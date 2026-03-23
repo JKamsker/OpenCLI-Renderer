@@ -4,22 +4,23 @@ using OpenCli.Renderer.Tests.TestSupport;
 
 namespace OpenCli.Renderer.Tests;
 
-public class MarkdownRenderServiceTests
+public class DocumentRenderServiceTests
 {
-    private readonly MarkdownRenderService _service = new(
+    private readonly DocumentRenderService _service = new(
         new OpenCliDocumentLoader(new OpenCliSchemaProvider()),
         new OpenCliXmlEnricher(),
         new OpenCliNormalizer(),
-        new MarkdownRenderer(),
         new ExecutableResolver(),
         new ProcessRunner());
+    private readonly MarkdownRenderer _markdownRenderer = new();
+    private readonly HtmlRenderer _htmlRenderer = new();
 
     [Fact]
     public async Task Dry_run_does_not_write_single_output_file()
     {
         using var temp = new TempDirectory();
         var outputFile = System.IO.Path.Combine(temp.Path, "docs.md");
-        var request = new FileMarkdownRenderRequest(
+        var request = new FileRenderRequest(
             FixturePaths.OpenCliJson,
             null,
             new RenderExecutionOptions(
@@ -35,11 +36,12 @@ public class MarkdownRenderServiceTests
                 OutputFile: outputFile,
                 OutputDirectory: null));
 
-        var result = await _service.RenderFromFileAsync(request, CancellationToken.None);
+        var result = await _service.RenderFromFileAsync(request, _markdownRenderer, CancellationToken.None);
 
         Assert.False(File.Exists(outputFile));
         Assert.True(result.IsDryRun);
         Assert.Single(result.Files);
+        Assert.Equal(DocumentFormat.Markdown, result.Format);
     }
 
     [Fact]
@@ -48,7 +50,7 @@ public class MarkdownRenderServiceTests
         using var temp = new TempDirectory();
         File.WriteAllText(System.IO.Path.Combine(temp.Path, "keep.txt"), "existing");
 
-        var request = new FileMarkdownRenderRequest(
+        var request = new FileRenderRequest(
             FixturePaths.OpenCliJson,
             null,
             new RenderExecutionOptions(
@@ -65,8 +67,36 @@ public class MarkdownRenderServiceTests
                 OutputDirectory: temp.Path));
 
         var exception = await Assert.ThrowsAsync<CliUsageException>(() =>
-            _service.RenderFromFileAsync(request, CancellationToken.None));
+            _service.RenderFromFileAsync(request, _markdownRenderer, CancellationToken.None));
 
         Assert.Contains("not empty", exception.Message);
+    }
+
+    [Fact]
+    public async Task Dry_run_tracks_html_output_format()
+    {
+        using var temp = new TempDirectory();
+        var outputFile = System.IO.Path.Combine(temp.Path, "docs.html");
+        var request = new FileRenderRequest(
+            FixturePaths.OpenCliJson,
+            null,
+            new RenderExecutionOptions(
+                MarkdownLayout.Single,
+                ResolvedOutputMode.Human,
+                DryRun: true,
+                Quiet: false,
+                Verbose: false,
+                NoColor: false,
+                IncludeHidden: false,
+                IncludeMetadata: false,
+                Overwrite: false,
+                OutputFile: outputFile,
+                OutputDirectory: null));
+
+        var result = await _service.RenderFromFileAsync(request, _htmlRenderer, CancellationToken.None);
+
+        Assert.Equal(DocumentFormat.Html, result.Format);
+        Assert.Single(result.Files);
+        Assert.Equal(outputFile, result.Files[0].FullPath);
     }
 }

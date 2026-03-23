@@ -30,6 +30,7 @@ public class RequestAndOutputContractTests
         {
             var result = new RenderExecutionResult
             {
+                Format = DocumentFormat.Html,
                 Layout = MarkdownLayout.Single,
                 Source = new RenderSourceInfo("file", "sample.json", null, null),
                 Stats = new RenderStats(1, 2, 3, 1),
@@ -49,6 +50,7 @@ public class RequestAndOutputContractTests
             Assert.Equal(0, exitCode);
             Assert.NotNull(json);
             Assert.True(json!["ok"]!.GetValue<bool>());
+            Assert.Equal("html", json["data"]!["format"]!.GetValue<string>());
             Assert.Equal("single", json["data"]!["layout"]!.GetValue<string>());
             Assert.Equal(1, json["meta"]!["schemaVersion"]!.GetValue<int>());
         }

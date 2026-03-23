@@ -3,15 +3,17 @@ using OpenCli.Renderer.Runtime;
 
 namespace OpenCli.Renderer.Services;
 
-public sealed class MarkdownRenderService(
+public sealed class DocumentRenderService(
     OpenCliDocumentLoader documentLoader,
     OpenCliXmlEnricher xmlEnricher,
     OpenCliNormalizer normalizer,
-    MarkdownRenderer renderer,
     ExecutableResolver executableResolver,
     ProcessRunner processRunner)
 {
-    public async Task<RenderExecutionResult> RenderFromFileAsync(FileMarkdownRenderRequest request, CancellationToken cancellationToken)
+    public async Task<RenderExecutionResult> RenderFromFileAsync(
+        FileRenderRequest request,
+        IDocumentRenderer renderer,
+        CancellationToken cancellationToken)
     {
         var document = await documentLoader.LoadFromFileAsync(request.OpenCliJsonPath, cancellationToken);
         var warnings = new List<string>();
@@ -25,10 +27,14 @@ public sealed class MarkdownRenderService(
             document,
             new RenderSourceInfo("file", Path.GetFullPath(request.OpenCliJsonPath), request.XmlDocPath is null ? null : Path.GetFullPath(request.XmlDocPath), null),
             request.Options,
-            warnings);
+            warnings,
+            renderer);
     }
 
-    public async Task<RenderExecutionResult> RenderFromExecAsync(ExecMarkdownRenderRequest request, CancellationToken cancellationToken)
+    public async Task<RenderExecutionResult> RenderFromExecAsync(
+        ExecRenderRequest request,
+        IDocumentRenderer renderer,
+        CancellationToken cancellationToken)
     {
         var executablePath = executableResolver.Resolve(request.Source, request.WorkingDirectory);
         var openCliArguments = request.SourceArguments.Concat(request.OpenCliArguments).ToArray();
@@ -62,27 +68,30 @@ public sealed class MarkdownRenderService(
             document,
             new RenderSourceInfo("exec", executablePath, xmlOrigin, executablePath),
             request.Options,
-            warnings);
+            warnings,
+            renderer);
     }
 
     private Task<RenderExecutionResult> RenderAsync(
         OpenCliDocument document,
         RenderSourceInfo source,
         RenderExecutionOptions options,
-        IReadOnlyList<string> warnings)
+        IReadOnlyList<string> warnings,
+        IDocumentRenderer renderer)
     {
         var normalized = normalizer.Normalize(document, options.IncludeHidden);
 
         return options.Layout switch
         {
-            MarkdownLayout.Single => Task.FromResult(HandleSingleLayout(renderer.RenderSingle(normalized, options.IncludeMetadata), source, normalized, options, warnings)),
-            MarkdownLayout.Tree => Task.FromResult(HandleTreeLayout(renderer.RenderTree(normalized, options.IncludeMetadata), source, normalized, options, warnings)),
+            MarkdownLayout.Single => Task.FromResult(HandleSingleLayout(renderer, renderer.RenderSingle(normalized, options.IncludeMetadata), source, normalized, options, warnings)),
+            MarkdownLayout.Tree => Task.FromResult(HandleTreeLayout(renderer, renderer.RenderTree(normalized, options.IncludeMetadata), source, normalized, options, warnings)),
             _ => throw new ArgumentOutOfRangeException(nameof(options.Layout)),
         };
     }
 
     private static RenderExecutionResult HandleSingleLayout(
-        string markdown,
+        IDocumentRenderer renderer,
+        string content,
         RenderSourceInfo source,
         NormalizedCliDocument document,
         RenderExecutionOptions options,
@@ -95,24 +104,26 @@ public sealed class MarkdownRenderService(
                 : [new RenderedFile(Path.GetFileName(options.OutputFile), options.OutputFile, string.Empty)];
 
             return CreateResult(
+                renderer,
                 source,
                 document,
                 warnings,
                 options,
                 plannedFiles,
-                options.OutputFile is null ? $"Dry run: render `{source.OpenCliOrigin}` as single Markdown to stdout." : $"Dry run: render `{source.OpenCliOrigin}` as single Markdown to `{options.OutputFile}`.");
+                options.OutputFile is null ? $"Dry run: render `{source.OpenCliOrigin}` as single {FormatDisplayName(renderer)} to stdout." : $"Dry run: render `{source.OpenCliOrigin}` as single {FormatDisplayName(renderer)} to `{options.OutputFile}`.");
         }
 
         if (options.OutputFile is null)
         {
             return CreateResult(
+                renderer,
                 source,
                 document,
                 warnings,
                 options,
                 [],
                 null,
-                markdown);
+                content);
         }
 
         EnsureFileWritable(options.OutputFile, options.Overwrite);
@@ -122,18 +133,19 @@ public sealed class MarkdownRenderService(
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(options.OutputFile, markdown);
+        File.WriteAllText(options.OutputFile, content);
 
-        var written = new RenderedFile(Path.GetFileName(options.OutputFile), options.OutputFile, markdown);
+        var written = new RenderedFile(Path.GetFileName(options.OutputFile), options.OutputFile, content);
         var summary = options.Quiet
             ? null
-            : $"Wrote Markdown to `{options.OutputFile}`.";
+            : $"Wrote {FormatDisplayName(renderer)} to `{options.OutputFile}`.";
 
-        return CreateResult(source, document, warnings, options, [written], summary);
+        return CreateResult(renderer, source, document, warnings, options, [written], summary);
     }
 
     private static RenderExecutionResult HandleTreeLayout(
-        IReadOnlyList<RelativeMarkdownFile> files,
+        IDocumentRenderer renderer,
+        IReadOnlyList<RelativeRenderedFile> files,
         RenderSourceInfo source,
         NormalizedCliDocument document,
         RenderExecutionOptions options,
@@ -149,12 +161,13 @@ public sealed class MarkdownRenderService(
                 .ToList();
 
             return CreateResult(
+                renderer,
                 source,
                 document,
                 warnings,
                 options,
                 planned,
-                $"Dry run: render `{source.OpenCliOrigin}` as a Markdown tree in `{outputDirectory}` ({planned.Count} files planned).");
+                $"Dry run: render `{source.OpenCliOrigin}` as a {FormatDisplayName(renderer)} tree in `{outputDirectory}` ({planned.Count} files planned).");
         }
 
         PrepareDirectory(outputDirectory, options.Overwrite);
@@ -175,12 +188,13 @@ public sealed class MarkdownRenderService(
 
         var summary = options.Quiet
             ? null
-            : $"Wrote {writtenFiles.Count} Markdown files to `{outputDirectory}`.";
+            : $"Wrote {writtenFiles.Count} {FormatDisplayName(renderer)} files to `{outputDirectory}`.";
 
-        return CreateResult(source, document, warnings, options, writtenFiles, summary);
+        return CreateResult(renderer, source, document, warnings, options, writtenFiles, summary);
     }
 
     private static RenderExecutionResult CreateResult(
+        IDocumentRenderer renderer,
         RenderSourceInfo source,
         NormalizedCliDocument document,
         IReadOnlyList<string> warnings,
@@ -191,6 +205,7 @@ public sealed class MarkdownRenderService(
     {
         return new RenderExecutionResult
         {
+            Format = renderer.Format,
             Layout = options.Layout,
             Source = source,
             Warnings = warnings,
@@ -204,6 +219,11 @@ public sealed class MarkdownRenderService(
                 CountArguments(document),
                 files.Count),
         };
+    }
+
+    private static string FormatDisplayName(IDocumentRenderer renderer)
+    {
+        return renderer.Format == DocumentFormat.Html ? "HTML" : "Markdown";
     }
 
     private static int CountCommands(IEnumerable<NormalizedCommand> commands)

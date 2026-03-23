@@ -42,7 +42,7 @@ public static class CommandOutputHandler
                 Ok = true,
                 Data = new
                 {
-                    format = "markdown",
+                    format = result.Format == DocumentFormat.Html ? "html" : "markdown",
                     layout = result.Layout == MarkdownLayout.Tree ? "tree" : "single",
                     dryRun = result.IsDryRun,
                     source = new

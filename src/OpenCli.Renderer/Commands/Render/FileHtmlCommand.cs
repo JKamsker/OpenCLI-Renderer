@@ -4,7 +4,7 @@ using Spectre.Console.Cli;
 
 namespace OpenCli.Renderer.Commands.Render;
 
-public sealed class FileMarkdownCommand(DocumentRenderService renderService, MarkdownRenderer renderer) : AsyncCommand<FileRenderSettings>
+public sealed class FileHtmlCommand(DocumentRenderService renderService, HtmlRenderer renderer) : AsyncCommand<FileRenderSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context, FileRenderSettings settings, CancellationToken cancellationToken)
     {
@@ -19,13 +19,4 @@ public sealed class FileMarkdownCommand(DocumentRenderService renderService, Mar
             options.Verbose,
             () => renderService.RenderFromFileAsync(request, renderer, cancellationToken));
     }
-}
-
-public sealed class FileRenderSettings : DocumentCommandSettingsBase
-{
-    [CommandArgument(0, "<OPENCLI_JSON>")]
-    public string OpenCliJsonPath { get; init; } = string.Empty;
-
-    [CommandOption("--xmldoc <PATH>")]
-    public string? XmlDocPath { get; init; }
 }

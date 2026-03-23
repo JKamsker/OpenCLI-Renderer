@@ -32,7 +32,7 @@ public abstract class CommonCommandSettings : CommandSettings
     public bool IncludeMetadata { get; init; }
 }
 
-public abstract class MarkdownCommandSettingsBase : CommonCommandSettings
+public abstract class DocumentCommandSettingsBase : CommonCommandSettings
 {
     [CommandOption("--layout <LAYOUT>")]
     public string? Layout { get; init; }
@@ -42,4 +42,8 @@ public abstract class MarkdownCommandSettingsBase : CommonCommandSettings
 
     [CommandOption("--out-dir <DIR>")]
     public string? OutputDirectory { get; init; }
+}
+
+public abstract class MarkdownCommandSettingsBase : DocumentCommandSettingsBase
+{
 }

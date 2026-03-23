@@ -1,11 +1,14 @@
 using System.Text;
 using System.Text.Json;
 using OpenCli.Renderer.Models;
+using OpenCli.Renderer.Runtime;
 
 namespace OpenCli.Renderer.Services;
 
-public sealed class MarkdownRenderer
+public sealed class MarkdownRenderer : IDocumentRenderer
 {
+    public DocumentFormat Format => DocumentFormat.Markdown;
+
     public string RenderSingle(NormalizedCliDocument document, bool includeMetadata)
     {
         var builder = new StringBuilder();
@@ -91,9 +94,9 @@ public sealed class MarkdownRenderer
         return builder.ToString().TrimEnd() + Environment.NewLine;
     }
 
-    public IReadOnlyList<RelativeMarkdownFile> RenderTree(NormalizedCliDocument document, bool includeMetadata)
+    public IReadOnlyList<RelativeRenderedFile> RenderTree(NormalizedCliDocument document, bool includeMetadata)
     {
-        var files = new List<RelativeMarkdownFile>
+        var files = new List<RelativeRenderedFile>
         {
             new("index.md", RenderRootPage(document, includeMetadata)),
         };
@@ -181,10 +184,10 @@ public sealed class MarkdownRenderer
     private static void AppendCommandPages(
         NormalizedCommand command,
         bool includeMetadata,
-        ICollection<RelativeMarkdownFile> files)
+        ICollection<RelativeRenderedFile> files)
     {
         var relativePath = GetCommandRelativePath(command);
-        files.Add(new RelativeMarkdownFile(relativePath, RenderCommandPage(command, includeMetadata, relativePath)));
+        files.Add(new RelativeRenderedFile(relativePath, RenderCommandPage(command, includeMetadata, relativePath)));
 
         foreach (var child in command.Commands)
         {
@@ -692,5 +695,3 @@ public sealed class MarkdownRenderer
         return string.IsNullOrWhiteSpace(description) ? string.Empty : $" — {description}";
     }
 }
-
-public sealed record RelativeMarkdownFile(string RelativePath, string Content);

@@ -9,6 +9,12 @@ public enum ResolvedOutputMode
     Json,
 }
 
+public enum DocumentFormat
+{
+    Markdown,
+    Html,
+}
+
 public enum MarkdownLayout
 {
     Single,
@@ -28,12 +34,12 @@ public sealed record RenderExecutionOptions(
     string? OutputFile,
     string? OutputDirectory);
 
-public sealed record FileMarkdownRenderRequest(
+public sealed record FileRenderRequest(
     string OpenCliJsonPath,
     string? XmlDocPath,
     RenderExecutionOptions Options);
 
-public sealed record ExecMarkdownRenderRequest(
+public sealed record ExecRenderRequest(
     string Source,
     IReadOnlyList<string> SourceArguments,
     IReadOnlyList<string> OpenCliArguments,
@@ -62,6 +68,8 @@ public sealed record RenderedFile(
 
 public sealed class RenderExecutionResult
 {
+    public required DocumentFormat Format { get; init; }
+
     public required MarkdownLayout Layout { get; init; }
 
     public required RenderSourceInfo Source { get; init; }

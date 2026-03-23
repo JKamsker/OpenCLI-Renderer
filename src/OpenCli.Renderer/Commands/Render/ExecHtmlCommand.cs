@@ -4,7 +4,7 @@ using Spectre.Console.Cli;
 
 namespace OpenCli.Renderer.Commands.Render;
 
-public sealed class ExecMarkdownCommand(DocumentRenderService renderService, MarkdownRenderer renderer) : AsyncCommand<ExecRenderSettings>
+public sealed class ExecHtmlCommand(DocumentRenderService renderService, HtmlRenderer renderer) : AsyncCommand<ExecRenderSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context, ExecRenderSettings settings, CancellationToken cancellationToken)
     {
@@ -25,28 +25,4 @@ public sealed class ExecMarkdownCommand(DocumentRenderService renderService, Mar
             options.Verbose,
             () => renderService.RenderFromExecAsync(request, renderer, cancellationToken));
     }
-}
-
-public sealed class ExecRenderSettings : DocumentCommandSettingsBase
-{
-    [CommandArgument(0, "<SOURCE>")]
-    public string Source { get; init; } = string.Empty;
-
-    [CommandOption("--source-arg <ARG>")]
-    public string[] SourceArguments { get; init; } = [];
-
-    [CommandOption("--opencli-arg <ARG>")]
-    public string[] OpenCliArguments { get; init; } = [];
-
-    [CommandOption("--with-xmldoc")]
-    public bool IncludeXmlDoc { get; init; }
-
-    [CommandOption("--xmldoc-arg <ARG>")]
-    public string[] XmlDocArguments { get; init; } = [];
-
-    [CommandOption("--cwd <PATH>")]
-    public string? WorkingDirectory { get; init; }
-
-    [CommandOption("--timeout <SECONDS>")]
-    public int? TimeoutSeconds { get; init; }
 }

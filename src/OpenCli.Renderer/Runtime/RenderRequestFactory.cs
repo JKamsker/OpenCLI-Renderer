@@ -143,7 +143,7 @@ public static class RenderRequestFactory
 
         if (outputMode == ResolvedOutputMode.Json && layout == MarkdownLayout.Single && string.IsNullOrWhiteSpace(outputFile))
         {
-            throw new CliUsageException("Machine output requires `--out` for single-file Markdown rendering.");
+            throw new CliUsageException("Machine output requires `--out` for single-file rendering.");
         }
     }
 
