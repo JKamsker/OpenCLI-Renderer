@@ -8,8 +8,8 @@ public class OpenCliEnrichmentAndRenderingTests
     private readonly OpenCliDocumentLoader _loader = new(new OpenCliSchemaProvider());
     private readonly OpenCliXmlEnricher _enricher = new();
     private readonly OpenCliNormalizer _normalizer = new();
-    private readonly MarkdownRenderer _renderer = new();
-    private readonly HtmlRenderer _htmlRenderer = new();
+    private readonly MarkdownRenderer _renderer = RendererFactory.CreateMarkdownRenderer();
+    private readonly HtmlRenderer _htmlRenderer = RendererFactory.CreateHtmlRenderer();
 
     [Fact]
     public async Task Xml_enrichment_restores_missing_command_descriptions()

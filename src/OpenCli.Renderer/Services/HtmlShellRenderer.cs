@@ -1,0 +1,101 @@
+using System.Text;
+using OpenCli.Renderer.Models;
+
+namespace OpenCli.Renderer.Services;
+
+public sealed class HtmlShellRenderer(
+    HtmlAssetProvider assetProvider,
+    HtmlContentFormatter contentFormatter,
+    CommandPathResolver pathResolver)
+{
+    public string BuildSingleSidebar(NormalizedCliDocument document)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine("<nav class=\"sidebar-nav\"><a class=\"nav-link active\" href=\"#overview\">Overview</a>");
+        if (document.RootArguments.Count > 0) builder.AppendLine("<a class=\"nav-link\" href=\"#root-arguments\">Root arguments</a>");
+        if (document.RootOptions.Count > 0) builder.AppendLine("<a class=\"nav-link\" href=\"#root-options\">Root options</a>");
+        if (document.Source.Examples.Count > 0) builder.AppendLine("<a class=\"nav-link\" href=\"#root-examples\">Examples</a>");
+        if (document.Source.ExitCodes.Count > 0) builder.AppendLine("<a class=\"nav-link\" href=\"#root-exit-codes\">Exit codes</a>");
+        if (document.Source.Metadata.Count > 0) builder.AppendLine("<a class=\"nav-link\" href=\"#root-metadata\">Metadata</a>");
+        AppendCommandLinks(document.Commands, builder, null, string.Empty, true);
+        builder.AppendLine("</nav>");
+        return builder.ToString();
+    }
+
+    public string BuildTreeSidebar(NormalizedCliDocument document, string currentPagePath, string? currentPath)
+    {
+        var builder = new StringBuilder();
+        builder.AppendLine($"<nav class=\"sidebar-nav\"><a class=\"nav-link{(currentPath is null ? " active" : string.Empty)}\" href=\"{contentFormatter.Encode(pathResolver.CreateRelativeLink(currentPagePath, "index.html"))}\">Overview</a>");
+        AppendCommandLinks(document.Commands, builder, currentPath, currentPagePath, false);
+        builder.AppendLine("</nav>");
+        return builder.ToString();
+    }
+
+    public string RenderShell(NormalizedCliDocument document, string pageTitle, string sidebar, string content)
+    {
+        return $$"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="utf-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1" />
+              <title>{{contentFormatter.Encode(document.Source.Info.Title)}} · {{contentFormatter.Encode(pageTitle)}}</title>
+              <style>{{assetProvider.GetStyles()}}</style>
+            </head>
+            <body>
+              <div class="shell">
+                <header class="topbar">
+                  <div class="brand"><span class="brand-mark">⌘</span><div><strong>{{contentFormatter.Encode(document.Source.Info.Title)}}</strong><span>v{{contentFormatter.Encode(document.Source.Info.Version)}} · OpenCLI {{contentFormatter.Encode(document.Source.OpenCliVersion)}}</span></div></div>
+                  <div class="topbar-context">{{contentFormatter.Encode(pageTitle)}}</div>
+                </header>
+                <div class="layout">
+                  <aside class="sidebar">
+                    <label class="search"><span>Filter commands</span><input type="search" placeholder="Search command tree" data-nav-search /></label>
+                    {{sidebar}}
+                  </aside>
+                  <main class="content"><div class="content-inner">{{content}}</div></main>
+                </div>
+              </div>
+              <script>{{assetProvider.GetScript()}}</script>
+            </body>
+            </html>
+            """;
+    }
+
+    private void AppendCommandLinks(IEnumerable<NormalizedCommand> commands, StringBuilder builder, string? currentPath, string currentPagePath, bool isSinglePage)
+    {
+        var commandList = commands.ToList();
+        if (commandList.Count == 0)
+        {
+            return;
+        }
+
+        builder.AppendLine("<div class=\"nav-label\">Commands</div><ul class=\"nav-tree\">");
+        foreach (var command in commandList)
+        {
+            AppendSidebarNode(builder, command, currentPath, currentPagePath, isSinglePage);
+        }
+
+        builder.AppendLine("</ul>");
+    }
+
+    private void AppendSidebarNode(StringBuilder builder, NormalizedCommand command, string? currentPath, string currentPagePath, bool isSinglePage)
+    {
+        var href = isSinglePage
+            ? $"#command-{pathResolver.CreateAnchorId(command.Path)}"
+            : pathResolver.CreateRelativeLink(currentPagePath, pathResolver.GetCommandRelativePath(command, "html"));
+        builder.AppendLine($"<li class=\"nav-item\" data-nav-item data-label=\"{contentFormatter.Encode(command.Path.ToLowerInvariant())}\"><a class=\"nav-link{(command.Path == currentPath ? " active" : string.Empty)}\" href=\"{contentFormatter.Encode(href)}\">{contentFormatter.Encode(command.Command.Name)}</a>");
+        if (command.Commands.Count > 0)
+        {
+            builder.AppendLine("<ul class=\"nav-tree\">");
+            foreach (var child in command.Commands)
+            {
+                AppendSidebarNode(builder, child, currentPath, currentPagePath, isSinglePage);
+            }
+
+            builder.AppendLine("</ul>");
+        }
+
+        builder.AppendLine("</li>");
+    }
+}

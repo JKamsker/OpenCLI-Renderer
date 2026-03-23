@@ -12,8 +12,8 @@ public class DocumentRenderServiceTests
         new OpenCliNormalizer(),
         new ExecutableResolver(),
         new ProcessRunner());
-    private readonly MarkdownRenderer _markdownRenderer = new();
-    private readonly HtmlRenderer _htmlRenderer = new();
+    private readonly MarkdownRenderer _markdownRenderer = RendererFactory.CreateMarkdownRenderer();
+    private readonly HtmlRenderer _htmlRenderer = RendererFactory.CreateHtmlRenderer();
 
     [Fact]
     public async Task Dry_run_does_not_write_single_output_file()

@@ -17,6 +17,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Schema\OpenCli.draft.json" />
+    <EmbeddedResource Include="Templates\HtmlRenderer.css" />
+    <EmbeddedResource Include="Templates\HtmlRenderer.js" />
   </ItemGroup>
 
 </Project>
