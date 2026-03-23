@@ -191,6 +191,7 @@ public sealed class MarkdownRenderService(
     {
         return new RenderExecutionResult
         {
+            Layout = options.Layout,
             Source = source,
             Warnings = warnings,
             IsDryRun = options.DryRun,

@@ -113,4 +113,4 @@
 - [x] Implement source loading pipeline
 - [x] Implement Markdown rendering
 - [x] Wire Spectre commands and output contracts
-- [ ] Add focused validation tests
+- [x] Add focused validation tests

@@ -43,7 +43,7 @@ public static class CommandOutputHandler
                 Data = new
                 {
                     format = "markdown",
-                    layout = result.Files.Count > 1 ? "tree" : "single",
+                    layout = result.Layout == MarkdownLayout.Tree ? "tree" : "single",
                     dryRun = result.IsDryRun,
                     source = new
                     {

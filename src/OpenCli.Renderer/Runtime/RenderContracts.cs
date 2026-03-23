@@ -62,6 +62,8 @@ public sealed record RenderedFile(
 
 public sealed class RenderExecutionResult
 {
+    public required MarkdownLayout Layout { get; init; }
+
     public required RenderSourceInfo Source { get; init; }
 
     public required RenderStats Stats { get; init; }

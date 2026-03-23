@@ -5,9 +5,9 @@ namespace OpenCli.Renderer.Services;
 
 public sealed class OpenCliSchemaProvider
 {
-    private readonly Lazy<JsonSchema> _schema = new(LoadSchema);
+    private static readonly Lazy<JsonSchema> Schema = new(LoadSchema);
 
-    public JsonSchema GetSchema() => _schema.Value;
+    public JsonSchema GetSchema() => Schema.Value;
 
     private static JsonSchema LoadSchema()
     {
