@@ -2,24 +2,25 @@
 
   ## Summary
 
-  - Build a new local-only .NET 10 Spectre.Console.Cli tool that renders documentation from OpenCLI exports, with Markdown shipped now and HTML kept as the next formatter behind the same internal
-    pipeline.
-  - Support two explicit source modes: render file markdown <OPENCLI_JSON> for saved exports and render exec markdown <SOURCE> for live CLIs that expose cli opencli; optional XML enrichment is additive
-    in both modes.
+  - Build a new local-only .NET 10 Spectre.Console.Cli tool that renders documentation from OpenCLI exports, with Markdown and HTML shipped on top of the same normalized pipeline.
+  - Support two explicit source modes for both formats: render file <FORMAT> <OPENCLI_JSON> for saved exports and render exec <FORMAT> <SOURCE> for live CLIs that expose cli opencli; optional XML
+    enrichment is additive in both modes.
   - Treat OpenCLI JSON as the source of truth, validate it offline against an embedded snapshot of the published schema, then optionally merge structured XML data to fill missing prose.
 
   ## Command Surface
 
   - Group commands by source mode first so help stays short and flags stay relevant:
       - render file markdown <OPENCLI_JSON>
+      - render file html <OPENCLI_JSON>
       - render exec markdown <SOURCE>
-  - render file markdown flags:
+      - render exec html <SOURCE>
+  - render file markdown/html flags:
       - --layout single|tree (single default)
       - --out <FILE> for single
       - --out-dir <DIR> for tree
       - --xmldoc <PATH> for optional XML enrichment
       - --include-hidden, --include-metadata, --overwrite
-  - render exec markdown flags:
+  - render exec markdown/html flags:
       - --layout single|tree, --out <FILE>, --out-dir <DIR>, --include-hidden, --include-metadata, --overwrite
       - --source-arg <ARG> repeatable; inserted before the export tail so wrappers like dotnet run --project ... -- work
       - --opencli-arg <ARG> repeatable; when present it replaces the default export tail cli opencli
@@ -52,11 +53,13 @@
       - match commands by command path, then parameters by long/short name; use ClrType/Settings attributes as tie-breakers
       - fill missing descriptions and appendix-only technical details
       - never overwrite non-empty OpenCLI JSON descriptions or alter public command names/order
-  - Markdown layouts:
+  - Markdown and HTML layouts:
       - single: one document with title/version, summary/description when present, conventions/contact/license when present, TOC, branch/command sections, subcommand lists, argument/option tables,
         examples, exit codes, and optional metadata appendix
-      - tree: index.md plus nested pages mirroring the command tree (auth/index.md, auth/login.md, etc.) with relative links and slug-safe file names
+      - tree: format-specific index pages plus nested pages mirroring the command tree (`index.md` / `index.html`, `auth/index.md` / `auth/index.html`, etc.) with relative links and slug-safe file
+        names
       - option/argument tables include name, aliases, value shape/arity, required, accepted values, group, description, and inherited marker
+      - HTML uses a viewer-inspired shell based on `assets/poc/Viewer.jsx`, including a persistent sidebar, search box, cards, badges, and standalone styling
   - Overwrite/non-interactive policy:
       - no interactive prompts in v1
       - existing output file or non-empty output dir refuses with exit 2 unless --overwrite
@@ -82,10 +85,12 @@
 
   ## Test Plan
 
-  - Help contract: root help, render, render file markdown, and render exec markdown all show the intended branch grouping, examples, output rules, and overwrite behavior.
+  - Help contract: root help, render, render file markdown/html, and render exec markdown/html all show the intended branch grouping, examples, output rules, and overwrite behavior.
   - File source happy path: render file markdown assets/testfiles/opencli.json:1 emits a single Markdown document to stdout, preserves command order, and omits metadata/hidden items by default.
   - Tree + XML enrichment: render file markdown ... --layout tree --out-dir <tmp> --xmldoc assets/testfiles/xmldoc.xml:1 --include-metadata creates index.md plus nested docs, fills missing prose from
     XML, and confines CLR/Settings details to the appendix.
+  - HTML happy path: render file html assets/testfiles/opencli.json:1 emits a standalone viewer-style HTML page or tree with linked `.html` pages, sidebar filtering, command cards, and metadata
+    appendices when enabled.
   - Exec source behavior: a fixture CLI exposing cli opencli and cli xmldoc succeeds with bare executable name, explicit .exe, and full path; default export tails and --source-arg / --opencli-arg /
     --xmldoc-arg overrides behave as documented.
   - Automation/destructive checks: --json without an explicit output destination fails with exit 2; --json with an output destination returns a valid v1 envelope; existing targets refuse without
@@ -94,7 +99,7 @@
   ## Assumptions & Checklist
 
   - Assumptions/defaults:
-      - Markdown is the only shipped renderer in this slice; future HTML plugs into the same source/load/normalize pipeline with planned single|site layouts but no public HTML commands are exposed yet.
+      - Markdown and HTML ship in this slice; both formats use the same source/load/normalize pipeline and the HTML shell is visually guided by `assets/poc/Viewer.jsx`.
       - The tool stays stateless in v1; env vars are the only non-CLI override layer.
       - The schema contract comes from the published OpenCLI spec (https://opencli.org/) and an embedded snapshot of the published draft schema (https://opencli.org/draft.json); current fixtures remain
         assets/testfiles/opencli.json:1 and assets/testfiles/xmldoc.xml:1.
@@ -112,5 +117,6 @@
 - [x] Bootstrap `.NET 10` Spectre CLI solution
 - [x] Implement source loading pipeline
 - [x] Implement Markdown rendering
+- [x] Add HTML rendering
 - [x] Wire Spectre commands and output contracts
 - [x] Add focused validation tests
