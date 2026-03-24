@@ -130,6 +130,10 @@ async function fetchText(url: string, optional: boolean, signal?: AbortSignal): 
   try {
     return await fetchRequiredText(url, signal);
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
+
     if (optional) {
       return undefined;
     }
