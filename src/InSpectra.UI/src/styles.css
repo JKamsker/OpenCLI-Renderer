@@ -1155,6 +1155,10 @@ code {
   margin-top: 1rem;
 }
 
+.nuget-panel > .section-card {
+  margin-top: 1rem;
+}
+
 .nuget-results {
   display: grid;
   gap: 0.55rem;
@@ -1235,6 +1239,23 @@ code {
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.6;
+}
+
+.probe-warning-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--amber-border);
+  border-radius: 0.75rem;
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.probe-warning-list p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 /* ── Spinner ────────────────────────────────── */

@@ -1,7 +1,7 @@
 import { startTransition, useDeferredValue, useEffect, useRef, useState } from "react";
 import { resolveStartupRequest } from "./boot/bootstrap";
 import { defaultViewerOptions, ViewerOptions } from "./boot/contracts";
-import { loadFromNugetTool } from "./data/loadNugetTool";
+import { loadFromNugetTool, NugetToolProbeError } from "./data/loadNugetTool";
 import { loadFromFiles, loadFromStartupRequest, LoadedSource } from "./data/loadSource";
 import { buildCommandHash, parseHashRoute } from "./data/navigation";
 import { findCommandByPath, normalizeOpenCliDocument, NormalizedCliDocument } from "./data/normalize";
@@ -13,12 +13,9 @@ import { ComposerPanel } from "./components/ComposerPanel";
 import { ImportScreen } from "./components/ImportScreen";
 import { OverviewPanel } from "./components/OverviewPanel";
 import { SourceSummaryCard } from "./components/SourceSummaryCard";
-import { ProbePackageSummary } from "./data/toolProbe";
+import { ProbeDiagnostics, ProbePackageSummary } from "./data/toolProbe";
 
-interface LoadState {
-  status: "loading" | "ready" | "empty";
-  message?: string;
-}
+interface LoadState { status: "loading" | "ready" | "empty"; message?: string; }
 
 function readBool(key: string, fallback: boolean): boolean {
   const v = localStorage.getItem(key);
@@ -39,6 +36,7 @@ export function InSpectraApp() {
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [sourceLabel, setSourceLabel] = useState<string>("");
+  const [probeDiagnostics, setProbeDiagnostics] = useState<ProbeDiagnostics | null>(null);
   const [probeSummary, setProbeSummary] = useState<ProbePackageSummary | null>(null);
   const [viewerOptions, setViewerOptions] = useState<ViewerOptions>(defaultViewerOptions());
   const [document, setDocument] = useState<NormalizedCliDocument | null>(null);
@@ -54,12 +52,10 @@ export function InSpectraApp() {
     void initialize(controller.signal);
     return () => controller.abort();
   }, []);
-
   useEffect(() => {
     function handleHashChange() {
       setRoutePath(parseHashRoute(window.location.hash).commandPath);
     }
-
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
@@ -92,7 +88,6 @@ export function InSpectraApp() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
   async function initialize(signal: AbortSignal) {
     try {
       const request = resolveStartupRequest({ search: window.location.search, href: window.location.href });
@@ -101,7 +96,6 @@ export function InSpectraApp() {
         setLoadState({ status: "empty" });
         return;
       }
-
       applyLoadedSource(loaded);
     } catch (loadError) {
       setError(toMessage(loadError));
@@ -112,6 +106,7 @@ export function InSpectraApp() {
   function applyLoadedSource(source: LoadedSource) {
     setWarnings(source.warnings);
     setSourceLabel(source.label);
+    setProbeDiagnostics(null);
     setProbeSummary(source.probeSummary ?? null);
     setViewerOptions(source.options);
     setDocument(normalizeOpenCliDocument(source.document, source.options.includeHidden));
@@ -126,6 +121,7 @@ export function InSpectraApp() {
       applyLoadedSource(await loadFromFiles(files, viewerOptions));
       window.location.hash = "#/";
     } catch (loadError) {
+      setProbeDiagnostics(null);
       setError(toMessage(loadError));
       setLoadState(document ? { status: "ready" } : { status: "empty" });
     }
@@ -137,6 +133,7 @@ export function InSpectraApp() {
       applyLoadedSource(await loadFromNugetTool(request, viewerOptions));
       window.location.hash = "#/";
     } catch (loadError) {
+      setProbeDiagnostics(loadError instanceof NugetToolProbeError ? loadError.diagnostics : null);
       setError(toMessage(loadError));
       setLoadState(document ? { status: "ready" } : { status: "empty" });
     }
@@ -161,6 +158,7 @@ export function InSpectraApp() {
     setWarnings([]);
     setError(null);
     setSourceLabel("");
+    setProbeDiagnostics(null);
     setProbeSummary(null);
     setSearchTerm("");
     setLoadState({ status: "empty" });
@@ -206,6 +204,7 @@ export function InSpectraApp() {
         onFilesSelected={handleFiles}
         onModeChange={setImportMode}
         onToolInspect={handleNugetTool}
+        probeDiagnostics={probeDiagnostics}
       />
     );
   }

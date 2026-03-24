@@ -14,6 +14,14 @@ export interface ProbePackageSummary {
   confidence: string;
 }
 
+export interface ProbeDiagnostics {
+  status: string;
+  confidence: string;
+  error?: string;
+  warnings: string[];
+  summary?: ProbePackageSummary;
+}
+
 export interface ProbePackageResult {
   status: string;
   confidence: string;
@@ -59,6 +67,27 @@ export function toProbeSummary(result: ProbePackageResult): ProbePackageSummary 
     ...result.package,
     confidence: result.confidence,
   };
+}
+
+export function toProbeDiagnostics(result: ProbePackageResult): ProbeDiagnostics {
+  return {
+    status: result.status,
+    confidence: result.confidence,
+    error: result.error,
+    warnings: result.warnings,
+    summary: toProbeSummary(result),
+  };
+}
+
+export function describeDocumentSource(documentSource: string): string {
+  switch (documentSource) {
+    case "packaged-opencli":
+      return "Packaged OpenCLI";
+    case "static-spectre":
+      return "Static Spectre recovery";
+    default:
+      return "No document";
+  }
 }
 
 async function loadProbeModule(): Promise<ProbeModule> {

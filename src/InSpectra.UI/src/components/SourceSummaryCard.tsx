@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { ProbePackageSummary } from "../data/toolProbe";
+import { ProbePackageSummary, describeDocumentSource } from "../data/toolProbe";
 
 interface SourceSummaryCardProps {
   summary: ProbePackageSummary;
@@ -49,15 +49,4 @@ export function SourceSummaryCard({ summary }: SourceSummaryCardProps) {
       </p>
     </section>
   );
-}
-
-function describeDocumentSource(documentSource: string): string {
-  switch (documentSource) {
-    case "packaged-opencli":
-      return "Packaged OpenCLI";
-    case "static-spectre":
-      return "Static Spectre recovery";
-    default:
-      return "No document";
-  }
 }

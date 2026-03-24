@@ -1,14 +1,17 @@
 import { LoaderCircle, Search } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { ProbeDiagnostics } from "../data/toolProbe";
 import { NugetSearchResult, searchNugetTools } from "../data/nugetTools";
 import { NugetToolRequest } from "../data/loadNugetTool";
+import { ProbeDiagnosticsCard } from "./ProbeDiagnosticsCard";
 
 interface NugetToolPanelProps {
+  diagnostics?: ProbeDiagnostics | null;
   loading: boolean;
   onInspect: (request: NugetToolRequest) => void;
 }
 
-export function NugetToolPanel({ loading, onInspect }: NugetToolPanelProps) {
+export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPanelProps) {
   const [query, setQuery] = useState("");
   const [includePrerelease, setIncludePrerelease] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -163,6 +166,8 @@ export function NugetToolPanel({ loading, onInspect }: NugetToolPanelProps) {
           ) : null}
         </div>
       ) : null}
+
+      {diagnostics ? <ProbeDiagnosticsCard diagnostics={diagnostics} /> : null}
     </section>
   );
 }

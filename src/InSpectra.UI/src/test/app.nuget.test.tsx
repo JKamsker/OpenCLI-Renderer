@@ -5,12 +5,44 @@ import { defaultViewerOptions } from "../boot/contracts";
 import { testDocument } from "./fixtures";
 import { vi } from "vitest";
 
-const { loadFromNugetTool } = vi.hoisted(() => ({
-  loadFromNugetTool: vi.fn(),
-}));
+const { MockNugetToolProbeError, loadFromNugetTool } = vi.hoisted(() => {
+  class MockNugetToolProbeError extends Error {
+    constructor(
+      message: string,
+      readonly diagnostics: {
+        status: string;
+        confidence: string;
+        error?: string;
+        warnings: string[];
+        summary?: {
+          id: string;
+          version: string;
+          isDotnetTool: boolean;
+          isSpectreCli: boolean;
+          commandName?: string;
+          runner?: string;
+          entryPoint?: string;
+          targetFramework?: string;
+          hasPackagedOpenCli: boolean;
+          documentSource: string;
+          confidence: string;
+        };
+      },
+    ) {
+      super(message);
+      this.name = "NugetToolProbeError";
+    }
+  }
+
+  return {
+    MockNugetToolProbeError,
+    loadFromNugetTool: vi.fn(),
+  };
+});
 
 vi.mock("../data/loadNugetTool", () => ({
   loadFromNugetTool,
+  NugetToolProbeError: MockNugetToolProbeError,
 }));
 
 describe("InSpectraUI NuGet mode", () => {
@@ -82,5 +114,43 @@ describe("InSpectraUI NuGet mode", () => {
     expect(screen.getByText("No tool code executed. The package was downloaded and inspected in the browser.")).toBeInTheDocument();
     expect(await screen.findAllByText("demo")).not.toHaveLength(0);
     expect(screen.getByText("Static Spectre probe.")).toBeInTheDocument();
+  });
+
+  it("shows probe diagnostics when a NuGet package is unsupported", async () => {
+    loadFromNugetTool.mockRejectedValue(
+      new MockNugetToolProbeError("The package does not bundle opencli.json.", {
+        status: "unsupported",
+        confidence: "unsupported",
+        error: "The package does not bundle opencli.json.",
+        warnings: ["No tool code was executed."],
+        summary: {
+          id: "Demo.Tool",
+          version: "2.0.0",
+          isDotnetTool: true,
+          isSpectreCli: false,
+          commandName: "demo",
+          runner: "dotnet",
+          entryPoint: "demo.dll",
+          targetFramework: "net10.0",
+          hasPackagedOpenCli: false,
+          documentSource: "none",
+          confidence: "unsupported",
+        },
+      }),
+    );
+
+    const user = userEvent.setup();
+    render(<InSpectraApp />);
+
+    await user.click(screen.getByRole("tab", { name: /nuget tool/i }));
+    await user.type(screen.getByLabelText("NuGet package query"), "Demo.Tool");
+    await user.click(screen.getByRole("button", { name: /search nuget/i }));
+    await user.click(await screen.findByRole("button", { name: /inspect tool/i }));
+
+    expect(await screen.findByText("Last Probe Attempt")).toBeInTheDocument();
+    expect(screen.getByText("No document")).toBeInTheDocument();
+    expect(screen.getByText("Not detected")).toBeInTheDocument();
+    expect(screen.getByText("No tool code was executed.")).toBeInTheDocument();
+    expect(screen.getAllByRole("alert")[0]).toHaveTextContent("The package does not bundle opencli.json.");
   });
 });

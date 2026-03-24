@@ -1,6 +1,7 @@
 import { FileCode2, FileJson2, LoaderCircle, Search, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { NugetToolRequest } from "../data/loadNugetTool";
+import { ProbeDiagnostics } from "../data/toolProbe";
 import { NugetToolPanel } from "./NugetToolPanel";
 
 type ImportMode = "files" | "nuget";
@@ -12,6 +13,7 @@ interface ImportScreenProps {
   onFilesSelected: (files: File[]) => void;
   onModeChange: (mode: ImportMode) => void;
   onToolInspect: (request: NugetToolRequest) => void;
+  probeDiagnostics?: ProbeDiagnostics | null;
 }
 
 export function ImportScreen({
@@ -21,6 +23,7 @@ export function ImportScreen({
   onFilesSelected,
   onModeChange,
   onToolInspect,
+  probeDiagnostics,
 }: ImportScreenProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -131,7 +134,7 @@ export function ImportScreen({
             />
           </div>
         ) : (
-          <NugetToolPanel loading={loading} onInspect={onToolInspect} />
+          <NugetToolPanel diagnostics={probeDiagnostics} loading={loading} onInspect={onToolInspect} />
         )}
 
         {error ? (
