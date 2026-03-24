@@ -65,6 +65,7 @@ dotnet run --project src/InSpectra.Gen -- \
 Open `jellyfin-docs/index.html` in a browser. The bundle is relocatable because the viewer is built with `base: "./"`.
 
 The build also publishes the browser-side NuGet probe into `src/InSpectra.UI/dist/probe/`.
+If `dist/probe/**` is missing from a deployment, NuGet mode fails with a clear browser-probe asset error instead of a generic import failure.
 
 ## Command Surface
 

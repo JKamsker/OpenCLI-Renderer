@@ -46,7 +46,22 @@ interface ProbeModule {
   analyzePackage(base64Package: string): Promise<string> | string;
 }
 
+type ProbeModuleLoader = () => Promise<ProbeModule>;
+
 let probeModulePromise: Promise<ProbeModule> | null = null;
+let probeModuleLoader: ProbeModuleLoader = async () => {
+  const url = new URL("../probe/main.js", import.meta.url).toString();
+  return import(/* @vite-ignore */ url) as Promise<ProbeModule>;
+};
+
+export class ToolProbeUnavailableError extends Error {
+  constructor() {
+    super(
+      "The browser probe assets are unavailable. Rebuild the viewer with `npm run build` and deploy `dist/probe/**` with the site.",
+    );
+    this.name = "ToolProbeUnavailableError";
+  }
+}
 
 export async function probePackage(packageBytes: Uint8Array): Promise<ProbePackageResult> {
   const module = await loadProbeModule();
@@ -92,11 +107,25 @@ export function describeDocumentSource(documentSource: string): string {
 
 async function loadProbeModule(): Promise<ProbeModule> {
   if (!probeModulePromise) {
-    const url = new URL("../probe/main.js", import.meta.url).toString();
-    probeModulePromise = import(/* @vite-ignore */ url) as Promise<ProbeModule>;
+    probeModulePromise = probeModuleLoader().catch((error: unknown) => {
+      probeModulePromise = null;
+      if (error instanceof ToolProbeUnavailableError) {
+        throw error;
+      }
+
+      throw new ToolProbeUnavailableError();
+    });
   }
 
   return probeModulePromise;
+}
+
+export function setProbeModuleLoaderForTests(loader: ProbeModuleLoader | null): void {
+  probeModulePromise = null;
+  probeModuleLoader = loader ?? (async () => {
+    const url = new URL("../probe/main.js", import.meta.url).toString();
+    return import(/* @vite-ignore */ url) as Promise<ProbeModule>;
+  });
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
