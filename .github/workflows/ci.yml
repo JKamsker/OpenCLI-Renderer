@@ -151,11 +151,13 @@ jobs:
         run: |
           set -euo pipefail
           site="_site"
-          mkdir -p "$site/examples"
+          mkdir -p "$site/examples" "$site/try"
 
           cp docs/index.html "$site/index.html"
           echo "opencli.kamsker.at" > "$site/CNAME"
           touch "$site/.nojekyll"
+
+          cp -r src/InSpectra.UI/dist/* "$site/try/"
 
       - name: Render - InSpectraGen
         shell: bash
@@ -195,6 +197,8 @@ jobs:
             test -f "$index_path"
             grep -q './assets/' "$index_path"
           done
+
+          test -f _site/try/index.html
 
       - name: Zip preview site
         shell: bash
@@ -258,11 +262,13 @@ jobs:
         run: |
           set -euo pipefail
           site="_site"
-          mkdir -p "$site/examples"
+          mkdir -p "$site/examples" "$site/try"
 
           cp docs/index.html "$site/index.html"
           echo "opencli.kamsker.at" > "$site/CNAME"
           touch "$site/.nojekyll"
+
+          cp -r src/InSpectra.UI/dist/* "$site/try/"
 
       - name: Render - InSpectraGen
         shell: bash
@@ -302,6 +308,8 @@ jobs:
             test -f "$index_path"
             grep -q './assets/' "$index_path"
           done
+
+          test -f _site/try/index.html
 
       - name: Summarize site
         shell: bash
