@@ -5,12 +5,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>inspectra-gen</AssemblyName>
+    <AssemblyName>inspectra</AssemblyName>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>inspectra-gen</ToolCommandName>
+    <ToolCommandName>inspectra</ToolCommandName>
     <PackageId>InSpectra.Gen</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>0.1.0</Version>
+    <Version>0.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

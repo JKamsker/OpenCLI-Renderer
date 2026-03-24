@@ -1,7 +1,7 @@
 {
   "opencli": "0.1-draft",
   "info": {
-    "title": "inspectra-gen",
+    "title": "inspectra",
     "version": "0.1.0"
   },
   "commands": [

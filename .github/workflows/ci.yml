@@ -52,7 +52,7 @@ jobs:
         run: dotnet test InSpectra.Gen.sln --configuration Release --no-build
 
       - name: Pack tool
-        run: dotnet pack src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build
+        run: dotnet pack src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build -p:Version=0.0.${{ github.run_number }}
 
       - name: Publish tool
         run: dotnet publish src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build -o artifacts/publish
@@ -81,14 +81,29 @@ jobs:
           test -f "$out_dir/index.html"
           grep -q './assets/' "$out_dir/index.html"
 
+      - name: Validate nupkg
+        shell: bash
+        run: |
+          set -euo pipefail
+          nupkg=$(find src/InSpectra.Gen/bin/Release -name '*.nupkg' | head -1)
+          test -n "$nupkg"
+          echo "Found package: $nupkg"
+          dotnet tool install --global --add-source "$(dirname "$nupkg")" InSpectra.Gen --version "0.0.${{ github.run_number }}"
+          inspectra --version
+
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
           name: build
           path: |
             src/InSpectra.Gen/bin/Release/net10.0/
-            src/InSpectra.Gen/bin/Release/*.nupkg
             artifacts/publish/
+
+      - name: Upload nupkg
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: src/InSpectra.Gen/bin/Release/*.nupkg
 
   package-pages-preview:
     needs: build-test

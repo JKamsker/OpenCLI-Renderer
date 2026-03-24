@@ -43,7 +43,7 @@ public class CliHelpSurfaceTests
             "bin",
             "Release",
             "net10.0",
-            "inspectra-gen.dll");
+            "inspectra.dll");
 
         var startInfo = new ProcessStartInfo
         {

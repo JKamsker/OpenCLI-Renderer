@@ -1,9 +1,9 @@
-# inspectra-gen
+# inspectra
 
 - Version: `0.1.0`
 - OpenCLI: `0.1-draft`
 
-Command-line reference for `inspectra-gen`. Available command areas include render.
+Command-line reference for `inspectra`. Available command areas include render.
 
 <a id="overview"></a>
 ## Overview

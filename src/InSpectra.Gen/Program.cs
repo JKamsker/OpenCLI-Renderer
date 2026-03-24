@@ -32,7 +32,7 @@ var app = new CommandApp(new TypeRegistrar(services));
 
 app.Configure(config =>
 {
-    config.SetApplicationName("inspectra-gen");
+    config.SetApplicationName("inspectra");
     config.SetApplicationVersion("0.1.0");
 
     config.AddBranch("render", render =>
