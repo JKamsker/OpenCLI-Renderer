@@ -181,7 +181,7 @@ section{padding:6rem 0}
   background:var(--cyan-dim);border:1px solid rgba(34,211,238,.15);color:var(--cyan);
   padding:.4rem .7rem;border-radius:6px;cursor:pointer;font-size:.78rem;
   font-family:var(--mono);font-weight:500;transition:all .2s;
-  display:flex;align-items:center;gap:.35rem;
+  display:flex;align-items:center;gap:.35rem;width:5.8rem;justify-content:center;
 }
 .copy-btn:hover{background:rgba(34,211,238,.2);border-color:rgba(34,211,238,.3)}
 .copy-btn.copied{color:var(--green);border-color:rgba(52,211,153,.3)}
@@ -241,13 +241,14 @@ section{padding:6rem 0}
    Examples
    ═══════════════════════════════════════════ */
 .examples-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  display:grid;grid-template-columns:repeat(4,1fr);
   gap:1.5rem;margin-top:3rem;
 }
 .example-card{
   background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
   padding:2rem;position:relative;overflow:hidden;
   transition:border-color .3s, transform .2s, box-shadow .3s;
+  display:flex;flex-direction:column;
 }
 .example-card:hover{
   border-color:rgba(34,211,238,.3);transform:translateY(-2px);
@@ -271,7 +272,7 @@ section{padding:6rem 0}
   color:var(--teal);background:rgba(94,234,212,.08);
   padding:.15rem .5rem;border-radius:4px;margin-bottom:.8rem;
 }
-.card-desc{font-size:.88rem;color:var(--text-dim);line-height:1.65;margin-bottom:1.5rem}
+.card-desc{font-size:.88rem;color:var(--text-dim);line-height:1.65;margin-bottom:1.5rem;flex:1}
 .card-link{
   display:inline-flex;align-items:center;gap:.4rem;
   font-size:.85rem;font-weight:600;color:var(--cyan);
@@ -380,6 +381,9 @@ section{padding:6rem 0}
   .quickstart{grid-template-columns:1fr;gap:2.5rem}
   .qs-code{position:static}
   .nav-links .hide-mobile{display:none}
+}
+@media(max-width:960px){
+  .examples-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:640px){
   .wrap{padding:0 1.25rem}
@@ -508,6 +512,21 @@ section{padding:6rem 0}
         </div>
         <span class="card-link">
           View live docs
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <a href="./try/" class="example-card reveal reveal-delay-3">
+        <div class="card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        </div>
+        <div class="card-title">Try Your Own Spec</div>
+        <div class="card-alias">opencli.json</div>
+        <div class="card-desc">
+          Drop your own OpenCLI spec into the interactive viewer and preview the generated documentation instantly.
+        </div>
+        <span class="card-link">
+          Open viewer
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
         </span>
       </a>
