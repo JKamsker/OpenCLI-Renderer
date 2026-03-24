@@ -54,6 +54,17 @@ jobs:
       - name: Pack tool
         run: dotnet pack src/OpenCli.Renderer/OpenCli.Renderer.csproj --configuration Release --no-build
 
+      - name: Publish tool
+        run: dotnet publish src/OpenCli.Renderer/OpenCli.Renderer.csproj --configuration Release --no-build -o artifacts/publish
+
+      - name: Verify published bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f artifacts/publish/InSpectreUI/dist/index.html
+          compgen -G 'artifacts/publish/InSpectreUI/dist/assets/*.css' > /dev/null
+          compgen -G 'artifacts/publish/InSpectreUI/dist/assets/*.js' > /dev/null
+
       - name: Smoke render HTML bundle
         shell: bash
         run: |
@@ -77,6 +88,7 @@ jobs:
           path: |
             src/OpenCli.Renderer/bin/Release/net10.0/
             src/OpenCli.Renderer/bin/Release/*.nupkg
+            artifacts/publish/
 
   deploy-pages:
     needs: build-test
