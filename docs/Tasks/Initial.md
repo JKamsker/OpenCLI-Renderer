@@ -1,6 +1,6 @@
-  # OpenCLI Renderer v1
+# OpenCLI Renderer v1
 
-  ## Status
+## Status
 
   - Historical planning note for the initial implementation.
   - The current HTML renderer no longer follows the single-file or tree-page model described below.
