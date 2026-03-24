@@ -17,6 +17,7 @@ public sealed class PackageProbeServiceTests
         Assert.Equal("The package is not marked as DotnetTool.", result.Error);
         Assert.NotNull(result.Package);
         Assert.False(result.Package!.IsDotnetTool);
+        Assert.Equal("none", result.Package.DocumentSource);
     }
 
     [Fact]
@@ -31,6 +32,8 @@ public sealed class PackageProbeServiceTests
         Assert.NotNull(result.Document);
         Assert.Equal("jdr", result.Document!.Info.Title);
         Assert.True(result.Package!.HasPackagedOpenCli);
+        Assert.Equal("packaged-opencli", result.Package.DocumentSource);
+        Assert.Contains(result.Warnings, warning => warning.Contains("No tool code was executed.", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -56,5 +59,6 @@ public sealed class PackageProbeServiceTests
 
         Assert.Equal("static-spectre", result.Document.Metadata.Single(item => item.Name == "ProbeMode").Value);
         Assert.True(result.Package!.IsSpectreCli);
+        Assert.Equal("static-spectre", result.Package.DocumentSource);
     }
 }

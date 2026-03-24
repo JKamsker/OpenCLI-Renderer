@@ -18,7 +18,7 @@ internal sealed class SpectreCliAnalyzer
 
         if (!result.Package.IsSpectreCli)
         {
-            result.Error = "The entry assembly does not reference Spectre.Console.Cli.";
+            result.Error = "The package does not bundle opencli.json and the entry assembly does not reference Spectre.Console.Cli, so the browser probe cannot recover a command graph.";
             return result;
         }
 
@@ -49,6 +49,7 @@ internal sealed class SpectreCliAnalyzer
 
         var document = BuildDocument(context, root);
         result.Document = document;
+        result.Package.DocumentSource = "static-spectre";
         result.Status = "supported";
         result.Confidence = result.Warnings.Count == 0 ? "high" : "partial";
         if (document.Commands.Count == 0 && document.Options.Count == 0 && document.Arguments.Count == 0)

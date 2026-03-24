@@ -27,7 +27,8 @@ public sealed class PackageProbeService
                     Runner = context.Runner,
                     EntryPoint = context.EntryPoint,
                     TargetFramework = context.TargetFramework,
-                    HasPackagedOpenCli = context.HasPackagedOpenCli
+                    HasPackagedOpenCli = context.HasPackagedOpenCli,
+                    DocumentSource = "none"
                 }
             };
 
@@ -42,13 +43,14 @@ public sealed class PackageProbeService
                 result.Status = "supported";
                 result.Confidence = "high";
                 result.Document = context.PackagedOpenCli;
-                result.Warnings.Add("Loaded packaged opencli.json snapshot from the tool package.");
+                result.Package.DocumentSource = "packaged-opencli";
+                result.Warnings.Add("Loaded packaged opencli.json from the NuGet package. No tool code was executed.");
                 return result;
             }
 
             if (context.EntryAssemblyBytes is null)
             {
-                result.Error = "The tool entry assembly could not be located in the package.";
+                result.Error = "The package does not bundle opencli.json and the tool entry assembly could not be located for browser-side static inspection.";
                 return result;
             }
 

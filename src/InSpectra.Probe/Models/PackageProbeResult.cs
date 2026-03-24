@@ -34,4 +34,6 @@ public sealed class PackageDescriptor
     public string? TargetFramework { get; set; }
 
     public bool HasPackagedOpenCli { get; set; }
+
+    public string DocumentSource { get; set; } = "none";
 }
