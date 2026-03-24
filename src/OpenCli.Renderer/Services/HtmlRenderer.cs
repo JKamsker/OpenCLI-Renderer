@@ -15,21 +15,41 @@ public sealed class HtmlRenderer(
     public string RenderSingle(NormalizedCliDocument document, bool includeMetadata)
     {
         var content = new StringBuilder();
+
+        content.AppendLine("<div class=\"page active\" data-page=\"overview\">");
         sectionRenderer.AppendRootHero(document, content);
         sectionRenderer.AppendRootDetails(
             document,
             content,
             includeMetadata,
             command => $"#command-{pathResolver.CreateAnchorId(command.Path)}");
+        content.AppendLine("</div>");
 
         if (document.Commands.Count > 0)
         {
-            content.AppendLine("<section class=\"panel section\" id=\"commands\"><div class=\"section-head\"><span class=\"eyebrow\">Command Tree</span><h2>Commands</h2></div>");
-            sectionRenderer.AppendSinglePageCommandSections(document.Commands, content, includeMetadata);
-            content.AppendLine("</section>");
+            AppendCommandPages(document, document.Commands, content, includeMetadata);
         }
 
         return shellRenderer.RenderShell(document, "Overview", shellRenderer.BuildSingleSidebar(document), content.ToString());
+    }
+
+    private void AppendCommandPages(
+        NormalizedCliDocument document,
+        IReadOnlyList<NormalizedCommand> commands,
+        StringBuilder content,
+        bool includeMetadata)
+    {
+        foreach (var command in commands)
+        {
+            var anchorId = pathResolver.CreateAnchorId(command.Path);
+            content.AppendLine($"<div class=\"page\" data-page=\"command-{anchorId}\">");
+            sectionRenderer.AppendCommandBreadcrumb(document, command, content);
+            sectionRenderer.AppendCommandBody(command, content, includeMetadata,
+                child => $"#command-{pathResolver.CreateAnchorId(child.Path)}", includeWrapper: true);
+            content.AppendLine("</div>");
+
+            AppendCommandPages(document, command.Commands, content, includeMetadata);
+        }
     }
 
     public IReadOnlyList<RelativeRenderedFile> RenderTree(NormalizedCliDocument document, bool includeMetadata)

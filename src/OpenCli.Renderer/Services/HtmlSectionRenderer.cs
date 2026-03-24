@@ -63,6 +63,29 @@ public sealed class HtmlSectionRenderer(
         }
     }
 
+    public void AppendCommandBreadcrumb(NormalizedCliDocument document, NormalizedCommand command, StringBuilder builder)
+    {
+        builder.Append("<nav class=\"breadcrumb\">");
+        builder.Append($"<a href=\"#overview\">{contentFormatter.Encode(document.Source.Info.Title)}</a>");
+
+        var segments = command.Path.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        for (var i = 0; i < segments.Length; i++)
+        {
+            builder.Append("<span class=\"crumb-sep\">›</span>");
+            if (i == segments.Length - 1)
+            {
+                builder.Append($"<span class=\"crumb-current\">{contentFormatter.Encode(segments[i])}</span>");
+            }
+            else
+            {
+                var partialPath = string.Join(" ", segments.Take(i + 1));
+                builder.Append($"<a href=\"#command-{pathResolver.CreateAnchorId(partialPath)}\">{contentFormatter.Encode(segments[i])}</a>");
+            }
+        }
+
+        builder.AppendLine("</nav>");
+    }
+
     public void AppendCommandBody(
         NormalizedCommand command,
         StringBuilder builder,
