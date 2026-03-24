@@ -3,3 +3,5 @@
 **/bin/
 **/obj/
 artifacts/
+node_modules/
+src/InSpectra.UI/dist/
