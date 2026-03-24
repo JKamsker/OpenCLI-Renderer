@@ -56,7 +56,7 @@ jobs:
         run: dotnet build OpenCli.Renderer.sln --configuration Release
 
       - name: Install .NET tool — JDownloader-RemoteCli
-        run: dotnet tool install -g JDownloader-RemoteCli
+        run: dotnet tool install --global JDownloader-RemoteCli
 
       - name: Install .NET tool — JellyfinCli
         run: dotnet tool install -g JellyfinCli
@@ -102,11 +102,8 @@ jobs:
           set -euo pipefail
           renderer="dotnet run --project src/OpenCli.Renderer --configuration Release --no-build --"
 
-          # jdr's opencli export has a known JSON bug (unescaped newline),
-          # so fall back to the committed spec files
-          $renderer render file html \
-            examples/jdownloader-remotecli/opencli.json \
-            --xmldoc examples/jdownloader-remotecli/xmldoc.xml \
+          $renderer render exec html jdr \
+            --with-xmldoc \
             --out _site/examples/jdownloader-remotecli/jdownloader-remotecli.html
 
       - name: Summarize site
