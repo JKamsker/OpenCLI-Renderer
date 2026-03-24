@@ -8,10 +8,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  build-test-render:
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,52 +32,92 @@ jobs:
       - name: Test
         run: dotnet test OpenCli.Renderer.sln --configuration Release --no-build
 
-      - name: Render docs
+      - name: Upload build
+        uses: actions/upload-artifact@v6
+        with:
+          name: build
+          path: src/OpenCli.Renderer/bin/Release/net10.0/
+
+  deploy-pages:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build renderer
+        run: dotnet build OpenCli.Renderer.sln --configuration Release
+
+      - name: Install .NET tool — JDownloader-RemoteCli
+        run: dotnet tool install -g JDownloader-RemoteCli
+
+      - name: Install .NET tool — JellyfinCli
+        run: dotnet tool install -g JellyfinCli
+
+      - name: Prepare site directory
         shell: bash
         run: |
           set -euo pipefail
+          site="_site"
+          mkdir -p "$site/examples/opencli-renderer" \
+                   "$site/examples/jellyfin-cli" \
+                   "$site/examples/jdownloader-remotecli"
 
-          root="artifacts/rendered-docs"
-          mkdir -p \
-            "$root/markdown/single" \
-            "$root/markdown/tree" \
-            "$root/html/single" \
-            "$root/html/tree"
+          # Landing page and GitHub Pages files
+          cp docs/index.html "$site/index.html"
+          echo "opencli.kamsker.at" > "$site/CNAME"
+          touch "$site/.nojekyll"
 
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
-            render file markdown assets/testfiles/opencli.json \
-            --xmldoc assets/testfiles/xmldoc.xml \
-            --out "$root/markdown/single/opencli.md"
+      - name: Render — OpenCLI Renderer (self)
+        shell: bash
+        run: |
+          set -euo pipefail
+          renderer="dotnet run --project src/OpenCli.Renderer --configuration Release --no-build --"
 
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
-            render file markdown assets/testfiles/opencli.json \
-            --xmldoc assets/testfiles/xmldoc.xml \
-            --layout tree \
-            --out-dir "$root/markdown/tree"
+          $renderer render file html \
+            docs/opencli-renderer/opencli.json \
+            --xmldoc docs/opencli-renderer/xmldoc.xml \
+            --out _site/examples/opencli-renderer/opencli-renderer.html
 
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
-            render file html assets/testfiles/opencli.json \
-            --xmldoc assets/testfiles/xmldoc.xml \
-            --out "$root/html/single/opencli.html"
+      - name: Render — Jellyfin CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          renderer="dotnet run --project src/OpenCli.Renderer --configuration Release --no-build --"
 
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
-            render file html assets/testfiles/opencli.json \
-            --xmldoc assets/testfiles/xmldoc.xml \
-            --layout tree \
-            --out-dir "$root/html/tree"
+          $renderer render exec html jf \
+            --with-xmldoc \
+            --out _site/examples/jellyfin-cli/jellyfin-cli.html
 
-      - name: Summarize rendered files
+      - name: Render — JDownloader RemoteCli
+        shell: bash
+        run: |
+          set -euo pipefail
+          renderer="dotnet run --project src/OpenCli.Renderer --configuration Release --no-build --"
+
+          $renderer render exec html jdr \
+            --with-xmldoc \
+            --out _site/examples/jdownloader-remotecli/jdownloader-remotecli.html
+
+      - name: Summarize site
         shell: bash
         run: |
           {
-            echo "## Rendered artifacts"
+            echo "## GitHub Pages site contents"
             echo
-            find artifacts/rendered-docs -type f | sort | sed 's#^#- `#; s#$#`#'
+            find _site -type f | sort | sed 's#^#- `#; s#$#`#'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload rendered docs artifact
-        uses: actions/upload-artifact@v6
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: rendered-docs
-          path: artifacts/rendered-docs
-          if-no-files-found: error
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          cname: opencli.kamsker.at
