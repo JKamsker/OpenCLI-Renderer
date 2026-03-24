@@ -18,6 +18,19 @@ public class CliHelpSurfaceTests
         Assert.DoesNotContain("--layout <LAYOUT>", result.StandardOutput);
     }
 
+    [Theory]
+    [InlineData("file")]
+    [InlineData("exec")]
+    public async Task Markdown_help_keeps_single_and_tree_output_options(string mode)
+    {
+        var result = await RunRendererAsync(["render", mode, "markdown", "--help"]);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("--layout <LAYOUT>", result.StandardOutput);
+        Assert.Contains("--out <FILE>", result.StandardOutput);
+        Assert.Contains("--out-dir <DIR>", result.StandardOutput);
+    }
+
     private static async Task<ProcessResult> RunRendererAsync(IReadOnlyList<string> arguments)
     {
         var dllPath = Path.Combine(
