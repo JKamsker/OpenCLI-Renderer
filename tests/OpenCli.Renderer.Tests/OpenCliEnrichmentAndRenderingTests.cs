@@ -164,13 +164,15 @@ public class OpenCliEnrichmentAndRenderingTests
         var normalized = _normalizer.Normalize(document, includeHidden: false);
 
         var files = _htmlRenderer.RenderTree(normalized, includeMetadata: false);
+        var loginPage = files.Single(file => file.RelativePath == "auth/login.html").Content;
 
         Assert.Contains(files, file => file.RelativePath == "index.html");
         Assert.Contains(files, file => file.RelativePath == "auth/index.html");
         Assert.Contains(files, file => file.RelativePath == "auth/login.html");
         Assert.Contains("Available commands", files.Single(file => file.RelativePath == "index.html").Content);
-        Assert.Contains("Store encrypted auth material for a profile.", files.Single(file => file.RelativePath == "auth/login.html").Content);
-        Assert.Contains("Search command tree", files.Single(file => file.RelativePath == "auth/login.html").Content);
+        Assert.Contains("Store encrypted auth material for a profile.", loginPage);
+        Assert.Contains("Filter command tree", loginPage);
+        Assert.Contains("Ctrl F", loginPage);
     }
 
     [Fact]
