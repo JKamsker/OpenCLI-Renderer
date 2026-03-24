@@ -32,6 +32,7 @@ This installs the `inspectra` command globally.
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Node.js for local frontend builds, CI, and `dotnet pack` / `dotnet publish`
+- `wasm-tools` for the browser-side NuGet probe. `npm run build` restores it automatically; a manual fallback is `dotnet workload install wasm-tools`.
 
 ### Build the viewer bundle
 
@@ -62,6 +63,8 @@ dotnet run --project src/InSpectra.Gen -- \
 ```
 
 Open `jellyfin-docs/index.html` in a browser. The bundle is relocatable because the viewer is built with `base: "./"`.
+
+The build also publishes the browser-side NuGet probe into `src/InSpectra.UI/dist/probe/`.
 
 ## Command Surface
 
@@ -121,6 +124,7 @@ The bundled viewer supports three boot paths:
 - injected inline data from the renderer
 - URL-driven loading with `?opencli=...`, `?xmldoc=...`, or `?dir=...`
 - manual import by dropping or picking `opencli.json` and optional `xmldoc.xml`
+- a `NuGet Tool` mode that searches NuGet.org, downloads a `.nupkg` in-browser, and runs a static Spectre.Console.Cli probe
 
 Other viewer features:
 
@@ -155,6 +159,7 @@ XML metadata ──┴─> validate -> enrich -> normalize -> render -> write
 - the .NET HTML pipeline keeps the existing acquisition and validation flow
 - injected HTML output defaults to inline bootstrap mode
 - internal links-mode support remains available for hosted scenarios
+- the hosted `/try/` viewer also ships `dist/probe/**`, a browser-side WebAssembly probe used for static NuGet tool inspection
 
 ### Bundle resolution
 
@@ -171,6 +176,8 @@ At runtime, HTML assets are resolved in this order:
 
 ```text
 src/InSpectra.Gen/       CLI tool and render services
+src/InSpectra.Probe/     Static NuGet package analyzer
+src/InSpectra.Probe.Wasm/ Browser-side JS-export wrapper for the analyzer
 src/InSpectra.UI/        Vite + React + TypeScript viewer app
 tests/InSpectra.Gen.Tests/
 docs/
@@ -191,6 +198,8 @@ dotnet test InSpectra.Gen.sln --configuration Release
 Coverage includes:
 
 - frontend bootstrap precedence and import flows
+- frontend NuGet tool search and generated-document loading
+- static NuGet package probe behavior for packaged OpenCLI and Spectre command recovery
 - XML enrichment and normalization behavior
 - HTML output contract and bootstrap injection
 - bundle resolution order

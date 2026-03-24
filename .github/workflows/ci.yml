@@ -62,6 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f artifacts/publish/InSpectra.UI/dist/index.html
+          test -f artifacts/publish/InSpectra.UI/dist/probe/main.js
           compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.css' > /dev/null
           compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.js' > /dev/null
 
@@ -199,6 +200,7 @@ jobs:
           done
 
           test -f _site/try/index.html
+          test -f _site/try/probe/main.js
 
       - name: Zip preview site
         shell: bash
@@ -310,6 +312,7 @@ jobs:
           done
 
           test -f _site/try/index.html
+          test -f _site/try/probe/main.js
 
       - name: Summarize site
         shell: bash
