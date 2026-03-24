@@ -68,6 +68,22 @@ describe("InSpectreUI app", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("opencli.json is required.");
   });
 
+  it("shows a picker error when more than two files are uploaded", async () => {
+    const user = userEvent.setup();
+    render(<InSpectreApp />);
+
+    const input = screen.getByLabelText("OpenCLI files");
+    await user.upload(input, [
+      new File([JSON.stringify(testDocument)], "opencli.json", { type: "application/json" }),
+      new File([testXmlDoc], "xmldoc.xml", { type: "application/xml" }),
+      new File(["{}"], "extra.json", { type: "application/json" }),
+    ]);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Import accepts one or two files: opencli.json and optional xmldoc.xml.",
+    );
+  });
+
   it("shows a dropzone error for unsupported files", async () => {
     render(<InSpectreApp />);
 
