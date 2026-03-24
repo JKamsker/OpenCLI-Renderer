@@ -243,7 +243,7 @@
                   ]
                 }
               ],
-              "description": "Render an HTML app bundle from a live CLI process and optional cli xmldoc enrichment.",
+              "description": "Render an HTML app bundle from a live CLI process and optional `cli xmldoc` enrichment.",
               "hidden": false,
               "examples": []
             },
@@ -528,7 +528,7 @@
               "examples": []
             }
           ],
-          "description": "Render docs by executing a CLI that exposes `cli  opencli`.",
+          "description": "Render docs by executing a CLI that exposes `cli opencli`.",
           "hidden": false,
           "examples": []
         },

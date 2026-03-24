@@ -44,13 +44,13 @@ Render documentation from OpenCLI exports.
 
 ### Subcommands
 
-- `exec` — Render docs by executing a CLI that exposes `cli  opencli`.
+- `exec` — Render docs by executing a CLI that exposes `cli opencli`.
 - `file` — Render docs from saved OpenCLI export files.
 
 <a id="command-render-exec"></a>
 ### `render exec`
 
-Render docs by executing a CLI that exposes `cli  opencli`.
+Render docs by executing a CLI that exposes `cli opencli`.
 
 #### Subcommands
 

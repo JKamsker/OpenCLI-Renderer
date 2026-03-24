@@ -3,7 +3,7 @@
 - Root: [index](../../index.md)
 - Parent: [render](../index.md)
 
-Render docs by executing a CLI that exposes `cli  opencli`.
+Render docs by executing a CLI that exposes `cli opencli`.
 
 ## Subcommands
 
