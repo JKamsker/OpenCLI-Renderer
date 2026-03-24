@@ -1,12 +1,12 @@
-# OpenCLI Renderer
+# InSpectraGen
 
 Turn an OpenCLI export into either Markdown or a relocatable HTML app bundle.
 
 ```bash
-opencli-renderer render file html mycli.json --out-dir ./docs
+inspectra-gen render file html mycli.json --out-dir ./docs
 ```
 
-OpenCLI Renderer is a .NET 10 tool that reads [OpenCLI](https://opencli.org/) JSON exports, optionally enriches them with XML metadata, and renders either:
+InSpectraGen is a .NET 10 tool that reads [OpenCLI](https://opencli.org/) JSON exports, optionally enriches them with XML metadata, and renders either:
 
 - GitHub-friendly Markdown
 - an interactive HTML viewer bundle with `index.html` plus built JS/CSS assets
@@ -28,7 +28,7 @@ OpenCLI Renderer is a .NET 10 tool that reads [OpenCLI](https://opencli.org/) JS
 ### Build the viewer bundle
 
 ```bash
-cd src/InSpectreUI
+cd src/InSpectra.UI
 npm ci
 npm test
 npm run build
@@ -38,7 +38,7 @@ cd ../..
 ### Render Markdown
 
 ```bash
-dotnet run --project src/OpenCli.Renderer -- \
+dotnet run --project src/InSpectra.Gen -- \
   render file markdown examples/jellyfin-cli/opencli.json \
   --xmldoc examples/jellyfin-cli/xmldoc.xml \
   --out jellyfin-docs.md
@@ -47,7 +47,7 @@ dotnet run --project src/OpenCli.Renderer -- \
 ### Render HTML
 
 ```bash
-dotnet run --project src/OpenCli.Renderer -- \
+dotnet run --project src/InSpectra.Gen -- \
   render file html examples/jellyfin-cli/opencli.json \
   --xmldoc examples/jellyfin-cli/xmldoc.xml \
   --out-dir jellyfin-docs
@@ -58,7 +58,7 @@ Open `jellyfin-docs/index.html` in a browser. The bundle is relocatable because 
 ## Command Surface
 
 ```text
-opencli-renderer render [file|exec] [markdown|html] [OPTIONS]
+inspectra-gen render [file|exec] [markdown|html] [OPTIONS]
 ```
 
 ### Markdown
@@ -106,7 +106,7 @@ HTML uses bundle-directory output only:
 
 ## HTML Viewer
 
-The HTML renderer copies `src/InSpectreUI/dist/**` and patches `index.html` with a bootstrap payload.
+The HTML renderer copies `src/InSpectra.UI/dist/**` and patches `index.html` with a bootstrap payload.
 
 The bundled viewer supports three boot paths:
 
@@ -149,37 +149,37 @@ XML metadata ──┴─> validate -> enrich -> normalize -> render -> write
 
 At runtime, HTML assets are resolved in this order:
 
-1. packaged `InSpectreUI/dist` beside the installed tool
-2. repo-local `src/InSpectreUI/dist`
+1. packaged `InSpectra.UI/dist` beside the installed tool
+2. repo-local `src/InSpectra.UI/dist`
 3. repo-local `npm ci` plus `npm run build` if `dist` is missing and `npm` is available
 4. otherwise a clear error telling you how to build the frontend
 
-`dotnet pack` and `dotnet publish` do not run npm implicitly. They fail if `src/InSpectreUI/dist/index.html` is missing.
+`dotnet pack` and `dotnet publish` do not run npm implicitly. They fail if `src/InSpectra.UI/dist/index.html` is missing.
 
 ## Project Layout
 
 ```text
-src/OpenCli.Renderer/
-src/InSpectreUI/
-tests/OpenCli.Renderer.Tests/
+src/InSpectra.Gen/
+src/InSpectra.UI/
+tests/InSpectra.Gen.Tests/
 docs/
 examples/
 ```
 
-- `src/OpenCli.Renderer/` contains the CLI, render services, and packaging logic
-- `src/InSpectreUI/` is a standalone Vite + React + TypeScript app
-- `tests/OpenCli.Renderer.Tests/` covers CLI contracts, render services, and bundle lookup
+- `src/InSpectra.Gen/` contains the CLI, render services, and packaging logic
+- `src/InSpectra.UI/` is a standalone Vite + React + TypeScript app
+- `tests/InSpectra.Gen.Tests/` covers CLI contracts, render services, and bundle lookup
 - `examples/` contains tracked Markdown example renders plus source snapshots
 
 ## Testing
 
 ```bash
-cd src/InSpectreUI
+cd src/InSpectra.UI
 npm test
 npm run build
 cd ../..
 
-dotnet test OpenCli.Renderer.sln --configuration Release
+dotnet test InSpectra.Gen.sln --configuration Release
 ```
 
 Coverage includes:
@@ -198,6 +198,6 @@ CI builds the frontend before running the .NET test and packaging flow. GitHub P
 
 - [examples/jellyfin-cli](examples/jellyfin-cli/)
 - [examples/jdownloader-remotecli](examples/jdownloader-remotecli/)
-- [docs/opencli-renderer](docs/opencli-renderer/)
+- [docs/inspectra-gen](docs/inspectra-gen/)
 
 The hosted HTML examples live under the Pages site as bundle directories. The repository keeps Markdown renders and source snapshots checked in.

@@ -4,8 +4,8 @@
 
   - Historical planning note for the initial implementation.
   - The current HTML renderer no longer follows the single-file or tree-page model described below.
-  - HTML now emits an InSpectreUI app bundle directory, requires `--out-dir`, rejects `--out` and `--layout`, and reports layout `app`.
-  - Use `README.md` and `docs/opencli-renderer/` for the current public contract.
+  - HTML now emits an InSpectra.UI app bundle directory, requires `--out-dir`, rejects `--out` and `--layout`, and reports layout `app`.
+  - Use `README.md` and `docs/inspectra-gen/` for the current public contract.
 
   ## Summary
 
@@ -47,7 +47,7 @@
       - otherwise exit 3 with an actionable “not found” error
   - Precedence:
       - flags > env > defaults
-      - envs: OPENCLI_RENDERER_OUTPUT, OPENCLI_RENDERER_VERBOSE, OPENCLI_RENDERER_QUIET, OPENCLI_RENDERER_TIMEOUT, NO_COLOR
+      - envs: INSPECTRA_GEN_OUTPUT, INSPECTRA_GEN_VERBOSE, INSPECTRA_GEN_QUIET, INSPECTRA_GEN_TIMEOUT, NO_COLOR
       - no config file/profile layer in v1
 
   ## Implementation

@@ -4,4 +4,4 @@
 **/obj/
 artifacts/
 node_modules/
-src/InSpectreUI/dist/
+src/InSpectra.UI/dist/

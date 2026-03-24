@@ -23,18 +23,18 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: src/InSpectreUI/package-lock.json
+          cache-dependency-path: src/InSpectra.UI/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: src/InSpectreUI
+        working-directory: src/InSpectra.UI
         run: npm ci
 
       - name: Test frontend
-        working-directory: src/InSpectreUI
+        working-directory: src/InSpectra.UI
         run: npm test
 
       - name: Build frontend
-        working-directory: src/InSpectreUI
+        working-directory: src/InSpectra.UI
         run: npm run build
 
       - name: Setup .NET
@@ -43,39 +43,39 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore OpenCli.Renderer.sln
+        run: dotnet restore InSpectra.Gen.sln
 
       - name: Build
-        run: dotnet build OpenCli.Renderer.sln --configuration Release --no-restore
+        run: dotnet build InSpectra.Gen.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test OpenCli.Renderer.sln --configuration Release --no-build
+        run: dotnet test InSpectra.Gen.sln --configuration Release --no-build
 
       - name: Pack tool
-        run: dotnet pack src/OpenCli.Renderer/OpenCli.Renderer.csproj --configuration Release --no-build
+        run: dotnet pack src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build
 
       - name: Publish tool
-        run: dotnet publish src/OpenCli.Renderer/OpenCli.Renderer.csproj --configuration Release --no-build -o artifacts/publish
+        run: dotnet publish src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build -o artifacts/publish
 
       - name: Verify published bundle
         shell: bash
         run: |
           set -euo pipefail
-          test -f artifacts/publish/InSpectreUI/dist/index.html
-          compgen -G 'artifacts/publish/InSpectreUI/dist/assets/*.css' > /dev/null
-          compgen -G 'artifacts/publish/InSpectreUI/dist/assets/*.js' > /dev/null
+          test -f artifacts/publish/InSpectra.UI/dist/index.html
+          compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.css' > /dev/null
+          compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.js' > /dev/null
 
       - name: Smoke render HTML bundle
         shell: bash
         run: |
           set -euo pipefail
           tmp_dir="$(mktemp -d)"
-          out_dir="$tmp_dir/opencli-renderer"
+          out_dir="$tmp_dir/inspectra-gen"
 
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render file html \
-            docs/opencli-renderer/opencli.json \
-            --xmldoc docs/opencli-renderer/xmldoc.xml \
+            docs/inspectra-gen/opencli.json \
+            --xmldoc docs/inspectra-gen/xmldoc.xml \
             --out-dir "$out_dir"
 
           test -f "$out_dir/index.html"
@@ -86,8 +86,8 @@ jobs:
         with:
           name: build
           path: |
-            src/OpenCli.Renderer/bin/Release/net10.0/
-            src/OpenCli.Renderer/bin/Release/*.nupkg
+            src/InSpectra.Gen/bin/Release/net10.0/
+            src/InSpectra.Gen/bin/Release/*.nupkg
             artifacts/publish/
 
   package-pages-preview:
@@ -104,14 +104,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: src/InSpectreUI/package-lock.json
+          cache-dependency-path: src/InSpectra.UI/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: src/InSpectreUI
+        working-directory: src/InSpectra.UI
         run: npm ci
 
       - name: Build frontend
-        working-directory: src/InSpectreUI
+        working-directory: src/InSpectra.UI
         run: npm run build
 
       - name: Setup .NET
@@ -120,10 +120,10 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore OpenCli.Renderer.sln
+        run: dotnet restore InSpectra.Gen.sln
 
       - name: Build renderer
-        run: dotnet build OpenCli.Renderer.sln --configuration Release --no-restore
+        run: dotnet build InSpectra.Gen.sln --configuration Release --no-restore
 
       - name: Install .NET tool - JDownloader-RemoteCli
         run: dotnet tool install --global JDownloader-RemoteCli
@@ -142,21 +142,21 @@ jobs:
           echo "opencli.kamsker.at" > "$site/CNAME"
           touch "$site/.nojekyll"
 
-      - name: Render - OpenCLI Renderer
+      - name: Render - InSpectraGen
         shell: bash
         run: |
           set -euo pipefail
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render file html \
-            docs/opencli-renderer/opencli.json \
-            --xmldoc docs/opencli-renderer/xmldoc.xml \
-            --out-dir _site/examples/opencli-renderer
+            docs/inspectra-gen/opencli.json \
+            --xmldoc docs/inspectra-gen/xmldoc.xml \
+            --out-dir _site/examples/inspectra-gen
 
       - name: Render - Jellyfin CLI
         shell: bash
         run: |
           set -euo pipefail
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render exec html jf \
             --with-xmldoc \
             --out-dir _site/examples/jellyfin-cli
@@ -165,7 +165,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render exec html jdr \
             --with-xmldoc \
             --out-dir _site/examples/jdownloader-remotecli
@@ -175,7 +175,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          for example in opencli-renderer jellyfin-cli jdownloader-remotecli; do
+          for example in inspectra-gen jellyfin-cli jdownloader-remotecli; do
             index_path="_site/examples/$example/index.html"
             test -f "$index_path"
             grep -q './assets/' "$index_path"
@@ -211,14 +211,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: src/InSpectreUI/package-lock.json
+          cache-dependency-path: src/InSpectra.UI/package-lock.json
 
       - name: Install frontend dependencies
-        working-directory: src/InSpectreUI
+        working-directory: src/InSpectra.UI
         run: npm ci
 
       - name: Build frontend
-        working-directory: src/InSpectreUI
+        working-directory: src/InSpectra.UI
         run: npm run build
 
       - name: Setup .NET
@@ -227,10 +227,10 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Restore
-        run: dotnet restore OpenCli.Renderer.sln
+        run: dotnet restore InSpectra.Gen.sln
 
       - name: Build renderer
-        run: dotnet build OpenCli.Renderer.sln --configuration Release --no-restore
+        run: dotnet build InSpectra.Gen.sln --configuration Release --no-restore
 
       - name: Install .NET tool - JDownloader-RemoteCli
         run: dotnet tool install --global JDownloader-RemoteCli
@@ -249,21 +249,21 @@ jobs:
           echo "opencli.kamsker.at" > "$site/CNAME"
           touch "$site/.nojekyll"
 
-      - name: Render - OpenCLI Renderer
+      - name: Render - InSpectraGen
         shell: bash
         run: |
           set -euo pipefail
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render file html \
-            docs/opencli-renderer/opencli.json \
-            --xmldoc docs/opencli-renderer/xmldoc.xml \
-            --out-dir _site/examples/opencli-renderer
+            docs/inspectra-gen/opencli.json \
+            --xmldoc docs/inspectra-gen/xmldoc.xml \
+            --out-dir _site/examples/inspectra-gen
 
       - name: Render - Jellyfin CLI
         shell: bash
         run: |
           set -euo pipefail
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render exec html jf \
             --with-xmldoc \
             --out-dir _site/examples/jellyfin-cli
@@ -272,7 +272,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dotnet run --project src/OpenCli.Renderer --configuration Release --no-build -- \
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render exec html jdr \
             --with-xmldoc \
             --out-dir _site/examples/jdownloader-remotecli
@@ -282,7 +282,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          for example in opencli-renderer jellyfin-cli jdownloader-remotecli; do
+          for example in inspectra-gen jellyfin-cli jdownloader-remotecli; do
             index_path="_site/examples/$example/index.html"
             test -f "$index_path"
             grep -q './assets/' "$index_path"
