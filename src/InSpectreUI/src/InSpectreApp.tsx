@@ -2,10 +2,7 @@ import {
   Eye,
   EyeOff,
   FileUp,
-  Search,
-  Sidebar,
   Sparkles,
-  TerminalSquare,
 } from "lucide-react";
 import { startTransition, useDeferredValue, useEffect, useRef, useState } from "react";
 import { resolveStartupRequest } from "./boot/bootstrap";
@@ -139,30 +136,17 @@ export function InSpectreApp() {
     <div className="app-shell">
       <header className="topbar">
         <div className="brand-block">
-          <div className="brand-mark">
-            <Sidebar aria-hidden="true" />
-          </div>
-          <div>
+          <span className="brand-mark">{">_"}</span>
+          <div className="brand-info">
             <div className="brand-title">{document.source.info.title || "OpenCLI Viewer"}</div>
             <div className="brand-subtitle">
-              <span>{sourceLabel}</span>
+              <span>{sourceLabel || `v${document.source.info.version || "0.0.0"}`}</span>
               <span>OpenCLI {document.source.opencli || "unknown"}</span>
-              <span>{document.source.info.version || "0.0.0"}</span>
             </div>
           </div>
         </div>
 
         <div className="toolbar">
-          <label className="search-field">
-            <Search aria-hidden="true" />
-            <input
-              type="search"
-              placeholder="Filter command tree"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          </label>
-
           <button type="button" className="toolbar-button" onClick={() => toggleOption("includeHidden")}>
             {viewerOptions.includeHidden ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
             <span>{viewerOptions.includeHidden ? "Hide hidden" : "Show hidden"}</span>
@@ -175,7 +159,7 @@ export function InSpectreApp() {
 
           <button type="button" className="toolbar-button" onClick={() => pickerRef.current?.click()}>
             <FileUp aria-hidden="true" />
-            <span>Import files</span>
+            <span>Import</span>
           </button>
           <input
             ref={pickerRef}
@@ -189,68 +173,71 @@ export function InSpectreApp() {
       </header>
 
       <div className="app-grid">
-        <aside className="sidebar panel">
-          <div className="sidebar-heading">
-            <TerminalSquare aria-hidden="true" />
-            <h2>Command graph</h2>
+        <aside className="sidebar">
+          <div className="sidebar-search">
+            <input
+              type="search"
+              placeholder="Filter commands…"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
           </div>
-          <button
-            type="button"
-            className={`tree-row overview-row ${!activeCommand ? "selected" : ""}`}
-            onClick={() => {
-              window.location.hash = "#/";
-            }}
-          >
-            <span className="tree-toggle">
-              <Sidebar aria-hidden="true" />
-            </span>
-            <span className="tree-copy">
-              <strong>Overview</strong>
-              <span>Project summary, root arguments, and top-level commands</span>
-            </span>
-          </button>
-          <CommandTree
-            commands={document.commands}
-            searchTerm={deferredSearch}
-            selectedPath={activeCommand?.path}
-            onSelect={(path) => {
-              window.location.hash = buildCommandHash(path);
-            }}
-          />
+          <nav className="sidebar-nav">
+            <button
+              type="button"
+              className={`overview-row ${!activeCommand ? "selected" : ""}`}
+              onClick={() => {
+                window.location.hash = "#/";
+              }}
+            >
+              Overview
+            </button>
+            <div className="nav-label">Commands</div>
+            <CommandTree
+              commands={document.commands}
+              searchTerm={deferredSearch}
+              selectedPath={activeCommand?.path}
+              onSelect={(path) => {
+                window.location.hash = buildCommandHash(path);
+              }}
+            />
+          </nav>
         </aside>
 
         <main className="content-column">
-          {warnings.length > 0 ? (
-            <div className="warning-banner panel" role="status">
-              {warnings.map((warning) => (
-                <p key={warning}>{warning}</p>
-              ))}
-            </div>
-          ) : null}
+          <div className="content-stack" key={activeCommand?.path ?? "overview"}>
+            {warnings.length > 0 ? (
+              <div className="warning-banner" role="status">
+                {warnings.map((warning) => (
+                  <p key={warning}>{warning}</p>
+                ))}
+              </div>
+            ) : null}
 
-          {error ? (
-            <div className="warning-banner panel" role="alert">
-              <p>{error}</p>
-            </div>
-          ) : null}
+            {error ? (
+              <div className="warning-banner" role="alert">
+                <p>{error}</p>
+              </div>
+            ) : null}
 
-          {activeCommand ? (
-            <CommandPanel
-              command={activeCommand}
-              includeMetadata={viewerOptions.includeMetadata}
-              onCommandSelect={(path) => {
-                window.location.hash = buildCommandHash(path);
-              }}
-            />
-          ) : (
-            <OverviewPanel
-              document={document}
-              includeMetadata={viewerOptions.includeMetadata}
-              onCommandSelect={(path) => {
-                window.location.hash = buildCommandHash(path);
-              }}
-            />
-          )}
+            {activeCommand ? (
+              <CommandPanel
+                command={activeCommand}
+                includeMetadata={viewerOptions.includeMetadata}
+                onCommandSelect={(path) => {
+                  window.location.hash = buildCommandHash(path);
+                }}
+              />
+            ) : (
+              <OverviewPanel
+                document={document}
+                includeMetadata={viewerOptions.includeMetadata}
+                onCommandSelect={(path) => {
+                  window.location.hash = buildCommandHash(path);
+                }}
+              />
+            )}
+          </div>
         </main>
       </div>
     </div>

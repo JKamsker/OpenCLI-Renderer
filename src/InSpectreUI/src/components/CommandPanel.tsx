@@ -1,4 +1,4 @@
-import { ArrowRight, CornerDownRight, Fingerprint, Shield, SquareTerminal } from "lucide-react";
+import { ChevronRight, CornerDownRight, Fingerprint, Shield, SquareTerminal } from "lucide-react";
 import { type ReactNode } from "react";
 import { buildCommandHash } from "../data/navigation";
 import {
@@ -22,12 +22,12 @@ export function CommandPanel({ command, includeMetadata, onCommandSelect }: Comm
   ];
 
   return (
-    <div className="content-stack">
+    <>
       <section className="panel command-hero">
         <div className="breadcrumb-row">
           {command.path.split(" ").map((segment, index, all) => (
             <span key={`${segment}-${index}`} className="crumb">
-              {index > 0 ? <ArrowRight aria-hidden="true" /> : null}
+              {index > 0 ? <ChevronRight aria-hidden="true" /> : null}
               {index === all.length - 1 ? <strong>{segment}</strong> : <span>{segment}</span>}
             </span>
           ))}
@@ -146,7 +146,7 @@ export function CommandPanel({ command, includeMetadata, onCommandSelect }: Comm
           </div>
         </section>
       ) : null}
-    </div>
+    </>
   );
 }
 

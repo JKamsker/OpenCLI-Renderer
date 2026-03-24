@@ -14,7 +14,7 @@ export function OverviewPanel({ document, includeMetadata, onCommandSelect }: Ov
   const summary = buildSummary(document);
 
   return (
-    <div className="content-stack">
+    <>
       <section className="hero-band panel">
         <div className="eyebrow">Overview</div>
         <h1>{document.source.info.title || "Untitled CLI"}</h1>
@@ -90,7 +90,7 @@ export function OverviewPanel({ document, includeMetadata, onCommandSelect }: Ov
           }))}
         />
       ) : null}
-    </div>
+    </>
   );
 }
 

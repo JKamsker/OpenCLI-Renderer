@@ -78,7 +78,6 @@ function TreeNode({
         </span>
         <span className="tree-copy">
           <strong>{command.command.name}</strong>
-          <span>{command.command.description ?? "No description"}</span>
         </span>
       </button>
 
