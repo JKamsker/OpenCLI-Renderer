@@ -40,8 +40,9 @@ public class OpenCliEnrichmentAndRenderingTests
         var markdownWithMetadata = _renderer.RenderSingle(normalized, includeMetadata: true);
 
         Assert.Contains("# jdr", markdownWithoutMetadata);
-        Assert.Contains("top-level command groups and", markdownWithoutMetadata);
+        Assert.Contains("Command-line reference for `jdr`.", markdownWithoutMetadata);
         Assert.Contains("### CLI Scope", markdownWithoutMetadata);
+        Assert.Contains("### Available Commands", markdownWithoutMetadata);
         Assert.Contains("## Commands", markdownWithoutMetadata);
         Assert.Contains("`auth login`", markdownWithoutMetadata);
         Assert.DoesNotContain("Metadata Appendix", markdownWithoutMetadata);
@@ -61,6 +62,8 @@ public class OpenCliEnrichmentAndRenderingTests
         Assert.Contains(files, file => file.RelativePath == "auth/index.md");
         Assert.Contains(files, file => file.RelativePath == "auth/login.md");
         Assert.Contains("Store encrypted auth material for a profile.", files.Single(file => file.RelativePath == "auth/login.md").Content);
+        Assert.Contains("### Available Commands", files.Single(file => file.RelativePath == "index.md").Content);
+        Assert.Contains("- [auth](auth/index.md)", files.Single(file => file.RelativePath == "index.md").Content);
     }
 
     [Fact]
@@ -147,8 +150,9 @@ public class OpenCliEnrichmentAndRenderingTests
 
         Assert.Contains("<aside class=\"sidebar\">", html);
         Assert.Contains("Filter commands", html);
-        Assert.Contains("top-level command groups and", html);
+        Assert.Contains("Command-line reference for `jdr`.", html);
         Assert.Contains("Reference scope", html);
+        Assert.Contains("Available commands", html);
         Assert.Contains("command-card", html);
         Assert.Contains("option-card", html);
         Assert.Contains("Metadata appendix", html);
@@ -165,8 +169,64 @@ public class OpenCliEnrichmentAndRenderingTests
         Assert.Contains(files, file => file.RelativePath == "index.html");
         Assert.Contains(files, file => file.RelativePath == "auth/index.html");
         Assert.Contains(files, file => file.RelativePath == "auth/login.html");
+        Assert.Contains("Available commands", files.Single(file => file.RelativePath == "index.html").Content);
         Assert.Contains("Store encrypted auth material for a profile.", files.Single(file => file.RelativePath == "auth/login.html").Content);
         Assert.Contains("Search command tree", files.Single(file => file.RelativePath == "auth/login.html").Content);
+    }
+
+    [Fact]
+    public void Overview_summary_can_detect_jellyfin_shape()
+    {
+        var formatter = new OverviewFormatter();
+        var document = new NormalizedCliDocument
+        {
+            Source = new OpenCliDocument
+            {
+                OpenCliVersion = "0.1-draft",
+                Info = new OpenCliInfo
+                {
+                    Title = "jf",
+                    Version = "1.0.0",
+                },
+            },
+            RootArguments = [],
+            RootOptions = [],
+            Commands =
+            [
+                new NormalizedCommand
+                {
+                    Path = "users",
+                    Command = new OpenCliCommand
+                    {
+                        Name = "users",
+                        Description = "Manage Jellyfin users.",
+                    },
+                    Arguments = [],
+                    DeclaredOptions = [],
+                    InheritedOptions = [],
+                    Commands = [],
+                },
+                new NormalizedCommand
+                {
+                    Path = "server",
+                    Command = new OpenCliCommand
+                    {
+                        Name = "server",
+                        Description = "Health, logs, config, restart, and shutdown.",
+                    },
+                    Arguments = [],
+                    DeclaredOptions = [],
+                    InheritedOptions = [],
+                    Commands = [],
+                },
+            ],
+        };
+
+        var summary = formatter.BuildSummary(document);
+
+        Assert.Equal(
+            "Manage your Jellyfin server from the command line. Available command areas include server administration and users.",
+            summary);
     }
 
     private static OpenCliMetadata CreateMetadata(string name, string value)

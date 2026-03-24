@@ -19,7 +19,7 @@ public sealed class MarkdownRenderer(
         var builder = new StringBuilder();
         AppendHeader(document, builder);
         AppendTableOfContents(document, builder);
-        AppendOverview(document, builder);
+        AppendOverview(document, builder, currentPagePath: null);
         AppendRootArguments(document, builder);
         AppendRootOptions(document, builder);
         AppendCommandSections(document.Commands, builder, includeMetadata, 2);
@@ -82,7 +82,7 @@ public sealed class MarkdownRenderer(
         AppendCommandToc(document.Commands, builder, 1);
     }
 
-    private void AppendOverview(NormalizedCliDocument document, StringBuilder builder)
+    private void AppendOverview(NormalizedCliDocument document, StringBuilder builder, string? currentPagePath)
     {
         builder.AppendLine();
         builder.AppendLine("<a id=\"overview\"></a>");
@@ -90,6 +90,7 @@ public sealed class MarkdownRenderer(
         builder.AppendLine();
         sectionRenderer.AppendInfoSection(document.Source, builder);
         AppendOverviewFacts(document, builder);
+        AppendAvailableCommands(document.Commands, builder, currentPagePath);
     }
 
     private void AppendRootArguments(NormalizedCliDocument document, StringBuilder builder)
@@ -159,9 +160,7 @@ public sealed class MarkdownRenderer(
     {
         var builder = new StringBuilder();
         AppendHeader(document, builder);
-        builder.AppendLine();
-        sectionRenderer.AppendInfoSection(document.Source, builder);
-        AppendOverviewFacts(document, builder);
+        AppendOverview(document, builder, "index.md");
         if (document.RootArguments.Count > 0)
         {
             builder.AppendLine();
@@ -176,14 +175,6 @@ public sealed class MarkdownRenderer(
             builder.AppendLine("## Root Options");
             builder.AppendLine();
             tableRenderer.AppendOptionTable(document.RootOptions.Select(option => new ResolvedOption { Option = option, IsInherited = false }), builder);
-        }
-
-        builder.AppendLine();
-        builder.AppendLine("## Commands");
-        builder.AppendLine();
-        foreach (var command in document.Commands)
-        {
-            builder.AppendLine($"- [{command.Command.Name}]({pathResolver.GetCommandRelativePath(command, "md")}){formatter.FormatDescriptionSuffix(command.Command.Description)}");
         }
 
         if (includeMetadata)
@@ -207,6 +198,30 @@ public sealed class MarkdownRenderer(
         foreach (var (label, value) in facts)
         {
             builder.AppendLine($"- {label}: `{value}`");
+        }
+
+        builder.AppendLine();
+    }
+
+    private void AppendAvailableCommands(
+        IEnumerable<NormalizedCommand> commands,
+        StringBuilder builder,
+        string? currentPagePath)
+    {
+        var topLevelCommands = commands.ToList();
+        if (topLevelCommands.Count == 0)
+        {
+            return;
+        }
+
+        builder.AppendLine("### Available Commands");
+        builder.AppendLine();
+        foreach (var command in topLevelCommands)
+        {
+            var target = currentPagePath is null
+                ? $"#command-{pathResolver.CreateAnchorId(command.Path)}"
+                : pathResolver.CreateRelativeLink(currentPagePath, pathResolver.GetCommandRelativePath(command, "md"));
+            builder.AppendLine($"- [{command.Command.Name}]({target}){formatter.FormatDescriptionSuffix(command.Command.Description)}");
         }
 
         builder.AppendLine();

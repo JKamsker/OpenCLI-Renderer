@@ -16,7 +16,11 @@ public sealed class HtmlRenderer(
     {
         var content = new StringBuilder();
         sectionRenderer.AppendRootHero(document, content);
-        sectionRenderer.AppendRootDetails(document, content, includeMetadata);
+        sectionRenderer.AppendRootDetails(
+            document,
+            content,
+            includeMetadata,
+            command => $"#command-{pathResolver.CreateAnchorId(command.Path)}");
 
         if (document.Commands.Count > 0)
         {
@@ -47,19 +51,11 @@ public sealed class HtmlRenderer(
     {
         var content = new StringBuilder();
         sectionRenderer.AppendRootHero(document, content);
-        sectionRenderer.AppendRootDetails(document, content, includeMetadata);
-
-        if (document.Commands.Count > 0)
-        {
-            content.AppendLine("<section class=\"panel section\"><div class=\"section-head\"><span class=\"eyebrow\">Browse</span><h2>Top-level commands</h2></div><div class=\"card-grid\">");
-            foreach (var command in document.Commands)
-            {
-                var path = pathResolver.GetCommandRelativePath(command, "html");
-                content.AppendLine($"<a class=\"command-card\" href=\"{contentFormatter.Encode(path)}\"><strong>{contentFormatter.Encode(command.Command.Name)}</strong><p>{contentFormatter.EncodeOrFallback(command.Command.Description, "No description provided.")}</p></a>");
-            }
-
-            content.AppendLine("</div></section>");
-        }
+        sectionRenderer.AppendRootDetails(
+            document,
+            content,
+            includeMetadata,
+            command => pathResolver.GetCommandRelativePath(command, "html"));
 
         return shellRenderer.RenderShell(document, "Overview", shellRenderer.BuildTreeSidebar(document, "index.html", null), content.ToString());
     }

@@ -31,8 +31,16 @@ public sealed class HtmlSectionRenderer(
     }
 
     public void AppendRootDetails(NormalizedCliDocument document, StringBuilder builder, bool includeMetadata)
+        => AppendRootDetails(document, builder, includeMetadata, command => $"#command-{pathResolver.CreateAnchorId(command.Path)}");
+
+    public void AppendRootDetails(
+        NormalizedCliDocument document,
+        StringBuilder builder,
+        bool includeMetadata,
+        Func<NormalizedCommand, string> commandLinkFactory)
     {
         AppendOverviewCards(document, builder);
+        AppendAvailableCommands(document.Commands, builder, commandLinkFactory);
         AppendRootArguments(document, builder);
         AppendRootOptions(document, builder);
         AppendExamples(document.Source.Examples, builder);
@@ -107,6 +115,26 @@ public sealed class HtmlSectionRenderer(
 
         builder.AppendLine("<section class=\"section\"><div class=\"section-head\"><span class=\"eyebrow\">Overview</span><h2>Reference context</h2></div><div class=\"info-grid\">");
         foreach (var card in cards) builder.AppendLine(card);
+        builder.AppendLine("</div></section>");
+    }
+
+    private void AppendAvailableCommands(
+        IEnumerable<NormalizedCommand> commands,
+        StringBuilder builder,
+        Func<NormalizedCommand, string> commandLinkFactory)
+    {
+        var topLevelCommands = commands.ToList();
+        if (topLevelCommands.Count == 0)
+        {
+            return;
+        }
+
+        builder.AppendLine("<section class=\"panel section\" id=\"available-commands\"><div class=\"section-head\"><span class=\"eyebrow\">Explore</span><h2>Available commands</h2></div><div class=\"card-grid\">");
+        foreach (var command in topLevelCommands)
+        {
+            builder.AppendLine($"<a class=\"command-card\" href=\"{contentFormatter.Encode(commandLinkFactory(command))}\"><strong>{contentFormatter.Encode(command.Command.Name)}</strong><p>{contentFormatter.EncodeOrFallback(command.Command.Description, "No description provided.")}</p></a>");
+        }
+
         builder.AppendLine("</div></section>");
     }
 
