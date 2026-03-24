@@ -12,6 +12,7 @@ interface ImportScreenProps {
   mode: ImportMode;
   onFilesSelected: (files: File[]) => void;
   onModeChange: (mode: ImportMode) => void;
+  onNugetInteraction?: () => void;
   onToolInspect: (request: NugetToolRequest) => void;
   probeDiagnostics?: ProbeDiagnostics | null;
 }
@@ -22,6 +23,7 @@ export function ImportScreen({
   mode,
   onFilesSelected,
   onModeChange,
+  onNugetInteraction,
   onToolInspect,
   probeDiagnostics,
 }: ImportScreenProps) {
@@ -134,7 +136,12 @@ export function ImportScreen({
             />
           </div>
         ) : (
-          <NugetToolPanel diagnostics={probeDiagnostics} loading={loading} onInspect={onToolInspect} />
+          <NugetToolPanel
+            diagnostics={probeDiagnostics}
+            loading={loading}
+            onInspect={onToolInspect}
+            onInteraction={onNugetInteraction}
+          />
         )}
 
         {error ? (

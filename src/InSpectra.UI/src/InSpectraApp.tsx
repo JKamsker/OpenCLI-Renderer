@@ -59,12 +59,8 @@ export function InSpectraApp() {
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
-
   useEffect(() => {
-    if (!document) {
-      return;
-    }
-
+    if (!document) return;
     const route = parseHashRoute(window.location.hash);
     if (route.kind === "command" && !findCommandByPath(document.commands, route.commandPath)) {
       window.location.hash = "#/";
@@ -102,7 +98,6 @@ export function InSpectraApp() {
       setLoadState({ status: "empty" });
     }
   }
-
   function applyLoadedSource(source: LoadedSource) {
     setWarnings(source.warnings);
     setSourceLabel(source.label);
@@ -114,6 +109,7 @@ export function InSpectraApp() {
     setError(null);
     setLoadState({ status: "ready" });
   }
+  function clearNugetTransientState() { setError(null); setProbeDiagnostics(null); }
 
   async function handleFiles(files: File[]) {
     try {
@@ -143,7 +139,6 @@ export function InSpectraApp() {
     if (!document) {
       return;
     }
-
     startTransition(() => {
       setViewerOptions((current) => {
         const next = { ...current, [option]: !current[option] };
@@ -163,7 +158,6 @@ export function InSpectraApp() {
     setSearchTerm("");
     setLoadState({ status: "empty" });
   }
-
   function toggleComposer() {
     setComposerOpen((prev) => {
       const next = !prev;
@@ -203,6 +197,7 @@ export function InSpectraApp() {
         mode={importMode}
         onFilesSelected={handleFiles}
         onModeChange={setImportMode}
+        onNugetInteraction={clearNugetTransientState}
         onToolInspect={handleNugetTool}
         probeDiagnostics={probeDiagnostics}
       />

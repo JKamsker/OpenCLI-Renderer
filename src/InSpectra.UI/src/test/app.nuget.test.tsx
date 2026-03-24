@@ -170,4 +170,43 @@ describe("InSpectraUI NuGet mode", () => {
     expect(screen.getByText("No tool code was executed.")).toBeInTheDocument();
     expect(screen.getAllByRole("alert")[0]).toHaveTextContent("The package does not bundle opencli.json.");
   });
+
+  it("clears stale NuGet diagnostics when the user starts a new search", async () => {
+    loadFromNugetTool.mockRejectedValue(
+      new MockNugetToolProbeError("The package does not bundle opencli.json.", {
+        status: "unsupported",
+        confidence: "unsupported",
+        error: "The package does not bundle opencli.json.",
+        warnings: ["No tool code was executed."],
+        summary: {
+          id: "Demo.Tool",
+          version: "2.0.0",
+          isDotnetTool: true,
+          isSpectreCli: false,
+          commandName: "demo",
+          runner: "dotnet",
+          entryPoint: "demo.dll",
+          targetFramework: "net10.0",
+          hasPackagedOpenCli: false,
+          documentSource: "none",
+          confidence: "unsupported",
+        },
+      }),
+    );
+
+    const user = userEvent.setup();
+    render(<InSpectraApp />);
+
+    await user.click(screen.getByRole("tab", { name: /nuget tool/i }));
+    await user.type(screen.getByLabelText("NuGet package query"), "Demo.Tool");
+    await user.click(screen.getByRole("button", { name: /search nuget/i }));
+    await user.click(await screen.findByRole("button", { name: /inspect tool/i }));
+
+    expect(await screen.findByText("Last Probe Attempt")).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("NuGet package query"), " again");
+
+    expect(screen.queryByText("Last Probe Attempt")).not.toBeInTheDocument();
+    expect(screen.queryByText("The package does not bundle opencli.json.")).not.toBeInTheDocument();
+  });
 });

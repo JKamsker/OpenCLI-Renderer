@@ -8,10 +8,11 @@ import { ProbeDiagnosticsCard } from "./ProbeDiagnosticsCard";
 interface NugetToolPanelProps {
   diagnostics?: ProbeDiagnostics | null;
   loading: boolean;
+  onInteraction?: () => void;
   onInspect: (request: NugetToolRequest) => void;
 }
 
-export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPanelProps) {
+export function NugetToolPanel({ diagnostics, loading, onInspect, onInteraction }: NugetToolPanelProps) {
   const [query, setQuery] = useState("");
   const [includePrerelease, setIncludePrerelease] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -72,6 +73,7 @@ export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPan
 
   async function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    onInteraction?.();
     setSearching(true);
     setSearchError(null);
 
@@ -117,7 +119,10 @@ export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPan
             type="text"
             value={query}
             placeholder="inspectra or JellyfinCli"
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              onInteraction?.();
+              setQuery(event.target.value);
+            }}
           />
         </label>
 
@@ -125,7 +130,10 @@ export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPan
           <input
             checked={includePrerelease}
             type="checkbox"
-            onChange={(event) => setIncludePrerelease(event.target.checked)}
+            onChange={(event) => {
+              onInteraction?.();
+              setIncludePrerelease(event.target.checked);
+            }}
           />
           <span>Include prerelease versions</span>
         </label>
@@ -151,6 +159,7 @@ export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPan
                 type="button"
                 className={`nuget-result${item.id === selectedId ? " selected" : ""}`}
                 onClick={() => {
+                  onInteraction?.();
                   setSelectedId(item.id);
                   setSelectedVersion(item.version);
                   setVersionOptions([]);
@@ -195,7 +204,10 @@ export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPan
                   aria-label="Package version"
                   value={selectedVersion}
                   disabled={versionsLoading && versions.length === 0}
-                  onChange={(event) => setSelectedVersion(event.target.value)}
+                  onChange={(event) => {
+                    onInteraction?.();
+                    setSelectedVersion(event.target.value);
+                  }}
                 >
                   {versions.map((version) => (
                     <option key={version} value={version}>
@@ -217,7 +229,10 @@ export function NugetToolPanel({ diagnostics, loading, onInspect }: NugetToolPan
                 type="button"
                 className="secondary-button"
                 disabled={loading || !selectedVersion}
-                onClick={() => onInspect({ id: selected.id, version: selectedVersion })}
+                onClick={() => {
+                  onInteraction?.();
+                  onInspect({ id: selected.id, version: selectedVersion });
+                }}
               >
                 {loading ? <LoaderCircle className="spin" aria-hidden="true" /> : <Search aria-hidden="true" />}
                 <span>{loading ? "Inspecting…" : "Inspect tool"}</span>
