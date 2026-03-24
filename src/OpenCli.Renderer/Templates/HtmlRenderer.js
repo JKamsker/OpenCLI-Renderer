@@ -311,6 +311,125 @@
     });
   }
 
+  /* ── Command Palette ── */
+  var cmdPalette = document.querySelector('[data-cmd-palette]');
+  var cmdInput = cmdPalette ? cmdPalette.querySelector('[data-cmd-input]') : null;
+  var cmdResultsEl = cmdPalette ? cmdPalette.querySelector('[data-cmd-results]') : null;
+  var cmdBackdrop = cmdPalette ? cmdPalette.querySelector('.cmd-backdrop') : null;
+  var cmdActiveIdx = 0;
+  var cmdIndex = [];
+
+  function cmdBuildIndex() {
+    cmdIndex = [];
+    var items = document.querySelectorAll('[data-nav-item]');
+    items.forEach(function(item) {
+      var path = item.dataset.label || '';
+      var link = item.querySelector(':scope > .nav-row > .nav-link');
+      if (!link) return;
+      var href = link.getAttribute('href');
+      var desc = '';
+      if (href && href.startsWith('#')) {
+        var tpl = document.querySelector('template[data-page="' + href.slice(1) + '"]');
+        if (tpl) {
+          var p = tpl.content.querySelector('.command-detail > p');
+          if (p && p.textContent.trim() !== 'No description provided.') desc = p.textContent.trim();
+        }
+      }
+      cmdIndex.push({ path: path, desc: desc, href: href });
+    });
+  }
+
+  function cmdEsc(s) { var d = document.createElement('span'); d.textContent = s; return d.innerHTML; }
+
+  function cmdHL(text, q) {
+    if (!q) return cmdEsc(text);
+    var i = text.toLowerCase().indexOf(q);
+    if (i === -1) return cmdEsc(text);
+    return cmdEsc(text.slice(0, i)) + '<mark>' + cmdEsc(text.slice(i, i + q.length)) + '</mark>' + cmdEsc(text.slice(i + q.length));
+  }
+
+  function cmdRender(q) {
+    if (!cmdResultsEl) return;
+    var query = (q || '').toLowerCase().trim();
+    var matches = query ? cmdIndex.filter(function(c) {
+      return c.path.indexOf(query) !== -1 || c.desc.toLowerCase().indexOf(query) !== -1;
+    }) : cmdIndex;
+    if (!matches.length) {
+      cmdResultsEl.innerHTML = '<div class="cmd-empty">No matching commands</div>';
+      cmdActiveIdx = -1;
+      return;
+    }
+    cmdActiveIdx = Math.min(Math.max(cmdActiveIdx, 0), matches.length - 1);
+    cmdResultsEl.innerHTML = matches.map(function(c, i) {
+      return '<div class="cmd-item' + (i === cmdActiveIdx ? ' active' : '') + '" data-href="' + c.href + '">' +
+        '<span class="cmd-path">' + cmdHL(c.path, query) + '</span>' +
+        (c.desc ? '<span class="cmd-desc">' + cmdHL(c.desc, query) + '</span>' : '') +
+        '</div>';
+    }).join('');
+    var act = cmdResultsEl.querySelector('.cmd-item.active');
+    if (act) act.scrollIntoView({ block: 'nearest' });
+  }
+
+  function cmdOpen() {
+    if (!cmdPalette) return;
+    cmdBuildIndex();
+    cmdPalette.hidden = false;
+    cmdInput.value = '';
+    cmdActiveIdx = 0;
+    cmdRender('');
+    requestAnimationFrame(function() { cmdInput.focus(); });
+  }
+
+  function cmdClose() { if (cmdPalette) cmdPalette.hidden = true; }
+
+  function cmdNav(dir) {
+    var items = cmdResultsEl ? cmdResultsEl.querySelectorAll('.cmd-item') : [];
+    if (!items.length) return;
+    cmdActiveIdx = Math.max(0, Math.min(cmdActiveIdx + dir, items.length - 1));
+    items.forEach(function(el, i) { el.classList.toggle('active', i === cmdActiveIdx); });
+    items[cmdActiveIdx].scrollIntoView({ block: 'nearest' });
+  }
+
+  function cmdSelect() {
+    var el = cmdResultsEl ? cmdResultsEl.querySelector('.cmd-item.active') || cmdResultsEl.querySelector('.cmd-item') : null;
+    if (!el) return;
+    var href = el.dataset.href;
+    cmdClose();
+    if (href && href.startsWith('#')) {
+      var pageId = href === '#overview' ? 'overview' : href.slice(1);
+      history.pushState(null, '', href);
+      showPage(pageId);
+    }
+  }
+
+  if (cmdInput) {
+    cmdInput.addEventListener('input', function() { cmdActiveIdx = 0; cmdRender(cmdInput.value); });
+    cmdInput.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); cmdNav(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); cmdNav(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); cmdSelect(); }
+      else if (e.key === 'Escape') { e.preventDefault(); cmdClose(); }
+    });
+  }
+  if (cmdBackdrop) cmdBackdrop.addEventListener('click', cmdClose);
+  if (cmdResultsEl) cmdResultsEl.addEventListener('click', function(e) {
+    var item = e.target.closest('.cmd-item');
+    if (!item) return;
+    var all = cmdResultsEl.querySelectorAll('.cmd-item');
+    for (var i = 0; i < all.length; i++) { if (all[i] === item) { cmdActiveIdx = i; break; } }
+    cmdSelect();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      cmdPalette && !cmdPalette.hidden ? cmdClose() : cmdOpen();
+    }
+  });
+
+  var cmdTrigger = document.querySelector('[data-cmd-trigger]');
+  if (cmdTrigger) cmdTrigger.addEventListener('click', cmdOpen);
+
   /* ── Search / filter ── */
   var search = document.querySelector('[data-nav-search]');
   if (!search) return;
