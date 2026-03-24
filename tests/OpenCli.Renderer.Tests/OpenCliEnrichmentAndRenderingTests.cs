@@ -151,7 +151,7 @@ public class OpenCliEnrichmentAndRenderingTests
         Assert.Contains("<aside class=\"sidebar\">", html);
         Assert.Contains("Filter commands", html);
         Assert.Contains("Command-line reference for `jdr`.", html);
-        Assert.Contains("Reference scope", html);
+        Assert.Contains("stat-card", html);
         Assert.Contains("command-card", html);
         Assert.Contains("option-card", html);
         Assert.Contains("Metadata appendix", html);

@@ -503,6 +503,33 @@ dt, th {
   gap: .65rem;
 }
 
+/* ── Stat grid (full-width overview cards) ──── */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .65rem;
+  margin-bottom: .65rem;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: .8rem;
+  font-weight: 500;
+  opacity: .7;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 /* Compact grid for overview available-commands */
 #available-commands .card-grid {
   grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));

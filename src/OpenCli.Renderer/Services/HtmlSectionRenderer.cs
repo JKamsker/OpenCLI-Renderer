@@ -113,36 +113,49 @@ public sealed class HtmlSectionRenderer(
 
     private void AppendOverviewCards(NormalizedCliDocument document, StringBuilder builder)
     {
-        var cards = new List<string>();
         var facts = overviewFormatter.BuildFacts(document);
-        if (facts.Count > 0)
-        {
-            cards.Add($"<article class=\"panel info-card\"><h3>Reference scope</h3><dl>{string.Concat(facts.Select(fact => contentFormatter.CreateDefinition(fact.Label, fact.Value)))}</dl></article>");
-        }
+        var detailCards = new List<string>();
 
         if (document.Source.Conventions is not null)
         {
-            cards.Add($"<article class=\"panel info-card\"><h3>Conventions</h3><dl>{contentFormatter.CreateDefinition("Group short options", document.Source.Conventions.GroupOptions?.ToString() ?? "unspecified")}{contentFormatter.CreateDefinition("Option separator", document.Source.Conventions.OptionSeparator ?? "unspecified")}</dl></article>");
+            detailCards.Add($"<article class=\"panel info-card\"><h3>Conventions</h3><dl>{contentFormatter.CreateDefinition("Group short options", document.Source.Conventions.GroupOptions?.ToString() ?? "unspecified")}{contentFormatter.CreateDefinition("Option separator", document.Source.Conventions.OptionSeparator ?? "unspecified")}</dl></article>");
         }
 
         if (document.Source.Info.Contact is not null)
         {
-            cards.Add($"<article class=\"panel info-card\"><h3>Contact</h3><dl>{contentFormatter.CreateDefinition("Name", document.Source.Info.Contact.Name)}{contentFormatter.CreateDefinition("Email", document.Source.Info.Contact.Email)}{contentFormatter.CreateLinkDefinition("URL", document.Source.Info.Contact.Url)}</dl></article>");
+            detailCards.Add($"<article class=\"panel info-card\"><h3>Contact</h3><dl>{contentFormatter.CreateDefinition("Name", document.Source.Info.Contact.Name)}{contentFormatter.CreateDefinition("Email", document.Source.Info.Contact.Email)}{contentFormatter.CreateLinkDefinition("URL", document.Source.Info.Contact.Url)}</dl></article>");
         }
 
         if (document.Source.Info.License is not null)
         {
-            cards.Add($"<article class=\"panel info-card\"><h3>License</h3><dl>{contentFormatter.CreateDefinition("Name", document.Source.Info.License.Name)}{contentFormatter.CreateDefinition("Identifier", document.Source.Info.License.Identifier)}{contentFormatter.CreateLinkDefinition("URL", document.Source.Info.License.Url)}</dl></article>");
+            detailCards.Add($"<article class=\"panel info-card\"><h3>License</h3><dl>{contentFormatter.CreateDefinition("Name", document.Source.Info.License.Name)}{contentFormatter.CreateDefinition("Identifier", document.Source.Info.License.Identifier)}{contentFormatter.CreateLinkDefinition("URL", document.Source.Info.License.Url)}</dl></article>");
         }
 
-        if (cards.Count == 0)
+        if (facts.Count == 0 && detailCards.Count == 0)
         {
             return;
         }
 
-        builder.AppendLine("<section class=\"section\"><div class=\"section-head\"><span class=\"eyebrow\">Overview</span><h2>Reference context</h2></div><div class=\"info-grid\">");
-        foreach (var card in cards) builder.AppendLine(card);
-        builder.AppendLine("</div></section>");
+        builder.AppendLine("<section class=\"section\"><div class=\"section-head\"><span class=\"eyebrow\">Overview</span><h2>Reference context</h2></div>");
+
+        if (facts.Count > 0)
+        {
+            builder.AppendLine("<div class=\"stat-grid\">");
+            foreach (var fact in facts)
+            {
+                builder.AppendLine($"<article class=\"panel info-card stat-card\"><h3>{contentFormatter.Encode(fact.Label)}</h3><div class=\"stat-value\">{contentFormatter.Encode(fact.Value)}</div></article>");
+            }
+            builder.AppendLine("</div>");
+        }
+
+        if (detailCards.Count > 0)
+        {
+            builder.AppendLine("<div class=\"info-grid\">");
+            foreach (var card in detailCards) builder.AppendLine(card);
+            builder.AppendLine("</div>");
+        }
+
+        builder.AppendLine("</section>");
     }
 
     private void AppendAvailableCommands(
