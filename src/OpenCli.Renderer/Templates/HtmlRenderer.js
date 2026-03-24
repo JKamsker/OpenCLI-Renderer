@@ -128,6 +128,9 @@
   var composerOutput = composer ? composer.querySelector('.composer-output') : null;
   var composerToggleBtn = document.querySelector('[data-composer-toggle]');
 
+  var savedWidth = localStorage.getItem('opencli-composer-w');
+  if (savedWidth && composer) composer.style.width = savedWidth;
+
   function toggleComposer() {
     if (!composer) return;
     composer.hidden = !composer.hidden;
@@ -236,6 +239,32 @@
   if (composer) composer.addEventListener('click', function(e) {
     if (e.target.closest('[data-composer-copy]')) copyComposerCommand();
   });
+
+  /* Composer resize drag */
+  var resizeHandle = composer ? composer.querySelector('[data-composer-resize]') : null;
+  if (resizeHandle) {
+    var dragging = false;
+    resizeHandle.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      dragging = true;
+      resizeHandle.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      var layoutRight = composer.parentElement.getBoundingClientRect().right;
+      var w = layoutRight - e.clientX;
+      if (w >= 224 && w <= 576) composer.style.width = w + 'px';
+    });
+    document.addEventListener('mouseup', function() {
+      if (!dragging) return;
+      dragging = false;
+      resizeHandle.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  }
 
   /* ── Search / filter ── */
   var search = document.querySelector('[data-nav-search]');
