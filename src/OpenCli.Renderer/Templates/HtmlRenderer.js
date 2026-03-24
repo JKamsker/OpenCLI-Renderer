@@ -135,6 +135,7 @@
     if (!composer) return;
     composer.hidden = !composer.hidden;
     if (composerToggleBtn) composerToggleBtn.classList.toggle('active', !composer.hidden);
+    localStorage.setItem('opencli-composer', composer.hidden ? 'closed' : 'open');
     if (!composer.hidden) rebuildComposer();
   }
 
@@ -233,6 +234,20 @@
       if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done); }
       else { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }
     } catch(e) {}
+  }
+
+  /* Restore composer state or auto-open on first visit with wide screen */
+  var composerState = localStorage.getItem('opencli-composer');
+  if (composer) {
+    if (composerState === 'open') {
+      composer.hidden = false;
+      if (composerToggleBtn) composerToggleBtn.classList.add('active');
+      rebuildComposer();
+    } else if (!composerState && window.innerWidth >= 1280) {
+      composer.hidden = false;
+      if (composerToggleBtn) composerToggleBtn.classList.add('active');
+      rebuildComposer();
+    }
   }
 
   if (composerToggleBtn) composerToggleBtn.addEventListener('click', toggleComposer);
