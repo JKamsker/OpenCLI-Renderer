@@ -89,7 +89,8 @@ public sealed class HtmlShellRenderer(
             : pathResolver.CreateRelativeLink(currentPagePath, pathResolver.GetCommandRelativePath(command, "html"));
         var hasChildren = command.Commands.Count > 0;
 
-        builder.AppendLine($"<li class=\"nav-item\" data-nav-item data-label=\"{contentFormatter.Encode(command.Path.ToLowerInvariant())}\">");
+        var collapsedClass = hasChildren ? " collapsed" : string.Empty;
+        builder.AppendLine($"<li class=\"nav-item{collapsedClass}\" data-nav-item data-label=\"{contentFormatter.Encode(command.Path.ToLowerInvariant())}\">");
         builder.Append("<div class=\"nav-row\">");
 
         if (hasChildren)

@@ -152,7 +152,6 @@ public class OpenCliEnrichmentAndRenderingTests
         Assert.Contains("Filter commands", html);
         Assert.Contains("Command-line reference for `jdr`.", html);
         Assert.Contains("Reference scope", html);
-        Assert.Contains("Available commands", html);
         Assert.Contains("command-card", html);
         Assert.Contains("option-card", html);
         Assert.Contains("Metadata appendix", html);

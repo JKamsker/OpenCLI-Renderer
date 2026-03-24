@@ -37,10 +37,14 @@ public sealed class HtmlSectionRenderer(
         NormalizedCliDocument document,
         StringBuilder builder,
         bool includeMetadata,
-        Func<NormalizedCommand, string> commandLinkFactory)
+        Func<NormalizedCommand, string> commandLinkFactory,
+        bool includeCommandCards = true)
     {
         AppendOverviewCards(document, builder);
-        AppendAvailableCommands(document.Commands, builder, commandLinkFactory);
+        if (includeCommandCards)
+        {
+            AppendAvailableCommands(document.Commands, builder, commandLinkFactory);
+        }
         AppendRootArguments(document, builder);
         AppendRootOptions(document, builder);
         AppendExamples(document.Source.Examples, builder);

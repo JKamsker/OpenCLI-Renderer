@@ -50,6 +50,18 @@
   function showPage(pageId) {
     pages.forEach(function(p) { p.classList.remove('active'); });
     var target = document.querySelector('[data-page="' + pageId + '"]');
+    var scrollToEl = null;
+
+    if (!target) {
+      /* pageId is an in-page anchor (e.g. root-arguments) — find
+         the element by ID and show its parent page instead. */
+      var el = document.getElementById(pageId);
+      if (el) {
+        target = el.closest('.page');
+        scrollToEl = el;
+      }
+    }
+
     if (target) {
       target.classList.add('active');
       staggerCards(target);
@@ -64,7 +76,13 @@
       active.scrollIntoView({ block: 'nearest' });
     }
 
-    if (content) content.scrollTo(0, 0);
+    if (content) {
+      if (scrollToEl) {
+        requestAnimationFrame(function() { scrollToEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      } else {
+        content.scrollTo(0, 0);
+      }
+    }
     if (topbarCtx) {
       var h = target ? target.querySelector('h1, h2') : null;
       topbarCtx.textContent = h ? h.textContent : 'Overview';
