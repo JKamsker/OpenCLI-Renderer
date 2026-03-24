@@ -1,5 +1,5 @@
-import { ChevronRight, CornerDownRight, Fingerprint, Shield, SquareTerminal } from "lucide-react";
-import { type ReactNode } from "react";
+import { Check, ChevronRight, Copy, CornerDownRight, Fingerprint, Shield, SquareTerminal } from "lucide-react";
+import { type ReactNode, useState } from "react";
 import { buildCommandHash } from "../data/navigation";
 import {
   NormalizedCommand,
@@ -105,9 +105,12 @@ export function CommandPanel({ command, includeMetadata, onCommandSelect }: Comm
           </div>
           <div className="example-stack">
             {command.command.examples.map((example) => (
-              <pre key={example} className="example-block">
-                <code>{example}</code>
-              </pre>
+              <div key={example} className="example-wrap">
+                <pre className="example-block">
+                  <code>{example}</code>
+                </pre>
+                <CopyButton text={example} />
+              </div>
             ))}
           </div>
         </section>
@@ -195,6 +198,26 @@ function CommandGroup({
         </div>
       )}
     </section>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }
+
+  return (
+    <button type="button" className="example-copy" onClick={copy} title="Copy example">
+      {copied ? <Check /> : <Copy />}
+    </button>
   );
 }
 

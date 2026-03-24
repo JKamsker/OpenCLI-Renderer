@@ -817,15 +817,46 @@ code {
   gap: 0.6rem;
 }
 
+.example-wrap {
+  position: relative;
+}
+
 .example-block {
   margin: 0;
-  padding: 0.9rem 1rem;
+  padding: 0.9rem 2.5rem 0.9rem 1rem;
   border-radius: 0.55rem;
   background: var(--code-bg);
   color: var(--code-text);
   overflow: auto;
   font-size: 0.8rem;
   border: 1px solid var(--code-border);
+}
+
+.example-copy {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--soft);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.example-copy:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.example-copy svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* ── Buttons ────────────────────────────────── */
