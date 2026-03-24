@@ -179,15 +179,17 @@ function CommandGroup({
       ) : (
         <div className="detail-grid">
           {items.map((item) => (
-            <article key={item.key} className="detail-card">
+            <article
+              key={item.key}
+              className={`detail-card${item.action ? " clickable" : ""}`}
+              onClick={item.action}
+              role={item.action ? "button" : undefined}
+              tabIndex={item.action ? 0 : undefined}
+              onKeyDown={item.action ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); item.action!(); } } : undefined}
+            >
               <strong>{item.title}</strong>
               <p>{item.body}</p>
               <small>{item.footnote}</small>
-              {item.action ? (
-                <button type="button" className="link-button" onClick={item.action}>
-                  {item.actionLabel ?? "Open"}
-                </button>
-              ) : null}
             </article>
           ))}
         </div>
