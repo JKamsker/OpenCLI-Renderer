@@ -326,3 +326,29 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
           cname: opencli.kamsker.at
+
+  nuget-publish:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download nupkg
+        uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: nuget-packages
+
+      - name: Get Secrets
+        uses: bitwarden/sm-action@v2
+        with:
+          access_token: ${{ secrets.BW_ACCESS_TOKEN }}
+          base_url: https://vault.bitwarden.eu
+          secrets: |
+            265b2fb6-2cf0-4859-9bc8-b24c00ab4378 > NUGET_API_KEY
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push "nuget-packages/*.nupkg" \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json
