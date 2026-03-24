@@ -255,7 +255,7 @@
       if (!dragging) return;
       var layoutRight = composer.parentElement.getBoundingClientRect().right;
       var w = layoutRight - e.clientX;
-      if (w >= 224 && w <= 576) composer.style.width = w + 'px';
+      if (w >= 224 && w <= 576) { composer.style.width = w + 'px'; localStorage.setItem('opencli-composer-w', w + 'px'); }
     });
     document.addEventListener('mouseup', function() {
       if (!dragging) return;
