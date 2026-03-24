@@ -197,10 +197,18 @@ cd ../..
 dotnet test InSpectra.Gen.sln --configuration Release
 ```
 
+To run the live NuGet probe verification against the published `InSpectra.Gen 0.0.30` package, enable:
+
+```bash
+$env:INSPECTRA_RUN_LIVE_NUGET_TESTS=1
+dotnet test tests/InSpectra.Gen.Tests/InSpectra.Gen.Tests.csproj --filter LivePackageProbeTests
+```
+
 Coverage includes:
 
 - frontend bootstrap precedence and import flows
 - frontend NuGet tool search and generated-document loading
+- opt-in live verification against a real NuGet-hosted dotnet tool package
 - static NuGet package probe behavior for packaged OpenCLI and Spectre command recovery
 - XML enrichment and normalization behavior
 - HTML output contract and bootstrap injection
