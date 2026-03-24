@@ -334,7 +334,7 @@ code {
 .sidebar-kbd {
   position: absolute;
   right: 1.25rem;
-  top: calc(0.6rem + 50%);
+  top: calc(50% + 0.1rem);
   transform: translateY(-50%);
   pointer-events: none;
   transition: opacity 0.15s var(--ease);
