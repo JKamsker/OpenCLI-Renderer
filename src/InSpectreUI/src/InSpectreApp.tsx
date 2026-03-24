@@ -2,15 +2,21 @@ import {
   Eye,
   EyeOff,
   FileUp,
+  PanelRight,
+  PanelRightClose,
+  Search,
   Sparkles,
 } from "lucide-react";
 import { startTransition, useDeferredValue, useEffect, useRef, useState } from "react";
 import { resolveStartupRequest } from "./boot/bootstrap";
 import { defaultViewerOptions, ViewerOptions } from "./boot/contracts";
+import { CommandPalette } from "./components/CommandPalette";
 import { CommandPanel } from "./components/CommandPanel";
 import { CommandTree } from "./components/CommandTree";
+import { ComposerPanel } from "./components/ComposerPanel";
 import { ImportScreen } from "./components/ImportScreen";
 import { OverviewPanel } from "./components/OverviewPanel";
+import { ThemeToggle } from "./components/ThemeToggle";
 import { loadFromFiles, loadFromStartupRequest, LoadedSource } from "./data/loadSource";
 import { buildCommandHash, parseHashRoute } from "./data/navigation";
 import { findCommandByPath, normalizeOpenCliDocument, NormalizedCliDocument } from "./data/normalize";
@@ -20,8 +26,21 @@ interface LoadState {
   message?: string;
 }
 
+function readBool(key: string, fallback: boolean): boolean {
+  const v = localStorage.getItem(key);
+  return v === null ? fallback : v === "true";
+}
+
+function readNumber(key: string, fallback: number): number {
+  const v = localStorage.getItem(key);
+  if (v === null) return fallback;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export function InSpectreApp() {
   const pickerRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading", message: "Resolving viewer boot mode." });
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -31,6 +50,10 @@ export function InSpectreApp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [routePath, setRoutePath] = useState<string | undefined>(parseHashRoute(window.location.hash).commandPath);
   const deferredSearch = useDeferredValue(searchTerm);
+
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(() => readBool("opencli-composer-open", true));
+  const [composerWidth, setComposerWidth] = useState(() => readNumber("opencli-composer-width", 304));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -59,6 +82,26 @@ export function InSpectreApp() {
       window.location.hash = "#/";
     }
   }, [document]);
+
+  // Keyboard shortcuts: Ctrl+F (focus search), Ctrl+K (palette)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const mod = e.ctrlKey || e.metaKey;
+
+      if (mod && e.key === "f") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+
+      if (mod && e.key === "k") {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   async function initialize(signal: AbortSignal) {
     try {
@@ -120,6 +163,23 @@ export function InSpectreApp() {
     });
   }
 
+  function toggleComposer() {
+    setComposerOpen((prev) => {
+      const next = !prev;
+      localStorage.setItem("opencli-composer-open", String(next));
+      return next;
+    });
+  }
+
+  function handleComposerResize(width: number) {
+    setComposerWidth(width);
+    localStorage.setItem("opencli-composer-width", String(width));
+  }
+
+  function handlePaletteSelect(path: string) {
+    window.location.hash = buildCommandHash(path);
+  }
+
   if (loadState.status !== "ready" || !document) {
     return (
       <ImportScreen
@@ -169,6 +229,24 @@ export function InSpectreApp() {
             accept=".json,.xml"
             onChange={(event) => void handleFiles(Array.from(event.target.files ?? []))}
           />
+
+          <button type="button" className="toolbar-button" onClick={() => setPaletteOpen(true)} title="Search commands (Ctrl+K)">
+            <Search aria-hidden="true" />
+            <span>Search</span>
+            <kbd className="kbd-hint">Ctrl K</kbd>
+          </button>
+
+          <button
+            type="button"
+            className={`toolbar-button${composerOpen ? " active" : ""}`}
+            onClick={toggleComposer}
+            title="Toggle Composer"
+          >
+            {composerOpen ? <PanelRightClose aria-hidden="true" /> : <PanelRight aria-hidden="true" />}
+            <span>Composer</span>
+          </button>
+
+          <ThemeToggle />
         </div>
       </header>
 
@@ -176,11 +254,13 @@ export function InSpectreApp() {
         <aside className="sidebar">
           <div className="sidebar-search">
             <input
+              ref={searchInputRef}
               type="search"
               placeholder="Filter commands…"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
+            <kbd className="kbd-hint sidebar-kbd">Ctrl F</kbd>
           </div>
           <nav className="sidebar-nav">
             <button
@@ -239,7 +319,23 @@ export function InSpectreApp() {
             )}
           </div>
         </main>
+
+        {composerOpen && (
+          <ComposerPanel
+            command={activeCommand}
+            cliTitle={document.source.info.title || "cli"}
+            width={composerWidth}
+            onResize={handleComposerResize}
+          />
+        )}
       </div>
+
+      <CommandPalette
+        commands={document.commands}
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onSelect={handlePaletteSelect}
+      />
     </div>
   );
 }
