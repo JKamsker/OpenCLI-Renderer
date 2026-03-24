@@ -57,6 +57,7 @@ describe("InSpectraUI NuGet mode", () => {
         entryPoint: "demo.dll",
         targetFramework: "net10.0",
         hasPackagedOpenCli: false,
+        documentSource: "static-spectre",
         confidence: "partial",
       },
     });
@@ -77,6 +78,8 @@ describe("InSpectraUI NuGet mode", () => {
     });
 
     expect(await screen.findByText("NuGet Tool Probe")).toBeInTheDocument();
+    expect(screen.getAllByText("Static Spectre recovery").length).toBeGreaterThan(0);
+    expect(screen.getByText("No tool code executed. The package was downloaded and inspected in the browser.")).toBeInTheDocument();
     expect(await screen.findAllByText("demo")).not.toHaveLength(0);
     expect(screen.getByText("Static Spectre probe.")).toBeInTheDocument();
   });

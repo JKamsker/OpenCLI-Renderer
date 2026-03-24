@@ -10,6 +10,7 @@ export interface ProbePackageSummary {
   entryPoint?: string;
   targetFramework?: string;
   hasPackagedOpenCli: boolean;
+  documentSource: string;
   confidence: string;
 }
 
@@ -28,6 +29,7 @@ export interface ProbePackageResult {
     entryPoint?: string;
     targetFramework?: string;
     hasPackagedOpenCli: boolean;
+    documentSource: string;
   };
   document?: OpenCliDocument;
 }

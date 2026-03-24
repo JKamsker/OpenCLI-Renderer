@@ -47,9 +47,15 @@ export function NugetToolPanel({ loading, onInspect }: NugetToolPanelProps) {
       <div className="eyebrow">NuGet Tool</div>
       <h2>Inspect a published .NET tool without leaving the browser.</h2>
       <p className="lede">
-        Search NuGet.org, download the package locally, and build a best-effort UI from static Spectre.Console.Cli
-        metadata. No server-side execution is involved.
+        Search NuGet.org, download the package locally, and inspect it entirely in the browser. This mode only works
+        when the package bundles <code>opencli.json</code> or exposes a statically recoverable
+        <code> Spectre.Console.Cli </code> command graph.
       </p>
+      <ul className="nuget-contract-list">
+        <li>No backend and no remote execution.</li>
+        <li>No tool code execution inside the browser.</li>
+        <li>Best results come from packaged OpenCLI snapshots.</li>
+      </ul>
 
       <form className="nuget-search" onSubmit={handleSearch}>
         <label className="nuget-field">

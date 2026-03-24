@@ -124,7 +124,7 @@ The bundled viewer supports three boot paths:
 - injected inline data from the renderer
 - URL-driven loading with `?opencli=...`, `?xmldoc=...`, or `?dir=...`
 - manual import by dropping or picking `opencli.json` and optional `xmldoc.xml`
-- a `NuGet Tool` mode that searches NuGet.org, downloads a `.nupkg` in-browser, and runs a static Spectre.Console.Cli probe
+- a `NuGet Tool` mode that searches NuGet.org, downloads a `.nupkg` in-browser, and either reads a bundled `opencli.json` or runs a static Spectre.Console.Cli probe
 
 Other viewer features:
 
@@ -160,6 +160,8 @@ XML metadata ──┴─> validate -> enrich -> normalize -> render -> write
 - injected HTML output defaults to inline bootstrap mode
 - internal links-mode support remains available for hosted scenarios
 - the hosted `/try/` viewer also ships `dist/probe/**`, a browser-side WebAssembly probe used for static NuGet tool inspection
+- NuGet mode is browser-only and backend-free: it never executes downloaded tool code
+- NuGet mode only succeeds when the package bundles `opencli.json` or the browser probe can statically recover a Spectre command graph
 
 ### Bundle resolution
 

@@ -12,7 +12,10 @@ export async function loadFromNugetTool(request: NugetToolRequest, options: View
   const packageBytes = await downloadNugetPackage(request.id, request.version);
   const result = await probePackage(packageBytes);
   if (!result.document) {
-    throw new Error(result.error ?? "The package probe did not produce an OpenCLI document.");
+    throw new Error(
+      result.error ??
+        "The package does not bundle opencli.json and could not be recovered from browser-side static Spectre.Console.Cli analysis.",
+    );
   }
 
   return createLoadedSource({

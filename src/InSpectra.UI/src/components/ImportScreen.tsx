@@ -155,7 +155,7 @@ export function ImportScreen({
             <FileCode2 aria-hidden="true" />
           </div>
           <h2>Static inspection</h2>
-          <p>NuGet mode downloads the package in-browser and inspects Spectre.Console.Cli metadata without executing the tool on a server.</p>
+          <p>NuGet mode downloads the package in-browser and either reads a bundled OpenCLI snapshot or performs static Spectre inspection. No tool code is executed.</p>
         </article>
       </section>
     </main>
