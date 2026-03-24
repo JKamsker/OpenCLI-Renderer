@@ -92,6 +92,9 @@ public class RequestAndOutputContractTests
             Assert.True(json!["ok"]!.GetValue<bool>());
             Assert.Equal("html", json["data"]!["format"]!.GetValue<string>());
             Assert.Equal("app", json["data"]!["layout"]!.GetValue<string>());
+            var files = json["data"]!["output"]!["files"]!.AsArray();
+            var file = Assert.Single(files);
+            Assert.Equal("index.html", file!["relativePath"]!.GetValue<string>());
             Assert.Equal(1, json["meta"]!["schemaVersion"]!.GetValue<int>());
         }
         finally

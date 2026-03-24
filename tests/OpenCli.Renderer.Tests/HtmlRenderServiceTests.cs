@@ -90,6 +90,42 @@ public class HtmlRenderServiceTests
         Assert.Contains("auth", index);
     }
 
+    [Fact]
+    public async Task Dry_run_plans_bundle_files_without_writing_output()
+    {
+        using var temp = new TempDirectory();
+        var bundleRoot = CreateBundle(temp.Path, "packaged");
+        var service = CreateHtmlRenderService(new ViewerBundleLocatorOptions
+        {
+            PackagedRootPath = bundleRoot,
+        });
+
+        var outputDirectory = Path.Combine(temp.Path, "html");
+        var request = new FileRenderRequest(
+            FixturePaths.OpenCliJson,
+            FixturePaths.XmlDoc,
+            new RenderExecutionOptions(
+                RenderLayout.App,
+                ResolvedOutputMode.Human,
+                DryRun: true,
+                Quiet: false,
+                Verbose: false,
+                NoColor: false,
+                IncludeHidden: false,
+                IncludeMetadata: false,
+                Overwrite: false,
+                OutputFile: null,
+                OutputDirectory: outputDirectory));
+
+        var result = await service.RenderFromFileAsync(request, CancellationToken.None);
+
+        Assert.True(result.IsDryRun);
+        Assert.Equal(3, result.Files.Count);
+        Assert.DoesNotContain(result.Files, file => file.Content is not null);
+        Assert.False(Directory.Exists(outputDirectory));
+        Assert.Contains("3 files planned", result.Summary);
+    }
+
     private static HtmlRenderService CreateHtmlRenderService(ViewerBundleLocatorOptions options)
     {
         return new HtmlRenderService(
