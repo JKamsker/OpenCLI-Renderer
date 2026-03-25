@@ -54,7 +54,10 @@ export function InSpectraApp() {
   const deferredSearch = useDeferredValue(searchTerm);
 
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [composerOpen, setComposerOpen] = useState(() => readBool("inspectra-composer-open", true));
+  const [composerOpen, setComposerOpen] = useState(() => {
+    const isMobile = window.innerWidth <= 768;
+    return isMobile ? false : readBool("inspectra-composer-open", true);
+  });
   const [composerWidth, setComposerWidth] = useState(() => readNumber("inspectra-composer-width", 304));
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileSidebarSearch, setMobileSidebarSearch] = useState(false);
