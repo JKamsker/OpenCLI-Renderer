@@ -530,7 +530,7 @@ code {
   }
 }
 
-@keyframes composerSlideIn {
+@keyframes composer-slide-in {
   from {
     transform: translateX(100%);
   }
@@ -1539,6 +1539,10 @@ code {
   .composer {
     display: none;
   }
+
+  .toolbar-button.composer-toggle {
+    display: none;
+  }
 }
 
 /* ── Responsive: Mobile ────────────────────── */
@@ -1584,7 +1588,15 @@ code {
   }
 
   .toolbar-button span {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
   }
 
   .toolbar-button .kbd-hint {
@@ -1740,7 +1752,7 @@ code {
     box-shadow:
       -4px 0 24px rgba(0, 0, 0, 0.12),
       -1px 0 4px rgba(0, 0, 0, 0.06);
-    animation: composerSlideIn 0.25s var(--ease);
+    animation: composer-slide-in 0.25s var(--ease);
   }
 
   [data-theme="dark"] .composer {

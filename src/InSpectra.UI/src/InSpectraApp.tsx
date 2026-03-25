@@ -211,10 +211,7 @@ export function InSpectraApp() {
           className="mobile-menu-btn"
           onClick={() => {
             setMobileSidebarOpen((o) => {
-              if (!o) {
-                setComposerOpen(false);
-                localStorage.setItem("inspectra-composer-open", "false");
-              }
+              if (!o) setComposerOpen(false);
               return !o;
             });
           }}
@@ -269,7 +266,7 @@ export function InSpectraApp() {
 
           <button
             type="button"
-            className={`toolbar-button${composerOpen ? " active" : ""}`}
+            className={`toolbar-button composer-toggle${composerOpen ? " active" : ""}`}
             onClick={toggleComposer}
             title="Toggle Composer"
           >
@@ -290,7 +287,6 @@ export function InSpectraApp() {
               setMobileSidebarSearch(false);
               setSearchTerm("");
               setComposerOpen(false);
-              localStorage.setItem("inspectra-composer-open", "false");
             }}
             aria-hidden="true"
           />
