@@ -20,8 +20,9 @@ export function buildBrowseHash(packageId?: string, version?: string): string {
 }
 
 export function buildPackageHash(packageId: string, version?: string, commandPath?: string): string {
-  const versionSegment = version ? encodeURIComponent(version) : "latest";
-  const base = `#/pkg/${encodeURIComponent(packageId)}/${versionSegment}`;
+  const base = version
+    ? `#/pkg/${encodeURIComponent(packageId)}/${encodeURIComponent(version)}`
+    : `#/pkg/${encodeURIComponent(packageId)}`;
   if (!commandPath) return base;
 
   const segments = commandPath
@@ -65,6 +66,16 @@ export function parseHashRoute(hash: string): HashRoute {
     try {
       const packageId = decodeURIComponent(segments[0]);
 
+      // #/pkg/{id}/command/... — no version, with command path
+      if (segments[1] === "command") {
+        const commandSegments = segments.slice(2);
+        if (commandSegments.length > 0) {
+          const commandPath = commandSegments.map((s) => decodeURIComponent(s)).join(" ");
+          return { kind: "package", packageId, commandPath };
+        }
+        return { kind: "package", packageId };
+      }
+
       // #/pkg/{id} — no version, use latest
       if (segments.length === 1) {
         return { kind: "package", packageId };
@@ -74,10 +85,9 @@ export function parseHashRoute(hash: string): HashRoute {
       const rawVersion = decodeURIComponent(segments[1]);
       const version = rawVersion.toLowerCase() === "latest" ? undefined : rawVersion;
 
-      // Check for /command/... after packageId[/version]
-      const commandIdx = segments.indexOf("command", 2);
-      if (commandIdx >= 0) {
-        const commandSegments = segments.slice(commandIdx + 1);
+      // Check for /command/... after packageId/version
+      if (segments[2] === "command") {
+        const commandSegments = segments.slice(3);
         if (commandSegments.length > 0) {
           const commandPath = commandSegments.map((s) => decodeURIComponent(s)).join(" ");
           return { kind: "package", packageId, version, commandPath };
