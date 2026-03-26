@@ -1,9 +1,8 @@
 import {
   Eye,
   EyeOff,
-  FileUp,
+  Home,
   Menu,
-  Package,
   PanelRight,
   PanelRightClose,
   Search,
@@ -22,7 +21,7 @@ import { NugetBrowser } from "./components/NugetBrowser";
 import { OverviewPanel } from "./components/OverviewPanel";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { loadFromFiles, loadFromStartupRequest, loadFromUrls, LoadedSource } from "./data/loadSource";
-import { buildBrowseHash, buildCommandHash, HashRoute, parseHashRoute } from "./data/navigation";
+import { buildCommandHash, HashRoute, parseHashRoute } from "./data/navigation";
 import { findCommandByPath, normalizeOpenCliDocument, NormalizedCliDocument } from "./data/normalize";
 
 interface LoadState {
@@ -43,7 +42,6 @@ function readNumber(key: string, fallback: number): number {
 }
 
 export function InSpectraApp() {
-  const pickerRef = useRef<HTMLInputElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading", message: "Resolving viewer boot mode." });
   const [error, setError] = useState<string | null>(null);
@@ -285,31 +283,18 @@ export function InSpectraApp() {
             <span>{viewerOptions.includeMetadata ? "Hide metadata" : "Show metadata"}</span>
           </button> */}
 
-          <button type="button" className="toolbar-button" onClick={() => pickerRef.current?.click()}>
-            <FileUp aria-hidden="true" />
-            <span>Import</span>
-          </button>
-
           <button
             type="button"
             className="toolbar-button"
-            onClick={() => { window.location.hash = buildBrowseHash(); }}
-            title="Browse NuGet tools"
-          >
-            <Package aria-hidden="true" />
-            <span>Browse</span>
-          </button>
-          <input
-            ref={pickerRef}
-            className="visually-hidden"
-            type="file"
-            multiple
-            accept=".json,.xml"
-            onChange={(event) => {
-              void handleFiles(Array.from(event.target.files ?? []));
-              event.target.value = "";
+            onClick={() => {
+              setLoadState({ status: "empty" });
+              window.location.hash = "#/";
             }}
-          />
+            title="Back to start"
+          >
+            <Home aria-hidden="true" />
+            <span>Home</span>
+          </button>
 
           <button type="button" className="toolbar-button" onClick={() => setPaletteOpen(true)} title="Search commands (Ctrl+K)">
             <Search aria-hidden="true" />
