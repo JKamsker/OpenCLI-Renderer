@@ -1440,6 +1440,142 @@ code {
   }
 }
 
+/* ── Package loading screen ────────────────── */
+
+.pkg-loading-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 2rem;
+  background:
+    radial-gradient(ellipse at 30% 20%, var(--accent-glow), transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(124, 58, 237, 0.04), transparent 50%),
+    var(--bg);
+}
+
+.pkg-loading-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 22rem;
+  animation: pkgCardIn 0.5s var(--ease-out) both;
+}
+
+@keyframes pkgCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pkg-loading-terminal {
+  padding: 1rem 1.15rem 1.15rem;
+  border-radius: 0.65rem;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.pkg-loading-dots {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pkg-loading-dots span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--soft);
+  opacity: 0.5;
+}
+
+.pkg-loading-dots span:nth-child(1) { background: #ef4444; opacity: 0.7; }
+.pkg-loading-dots span:nth-child(2) { background: #eab308; opacity: 0.7; }
+.pkg-loading-dots span:nth-child(3) { background: #22c55e; opacity: 0.7; }
+
+.pkg-loading-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.pkg-loading-caret {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.pkg-loading-cmd {
+  color: var(--code-text);
+}
+
+.pkg-loading-flag {
+  color: var(--soft);
+}
+
+.pkg-loading-bar-track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.pkg-loading-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), #a78bfa, var(--accent));
+  background-size: 200% 100%;
+  animation: pkgBarSlide 1.8s ease-in-out infinite;
+}
+
+@keyframes pkgBarSlide {
+  0% {
+    width: 0%;
+    background-position: 0% 0;
+  }
+  50% {
+    width: 70%;
+    background-position: 100% 0;
+  }
+  100% {
+    width: 100%;
+    background-position: 0% 0;
+  }
+}
+
+.pkg-loading-info {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.pkg-loading-label {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 14rem;
+}
+
+.pkg-loading-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 /* ── Toolbar active state ──────────────────── */
 
 .toolbar-button.active {

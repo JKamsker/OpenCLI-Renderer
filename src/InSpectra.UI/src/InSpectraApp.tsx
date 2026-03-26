@@ -18,6 +18,7 @@ import { CommandTree } from "./components/CommandTree";
 import { ComposerPanel } from "./components/ComposerPanel";
 import { ImportScreen } from "./components/ImportScreen";
 import { NugetBrowser } from "./components/NugetBrowser";
+import { PackageLoadingScreen } from "./components/PackageLoadingScreen";
 import { OverviewPanel } from "./components/OverviewPanel";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { loadFromFiles, loadFromStartupRequest, loadFromUrls, LoadedSource } from "./data/loadSource";
@@ -167,8 +168,9 @@ export function InSpectraApp() {
       // No bootstrap/query source — check if route wants a package
       const initialRoute = parseHashRoute(window.location.hash);
       if (initialRoute.kind === "package") {
-        // The package-route effect will handle loading
-        setLoadState({ status: "empty" });
+        // Keep loading state so the package-loading screen stays visible
+        // until the package-route effect takes over.
+        setLoadState({ status: "loading", message: `Loading ${initialRoute.packageId}${initialRoute.version ? ` v${initialRoute.version}` : ""}` });
         return;
       }
 
@@ -317,10 +319,14 @@ export function InSpectraApp() {
   }
 
   if (loadState.status !== "ready" || !document) {
+    if (loadState.status === "loading") {
+      return <PackageLoadingScreen message={loadState.message} />;
+    }
+
     return (
       <ImportScreen
         error={error}
-        loading={loadState.status === "loading"}
+        loading={false}
         onFilesSelected={handleFiles}
         showUpload={featureFlags.packageUpload}
         showNugetBrowser={featureFlags.nugetBrowser}
