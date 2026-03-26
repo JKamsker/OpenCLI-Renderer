@@ -40,7 +40,7 @@ function TreeNode({
   selectedPath?: string;
   onSelect: (path: string) => void;
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const matches = matchesCommand(command, normalizedSearch);
 
