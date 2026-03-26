@@ -1,3 +1,5 @@
+import { toMessage } from "../utils";
+
 export interface OpenCliDocument {
   opencli: string;
   info: OpenCliInfo;
@@ -284,6 +286,3 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function toMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error.";
-}

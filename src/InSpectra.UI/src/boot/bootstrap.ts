@@ -1,3 +1,4 @@
+import { toMessage } from "../utils";
 import { defaultFeatureFlags, defaultViewerOptions, disabledFeatureFlags, FeatureFlags, InSpectraBootstrap, ViewerOptions } from "./contracts";
 import { resolveViewerLinks, resolveViewerLinksFromSearch, ViewerLinks } from "./urlParams";
 
@@ -116,6 +117,3 @@ function readFeatures(features: Partial<FeatureFlags> | undefined, hasBootstrap:
   };
 }
 
-function toMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error.";
-}

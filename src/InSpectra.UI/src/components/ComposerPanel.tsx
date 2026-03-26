@@ -1,7 +1,8 @@
-import { Check, Copy, Terminal } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatOptionValue, NormalizedCommand } from "../data/normalize";
 import type { OpenCliArgument, OpenCliOption } from "../data/openCli";
+import { CopyButton } from "./CopyButton";
 
 interface ComposerPanelProps {
   command: NormalizedCommand | undefined;
@@ -16,7 +17,6 @@ export function ComposerPanel({ command, cliTitle, width, onResize, rootArgument
   const [flagValues, setFlagValues] = useState<Record<string, boolean>>({});
   const [textValues, setTextValues] = useState<Record<string, string>>({});
   const [argValues, setArgValues] = useState<Record<string, string>>({});
-  const [copied, setCopied] = useState(false);
   const resizeRef = useRef<HTMLDivElement>(null);
 
   const allOptions = command
@@ -64,16 +64,6 @@ export function ComposerPanel({ command, cliTitle, width, onResize, rootArgument
     }
 
     return parts.join(" ");
-  }
-
-  async function copyCommand() {
-    try {
-      await navigator.clipboard.writeText(buildPreview());
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* clipboard unavailable */
-    }
   }
 
   function handleResizeStart(e: React.MouseEvent) {
@@ -193,9 +183,7 @@ export function ComposerPanel({ command, cliTitle, width, onResize, rootArgument
         <span className="composer-label">Generated Command</span>
         <div className="composer-output-wrap">
           <pre className="composer-output">{buildPreview()}</pre>
-          <button type="button" className="composer-copy" onClick={copyCommand} title="Copy command">
-            {copied ? <Check /> : <Copy />}
-          </button>
+          <CopyButton text={buildPreview()} className="composer-copy" title="Copy command" />
         </div>
       </div>
     </aside>

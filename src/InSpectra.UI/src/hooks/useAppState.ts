@@ -1,4 +1,5 @@
 import { startTransition, useDeferredValue, useEffect, useRef, useState } from "react";
+import { toMessage } from "../utils";
 import { resolveStartupRequest } from "../boot/bootstrap";
 import { defaultFeatureFlags, defaultViewerOptions, FeatureFlags, ViewerOptions } from "../boot/contracts";
 import { loadFromFiles, loadFromStartupRequest, loadFromUrls, LoadedSource } from "../data/loadSource";
@@ -21,10 +22,6 @@ function readNumber(key: string, fallback: number): number {
   if (v === null) return fallback;
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
-}
-
-function toMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error.";
 }
 
 export function useAppState() {

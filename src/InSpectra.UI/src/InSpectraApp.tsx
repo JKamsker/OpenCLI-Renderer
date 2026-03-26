@@ -54,10 +54,7 @@ export function InSpectraApp() {
     );
   }
 
-  const commandPath =
-    route.kind === "command" ? route.commandPath :
-    route.kind === "package" ? route.commandPath :
-    undefined;
+  const commandPath = route.kind === "command" || route.kind === "package" ? route.commandPath : undefined;
   const activeCommand = findCommandByPath(document.commands, commandPath);
   const isEmptyPackage =
     document.commands.length === 0 &&

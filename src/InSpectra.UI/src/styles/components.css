@@ -1,0 +1,423 @@
+/* ── Panels ─────────────────────────────────── */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  font-size: 0.65rem;
+  color: var(--accent);
+}
+
+.lede {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ── Hero sections ──────────────────────────── */
+
+.hero-band,
+.command-hero {
+  padding: 1.75rem;
+  background:
+    radial-gradient(ellipse at 5% 15%, rgba(6, 182, 212, 0.06), transparent 45%),
+    radial-gradient(ellipse at 95% 85%, rgba(124, 58, 237, 0.03), transparent 45%),
+    var(--surface);
+  overflow: hidden;
+}
+
+.hero-band h1,
+.command-hero h1 {
+  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0.1rem 0 0;
+  font-family: var(--mono);
+}
+
+/* ── Empty package state ────────────────────── */
+
+.empty-package {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 50vh;
+}
+
+.empty-package-icon {
+  width: 4rem;
+  height: 4rem;
+  color: var(--muted);
+  opacity: 0.45;
+  margin-bottom: 1rem;
+}
+
+.empty-package .lede {
+  max-width: 28rem;
+}
+
+/* ── Stat grid ──────────────────────────────── */
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  margin-top: 1.2rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 0.95rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.stat-card span {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 0.2rem;
+}
+
+/* ── Sections ───────────────────────────────── */
+
+.section-card {
+  padding: 1.75rem;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.section-heading h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.section-heading svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+/* ── Breadcrumbs ────────────────────────────── */
+
+.breadcrumb-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  width: max-content;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.crumb svg {
+  width: 0.65rem;
+  height: 0.65rem;
+  color: var(--soft);
+}
+
+.crumb span {
+  color: var(--muted);
+  transition: color 0.12s;
+}
+
+.crumb strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Badges / Chips ─────────────────────────── */
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.8rem;
+}
+
+.info-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.5rem;
+  border-radius: 0.28rem;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: var(--mono);
+}
+
+.info-chip.subtle {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+/* ── Detail grid & option cards ─────────────── */
+
+.detail-grid {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.detail-card {
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+
+.detail-card:hover {
+  border-color: var(--accent-border);
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.detail-card.clickable {
+  cursor: pointer;
+}
+
+.detail-card.clickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 20px var(--accent-glow);
+}
+
+.detail-card strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.detail-card p {
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.7;
+}
+
+.detail-card small {
+  display: block;
+  padding: 0 0.9rem 0.6rem;
+  font-size: 0.72rem;
+  color: var(--soft);
+}
+
+/* ── Command cards ──────────────────────────── */
+
+.command-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.45rem;
+}
+
+.command-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), border-color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+  width: 100%;
+  text-align: left;
+}
+
+.command-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 20px var(--accent-glow);
+}
+
+.command-card strong {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+.command-card span {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.command-card small {
+  display: none;
+}
+
+/* ── Examples ───────────────────────────────── */
+
+.example-stack {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.example-wrap {
+  position: relative;
+}
+
+.example-block {
+  margin: 0;
+  padding: 0.9rem 2.5rem 0.9rem 1rem;
+  border-radius: 0.55rem;
+  background: var(--code-bg);
+  color: var(--code-text);
+  overflow: auto;
+  font-size: 0.8rem;
+  border: 1px solid var(--code-border);
+}
+
+.example-copy {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--soft);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.example-copy:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.example-copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Buttons ────────────────────────────────── */
+
+.link-button {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+  width: fit-content;
+  margin-top: 0.6rem;
+}
+
+.link-button:hover {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-glow);
+}
+
+.secondary-button {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s var(--ease);
+}
+
+.secondary-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.secondary-button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+/* ── Warning banner ─────────────────────────── */
+
+.warning-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--red-border);
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.warning-banner p {
+  margin: 0;
+  font-size: 0.85rem;
+}
