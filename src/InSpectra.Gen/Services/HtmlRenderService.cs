@@ -14,23 +14,26 @@ public sealed class HtmlRenderService(
 
     public async Task<RenderExecutionResult> RenderFromFileAsync(
         FileRenderRequest request,
+        HtmlFeatureFlags features,
         CancellationToken cancellationToken)
     {
         var prepared = await documentService.LoadFromFileAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, cancellationToken);
+        return await RenderAsync(prepared, request.Options, features, cancellationToken);
     }
 
     public async Task<RenderExecutionResult> RenderFromExecAsync(
         ExecRenderRequest request,
+        HtmlFeatureFlags features,
         CancellationToken cancellationToken)
     {
         var prepared = await documentService.LoadFromExecAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, cancellationToken);
+        return await RenderAsync(prepared, request.Options, features, cancellationToken);
     }
 
     private async Task<RenderExecutionResult> RenderAsync(
         AcquiredRenderDocument prepared,
         RenderExecutionOptions options,
+        HtmlFeatureFlags features,
         CancellationToken cancellationToken)
     {
         var outputDirectory = options.OutputDirectory
@@ -62,7 +65,7 @@ public sealed class HtmlRenderService(
 
         OutputPathHelper.PrepareDirectory(outputDirectory, options.Overwrite);
 
-        var bootstrapJson = BuildInlineBootstrap(prepared, options.IncludeHidden, options.IncludeMetadata);
+        var bootstrapJson = BuildInlineBootstrap(prepared, options.IncludeHidden, options.IncludeMetadata, features);
         var writtenFiles = new List<RenderedFile>();
         foreach (var file in bundleFiles)
         {
@@ -116,7 +119,8 @@ public sealed class HtmlRenderService(
     private static string BuildInlineBootstrap(
         AcquiredRenderDocument prepared,
         bool includeHidden,
-        bool includeMetadata)
+        bool includeMetadata,
+        HtmlFeatureFlags features)
     {
         var payload = new InlineBootstrap
         {
@@ -127,6 +131,16 @@ public sealed class HtmlRenderService(
             {
                 IncludeHidden = includeHidden,
                 IncludeMetadata = includeMetadata,
+            },
+            Features = new FeatureFlagsPayload
+            {
+                ShowHome = features.ShowHome,
+                Composer = features.Composer,
+                DarkTheme = features.DarkTheme,
+                LightTheme = features.LightTheme,
+                UrlLoading = features.UrlLoading,
+                NugetBrowser = features.NugetBrowser,
+                PackageUpload = features.PackageUpload,
             },
         };
 
@@ -143,6 +157,8 @@ public sealed class HtmlRenderService(
         public string? XmlDoc { get; init; }
 
         public required ViewerOptionsPayload Options { get; init; }
+
+        public required FeatureFlagsPayload Features { get; init; }
     }
 
     private sealed class ViewerOptionsPayload
@@ -150,5 +166,22 @@ public sealed class HtmlRenderService(
         public required bool IncludeHidden { get; init; }
 
         public required bool IncludeMetadata { get; init; }
+    }
+
+    private sealed class FeatureFlagsPayload
+    {
+        public required bool ShowHome { get; init; }
+
+        public required bool Composer { get; init; }
+
+        public required bool DarkTheme { get; init; }
+
+        public required bool LightTheme { get; init; }
+
+        public required bool UrlLoading { get; init; }
+
+        public required bool NugetBrowser { get; init; }
+
+        public required bool PackageUpload { get; init; }
     }
 }

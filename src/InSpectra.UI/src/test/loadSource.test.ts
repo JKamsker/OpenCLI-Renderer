@@ -1,4 +1,4 @@
-import { defaultViewerOptions } from "../boot/contracts";
+import { defaultFeatureFlags, defaultViewerOptions } from "../boot/contracts";
 import { loadFromStartupRequest } from "../data/loadSource";
 import { testDocument, testXmlDoc } from "./fixtures";
 
@@ -34,6 +34,7 @@ describe("startup loading", () => {
         xmlDocIsOptional: true,
       },
       options: defaultViewerOptions(),
+      features: defaultFeatureFlags(),
       source: "query",
     });
 
@@ -69,6 +70,7 @@ describe("startup loading", () => {
         xmlDocIsOptional: false,
       },
       options: defaultViewerOptions(),
+      features: defaultFeatureFlags(),
       source: "query",
     })).rejects.toThrow(`Failed to load ${xmlDocUrl}: 404 Not Found`);
   });

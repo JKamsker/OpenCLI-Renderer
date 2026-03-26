@@ -9,6 +9,7 @@ public sealed class ExecHtmlCommand(HtmlRenderService renderService) : AsyncComm
     public override Task<int> ExecuteAsync(CommandContext context, ExecHtmlSettings settings, CancellationToken cancellationToken)
     {
         var options = RenderRequestFactory.CreateHtmlOptions(settings, null, null, settings.OutputDirectory, settings.TimeoutSeconds, hasTimeoutSupport: true);
+        var features = RenderRequestFactory.CreateHtmlFeatureFlags(settings);
         var workingDirectory = RenderRequestFactory.ResolveWorkingDirectory(settings.WorkingDirectory);
         var request = new ExecRenderRequest(
             settings.Source,
@@ -23,7 +24,7 @@ public sealed class ExecHtmlCommand(HtmlRenderService renderService) : AsyncComm
         return CommandOutputHandler.ExecuteAsync(
             options.OutputMode,
             options.Verbose,
-            () => renderService.RenderFromExecAsync(request, cancellationToken));
+            () => renderService.RenderFromExecAsync(request, features, cancellationToken));
     }
 }
 

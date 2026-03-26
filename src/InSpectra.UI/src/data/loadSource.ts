@@ -1,4 +1,4 @@
-import { ViewerOptions } from "../boot/contracts";
+import { defaultFeatureFlags, FeatureFlags, ViewerOptions } from "../boot/contracts";
 import { StartupRequest } from "../boot/bootstrap";
 import { cloneOpenCliDocument, OpenCliDocument, parseOpenCliDocument } from "./openCli";
 import { enrichDocumentFromXml } from "./xmlDoc";
@@ -8,6 +8,7 @@ export interface LoadedSource {
   xmlDoc?: string;
   warnings: string[];
   options: ViewerOptions;
+  features: FeatureFlags;
   label: string;
   mode: "inline" | "links" | "manual";
 }
@@ -25,6 +26,7 @@ export async function loadFromStartupRequest(
       document: parseOpenCliDocument(JSON.stringify(request.openCli)),
       xmlDoc: request.xmlDoc,
       options: request.options,
+      features: request.features,
       label: "Injected bootstrap",
       mode: "inline",
     });
@@ -39,12 +41,13 @@ export async function loadFromStartupRequest(
     document: parseOpenCliDocument(openCliText),
     xmlDoc: xmlDocText,
     options: request.options,
+    features: request.features,
     label: request.source === "bootstrap" ? "Injected links" : "URL parameters",
     mode: "links",
   });
 }
 
-export async function loadFromFiles(files: File[], options: ViewerOptions): Promise<LoadedSource> {
+export async function loadFromFiles(files: File[], options: ViewerOptions, features: FeatureFlags): Promise<LoadedSource> {
   const validated = validateFiles(files);
   const openCliText = await validated.openCli.text();
   const xmlDocText = validated.xmlDoc ? await validated.xmlDoc.text() : undefined;
@@ -53,6 +56,7 @@ export async function loadFromFiles(files: File[], options: ViewerOptions): Prom
     document: parseOpenCliDocument(openCliText),
     xmlDoc: xmlDocText,
     options,
+    features,
     label: "Manual import",
     mode: "manual",
   });
@@ -63,6 +67,7 @@ export async function loadFromUrls(
   xmldocUrl: string,
   options: ViewerOptions,
   label: string,
+  features: FeatureFlags,
 ): Promise<LoadedSource> {
   const openCliText = await fetchRequiredText(opencliUrl);
   const xmlDocText = await fetchText(xmldocUrl, true);
@@ -71,6 +76,7 @@ export async function loadFromUrls(
     document: parseOpenCliDocument(openCliText),
     xmlDoc: xmlDocText,
     options,
+    features,
     label,
     mode: "links",
   });
@@ -114,6 +120,7 @@ function buildLoadedSource(params: {
   document: OpenCliDocument;
   xmlDoc?: string;
   options: ViewerOptions;
+  features: FeatureFlags;
   label: string;
   mode: LoadedSource["mode"];
 }): LoadedSource {
@@ -130,6 +137,7 @@ function buildLoadedSource(params: {
     xmlDoc: params.xmlDoc,
     warnings,
     options: params.options,
+    features: params.features,
     label: params.label,
     mode: params.mode,
   };

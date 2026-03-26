@@ -6,6 +6,15 @@ namespace InSpectra.Gen.Tests;
 
 public class HtmlRenderServiceTests
 {
+    private static readonly HtmlFeatureFlags DefaultFeatures = new(
+        ShowHome: false,
+        Composer: true,
+        DarkTheme: true,
+        LightTheme: true,
+        UrlLoading: false,
+        NugetBrowser: false,
+        PackageUpload: false);
+
     [Fact]
     public async Task File_render_writes_bundle_and_injects_inline_bootstrap()
     {
@@ -33,7 +42,7 @@ public class HtmlRenderServiceTests
                 OutputFile: null,
                 OutputDirectory: outputDirectory));
 
-        var result = await service.RenderFromFileAsync(request, CancellationToken.None);
+        var result = await service.RenderFromFileAsync(request, DefaultFeatures, CancellationToken.None);
 
         var indexPath = Path.Combine(outputDirectory, "index.html");
         var index = await File.ReadAllTextAsync(indexPath);
@@ -81,7 +90,7 @@ public class HtmlRenderServiceTests
                 OutputFile: null,
                 OutputDirectory: outputDirectory));
 
-        var result = await service.RenderFromExecAsync(request, CancellationToken.None);
+        var result = await service.RenderFromExecAsync(request, DefaultFeatures, CancellationToken.None);
         var index = await File.ReadAllTextAsync(Path.Combine(outputDirectory, "index.html"));
 
         Assert.Equal("exec", result.Source.Kind);
@@ -117,7 +126,7 @@ public class HtmlRenderServiceTests
                 OutputFile: null,
                 OutputDirectory: outputDirectory));
 
-        var result = await service.RenderFromFileAsync(request, CancellationToken.None);
+        var result = await service.RenderFromFileAsync(request, DefaultFeatures, CancellationToken.None);
 
         Assert.True(result.IsDryRun);
         Assert.Equal(3, result.Files.Count);

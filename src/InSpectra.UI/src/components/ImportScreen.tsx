@@ -6,9 +6,11 @@ interface ImportScreenProps {
   error?: string | null;
   loading: boolean;
   onFilesSelected: (files: File[]) => void;
+  showUpload?: boolean;
+  showNugetBrowser?: boolean;
 }
 
-export function ImportScreen({ error, loading, onFilesSelected }: ImportScreenProps) {
+export function ImportScreen({ error, loading, onFilesSelected, showUpload = true, showNugetBrowser = true }: ImportScreenProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -34,65 +36,67 @@ export function ImportScreen({ error, loading, onFilesSelected }: ImportScreenPr
           command graph locally with relocatable static assets.
         </p>
 
-        <div
-          className={`import-dropzone ${isDragging ? "dragging" : ""}`}
-          role="button"
-          tabIndex={0}
-          aria-label="Import OpenCLI snapshot"
-          onClick={openPicker}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              openPicker();
-            }
-          }}
-          onDragEnter={(event) => {
-            event.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragOver={(event) => {
-            event.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={(event) => {
-            event.preventDefault();
-            if (event.currentTarget === event.target) {
-              setIsDragging(false);
-            }
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            setIsDragging(false);
-            handleFiles(event.dataTransfer.files);
-          }}
-        >
-          <div className="dropzone-icon">
-            {loading ? <LoaderCircle className="spin" aria-hidden="true" /> : <Upload aria-hidden="true" />}
-          </div>
-          <div className="dropzone-copy">
-            <strong>{loading ? "Loading snapshot" : "Drop your files here"}</strong>
-            <span>
-              {loading
-                ? "Parsing OpenCLI and applying XML enrichment."
-                : "Choose one or two files: opencli.json and optional xmldoc.xml."}
-            </span>
-          </div>
-          <button type="button" className="secondary-button" disabled={loading}>
-            {loading ? "Working…" : "Pick files"}
-          </button>
-          <input
-            ref={inputRef}
-            aria-label="OpenCLI files"
-            className="visually-hidden"
-            type="file"
-            multiple
-            accept=".json,.xml"
-            onChange={(event) => {
-              handleFiles(event.target.files);
-              event.target.value = "";
+        {showUpload && (
+          <div
+            className={`import-dropzone ${isDragging ? "dragging" : ""}`}
+            role="button"
+            tabIndex={0}
+            aria-label="Import OpenCLI snapshot"
+            onClick={openPicker}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openPicker();
+              }
             }}
-          />
-        </div>
+            onDragEnter={(event) => {
+              event.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={(event) => {
+              event.preventDefault();
+              if (event.currentTarget === event.target) {
+                setIsDragging(false);
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              setIsDragging(false);
+              handleFiles(event.dataTransfer.files);
+            }}
+          >
+            <div className="dropzone-icon">
+              {loading ? <LoaderCircle className="spin" aria-hidden="true" /> : <Upload aria-hidden="true" />}
+            </div>
+            <div className="dropzone-copy">
+              <strong>{loading ? "Loading snapshot" : "Drop your files here"}</strong>
+              <span>
+                {loading
+                  ? "Parsing OpenCLI and applying XML enrichment."
+                  : "Choose one or two files: opencli.json and optional xmldoc.xml."}
+              </span>
+            </div>
+            <button type="button" className="secondary-button" disabled={loading}>
+              {loading ? "Working…" : "Pick files"}
+            </button>
+            <input
+              ref={inputRef}
+              aria-label="OpenCLI files"
+              className="visually-hidden"
+              type="file"
+              multiple
+              accept=".json,.xml"
+              onChange={(event) => {
+                handleFiles(event.target.files);
+                event.target.value = "";
+              }}
+            />
+          </div>
+        )}
 
         {error ? (
           <p className="inline-alert" role="alert">
@@ -101,20 +105,22 @@ export function ImportScreen({ error, loading, onFilesSelected }: ImportScreenPr
         ) : null}
       </section>
 
-      <section className="import-browse-cta panel">
-        <div className="browse-cta-content">
-          <div className="fact-icon">
-            <Package aria-hidden="true" />
+      {showNugetBrowser && (
+        <section className="import-browse-cta panel">
+          <div className="browse-cta-content">
+            <div className="fact-icon">
+              <Package aria-hidden="true" />
+            </div>
+            <div>
+              <h2>Browse NuGet tools</h2>
+              <p>Explore indexed .NET CLI tool packages and inspect their command structure directly.</p>
+            </div>
           </div>
-          <div>
-            <h2>Browse NuGet tools</h2>
-            <p>Explore indexed .NET CLI tool packages and inspect their command structure directly.</p>
-          </div>
-        </div>
-        <a href={buildBrowseHash()} className="secondary-button browse-cta-btn">
-          Open browser
-        </a>
-      </section>
+          <a href={buildBrowseHash()} className="secondary-button browse-cta-btn">
+            Open browser
+          </a>
+        </section>
+      )}
 
       <section className="import-facts">
         <article className="fact-card panel">

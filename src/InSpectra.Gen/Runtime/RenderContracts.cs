@@ -41,6 +41,15 @@ public sealed record RenderExecutionOptions(
     string? OutputFile,
     string? OutputDirectory);
 
+public sealed record HtmlFeatureFlags(
+    bool ShowHome,
+    bool Composer,
+    bool DarkTheme,
+    bool LightTheme,
+    bool UrlLoading,
+    bool NugetBrowser,
+    bool PackageUpload);
+
 public sealed record FileRenderRequest(
     string OpenCliJsonPath,
     string? XmlDocPath,

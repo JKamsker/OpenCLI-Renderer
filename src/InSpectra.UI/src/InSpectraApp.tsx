@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { startTransition, useDeferredValue, useEffect, useRef, useState } from "react";
 import { resolveStartupRequest } from "./boot/bootstrap";
-import { defaultViewerOptions, ViewerOptions } from "./boot/contracts";
+import { defaultFeatureFlags, defaultViewerOptions, FeatureFlags, ViewerOptions } from "./boot/contracts";
 import { CommandPalette } from "./components/CommandPalette";
 import { CommandPanel } from "./components/CommandPanel";
 import { CommandTree } from "./components/CommandTree";
@@ -49,6 +49,7 @@ export function InSpectraApp() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [sourceLabel, setSourceLabel] = useState<string>("");
   const [viewerOptions, setViewerOptions] = useState<ViewerOptions>(defaultViewerOptions());
+  const [featureFlags, setFeatureFlags] = useState<FeatureFlags>(defaultFeatureFlags());
   const [document, setDocument] = useState<NormalizedCliDocument | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [route, setRoute] = useState<HashRoute>(() => parseHashRoute(window.location.hash));
@@ -141,12 +142,21 @@ export function InSpectraApp() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    if (!featureFlags.darkTheme) {
+      window.document.documentElement.dataset.theme = "light";
+    } else if (!featureFlags.lightTheme) {
+      window.document.documentElement.dataset.theme = "dark";
+    }
+  }, [featureFlags.darkTheme, featureFlags.lightTheme]);
+
   async function initialize(signal: AbortSignal) {
     try {
       const request = resolveStartupRequest({
         search: window.location.search,
         href: window.location.href,
       });
+      setFeatureFlags(request.features);
       const loaded = await loadFromStartupRequest(request, signal);
 
       if (loaded) {
@@ -193,7 +203,7 @@ export function InSpectraApp() {
 
       const urls = resolvePackageUrls(pkg, resolvedVersion);
       const label = `${pkg.packageId} v${resolvedVersion}`;
-      const loaded = await loadFromUrls(urls.opencliUrl, urls.xmldocUrl, viewerOptions, label);
+      const loaded = await loadFromUrls(urls.opencliUrl, urls.xmldocUrl, viewerOptions, label, featureFlags);
 
       applyLoadedSource(loaded);
       setPackageContext({ packageId: pkg.packageId, version: resolvedVersion });
@@ -208,6 +218,7 @@ export function InSpectraApp() {
     setWarnings(source.warnings);
     setSourceLabel(source.label);
     setViewerOptions(source.options);
+    setFeatureFlags(source.features);
     setDocument(normalizeOpenCliDocument(source.document, source.options.includeHidden));
     setSearchTerm("");
     setError(null);
@@ -217,7 +228,7 @@ export function InSpectraApp() {
   async function handleFiles(files: File[]) {
     try {
       setLoadState({ status: "loading", message: "Importing local files." });
-      const loaded = await loadFromFiles(files, viewerOptions);
+      const loaded = await loadFromFiles(files, viewerOptions, featureFlags);
       applyLoadedSource(loaded);
       window.location.hash = "#/";
     } catch (loadError) {
@@ -277,7 +288,7 @@ export function InSpectraApp() {
   async function handleLoadPackage(opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) {
     try {
       setLoadState({ status: "loading", message: `Loading ${label}` });
-      const loaded = await loadFromUrls(opencliUrl, xmldocUrl, viewerOptions, label);
+      const loaded = await loadFromUrls(opencliUrl, xmldocUrl, viewerOptions, label, featureFlags);
       applyLoadedSource(loaded);
       setPackageContext({ packageId, version });
       window.location.hash = buildPackageHash(packageId, version);
@@ -288,6 +299,11 @@ export function InSpectraApp() {
   }
 
   if (route.kind === "browse") {
+    if (!featureFlags.nugetBrowser) {
+      window.location.hash = "#/";
+      return null;
+    }
+
     return (
       <NugetBrowser
         packageId={route.packageId}
@@ -306,6 +322,8 @@ export function InSpectraApp() {
         error={error}
         loading={loadState.status === "loading"}
         onFilesSelected={handleFiles}
+        showUpload={featureFlags.packageUpload}
+        showNugetBrowser={featureFlags.nugetBrowser}
       />
     );
   }
@@ -359,20 +377,22 @@ export function InSpectraApp() {
             <span>{viewerOptions.includeMetadata ? "Hide metadata" : "Show metadata"}</span>
           </button> */}
 
-          <button
-            type="button"
-            className="toolbar-button"
-            onClick={() => {
-              setPackageContext(null);
-              setDocument(null);
-              setLoadState({ status: "empty" });
-              window.location.hash = "#/";
-            }}
-            title="Back to start"
-          >
-            <Home aria-hidden="true" />
-            <span>Home</span>
-          </button>
+          {featureFlags.showHome && (
+            <button
+              type="button"
+              className="toolbar-button"
+              onClick={() => {
+                setPackageContext(null);
+                setDocument(null);
+                setLoadState({ status: "empty" });
+                window.location.hash = "#/";
+              }}
+              title="Back to start"
+            >
+              <Home aria-hidden="true" />
+              <span>Home</span>
+            </button>
+          )}
 
           <button type="button" className="toolbar-button" onClick={() => setPaletteOpen(true)} title="Search commands (Ctrl+K)">
             <Search aria-hidden="true" />
@@ -380,7 +400,7 @@ export function InSpectraApp() {
             <kbd className="kbd-hint">Ctrl K</kbd>
           </button>
 
-          {!isEmptyPackage && (
+          {featureFlags.composer && !isEmptyPackage && (
             <button
               type="button"
               className={`toolbar-button composer-toggle${composerOpen ? " active" : ""}`}
@@ -392,7 +412,7 @@ export function InSpectraApp() {
             </button>
           )}
 
-          <ThemeToggle />
+          {featureFlags.darkTheme && featureFlags.lightTheme && <ThemeToggle />}
         </div>
       </header>
 
@@ -530,7 +550,7 @@ export function InSpectraApp() {
           </div>
         </main>
 
-        {composerOpen && !isEmptyPackage && (
+        {featureFlags.composer && composerOpen && !isEmptyPackage && (
           <ComposerPanel
             command={activeCommand}
             cliTitle={document.source.info.title || "cli"}

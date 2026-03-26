@@ -9,6 +9,7 @@ public sealed class FileHtmlCommand(HtmlRenderService renderService) : AsyncComm
     public override Task<int> ExecuteAsync(CommandContext context, FileHtmlSettings settings, CancellationToken cancellationToken)
     {
         var options = RenderRequestFactory.CreateHtmlOptions(settings, null, null, settings.OutputDirectory, timeoutSeconds: null, hasTimeoutSupport: false);
+        var features = RenderRequestFactory.CreateHtmlFeatureFlags(settings);
         var request = new FileRenderRequest(
             settings.OpenCliJsonPath,
             settings.XmlDocPath,
@@ -17,7 +18,7 @@ public sealed class FileHtmlCommand(HtmlRenderService renderService) : AsyncComm
         return CommandOutputHandler.ExecuteAsync(
             options.OutputMode,
             options.Verbose,
-            () => renderService.RenderFromFileAsync(request, cancellationToken));
+            () => renderService.RenderFromFileAsync(request, features, cancellationToken));
     }
 }
 

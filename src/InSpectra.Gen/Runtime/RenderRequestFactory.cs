@@ -65,6 +65,33 @@ public static class RenderRequestFactory
             NormalizePath(outputDirectory));
     }
 
+    public static HtmlFeatureFlags CreateHtmlFeatureFlags(HtmlCommandSettingsBase settings)
+    {
+        if (settings.NoDark && settings.NoLight)
+        {
+            throw new CliUsageException("`--no-dark` and `--no-light` cannot both be set.");
+        }
+
+        if (settings.EnableNugetBrowser && !settings.ShowHome)
+        {
+            throw new CliUsageException("`--enable-nuget-browser` requires `--show-home`.");
+        }
+
+        if (settings.EnablePackageUpload && !settings.ShowHome)
+        {
+            throw new CliUsageException("`--enable-package-upload` requires `--show-home`.");
+        }
+
+        return new HtmlFeatureFlags(
+            ShowHome: settings.ShowHome,
+            Composer: !settings.NoComposer,
+            DarkTheme: !settings.NoDark,
+            LightTheme: !settings.NoLight,
+            UrlLoading: settings.EnableUrl,
+            NugetBrowser: settings.EnableNugetBrowser,
+            PackageUpload: settings.EnablePackageUpload);
+    }
+
     public static string ResolveWorkingDirectory(string? workingDirectory)
     {
         var resolved = string.IsNullOrWhiteSpace(workingDirectory)
