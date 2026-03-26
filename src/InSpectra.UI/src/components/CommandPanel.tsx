@@ -12,9 +12,10 @@ interface CommandPanelProps {
   command: NormalizedCommand;
   includeMetadata: boolean;
   onCommandSelect: (path: string) => void;
+  deepLinkHash?: string;
 }
 
-export function CommandPanel({ command, includeMetadata, onCommandSelect }: CommandPanelProps) {
+export function CommandPanel({ command, includeMetadata, onCommandSelect, deepLinkHash }: CommandPanelProps) {
   const badges = [
     ...(command.command.interactive ? ["Interactive"] : []),
     ...(command.command.hidden ? ["Hidden"] : []),
@@ -43,7 +44,7 @@ export function CommandPanel({ command, includeMetadata, onCommandSelect }: Comm
               {badge}
             </span>
           ))}
-          <span className="info-chip subtle">Deep link {buildCommandHash(command.path)}</span>
+          <span className="info-chip subtle">Deep link {deepLinkHash ?? buildCommandHash(command.path)}</span>
         </div>
       </section>
 

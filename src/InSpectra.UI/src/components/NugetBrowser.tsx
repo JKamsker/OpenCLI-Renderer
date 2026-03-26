@@ -13,7 +13,7 @@ import { buildBrowseHash } from "../data/navigation";
 interface NugetBrowserProps {
   packageId?: string;
   version?: string;
-  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string) => void;
+  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string) => void;
   onBack: () => void;
 }
 
@@ -205,17 +205,18 @@ function PackageDetail({
 }: {
   pkg: DiscoveryPackage;
   selectedVersion?: string;
-  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string) => void;
+  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string) => void;
 }) {
   const [loadingSpec, setLoadingSpec] = useState(false);
   const activeVersion = selectedVersion || pkg.latestVersion;
   const versionInfo = pkg.versions.find((v) => v.version === activeVersion) || pkg.versions[0];
 
   function handleLoad(ver?: string) {
-    const urls = resolvePackageUrls(pkg, ver);
-    const label = `${pkg.packageId} v${ver || pkg.latestVersion}`;
+    const resolvedVersion = ver || pkg.latestVersion;
+    const urls = resolvePackageUrls(pkg, resolvedVersion);
+    const label = `${pkg.packageId} v${resolvedVersion}`;
     setLoadingSpec(true);
-    onLoadPackage(urls.opencliUrl, urls.xmldocUrl, label);
+    onLoadPackage(urls.opencliUrl, urls.xmldocUrl, label, pkg.packageId, resolvedVersion);
   }
 
   return (

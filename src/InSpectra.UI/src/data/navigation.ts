@@ -1,7 +1,8 @@
 export type HashRoute =
   | { kind: "overview" }
   | { kind: "command"; commandPath: string }
-  | { kind: "browse"; packageId?: string; version?: string };
+  | { kind: "browse"; packageId?: string; version?: string }
+  | { kind: "package"; packageId: string; version: string; commandPath?: string };
 
 export function buildCommandHash(path: string): string {
   const segments = path
@@ -16,6 +17,18 @@ export function buildBrowseHash(packageId?: string, version?: string): string {
   if (!packageId) return "#/browse";
   if (!version) return `#/browse/${encodeURIComponent(packageId)}`;
   return `#/browse/${encodeURIComponent(packageId)}/${encodeURIComponent(version)}`;
+}
+
+export function buildPackageHash(packageId: string, version: string, commandPath?: string): string {
+  const base = `#/pkg/${encodeURIComponent(packageId)}/${encodeURIComponent(version)}`;
+  if (!commandPath) return base;
+
+  const segments = commandPath
+    .split(" ")
+    .filter((s) => s.length > 0)
+    .map((s) => encodeURIComponent(s));
+
+  return `${base}/command/${segments.join("/")}`;
 }
 
 export function parseHashRoute(hash: string): HashRoute {
@@ -37,6 +50,32 @@ export function parseHashRoute(hash: string): HashRoute {
       return { kind: "browse", packageId, version };
     } catch {
       return { kind: "browse" };
+    }
+  }
+
+  if (normalized.startsWith("/pkg/")) {
+    const rest = normalized.slice("/pkg/".length);
+    const segments = rest.split("/").filter(Boolean);
+
+    if (segments.length < 2) {
+      return { kind: "overview" };
+    }
+
+    try {
+      const packageId = decodeURIComponent(segments[0]);
+      const version = decodeURIComponent(segments[1]);
+
+      if (segments.length > 2 && segments[2] === "command") {
+        const commandSegments = segments.slice(3);
+        if (commandSegments.length > 0) {
+          const commandPath = commandSegments.map((s) => decodeURIComponent(s)).join(" ");
+          return { kind: "package", packageId, version, commandPath };
+        }
+      }
+
+      return { kind: "package", packageId, version };
+    } catch {
+      return { kind: "overview" };
     }
   }
 

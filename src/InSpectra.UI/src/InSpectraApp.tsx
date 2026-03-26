@@ -21,7 +21,8 @@ import { NugetBrowser } from "./components/NugetBrowser";
 import { OverviewPanel } from "./components/OverviewPanel";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { loadFromFiles, loadFromStartupRequest, loadFromUrls, LoadedSource } from "./data/loadSource";
-import { buildCommandHash, HashRoute, parseHashRoute } from "./data/navigation";
+import { buildCommandHash, buildPackageHash, HashRoute, parseHashRoute } from "./data/navigation";
+import { fetchDiscoveryIndex, findPackageById, resolvePackageUrls } from "./data/nugetDiscovery";
 import { findCommandByPath, normalizeOpenCliDocument, NormalizedCliDocument } from "./data/normalize";
 
 interface LoadState {
@@ -62,6 +63,7 @@ export function InSpectraApp() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileSidebarSearch, setMobileSidebarSearch] = useState(false);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+  const [packageContext, setPackageContext] = useState<{ packageId: string; version: string } | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -93,12 +95,31 @@ export function InSpectraApp() {
   useEffect(() => {
     if (route.kind === "browse") {
       setDocument(null);
+      setPackageContext(null);
       setLoadState({ status: "empty" });
       setError(null);
       setWarnings([]);
       setSourceLabel("");
     }
   }, [route.kind]);
+
+  // Load package from route when navigating to a #/pkg/... URL.
+  const packageRouteKey = route.kind === "package" ? `${route.packageId.toLowerCase()}/${route.version}` : null;
+  useEffect(() => {
+    if (route.kind !== "package") return;
+    if (
+      packageContext &&
+      packageContext.packageId.toLowerCase() === route.packageId.toLowerCase() &&
+      packageContext.version === route.version &&
+      loadState.status === "ready"
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+    void loadPackageFromRoute(route.packageId, route.version, controller.signal);
+    return () => controller.abort();
+  }, [packageRouteKey]);
 
   // Keyboard shortcuts: Ctrl+F (focus search), Ctrl+K (palette)
   useEffect(() => {
@@ -128,13 +149,54 @@ export function InSpectraApp() {
       });
       const loaded = await loadFromStartupRequest(request, signal);
 
-      if (!loaded) {
+      if (loaded) {
+        applyLoadedSource(loaded);
+        return;
+      }
+
+      // No bootstrap/query source — check if route wants a package
+      const initialRoute = parseHashRoute(window.location.hash);
+      if (initialRoute.kind === "package") {
+        // The package-route effect will handle loading
         setLoadState({ status: "empty" });
         return;
       }
 
-      applyLoadedSource(loaded);
+      setLoadState({ status: "empty" });
     } catch (loadError) {
+      setError(toMessage(loadError));
+      setLoadState({ status: "empty" });
+    }
+  }
+
+  async function loadPackageFromRoute(packageId: string, version: string, signal?: AbortSignal) {
+    try {
+      setLoadState({ status: "loading", message: `Loading ${packageId} v${version}` });
+
+      const index = await fetchDiscoveryIndex(signal);
+      const pkg = findPackageById(index, packageId);
+
+      if (!pkg) {
+        setError(`Package "${packageId}" not found in the discovery index.`);
+        setLoadState({ status: "empty" });
+        return;
+      }
+
+      const versionExists = pkg.versions.some((v) => v.version === version);
+      if (!versionExists) {
+        setError(`Version "${version}" not found for package "${packageId}".`);
+        setLoadState({ status: "empty" });
+        return;
+      }
+
+      const urls = resolvePackageUrls(pkg, version);
+      const label = `${pkg.packageId} v${version}`;
+      const loaded = await loadFromUrls(urls.opencliUrl, urls.xmldocUrl, viewerOptions, label);
+
+      applyLoadedSource(loaded);
+      setPackageContext({ packageId: pkg.packageId, version });
+    } catch (loadError) {
+      if (loadError instanceof DOMException && loadError.name === "AbortError") return;
       setError(toMessage(loadError));
       setLoadState({ status: "empty" });
     }
@@ -194,21 +256,29 @@ export function InSpectraApp() {
     localStorage.setItem("inspectra-composer-width", String(width));
   }
 
+  function buildCurrentHash(commandPath?: string): string {
+    if (packageContext) {
+      return buildPackageHash(packageContext.packageId, packageContext.version, commandPath);
+    }
+    return commandPath ? buildCommandHash(commandPath) : "#/";
+  }
+
   function handlePaletteSelect(path: string) {
-    window.location.hash = buildCommandHash(path);
+    window.location.hash = buildCurrentHash(path);
   }
 
   function handleMobileCommandSelect(path: string) {
-    window.location.hash = buildCommandHash(path);
+    window.location.hash = buildCurrentHash(path);
     setMobileSidebarOpen(false);
   }
 
-  async function handleLoadPackage(opencliUrl: string, xmldocUrl: string, label: string) {
+  async function handleLoadPackage(opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string) {
     try {
       setLoadState({ status: "loading", message: `Loading ${label}` });
       const loaded = await loadFromUrls(opencliUrl, xmldocUrl, viewerOptions, label);
       applyLoadedSource(loaded);
-      window.location.hash = "#/";
+      setPackageContext({ packageId, version });
+      window.location.hash = buildPackageHash(packageId, version);
     } catch (loadError) {
       setError(toMessage(loadError));
       setLoadState(document ? { status: "ready" } : { status: "empty" });
@@ -238,7 +308,11 @@ export function InSpectraApp() {
     );
   }
 
-  const activeCommand = findCommandByPath(document.commands, route.kind === "command" ? route.commandPath : undefined);
+  const commandPath =
+    route.kind === "command" ? route.commandPath :
+    route.kind === "package" ? route.commandPath :
+    undefined;
+  const activeCommand = findCommandByPath(document.commands, commandPath);
   const isEmptyPackage =
     document.commands.length === 0 &&
     document.rootArguments.length === 0 &&
@@ -287,6 +361,8 @@ export function InSpectraApp() {
             type="button"
             className="toolbar-button"
             onClick={() => {
+              setPackageContext(null);
+              setDocument(null);
               setLoadState({ status: "empty" });
               window.location.hash = "#/";
             }}
@@ -399,7 +475,7 @@ export function InSpectraApp() {
               type="button"
               className={`overview-row ${!activeCommand ? "selected" : ""}`}
               onClick={() => {
-                window.location.hash = "#/";
+                window.location.hash = buildCurrentHash();
                 setMobileSidebarOpen(false);
               }}
             >
@@ -436,15 +512,16 @@ export function InSpectraApp() {
                 command={activeCommand}
                 includeMetadata={viewerOptions.includeMetadata}
                 onCommandSelect={(path) => {
-                  window.location.hash = buildCommandHash(path);
+                  window.location.hash = buildCurrentHash(path);
                 }}
+                deepLinkHash={buildCurrentHash(activeCommand.path)}
               />
             ) : (
               <OverviewPanel
                 document={document}
                 includeMetadata={viewerOptions.includeMetadata}
                 onCommandSelect={(path) => {
-                  window.location.hash = buildCommandHash(path);
+                  window.location.hash = buildCurrentHash(path);
                 }}
               />
             )}
