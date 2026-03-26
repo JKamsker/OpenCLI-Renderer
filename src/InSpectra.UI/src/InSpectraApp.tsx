@@ -223,6 +223,7 @@ export function InSpectraApp() {
             {activeCommand ? (
               <CommandPanel
                 command={activeCommand}
+                cliTitle={document.source.info.title || ""}
                 includeMetadata={viewerOptions.includeMetadata}
                 onCommandSelect={(path) => { window.location.hash = buildCurrentHash(path); }}
                 deepLinkHash={buildCurrentHash(activeCommand.path)}

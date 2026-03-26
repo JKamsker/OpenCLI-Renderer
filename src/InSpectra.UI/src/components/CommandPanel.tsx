@@ -11,12 +11,30 @@ import {
 
 interface CommandPanelProps {
   command: NormalizedCommand;
+  cliTitle: string;
   includeMetadata: boolean;
   onCommandSelect: (path: string) => void;
   deepLinkHash?: string;
 }
 
-export function CommandPanel({ command, includeMetadata, onCommandSelect, deepLinkHash }: CommandPanelProps) {
+function resolveExample(example: string, command: NormalizedCommand, cliTitle: string): string {
+  const fullPath = cliTitle ? `${cliTitle} ${command.path}` : command.path;
+  // Already includes the full path (with CLI title)
+  if (example === fullPath || example.startsWith(fullPath + " ")) return example;
+  // Already includes the command path (without CLI title)
+  if (example === command.path || example.startsWith(command.path + " ")) {
+    return cliTitle ? `${cliTitle} ${example}` : example;
+  }
+  // Starts with just the leaf command name — replace with full path
+  const name = command.command.name;
+  if (example === name || example.startsWith(name + " ")) {
+    return fullPath + example.slice(name.length);
+  }
+  // Starts with args only — prepend full path
+  return `${fullPath} ${example}`;
+}
+
+export function CommandPanel({ command, cliTitle, includeMetadata, onCommandSelect, deepLinkHash }: CommandPanelProps) {
   const badges = [
     ...(command.command.interactive ? ["Interactive"] : []),
     ...(command.command.hidden ? ["Hidden"] : []),
@@ -102,14 +120,17 @@ export function CommandPanel({ command, includeMetadata, onCommandSelect, deepLi
             <h2>Examples</h2>
           </div>
           <div className="example-stack">
-            {command.command.examples.map((example) => (
-              <div key={example} className="example-wrap">
-                <pre className="example-block">
-                  <code>{example}</code>
-                </pre>
-                <CopyButton text={example} />
-              </div>
-            ))}
+            {command.command.examples.map((example) => {
+              const resolved = resolveExample(example, command, cliTitle);
+              return (
+                <div key={example} className="example-wrap">
+                  <pre className="example-block">
+                    <code>{resolved}</code>
+                  </pre>
+                  <CopyButton text={resolved} />
+                </div>
+              );
+            })}
           </div>
         </section>
       ) : null}
