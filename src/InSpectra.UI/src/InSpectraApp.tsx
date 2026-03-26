@@ -238,10 +238,11 @@ export function InSpectraApp() {
           </div>
         </main>
 
-        {featureFlags.composer && composerOpen && !isEmptyPackage && (
+        {featureFlags.composer && !isEmptyPackage && (
           <ComposerPanel
             command={activeCommand}
             cliTitle={document.source.info.title || "cli"}
+            isOpen={composerOpen}
             width={composerWidth}
             onResize={handleComposerResize}
             rootArguments={document.rootArguments}

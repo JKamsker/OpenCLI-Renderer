@@ -10,6 +10,12 @@
   position: relative;
 }
 
+@media (min-width: 769px) {
+  .composer:not(.composer-open) {
+    display: none;
+  }
+}
+
 .composer-resize {
   position: absolute;
   top: 0;

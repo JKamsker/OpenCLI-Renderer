@@ -7,13 +7,14 @@ import { CopyButton } from "./CopyButton";
 interface ComposerPanelProps {
   command: NormalizedCommand | undefined;
   cliTitle: string;
+  isOpen: boolean;
   width: number;
   onResize: (width: number) => void;
   rootArguments?: OpenCliArgument[];
   rootOptions?: OpenCliOption[];
 }
 
-export function ComposerPanel({ command, cliTitle, width, onResize, rootArguments = [], rootOptions = [] }: ComposerPanelProps) {
+export function ComposerPanel({ command, cliTitle, isOpen, width, onResize, rootArguments = [], rootOptions = [] }: ComposerPanelProps) {
   const [flagValues, setFlagValues] = useState<Record<string, boolean>>({});
   const [textValues, setTextValues] = useState<Record<string, string>>({});
   const [argValues, setArgValues] = useState<Record<string, string>>({});
@@ -91,7 +92,7 @@ export function ComposerPanel({ command, cliTitle, width, onResize, rootArgument
   }
 
   return (
-    <aside className="composer" style={{ width }}>
+    <aside className={`composer${isOpen ? " composer-open" : ""}`} style={{ width }}>
       <div className="composer-resize" ref={resizeRef} onMouseDown={handleResizeStart} />
       <div className="composer-header">
         <Terminal width={16} height={16} />
