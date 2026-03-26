@@ -33,8 +33,15 @@ interface InheritedOption {
 }
 
 export function normalizeOpenCliDocument(document: OpenCliDocument, includeHidden: boolean): NormalizedCliDocument {
-  const rootArguments = document.arguments.filter((argument) => includeHidden || !argument.hidden);
-  const rootOptions = document.options.filter((option) => includeHidden || !option.hidden);
+  const implicitRoot = splitImplicitRootCommand(document.commands);
+  const rootArguments = mergeByName(
+    document.arguments.filter((argument) => includeHidden || !argument.hidden),
+    implicitRoot.command?.arguments.filter((argument) => includeHidden || !argument.hidden) ?? [],
+  );
+  const rootOptions = mergeByName(
+    document.options.filter((option) => includeHidden || !option.hidden),
+    implicitRoot.command?.options.filter((option) => includeHidden || !option.hidden) ?? [],
+  );
   const inherited = rootOptions
     .filter((option) => option.recursive)
     .map((option) => ({ option, sourcePath: "<root>" }));
@@ -43,9 +50,14 @@ export function normalizeOpenCliDocument(document: OpenCliDocument, includeHidde
     source: document,
     rootArguments,
     rootOptions,
-    commands: document.commands
+    commands: [
+      ...implicitRoot.command?.commands
+        .filter((command) => includeHidden || !command.hidden)
+        .map((command) => normalizeCommand(command, undefined, inherited, includeHidden)) ?? [],
+      ...implicitRoot.commands
       .filter((command) => includeHidden || !command.hidden)
       .map((command) => normalizeCommand(command, undefined, inherited, includeHidden)),
+    ],
   };
 }
 
@@ -158,4 +170,30 @@ function resolveInheritedOptions(
   }
 
   return buffer.reverse();
+}
+
+function splitImplicitRootCommand(commands: import("./openCli").OpenCliCommand[]) {
+  const command = commands.find((candidate) => candidate.name === "__default_command" && candidate.hidden);
+
+  return {
+    command,
+    commands: command ? commands.filter((candidate) => candidate !== command) : commands,
+  };
+}
+
+function mergeByName<T extends { name: string }>(primary: T[], secondary: T[]): T[] {
+  const merged = [...primary];
+  const seen = new Set(primary.map((item) => item.name.toLowerCase()));
+
+  for (const item of secondary) {
+    const key = item.name.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    merged.push(item);
+  }
+
+  return merged;
 }

@@ -6,16 +6,24 @@ public sealed class OpenCliNormalizer
 {
     public NormalizedCliDocument Normalize(OpenCliDocument document, bool includeHidden)
     {
-        var visibleRootArguments = document.Arguments.Where(argument => includeHidden || !argument.Hidden).ToList();
-        var visibleRootOptions = document.Options.Where(option => includeHidden || !option.Hidden).ToList();
+        var (implicitRootCommand, topLevelCommands) = SplitImplicitRootCommand(document.Commands);
+        var visibleRootArguments = MergeByName(
+            document.Arguments.Where(argument => includeHidden || !argument.Hidden),
+            implicitRootCommand?.Arguments.Where(argument => includeHidden || !argument.Hidden) ?? []);
+        var visibleRootOptions = MergeByName(
+            document.Options.Where(option => includeHidden || !option.Hidden),
+            implicitRootCommand?.Options.Where(option => includeHidden || !option.Hidden) ?? []);
         var inherited = visibleRootOptions
             .Where(option => option.Recursive)
             .Select(option => new InheritedOption(option, "<root>"))
             .ToList();
 
-        var commands = document.Commands
+        var commands = (implicitRootCommand?.Commands ?? [])
             .Where(command => includeHidden || !command.Hidden)
             .Select(command => NormalizeCommand(command, null, inherited, includeHidden))
+            .Concat(topLevelCommands
+            .Where(command => includeHidden || !command.Hidden)
+            .Select(command => NormalizeCommand(command, null, inherited, includeHidden)))
             .ToList();
 
         return new NormalizedCliDocument
@@ -89,6 +97,48 @@ public sealed class OpenCliNormalizer
     private static string CreateOptionKey(OpenCliOption option)
     {
         return option.Name;
+    }
+
+    private static (OpenCliCommand? ImplicitRootCommand, IReadOnlyList<OpenCliCommand> Commands) SplitImplicitRootCommand(
+        IReadOnlyList<OpenCliCommand> commands)
+    {
+        var implicitRootCommand = commands.FirstOrDefault(command => command.Name == "__default_command" && command.Hidden);
+        if (implicitRootCommand is null)
+        {
+            return (null, commands);
+        }
+
+        return (implicitRootCommand, commands.Where(command => !ReferenceEquals(command, implicitRootCommand)).ToList());
+    }
+
+    private static List<T> MergeByName<T>(IEnumerable<T> primary, IEnumerable<T> secondary)
+        where T : class
+    {
+        var merged = primary.ToList();
+        var seen = new HashSet<string>(merged.Select(GetName), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in secondary)
+        {
+            if (!seen.Add(GetName(item)))
+            {
+                continue;
+            }
+
+            merged.Add(item);
+        }
+
+        return merged;
+    }
+
+    private static string GetName<T>(T item)
+        where T : class
+    {
+        return item switch
+        {
+            OpenCliArgument argument => argument.Name,
+            OpenCliOption option => option.Name,
+            _ => throw new InvalidOperationException($"Unsupported item type `{typeof(T).Name}`."),
+        };
     }
 
     private sealed record InheritedOption(OpenCliOption Option, string SourcePath);

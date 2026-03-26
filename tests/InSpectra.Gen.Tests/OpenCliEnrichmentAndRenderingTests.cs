@@ -194,6 +194,47 @@ public class OpenCliEnrichmentAndRenderingTests
             summary);
     }
 
+    [Fact]
+    public void Hidden_default_command_renders_as_root_options()
+    {
+        var document = new OpenCliDocument
+        {
+            OpenCliVersion = "0.1-draft",
+            Info = new OpenCliInfo
+            {
+                Title = "nupu",
+                Version = "1.0.50",
+            },
+            Commands =
+            [
+                new OpenCliCommand
+                {
+                    Name = "__default_command",
+                    Hidden = true,
+                    Options =
+                    [
+                        new OpenCliOption
+                        {
+                            Name = "--directory",
+                            Aliases = ["-d"],
+                            Description = "A root directory to search.",
+                        },
+                    ],
+                },
+            ],
+        };
+
+        var normalized = _normalizer.Normalize(document, includeHidden: false);
+        var markdown = _renderer.RenderSingle(normalized, includeMetadata: false);
+
+        Assert.Empty(normalized.Commands);
+        Assert.Single(normalized.RootOptions);
+        Assert.Equal("--directory", normalized.RootOptions[0].Name);
+        Assert.Contains("## Root Options", markdown);
+        Assert.Contains("--directory", markdown);
+        Assert.DoesNotContain("__default_command", markdown);
+    }
+
     private static OpenCliMetadata CreateMetadata(string name, string value)
     {
         return new OpenCliMetadata
