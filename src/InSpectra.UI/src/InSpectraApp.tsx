@@ -275,7 +275,7 @@ export function InSpectraApp() {
         </div>
 
         <div className="toolbar">
-          <button type="button" className="toolbar-button" onClick={() => toggleOption("includeHidden")}>
+          {/* <button type="button" className="toolbar-button" onClick={() => toggleOption("includeHidden")}>
             {viewerOptions.includeHidden ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
             <span>{viewerOptions.includeHidden ? "Hide hidden" : "Show hidden"}</span>
           </button>
@@ -283,7 +283,7 @@ export function InSpectraApp() {
           <button type="button" className="toolbar-button" onClick={() => toggleOption("includeMetadata")}>
             <Sparkles aria-hidden="true" />
             <span>{viewerOptions.includeMetadata ? "Hide metadata" : "Show metadata"}</span>
-          </button>
+          </button> */}
 
           <button type="button" className="toolbar-button" onClick={() => pickerRef.current?.click()}>
             <FileUp aria-hidden="true" />
