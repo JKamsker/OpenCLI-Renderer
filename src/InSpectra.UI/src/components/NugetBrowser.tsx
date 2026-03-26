@@ -13,7 +13,7 @@ import { buildBrowseHash } from "../data/navigation";
 interface NugetBrowserProps {
   packageId?: string;
   version?: string;
-  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string) => void;
+  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) => void;
   onBack: () => void;
 }
 
@@ -205,7 +205,7 @@ function PackageDetail({
 }: {
   pkg: DiscoveryPackage;
   selectedVersion?: string;
-  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string) => void;
+  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) => void;
 }) {
   const [loadingSpec, setLoadingSpec] = useState(false);
   const activeVersion = selectedVersion || pkg.latestVersion;
@@ -213,10 +213,11 @@ function PackageDetail({
 
   function handleLoad(ver?: string) {
     const resolvedVersion = ver || pkg.latestVersion;
+    const isLatest = resolvedVersion === pkg.latestVersion;
     const urls = resolvePackageUrls(pkg, resolvedVersion);
     const label = `${pkg.packageId} v${resolvedVersion}`;
     setLoadingSpec(true);
-    onLoadPackage(urls.opencliUrl, urls.xmldocUrl, label, pkg.packageId, resolvedVersion);
+    onLoadPackage(urls.opencliUrl, urls.xmldocUrl, label, pkg.packageId, isLatest ? undefined : resolvedVersion);
   }
 
   return (
@@ -280,6 +281,9 @@ function PackageDetail({
             >
               <div className="browse-version-info">
                 <strong>v{ver.version}</strong>
+                {ver.version === pkg.latestVersion && (
+                  <span className="browse-badge browse-badge-latest">Latest</span>
+                )}
                 <StatusBadge status={ver.status} />
                 {ver.paths.opencliSource && (
                   <span className="browse-badge browse-badge-synth">Synthesized</span>

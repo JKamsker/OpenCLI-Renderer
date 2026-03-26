@@ -63,7 +63,7 @@ export function InSpectraApp() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileSidebarSearch, setMobileSidebarSearch] = useState(false);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
-  const [packageContext, setPackageContext] = useState<{ packageId: string; version: string } | null>(null);
+  const [packageContext, setPackageContext] = useState<{ packageId: string; version: string | undefined } | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -104,13 +104,13 @@ export function InSpectraApp() {
   }, [route.kind]);
 
   // Load package from route when navigating to a #/pkg/... URL.
-  const packageRouteKey = route.kind === "package" ? `${route.packageId.toLowerCase()}/${route.version}` : null;
+  const packageRouteKey = route.kind === "package" ? `${route.packageId.toLowerCase()}/${route.version ?? "latest"}` : null;
   useEffect(() => {
     if (route.kind !== "package") return;
     if (
       packageContext &&
       packageContext.packageId.toLowerCase() === route.packageId.toLowerCase() &&
-      packageContext.version === route.version &&
+      (route.version ? packageContext.version === route.version : true) &&
       loadState.status === "ready"
     ) {
       return;
@@ -169,9 +169,9 @@ export function InSpectraApp() {
     }
   }
 
-  async function loadPackageFromRoute(packageId: string, version: string, signal?: AbortSignal) {
+  async function loadPackageFromRoute(packageId: string, version: string | undefined, signal?: AbortSignal) {
     try {
-      setLoadState({ status: "loading", message: `Loading ${packageId} v${version}` });
+      setLoadState({ status: "loading", message: `Loading ${packageId}${version ? ` v${version}` : ""}` });
 
       const index = await fetchDiscoveryIndex(signal);
       const pkg = findPackageById(index, packageId);
@@ -182,19 +182,21 @@ export function InSpectraApp() {
         return;
       }
 
-      const versionExists = pkg.versions.some((v) => v.version === version);
+      const resolvedVersion = version ?? pkg.latestVersion;
+
+      const versionExists = pkg.versions.some((v) => v.version === resolvedVersion);
       if (!versionExists) {
-        setError(`Version "${version}" not found for package "${packageId}".`);
+        setError(`Version "${resolvedVersion}" not found for package "${packageId}".`);
         setLoadState({ status: "empty" });
         return;
       }
 
-      const urls = resolvePackageUrls(pkg, version);
-      const label = `${pkg.packageId} v${version}`;
+      const urls = resolvePackageUrls(pkg, resolvedVersion);
+      const label = `${pkg.packageId} v${resolvedVersion}`;
       const loaded = await loadFromUrls(urls.opencliUrl, urls.xmldocUrl, viewerOptions, label);
 
       applyLoadedSource(loaded);
-      setPackageContext({ packageId: pkg.packageId, version });
+      setPackageContext({ packageId: pkg.packageId, version: resolvedVersion });
     } catch (loadError) {
       if (loadError instanceof DOMException && loadError.name === "AbortError") return;
       setError(toMessage(loadError));
@@ -272,7 +274,7 @@ export function InSpectraApp() {
     setMobileSidebarOpen(false);
   }
 
-  async function handleLoadPackage(opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string) {
+  async function handleLoadPackage(opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) {
     try {
       setLoadState({ status: "loading", message: `Loading ${label}` });
       const loaded = await loadFromUrls(opencliUrl, xmldocUrl, viewerOptions, label);

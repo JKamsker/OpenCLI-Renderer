@@ -2,7 +2,7 @@ export type HashRoute =
   | { kind: "overview" }
   | { kind: "command"; commandPath: string }
   | { kind: "browse"; packageId?: string; version?: string }
-  | { kind: "package"; packageId: string; version: string; commandPath?: string };
+  | { kind: "package"; packageId: string; version?: string; commandPath?: string };
 
 export function buildCommandHash(path: string): string {
   const segments = path
@@ -19,8 +19,9 @@ export function buildBrowseHash(packageId?: string, version?: string): string {
   return `#/browse/${encodeURIComponent(packageId)}/${encodeURIComponent(version)}`;
 }
 
-export function buildPackageHash(packageId: string, version: string, commandPath?: string): string {
-  const base = `#/pkg/${encodeURIComponent(packageId)}/${encodeURIComponent(version)}`;
+export function buildPackageHash(packageId: string, version?: string, commandPath?: string): string {
+  const versionSegment = version ? encodeURIComponent(version) : "latest";
+  const base = `#/pkg/${encodeURIComponent(packageId)}/${versionSegment}`;
   if (!commandPath) return base;
 
   const segments = commandPath
@@ -57,16 +58,26 @@ export function parseHashRoute(hash: string): HashRoute {
     const rest = normalized.slice("/pkg/".length);
     const segments = rest.split("/").filter(Boolean);
 
-    if (segments.length < 2) {
+    if (segments.length < 1) {
       return { kind: "overview" };
     }
 
     try {
       const packageId = decodeURIComponent(segments[0]);
-      const version = decodeURIComponent(segments[1]);
 
-      if (segments.length > 2 && segments[2] === "command") {
-        const commandSegments = segments.slice(3);
+      // #/pkg/{id} — no version, use latest
+      if (segments.length === 1) {
+        return { kind: "package", packageId };
+      }
+
+      // "latest" is treated as no version (resolve to latest at runtime)
+      const rawVersion = decodeURIComponent(segments[1]);
+      const version = rawVersion.toLowerCase() === "latest" ? undefined : rawVersion;
+
+      // Check for /command/... after packageId[/version]
+      const commandIdx = segments.indexOf("command", 2);
+      if (commandIdx >= 0) {
+        const commandSegments = segments.slice(commandIdx + 1);
         if (commandSegments.length > 0) {
           const commandPath = commandSegments.map((s) => decodeURIComponent(s)).join(" ");
           return { kind: "package", packageId, version, commandPath };
