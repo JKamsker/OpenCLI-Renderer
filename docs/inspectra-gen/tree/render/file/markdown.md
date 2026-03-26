@@ -3,7 +3,7 @@
 - Root: [index](../../index.md)
 - Parent: [render file](index.md)
 
-Render Markdown from an OpenCLI JSON file and optional XML enrichment file.
+Render Markdown from an OpenCLI JSON file and  optional XML enrichment file.
 
 ## Arguments
 

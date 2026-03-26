@@ -3,7 +3,7 @@
 - Root: [index](../../index.md)
 - Parent: [render exec](index.md)
 
-Render Markdown from a live CLI process and optional `cli xmldoc` enrichment.
+Render Markdown from a live CLI process and  optional `cli xmldoc` enrichment.
 
 ## Arguments
 

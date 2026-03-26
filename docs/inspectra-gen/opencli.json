@@ -43,6 +43,24 @@
                   "hidden": false
                 },
                 {
+                  "name": "--enable-nuget-browser",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--enable-package-upload",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--enable-url",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
                   "name": "--include-hidden",
                   "required": false,
                   "recursive": false,
@@ -62,6 +80,24 @@
                 },
                 {
                   "name": "--no-color",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--no-composer",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--no-dark",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--no-light",
                   "required": false,
                   "recursive": false,
                   "hidden": false
@@ -144,6 +180,12 @@
                   "aliases": [
                     "-q"
                   ],
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--show-home",
+                  "required": false,
                   "recursive": false,
                   "hidden": false
                 },
@@ -243,7 +285,7 @@
                   ]
                 }
               ],
-              "description": "Render an HTML app bundle from a live CLI process and optional \u0060cli xmldoc\u0060 enrichment.",
+              "description": "Render an HTML app bundle from a live CLI process  and optional \u0060cli xmldoc\u0060 enrichment.",
               "hidden": false,
               "examples": []
             },
@@ -523,12 +565,12 @@
                   ]
                 }
               ],
-              "description": "Render Markdown from a live CLI process and optional \u0060cli xmldoc\u0060 enrichment.",
+              "description": "Render Markdown from a live CLI process and  optional \u0060cli xmldoc\u0060 enrichment.",
               "hidden": false,
               "examples": []
             }
           ],
-          "description": "Render docs by executing a CLI that exposes \u0060cli opencli\u0060.",
+          "description": "Render docs by executing a CLI that exposes \u0060cli  opencli\u0060.",
           "hidden": false,
           "examples": []
         },
@@ -540,6 +582,24 @@
               "options": [
                 {
                   "name": "--dry-run",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--enable-nuget-browser",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--enable-package-upload",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--enable-url",
                   "required": false,
                   "recursive": false,
                   "hidden": false
@@ -564,6 +624,24 @@
                 },
                 {
                   "name": "--no-color",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--no-composer",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--no-dark",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
+                  "name": "--no-light",
                   "required": false,
                   "recursive": false,
                   "hidden": false
@@ -628,6 +706,12 @@
                   "hidden": false
                 },
                 {
+                  "name": "--show-home",
+                  "required": false,
+                  "recursive": false,
+                  "hidden": false
+                },
+                {
                   "name": "--verbose",
                   "required": false,
                   "recursive": false,
@@ -673,7 +757,7 @@
                   ]
                 }
               ],
-              "description": "Render an HTML app bundle from an OpenCLI JSON file and optional XML enrichment file.",
+              "description": "Render an HTML app bundle from an OpenCLI JSON  file and optional XML enrichment file.",
               "hidden": false,
               "examples": []
             },
@@ -859,7 +943,7 @@
                   ]
                 }
               ],
-              "description": "Render Markdown from an OpenCLI JSON file and optional XML enrichment file.",
+              "description": "Render Markdown from an OpenCLI JSON file and  optional XML enrichment file.",
               "hidden": false,
               "examples": []
             }

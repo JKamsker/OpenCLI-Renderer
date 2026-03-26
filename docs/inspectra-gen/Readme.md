@@ -41,23 +41,23 @@ Render documentation from OpenCLI exports.
 
 ### Subcommands
 
-- `exec` — Render docs by executing a CLI that exposes `cli opencli`.
+- `exec` — Render docs by executing a CLI that exposes `cli  opencli`.
 - `file` — Render docs from saved OpenCLI export files.
 
 <a id="command-render-exec"></a>
 ### `render exec`
 
-Render docs by executing a CLI that exposes `cli opencli`.
+Render docs by executing a CLI that exposes `cli  opencli`.
 
 #### Subcommands
 
-- `html` — Render an HTML app bundle from a live CLI process and optional `cli xmldoc` enrichment.
-- `markdown` — Render Markdown from a live CLI process and optional `cli xmldoc` enrichment.
+- `html` — Render an HTML app bundle from a live CLI process  and optional `cli xmldoc` enrichment.
+- `markdown` — Render Markdown from a live CLI process and  optional `cli xmldoc` enrichment.
 
 <a id="command-render-exec-html"></a>
 #### `render exec html`
 
-Render an HTML app bundle from a live CLI process and optional `cli xmldoc` enrichment.
+Render an HTML app bundle from a live CLI process  and optional `cli xmldoc` enrichment.
 
 ##### Arguments
 
@@ -71,15 +71,22 @@ Render an HTML app bundle from a live CLI process and optional `cli xmldoc` enri
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | --cwd | — | <PATH> | No | No | Declared | — | — | PATH · required · arity 1 |
 | --dry-run | — | flag | No | No | Declared | — | — | — |
+| --enable-nuget-browser | — | flag | No | No | Declared | — | — | — |
+| --enable-package-upload | — | flag | No | No | Declared | — | — | — |
+| --enable-url | — | flag | No | No | Declared | — | — | — |
 | --include-hidden | — | flag | No | No | Declared | — | — | — |
 | --include-metadata | — | flag | No | No | Declared | — | — | — |
 | --json | — | flag | No | No | Declared | — | — | — |
 | --no-color | — | flag | No | No | Declared | — | — | — |
+| --no-composer | — | flag | No | No | Declared | — | — | — |
+| --no-dark | — | flag | No | No | Declared | — | — | — |
+| --no-light | — | flag | No | No | Declared | — | — | — |
 | --opencli-arg | — | <ARG> | No | No | Declared | — | — | ARG · required · arity 1 |
 | --out-dir | — | <DIR> | No | No | Declared | — | — | DIR · required · arity 1 |
 | --output | — | <MODE> | No | No | Declared | — | — | MODE · required · arity 1 |
 | --overwrite | — | flag | No | No | Declared | — | — | — |
 | --quiet | -q | flag | No | No | Declared | — | — | — |
+| --show-home | — | flag | No | No | Declared | — | — | — |
 | --source-arg | — | <ARG> | No | No | Declared | — | — | ARG · required · arity 1 |
 | --timeout | — | <SECONDS> | No | No | Declared | — | — | SECONDS · required · arity 1 |
 | --verbose | — | flag | No | No | Declared | — | — | — |
@@ -89,7 +96,7 @@ Render an HTML app bundle from a live CLI process and optional `cli xmldoc` enri
 <a id="command-render-exec-markdown"></a>
 #### `render exec markdown`
 
-Render Markdown from a live CLI process and optional `cli xmldoc` enrichment.
+Render Markdown from a live CLI process and  optional `cli xmldoc` enrichment.
 
 ##### Arguments
 
@@ -127,13 +134,13 @@ Render docs from saved OpenCLI export files.
 
 #### Subcommands
 
-- `html` — Render an HTML app bundle from an OpenCLI JSON file and optional XML enrichment file.
-- `markdown` — Render Markdown from an OpenCLI JSON file and optional XML enrichment file.
+- `html` — Render an HTML app bundle from an OpenCLI JSON  file and optional XML enrichment file.
+- `markdown` — Render Markdown from an OpenCLI JSON file and  optional XML enrichment file.
 
 <a id="command-render-file-html"></a>
 #### `render file html`
 
-Render an HTML app bundle from an OpenCLI JSON file and optional XML enrichment file.
+Render an HTML app bundle from an OpenCLI JSON  file and optional XML enrichment file.
 
 ##### Arguments
 
@@ -146,21 +153,28 @@ Render an HTML app bundle from an OpenCLI JSON file and optional XML enrichment 
 | Name | Aliases | Value | Required | Recursive | Scope | Group | Description | Arguments |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | --dry-run | — | flag | No | No | Declared | — | — | — |
+| --enable-nuget-browser | — | flag | No | No | Declared | — | — | — |
+| --enable-package-upload | — | flag | No | No | Declared | — | — | — |
+| --enable-url | — | flag | No | No | Declared | — | — | — |
 | --include-hidden | — | flag | No | No | Declared | — | — | — |
 | --include-metadata | — | flag | No | No | Declared | — | — | — |
 | --json | — | flag | No | No | Declared | — | — | — |
 | --no-color | — | flag | No | No | Declared | — | — | — |
+| --no-composer | — | flag | No | No | Declared | — | — | — |
+| --no-dark | — | flag | No | No | Declared | — | — | — |
+| --no-light | — | flag | No | No | Declared | — | — | — |
 | --out-dir | — | <DIR> | No | No | Declared | — | — | DIR · required · arity 1 |
 | --output | — | <MODE> | No | No | Declared | — | — | MODE · required · arity 1 |
 | --overwrite | — | flag | No | No | Declared | — | — | — |
 | --quiet | -q | flag | No | No | Declared | — | — | — |
+| --show-home | — | flag | No | No | Declared | — | — | — |
 | --verbose | — | flag | No | No | Declared | — | — | — |
 | --xmldoc | — | <PATH> | No | No | Declared | — | — | PATH · required · arity 1 |
 
 <a id="command-render-file-markdown"></a>
 #### `render file markdown`
 
-Render Markdown from an OpenCLI JSON file and optional XML enrichment file.
+Render Markdown from an OpenCLI JSON file and  optional XML enrichment file.
 
 ##### Arguments
 

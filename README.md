@@ -112,26 +112,89 @@ HTML uses bundle-directory output only:
 | `--json` | Emit machine-readable render results |
 | `--timeout <SECONDS>` | Exec-mode timeout |
 
+### HTML Feature Flags
+
+When rendering HTML bundles, the following flags control which UI features are available to the end user. These flags only apply to `render file html` and `render exec html`.
+
+By default, statically generated pages are locked down: only the inline command viewer and composer are active. Features like the home screen, NuGet browser, file upload, URL loading, and theme switching must be explicitly opted in. This "secure by default" approach ensures generated documentation pages expose exactly the features you choose.
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--show-home` | off | Show the Home button in the toolbar. Clicking it navigates back to the import/start screen. Required for `--enable-nuget-browser` and `--enable-package-upload` since those features live on the home screen. |
+| `--no-composer` | off | Hide the Composer panel and its toolbar toggle. The Composer lets users interactively build CLI invocations from the documented options and arguments. Pass this flag if the generated page should be read-only reference documentation without the command-building UI. |
+| `--no-dark` | off | Disable the dark theme and remove the theme toggle from the toolbar. The viewer is forced to light mode. Cannot be combined with `--no-light`. |
+| `--no-light` | off | Disable the light theme and remove the theme toggle from the toolbar. The viewer is forced to dark mode. Cannot be combined with `--no-dark`. |
+| `--enable-url` | off | Allow the viewer to load an OpenCLI spec from URL query parameters (`?opencli=`, `?xmldoc=`, `?dir=`). Without this flag, query parameters are ignored and the viewer only displays the inline data baked into the page. |
+| `--enable-nuget-browser` | off | Enable the NuGet package browser, which lets users search and explore indexed .NET CLI tool packages. Requires `--show-home`. |
+| `--enable-package-upload` | off | Enable the file upload drop zone on the home screen, allowing users to import an `opencli.json` (and optional `xmldoc.xml`) from disk. Requires `--show-home`. |
+
+**Validation rules:**
+
+- `--no-dark` and `--no-light` cannot both be set (at least one theme must be available).
+- `--enable-nuget-browser` requires `--show-home` (the browser is accessed from the home screen).
+- `--enable-package-upload` requires `--show-home` (the upload drop zone is on the home screen).
+
+**Examples:**
+
+Minimal static page (defaults: no home, no URL loading, no nuget, no upload, composer on, both themes):
+
+```bash
+inspectra render file html mycli.json --out-dir ./docs
+```
+
+Full-featured hosted viewer with all interactive features:
+
+```bash
+inspectra render file html mycli.json --out-dir ./docs \
+  --show-home \
+  --enable-url \
+  --enable-nuget-browser \
+  --enable-package-upload
+```
+
+Read-only dark-mode documentation without the composer:
+
+```bash
+inspectra render file html mycli.json --out-dir ./docs \
+  --no-composer \
+  --no-light
+```
+
+Light-mode-only page with file upload but no NuGet browser:
+
+```bash
+inspectra render file html mycli.json --out-dir ./docs \
+  --show-home \
+  --enable-package-upload \
+  --no-dark
+```
+
+**How it works:** Feature flags are serialized into the HTML bootstrap payload (the `<script id="inspectra-bootstrap">` JSON block). The viewer reads them at startup and conditionally renders UI elements. When running the viewer in development mode (no bootstrap), all features are enabled by default. When an older bootstrap without the `features` key is loaded, the viewer falls back to secure defaults (everything off except both themes).
+
 ## HTML Viewer (InSpectraUI)
 
 The HTML renderer copies `src/InSpectra.UI/dist/**` and patches `index.html` with a bootstrap payload.
 
+### Boot Modes
+
 The bundled viewer supports three boot paths:
 
-- injected inline data from the renderer
-- URL-driven loading with `?opencli=...`, `?xmldoc=...`, or `?dir=...`
-- manual import by dropping or picking `opencli.json` and optional `xmldoc.xml`
+1. **Inline bootstrap** (default for generated pages): The full OpenCLI document is embedded in the HTML as a JSON payload. The page is self-contained and works offline.
+2. **URL-driven loading**: Query parameters `?opencli=<url>`, `?xmldoc=<url>`, or `?dir=<url>` point the viewer at remote files. Only active when `--enable-url` is set (or in development mode).
+3. **Manual import**: Users drop or pick `opencli.json` and optional `xmldoc.xml` from disk. Only shown when `--enable-package-upload` is set (or in development mode).
 
-Other viewer features:
+### Viewer Features
 
-- dark mode with theme toggle and localStorage persistence
-- command palette (Ctrl+K) for quick command search
-- composer panel for interactively building CLI commands
-- Ctrl+F to focus sidebar search
-- hash routing for deep links
-- hidden-item filtering and metadata toggling
-- recursive option inheritance
-- command-tree filtering
+- **Command tree** with sidebar navigation, search filtering (Ctrl+F), and deep-link hash routing
+- **Command palette** (Ctrl+K) for quick fuzzy search across all commands
+- **Composer panel** for interactively building CLI invocations from documented options and arguments (toggleable, hideable via `--no-composer`)
+- **Dark/light theme** with toggle button and localStorage persistence (lockable to one theme via `--no-dark` or `--no-light`)
+- **NuGet browser** for searching and exploring indexed .NET CLI tool packages (opt-in via `--enable-nuget-browser`)
+- **Overview panel** showing root-level arguments, options, and command summary
+- **Recursive option inheritance** display
+- **Metadata sections** (when `--include-metadata` is set)
+
+### URL Parameters
 
 `?dir=<url>` resolves:
 
