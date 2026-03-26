@@ -472,6 +472,8 @@ export function InSpectraApp() {
             cliTitle={document.source.info.title || "cli"}
             width={composerWidth}
             onResize={handleComposerResize}
+            rootArguments={document.rootArguments}
+            rootOptions={document.rootOptions}
           />
         )}
       </div>

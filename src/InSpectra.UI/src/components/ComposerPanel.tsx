@@ -1,32 +1,53 @@
 import { Check, Copy, Terminal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { formatOptionValue, NormalizedCommand } from "../data/normalize";
+import type { OpenCliArgument, OpenCliOption } from "../data/openCli";
 
 interface ComposerPanelProps {
   command: NormalizedCommand | undefined;
   cliTitle: string;
   width: number;
   onResize: (width: number) => void;
+  rootArguments?: OpenCliArgument[];
+  rootOptions?: OpenCliOption[];
 }
 
-export function ComposerPanel({ command, cliTitle, width, onResize }: ComposerPanelProps) {
+export function ComposerPanel({ command, cliTitle, width, onResize, rootArguments = [], rootOptions = [] }: ComposerPanelProps) {
   const [flagValues, setFlagValues] = useState<Record<string, boolean>>({});
   const [textValues, setTextValues] = useState<Record<string, string>>({});
+  const [argValues, setArgValues] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const resizeRef = useRef<HTMLDivElement>(null);
 
-  const allOptions = [
-    ...(command?.declaredOptions ?? []),
-    ...(command?.inheritedOptions.map((r) => r.option) ?? []),
-  ];
+  const allOptions = command
+    ? [
+        ...command.declaredOptions,
+        ...command.inheritedOptions.map((r) => r.option),
+      ]
+    : rootOptions;
+
+  const allArguments = command ? command.arguments : rootArguments;
+
+  const composerKey = command?.path ?? "__root__";
 
   useEffect(() => {
     setFlagValues({});
     setTextValues({});
-  }, [command?.path]);
+    setArgValues({});
+  }, [composerKey]);
 
   function buildPreview(): string {
-    const parts = [cliTitle, ...(command?.path.split(" ") ?? [])];
+    const parts = command
+      ? [cliTitle, ...command.path.split(" ")]
+      : [cliTitle];
+
+    for (const arg of allArguments) {
+      const value = argValues[arg.name];
+      if (value?.trim()) {
+        parts.push(value.includes(" ") ? `"${value}"` : value);
+      }
+    }
+
     const nameToDisplay = new Map(
       allOptions.map((opt) => [opt.name, opt.aliases?.[0] ?? opt.name]),
     );
@@ -87,15 +108,37 @@ export function ComposerPanel({ command, cliTitle, width, onResize }: ComposerPa
         Composer
       </div>
       <div className="composer-body">
-        {!command ? (
+        {!command && allOptions.length === 0 && allArguments.length === 0 ? (
           <div className="composer-empty">Select a command to start composing.</div>
-        ) : allOptions.length === 0 ? (
+        ) : allOptions.length === 0 && allArguments.length === 0 ? (
           <div className="composer-empty">This command has no configurable options.</div>
         ) : (
           <>
             <div className="composer-section-title">
-              Options for <code>{command.path}</code>
+              {command ? <>Options for <code>{command.path}</code></> : "Root options"}
             </div>
+            {allArguments.map((argument) => {
+              const key = argument.name;
+              const inputId = `composer-arg-${key.replace(/[^a-zA-Z0-9-]/g, "-")}`;
+              return (
+                <div className="composer-field" key={key}>
+                  <label className="composer-opt-name" htmlFor={inputId}>{key}</label>
+                  <input
+                    id={inputId}
+                    type="text"
+                    placeholder={argument.acceptedValues.length > 0 ? argument.acceptedValues.join(" | ") : key}
+                    value={argValues[key] ?? ""}
+                    onChange={(e) =>
+                      setArgValues((prev) => ({ ...prev, [key]: e.target.value }))
+                    }
+                    className="composer-input"
+                  />
+                  {argument.description && (
+                    <span className="composer-opt-desc">{argument.description}</span>
+                  )}
+                </div>
+              );
+            })}
             {allOptions.map((option) => {
               const kind = formatOptionValue(option);
               const key = option.name;
