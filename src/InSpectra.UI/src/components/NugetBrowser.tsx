@@ -1,4 +1,4 @@
-import { ArrowLeft, Layers3, LoaderCircle, Search, Terminal } from "lucide-react";
+import { ArrowDownToLine, ArrowLeft, Layers3, LoaderCircle, Search, Terminal } from "lucide-react";
 import { SyntheticEvent, useDeferredValue, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_PACKAGE_ICON_URL,
@@ -22,6 +22,14 @@ interface NugetBrowserProps {
   onBack: () => void;
 }
 
+type BrowseOrder =
+  | "index"
+  | "downloads"
+  | "name"
+  | "commands"
+  | "groups"
+  | "versions";
+
 export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: NugetBrowserProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [index, setIndex] = useState<DiscoverySummaryIndex | null>(null);
@@ -32,6 +40,7 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
   const [packageDetail, setPackageDetail] = useState<DiscoveryPackageDetail | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const deferredSearch = useDeferredValue(searchTerm);
+  const [orderBy, setOrderBy] = useState<BrowseOrder>("index");
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
@@ -182,7 +191,7 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
     );
   }
 
-  const results = searchPackages(index, deferredSearch);
+  const results = sortPackages(searchPackages(index, deferredSearch), orderBy);
 
   return (
     <>
@@ -215,12 +224,24 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
             <kbd className="kbd-hint browse-kbd">Ctrl F</kbd>
           </div>
 
-          <div className="browse-stats">
+          <div className="browse-toolbar">
             <span className="browse-stat">
               {results.length === index.packages.length
                 ? `${index.packageCount} packages`
                 : `${results.length} of ${index.packageCount} packages`}
             </span>
+
+            <label className="browse-order-control">
+              <span className="browse-order-label">Order by</span>
+              <select value={orderBy} onChange={(e) => setOrderBy(e.target.value as BrowseOrder)}>
+                <option value="index">Discovery order</option>
+                <option value="downloads">Downloads</option>
+                <option value="name">Name</option>
+                <option value="commands">Commands</option>
+                <option value="groups">Groups</option>
+                <option value="versions">Versions</option>
+              </select>
+            </label>
           </div>
         </section>
 
@@ -280,6 +301,10 @@ function PackageCard({ pkg }: { pkg: DiscoveryPackageSummary }) {
         </div>
 
         <div className="browse-card-stats">
+          <span className="browse-card-stat" aria-label={`${pkg.totalDownloads} total downloads`}>
+            <ArrowDownToLine aria-hidden="true" size={13} />
+            <span>{formatCount(pkg.totalDownloads)}</span>
+          </span>
           <span className="browse-card-stat" aria-label={`${pkg.commandCount} commands`}>
             <Terminal aria-hidden="true" size={13} />
             <span>{pkg.commandCount}</span>
@@ -298,4 +323,36 @@ function handlePackageIconError(event: SyntheticEvent<HTMLImageElement>) {
   const img = event.currentTarget;
   if (img.src === DEFAULT_PACKAGE_ICON_URL) return;
   img.src = DEFAULT_PACKAGE_ICON_URL;
+}
+
+function formatCount(value: number): string {
+  return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(value);
+}
+
+function sortPackages(packages: DiscoveryPackageSummary[], orderBy: BrowseOrder): DiscoveryPackageSummary[] {
+  const sorted = [...packages];
+
+  switch (orderBy) {
+    case "downloads":
+      return sorted.sort((left, right) =>
+        right.totalDownloads - left.totalDownloads || left.packageId.localeCompare(right.packageId),
+      );
+    case "name":
+      return sorted.sort((left, right) => left.packageId.localeCompare(right.packageId));
+    case "commands":
+      return sorted.sort((left, right) =>
+        right.commandCount - left.commandCount || left.packageId.localeCompare(right.packageId),
+      );
+    case "groups":
+      return sorted.sort((left, right) =>
+        right.commandGroupCount - left.commandGroupCount || left.packageId.localeCompare(right.packageId),
+      );
+    case "versions":
+      return sorted.sort((left, right) =>
+        right.versionCount - left.versionCount || left.packageId.localeCompare(right.packageId),
+      );
+    case "index":
+    default:
+      return sorted;
+  }
 }

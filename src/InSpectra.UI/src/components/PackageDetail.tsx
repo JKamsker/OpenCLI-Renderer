@@ -67,6 +67,10 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
             <span className="browse-detail-label">Status</span>
             <StatusBadge status={pkg.latestStatus} />
           </div>
+          <div className="browse-detail-field">
+            <span className="browse-detail-label">Downloads</span>
+            <span>{formatNumber(pkg.totalDownloads)}</span>
+          </div>
           {summary && (
             <div className="browse-detail-field">
               <span className="browse-detail-label">Coverage</span>
@@ -158,4 +162,8 @@ function formatDate(iso: string): string {
   } catch {
     return iso;
   }
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat().format(value);
 }

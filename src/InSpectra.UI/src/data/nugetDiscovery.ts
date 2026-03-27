@@ -19,6 +19,7 @@ export interface DiscoveryPackageSummary {
   latestVersion: string;
   completeness: DiscoveryCompleteness;
   packageIconUrl?: string;
+  totalDownloads: number;
   commandCount: number;
   commandGroupCount: number;
 }
@@ -27,6 +28,7 @@ export interface DiscoveryPackageDetail {
   schemaVersion: number;
   packageId: string;
   trusted: boolean;
+  totalDownloads: number;
   latestVersion: string;
   latestStatus: DiscoveryStatus;
   latestPaths: DiscoveryPaths;
