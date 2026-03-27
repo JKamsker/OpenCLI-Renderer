@@ -73,6 +73,18 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
           </div>
           {summary && (
             <div className="browse-detail-field">
+              <span className="browse-detail-label">Created</span>
+              <span>{formatDate(summary.createdAt)}</span>
+            </div>
+          )}
+          {summary && (
+            <div className="browse-detail-field">
+              <span className="browse-detail-label">Updated</span>
+              <span>{formatDate(summary.updatedAt)}</span>
+            </div>
+          )}
+          {summary && (
+            <div className="browse-detail-field">
               <span className="browse-detail-label">Coverage</span>
               <span>{summary.commandCount} commands across {summary.commandGroupCount} groups</span>
             </div>
