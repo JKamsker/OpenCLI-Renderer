@@ -364,8 +364,7 @@ section{padding:4rem 0}
     <div class="toc reveal">
       <div class="toc-title">On this page</div>
       <ol>
-        <li><a href="#reusable-workflow">Reusable Workflow</a> &mdash; turnkey, zero setup</li>
-        <li><a href="#composite-action">Composite Action</a> &mdash; maximum flexibility</li>
+        <li><a href="#usage">Usage</a> &mdash; add one step to your workflow</li>
         <li><a href="#inputs">Input Reference</a></li>
         <li><a href="#pages">GitHub Pages Deployment</a></li>
         <li><a href="#prerequisites">Prerequisites</a></li>
@@ -374,107 +373,25 @@ section{padding:4rem 0}
   </div>
 </section>
 
-<!-- ── Reusable Workflow ──────────────── -->
-<section id="reusable-workflow">
+<!-- ── Usage ──────────────────────────── -->
+<section id="usage">
   <div class="wrap">
-    <div class="section-label">Option 1</div>
-    <div class="section-title reveal">Reusable Workflow</div>
+    <div class="section-label">Getting Started</div>
+    <div class="section-title reveal">Add one step to your workflow</div>
     <p class="section-desc reveal">
-      Call the workflow from your repo and get docs generated and uploaded as an artifact. XML documentation is auto-detected and used for enrichment when available. No InSpectra setup needed.
+      Install your CLI, then call the InSpectra action. It handles .NET, InSpectra, rendering, and verification.
+      XML documentation is auto-detected and used for enrichment when available.
     </p>
 
     <div class="code-block reveal">
       <div class="tab-bar">
-        <button class="tab active" onclick="switchTab(this,'wf-dotnet')">.NET Tool</button>
-        <button class="tab" onclick="switchTab(this,'wf-file')">From File</button>
-        <button class="tab" onclick="switchTab(this,'wf-markdown')">Markdown</button>
-        <button class="tab" onclick="switchTab(this,'wf-custom')">Custom Setup</button>
+        <button class="tab active" onclick="switchTab(this,'ex-basic')">.NET Tool</button>
+        <button class="tab" onclick="switchTab(this,'ex-file')">From File</button>
+        <button class="tab" onclick="switchTab(this,'ex-markdown')">Markdown</button>
+        <button class="tab" onclick="switchTab(this,'ex-build')">Build + Render</button>
+        <button class="tab" onclick="switchTab(this,'ex-release')">Release Asset</button>
       </div>
-      <div id="wf-dotnet" class="panel active"><span class="comment"># .github/workflows/docs.yml</span>
-<span class="c">name</span>: Generate CLI Docs
-
-<span class="c">on</span>:
-  <span class="a">push</span>:
-    <span class="a">branches</span>: [main]
-
-<span class="c">jobs</span>:
-  <span class="a">docs</span>:
-    <span class="f">uses</span>: <span class="s">JKamsker/InSpectra/.github/workflows/inspectra-generate.yml@v1</span>
-    <span class="f">with</span>:
-      <span class="a">dotnet-tool</span>: MyCli.Tool        <span class="comment"># NuGet package name</span>
-      <span class="a">cli-name</span>: mycli                <span class="comment"># executable name</span></div>
-      <div id="wf-file" class="panel"><span class="comment"># .github/workflows/docs.yml</span>
-<span class="c">name</span>: Generate CLI Docs
-
-<span class="c">on</span>:
-  <span class="a">push</span>:
-    <span class="a">branches</span>: [main]
-
-<span class="c">jobs</span>:
-  <span class="a">docs</span>:
-    <span class="f">uses</span>: <span class="s">JKamsker/InSpectra/.github/workflows/inspectra-generate.yml@v1</span>
-    <span class="f">with</span>:
-      <span class="a">mode</span>: file
-      <span class="a">opencli-json</span>: docs/opencli.json  <span class="comment"># checked into repo</span>
-      <span class="a">xmldoc</span>: docs/xmldoc.xml          <span class="comment"># optional</span></div>
-      <div id="wf-markdown" class="panel"><span class="comment"># .github/workflows/docs.yml</span>
-<span class="c">name</span>: Generate CLI Docs
-
-<span class="c">on</span>:
-  <span class="a">push</span>:
-    <span class="a">branches</span>: [main]
-
-<span class="c">jobs</span>:
-  <span class="a">docs</span>:
-    <span class="f">uses</span>: <span class="s">JKamsker/InSpectra/.github/workflows/inspectra-generate.yml@v1</span>
-    <span class="f">with</span>:
-      <span class="a">dotnet-tool</span>: MyCli.Tool
-      <span class="a">cli-name</span>: mycli
-      <span class="a">format</span>: markdown               <span class="comment"># or markdown-monolith</span></div>
-      <div id="wf-custom" class="panel"><span class="comment"># .github/workflows/docs.yml</span>
-<span class="c">name</span>: Generate CLI Docs
-
-<span class="c">on</span>:
-  <span class="a">push</span>:
-    <span class="a">branches</span>: [main]
-
-<span class="c">jobs</span>:
-  <span class="a">docs</span>:
-    <span class="f">uses</span>: <span class="s">JKamsker/InSpectra/.github/workflows/inspectra-generate.yml@v1</span>
-    <span class="f">with</span>:
-      <span class="a">cli-name</span>: jf
-      <span class="a">setup-command</span>: <span class="s">'dotnet tool install -g JellyfinCli --version 1.0.0'</span></div>
-    </div>
-
-    <div class="callout reveal">
-      <div class="callout-title">What you get</div>
-      <p>
-        The workflow uploads the output as the <code>inspectra-docs</code> artifact.
-        Download it from the workflow run page, attach it to a release, or add a deploy job
-        to push it to GitHub Pages (see below).
-      </p>
-    </div>
-  </div>
-</section>
-
-<hr class="divider">
-
-<!-- ── Composite Action ──────────────── -->
-<section id="composite-action">
-  <div class="wrap">
-    <div class="section-label">Option 2</div>
-    <div class="section-title reveal">Composite Action</div>
-    <p class="section-desc reveal">
-      Drop the render step into any existing workflow. You control checkout, CLI installation, and what happens with the output.
-    </p>
-
-    <div class="code-block reveal">
-      <div class="tab-bar">
-        <button class="tab active" onclick="switchTab(this,'act-basic')">Basic</button>
-        <button class="tab" onclick="switchTab(this,'act-build')">Build + Render</button>
-        <button class="tab" onclick="switchTab(this,'act-release')">Release Asset</button>
-      </div>
-      <div id="act-basic" class="panel active"><span class="comment"># Use inside any job</span>
+      <div id="ex-basic" class="panel active"><span class="comment"># .github/workflows/docs.yml</span>
 <span class="c">steps</span>:
   - <span class="f">uses</span>: <span class="s">actions/checkout@v6</span>
 
@@ -489,7 +406,28 @@ section{padding:4rem 0}
     <span class="f">with</span>:
       <span class="a">name</span>: cli-docs
       <span class="a">path</span>: docs/cli</div>
-      <div id="act-build" class="panel"><span class="comment"># Build your CLI from source, then render</span>
+      <div id="ex-file" class="panel"><span class="comment"># Render from pre-exported opencli.json</span>
+<span class="c">steps</span>:
+  - <span class="f">uses</span>: <span class="s">actions/checkout@v6</span>
+
+  - <span class="f">uses</span>: <span class="s">JKamsker/InSpectra@v1</span>
+    <span class="f">with</span>:
+      <span class="a">mode</span>: file
+      <span class="a">opencli-json</span>: docs/opencli.json
+      <span class="a">xmldoc</span>: docs/xmldoc.xml         <span class="comment"># optional</span>
+      <span class="a">output-dir</span>: docs/cli</div>
+      <div id="ex-markdown" class="panel"><span class="comment"># Generate Markdown instead of HTML</span>
+<span class="c">steps</span>:
+  - <span class="f">uses</span>: <span class="s">actions/checkout@v6</span>
+
+  - <span class="a">run</span>: dotnet tool install -g MyCli.Tool
+
+  - <span class="f">uses</span>: <span class="s">JKamsker/InSpectra@v1</span>
+    <span class="f">with</span>:
+      <span class="a">cli-name</span>: mycli
+      <span class="a">format</span>: markdown               <span class="comment"># or markdown-monolith</span>
+      <span class="a">output-dir</span>: docs/cli</div>
+      <div id="ex-build" class="panel"><span class="comment"># Build your CLI from source, then render</span>
 <span class="c">steps</span>:
   - <span class="f">uses</span>: <span class="s">actions/checkout@v6</span>
 
@@ -505,7 +443,7 @@ section{padding:4rem 0}
     <span class="f">with</span>:
       <span class="a">cli-name</span>: ./publish/mycli       <span class="comment"># path to built binary</span>
       <span class="a">output-dir</span>: _site</div>
-      <div id="act-release" class="panel"><span class="comment"># Attach docs to a GitHub Release</span>
+      <div id="ex-release" class="panel"><span class="comment"># Attach docs to a GitHub Release</span>
 <span class="c">steps</span>:
   - <span class="f">uses</span>: <span class="s">actions/checkout@v6</span>
 
@@ -525,8 +463,8 @@ section{padding:4rem 0}
 
     <div class="prose reveal">
       <p>
-        The composite action installs <strong>.NET</strong> and <strong>InSpectra.Gen</strong> automatically.
-        It does <em>not</em> install your CLI &mdash; add that step before the render action.
+        The action installs <strong>.NET</strong> and <strong>InSpectra.Gen</strong> automatically.
+        It does <em>not</em> install your CLI &mdash; add that step before the action.
       </p>
     </div>
   </div>
@@ -540,7 +478,7 @@ section{padding:4rem 0}
     <div class="section-label">Reference</div>
     <div class="section-title reveal">Inputs</div>
     <p class="section-desc reveal">
-      Both the reusable workflow and composite action accept these inputs. The workflow adds a few extras for CLI installation.
+      All inputs accepted by <code>JKamsker/InSpectra@v1</code>.
     </p>
 
     <div class="callout reveal">
@@ -551,7 +489,7 @@ section{padding:4rem 0}
       </p>
     </div>
 
-    <div class="section-label" style="margin-top:2rem">Render inputs (action + workflow)</div>
+    <div class="section-label" style="margin-top:2rem">Inputs</div>
     <div class="options-grid reveal">
       <div class="option-card">
         <div class="option-name">mode</div>
@@ -620,29 +558,6 @@ section{padding:4rem 0}
       </div>
     </div>
 
-    <div class="section-label">Workflow-only inputs</div>
-    <div class="options-grid reveal">
-      <div class="option-card">
-        <div class="option-name">dotnet-tool</div>
-        <div class="option-desc">NuGet package to <code>dotnet tool install -g</code> as the target CLI.</div>
-        <div class="option-default">Optional</div>
-      </div>
-      <div class="option-card">
-        <div class="option-name">dotnet-tool-version</div>
-        <div class="option-desc">Version constraint for the dotnet tool install.</div>
-        <div class="option-default">Optional (latest)</div>
-      </div>
-      <div class="option-card">
-        <div class="option-name">setup-command</div>
-        <div class="option-desc">Custom shell command to make your CLI available on PATH.</div>
-        <div class="option-default">Optional</div>
-      </div>
-      <div class="option-card">
-        <div class="option-name">artifact-name</div>
-        <div class="option-desc">Name of the uploaded artifact.</div>
-        <div class="option-default">Default: <code>inspectra-docs</code></div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -686,10 +601,16 @@ section{padding:4rem 0}
 
 <span class="c">jobs</span>:
   <span class="a">generate</span>:
-    <span class="f">uses</span>: <span class="s">JKamsker/InSpectra/.github/workflows/inspectra-generate.yml@v1</span>
-    <span class="f">with</span>:
-      <span class="a">dotnet-tool</span>: MyCli.Tool
-      <span class="a">cli-name</span>: mycli
+    <span class="f">runs-on</span>: ubuntu-latest
+    <span class="f">steps</span>:
+      - <span class="f">uses</span>: <span class="s">actions/checkout@v6</span>
+      - <span class="a">run</span>: dotnet tool install -g MyCli.Tool
+      - <span class="f">uses</span>: <span class="s">JKamsker/InSpectra@v1</span>
+        <span class="f">with</span>:
+          <span class="a">cli-name</span>: mycli
+          <span class="a">output-dir</span>: _site
+      - <span class="f">uses</span>: <span class="s">actions/upload-pages-artifact@v3</span>
+        <span class="f">with</span>: { <span class="a">path</span>: _site }
 
   <span class="a">deploy</span>:
     <span class="f">needs</span>: generate
@@ -698,10 +619,6 @@ section{padding:4rem 0}
       <span class="a">name</span>: github-pages
       <span class="a">url</span>: <span class="s">${{ steps.deploy.outputs.page_url }}</span>
     <span class="f">steps</span>:
-      - <span class="f">uses</span>: <span class="s">actions/download-artifact@v4</span>
-        <span class="f">with</span>: { <span class="a">name</span>: inspectra-docs, <span class="a">path</span>: _site }
-      - <span class="f">uses</span>: <span class="s">actions/upload-pages-artifact@v3</span>
-        <span class="f">with</span>: { <span class="a">path</span>: _site }
       - <span class="f">uses</span>: <span class="s">actions/deploy-pages@v4</span>
         <span class="a">id</span>: deploy</div>
     </div>
