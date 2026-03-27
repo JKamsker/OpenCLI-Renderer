@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json;
 using InSpectra.Gen.Runtime;
 using InSpectra.Gen.Services;
@@ -146,11 +147,22 @@ public sealed class SelfDocCommand(
     }
 }
 
-public sealed class SelfDocSettings : HtmlCommandSettingsBase
+/// <summary>
+/// Settings for rendering InSpectra's own documentation set.
+/// </summary>
+public sealed class SelfDocSettings : SelfDocHtmlCommandSettingsBase
 {
+    /// <summary>
+    /// Skip generating the Markdown tree output under <c>tree/</c>.
+    /// </summary>
+    [Description("Skip generating the Markdown tree output under tree/.")]
     [CommandOption("--skip-markdown")]
     public bool SkipMarkdown { get; init; }
 
+    /// <summary>
+    /// Skip generating the HTML app bundle under <c>html/</c>.
+    /// </summary>
+    [Description("Skip generating the HTML app bundle under html/.")]
     [CommandOption("--skip-html")]
     public bool SkipHtml { get; init; }
 }

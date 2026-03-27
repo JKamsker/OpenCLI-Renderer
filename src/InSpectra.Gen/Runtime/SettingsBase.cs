@@ -1,72 +1,251 @@
+using System.ComponentModel;
 using Spectre.Console.Cli;
 
 namespace InSpectra.Gen.Runtime;
 
+/// <summary>
+/// Shared CLI flags for the file and exec render commands.
+/// </summary>
 public abstract class CommonCommandSettings : CommandSettings
 {
+    /// <summary>
+    /// Emit the stable machine-readable JSON envelope instead of human output.
+    /// </summary>
+    [Description("Emit the stable machine-readable JSON envelope instead of human output.")]
     [CommandOption("--json")]
     public bool Json { get; init; }
 
+    /// <summary>
+    /// Override the output mode. Supported values are <c>human</c> and <c>json</c>.
+    /// </summary>
+    [Description("Override the output mode. Supported values are human and json.")]
     [CommandOption("--output <MODE>")]
     public string? Output { get; init; }
 
+    /// <summary>
+    /// Suppress non-essential console output.
+    /// </summary>
+    [Description("Suppress non-essential console output.")]
     [CommandOption("-q|--quiet")]
     public bool Quiet { get; init; }
 
+    /// <summary>
+    /// Increase diagnostic detail in the rendered summary output.
+    /// </summary>
+    [Description("Increase diagnostic detail in the rendered summary output.")]
     [CommandOption("--verbose")]
     public bool Verbose { get; init; }
 
+    /// <summary>
+    /// Disable ANSI color sequences in human-readable console output.
+    /// </summary>
+    [Description("Disable ANSI color sequences in human-readable console output.")]
     [CommandOption("--no-color")]
     public bool NoColor { get; init; }
 
+    /// <summary>
+    /// Preview the resolved render plan without writing files.
+    /// </summary>
+    [Description("Preview the resolved render plan without writing files.")]
     [CommandOption("--dry-run")]
     public bool DryRun { get; init; }
 
+    /// <summary>
+    /// Allow existing output files or directories to be replaced.
+    /// </summary>
+    [Description("Allow existing output files or directories to be replaced.")]
     [CommandOption("--overwrite")]
     public bool Overwrite { get; init; }
 
+    /// <summary>
+    /// Include commands and options marked hidden by the source CLI.
+    /// </summary>
+    [Description("Include commands and options marked hidden by the source CLI.")]
     [CommandOption("--include-hidden")]
     public bool IncludeHidden { get; init; }
 
+    /// <summary>
+    /// Include metadata sections in the rendered Markdown or HTML output.
+    /// </summary>
+    [Description("Include metadata sections in the rendered Markdown or HTML output.")]
     [CommandOption("--include-metadata")]
     public bool IncludeMetadata { get; init; }
 }
 
+/// <summary>
+/// Shared HTML-output settings for file and exec render commands.
+/// </summary>
 public abstract class HtmlCommandSettingsBase : CommonCommandSettings
 {
+    /// <summary>
+    /// Directory where the HTML app bundle should be written.
+    /// </summary>
+    [Description("Directory where the HTML app bundle should be written.")]
     [CommandOption("--out-dir <DIR>")]
     public string? OutputDirectory { get; init; }
 
+    /// <summary>
+    /// Show the viewer home screen button in the generated HTML app.
+    /// </summary>
+    [Description("Show the viewer home screen button in the generated HTML app.")]
     [CommandOption("--show-home")]
     public bool ShowHome { get; init; }
 
+    /// <summary>
+    /// Hide the interactive command composer from the generated HTML app.
+    /// </summary>
+    [Description("Hide the interactive command composer from the generated HTML app.")]
     [CommandOption("--no-composer")]
     public bool NoComposer { get; init; }
 
+    /// <summary>
+    /// Disable dark mode in the generated HTML app.
+    /// </summary>
+    [Description("Disable dark mode in the generated HTML app.")]
     [CommandOption("--no-dark")]
     public bool NoDark { get; init; }
 
+    /// <summary>
+    /// Disable light mode in the generated HTML app.
+    /// </summary>
+    [Description("Disable light mode in the generated HTML app.")]
     [CommandOption("--no-light")]
     public bool NoLight { get; init; }
 
+    /// <summary>
+    /// Allow the viewer to load OpenCLI inputs from URL query parameters.
+    /// </summary>
+    [Description("Allow the viewer to load OpenCLI inputs from URL query parameters.")]
     [CommandOption("--enable-url")]
     public bool EnableUrl { get; init; }
 
+    /// <summary>
+    /// Enable the NuGet package browser on the viewer home screen.
+    /// </summary>
+    [Description("Enable the NuGet package browser on the viewer home screen.")]
     [CommandOption("--enable-nuget-browser")]
     public bool EnableNugetBrowser { get; init; }
 
+    /// <summary>
+    /// Enable local package upload on the viewer home screen.
+    /// </summary>
+    [Description("Enable local package upload on the viewer home screen.")]
     [CommandOption("--enable-package-upload")]
     public bool EnablePackageUpload { get; init; }
 }
 
+/// <summary>
+/// Shared Markdown-output settings for file and exec render commands.
+/// </summary>
 public abstract class MarkdownCommandSettingsBase : CommonCommandSettings
 {
+    /// <summary>
+    /// Markdown layout mode. Supported values are <c>single</c> and <c>tree</c>.
+    /// </summary>
+    [Description("Markdown layout mode. Supported values are single and tree.")]
     [CommandOption("--layout <LAYOUT>")]
     public string? Layout { get; init; }
 
+    /// <summary>
+    /// Single Markdown file to write when using the <c>single</c> layout.
+    /// </summary>
+    [Description("Single Markdown file to write when using the single layout.")]
     [CommandOption("--out <FILE>")]
     public string? OutputFile { get; init; }
 
+    /// <summary>
+    /// Output directory to write when using the <c>tree</c> layout.
+    /// </summary>
+    [Description("Output directory to write when using the tree layout.")]
     [CommandOption("--out-dir <DIR>")]
     public string? OutputDirectory { get; init; }
+}
+
+/// <summary>
+/// Shared flags supported by the self-documentation command.
+/// </summary>
+public abstract class SelfDocCommandSettingsBase : CommandSettings
+{
+    /// <summary>
+    /// Allow existing self-documentation output to be replaced.
+    /// </summary>
+    [Description("Allow existing self-documentation output to be replaced.")]
+    [CommandOption("--overwrite")]
+    public bool Overwrite { get; init; }
+
+    /// <summary>
+    /// Include hidden commands and options from InSpectra's own CLI surface.
+    /// </summary>
+    [Description("Include hidden commands and options from InSpectra's own CLI surface.")]
+    [CommandOption("--include-hidden")]
+    public bool IncludeHidden { get; init; }
+
+    /// <summary>
+    /// Include metadata sections in the generated Markdown tree and HTML bundle.
+    /// </summary>
+    [Description("Include metadata sections in the generated Markdown tree and HTML bundle.")]
+    [CommandOption("--include-metadata")]
+    public bool IncludeMetadata { get; init; }
+}
+
+/// <summary>
+/// Shared HTML feature flags supported by the self-documentation command.
+/// </summary>
+public abstract class SelfDocHtmlCommandSettingsBase : SelfDocCommandSettingsBase
+{
+    /// <summary>
+    /// Directory where the self-documentation bundle should be written.
+    /// </summary>
+    [Description("Directory where the self-documentation bundle should be written.")]
+    [CommandOption("--out-dir <DIR>")]
+    public string? OutputDirectory { get; init; }
+
+    /// <summary>
+    /// Show the viewer home screen button in the generated self-documentation app.
+    /// </summary>
+    [Description("Show the viewer home screen button in the generated self-documentation app.")]
+    [CommandOption("--show-home")]
+    public bool ShowHome { get; init; }
+
+    /// <summary>
+    /// Hide the interactive command composer from the generated self-documentation app.
+    /// </summary>
+    [Description("Hide the interactive command composer from the generated self-documentation app.")]
+    [CommandOption("--no-composer")]
+    public bool NoComposer { get; init; }
+
+    /// <summary>
+    /// Disable dark mode in the generated self-documentation app.
+    /// </summary>
+    [Description("Disable dark mode in the generated self-documentation app.")]
+    [CommandOption("--no-dark")]
+    public bool NoDark { get; init; }
+
+    /// <summary>
+    /// Disable light mode in the generated self-documentation app.
+    /// </summary>
+    [Description("Disable light mode in the generated self-documentation app.")]
+    [CommandOption("--no-light")]
+    public bool NoLight { get; init; }
+
+    /// <summary>
+    /// Allow the viewer to load alternate OpenCLI inputs from URL query parameters.
+    /// </summary>
+    [Description("Allow the viewer to load alternate OpenCLI inputs from URL query parameters.")]
+    [CommandOption("--enable-url")]
+    public bool EnableUrl { get; init; }
+
+    /// <summary>
+    /// Enable the NuGet package browser on the self-documentation viewer home screen.
+    /// </summary>
+    [Description("Enable the NuGet package browser on the self-documentation viewer home screen.")]
+    [CommandOption("--enable-nuget-browser")]
+    public bool EnableNugetBrowser { get; init; }
+
+    /// <summary>
+    /// Enable local package upload on the self-documentation viewer home screen.
+    /// </summary>
+    [Description("Enable local package upload on the self-documentation viewer home screen.")]
+    [CommandOption("--enable-package-upload")]
+    public bool EnablePackageUpload { get; init; }
 }

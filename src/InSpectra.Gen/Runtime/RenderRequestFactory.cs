@@ -67,29 +67,60 @@ public static class RenderRequestFactory
 
     public static HtmlFeatureFlags CreateHtmlFeatureFlags(HtmlCommandSettingsBase settings)
     {
-        if (settings.NoDark && settings.NoLight)
+        return CreateHtmlFeatureFlags(
+            settings.ShowHome,
+            settings.NoComposer,
+            settings.NoDark,
+            settings.NoLight,
+            settings.EnableUrl,
+            settings.EnableNugetBrowser,
+            settings.EnablePackageUpload);
+    }
+
+    public static HtmlFeatureFlags CreateHtmlFeatureFlags(SelfDocHtmlCommandSettingsBase settings)
+    {
+        return CreateHtmlFeatureFlags(
+            settings.ShowHome,
+            settings.NoComposer,
+            settings.NoDark,
+            settings.NoLight,
+            settings.EnableUrl,
+            settings.EnableNugetBrowser,
+            settings.EnablePackageUpload);
+    }
+
+    private static HtmlFeatureFlags CreateHtmlFeatureFlags(
+        bool showHome,
+        bool noComposer,
+        bool noDark,
+        bool noLight,
+        bool enableUrl,
+        bool enableNugetBrowser,
+        bool enablePackageUpload)
+    {
+        if (noDark && noLight)
         {
             throw new CliUsageException("`--no-dark` and `--no-light` cannot both be set.");
         }
 
-        if (settings.EnableNugetBrowser && !settings.ShowHome)
+        if (enableNugetBrowser && !showHome)
         {
             throw new CliUsageException("`--enable-nuget-browser` requires `--show-home`.");
         }
 
-        if (settings.EnablePackageUpload && !settings.ShowHome)
+        if (enablePackageUpload && !showHome)
         {
             throw new CliUsageException("`--enable-package-upload` requires `--show-home`.");
         }
 
         return new HtmlFeatureFlags(
-            ShowHome: settings.ShowHome,
-            Composer: !settings.NoComposer,
-            DarkTheme: !settings.NoDark,
-            LightTheme: !settings.NoLight,
-            UrlLoading: settings.EnableUrl,
-            NugetBrowser: settings.EnableNugetBrowser,
-            PackageUpload: settings.EnablePackageUpload);
+            ShowHome: showHome,
+            Composer: !noComposer,
+            DarkTheme: !noDark,
+            LightTheme: !noLight,
+            UrlLoading: enableUrl,
+            NugetBrowser: enableNugetBrowser,
+            PackageUpload: enablePackageUpload);
     }
 
     public static string ResolveWorkingDirectory(string? workingDirectory)
