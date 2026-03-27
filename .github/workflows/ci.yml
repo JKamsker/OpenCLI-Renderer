@@ -154,6 +154,7 @@ jobs:
           mkdir -p "$site/examples" "$site/try"
 
           cp docs/index.html "$site/index.html"
+          cp docs/integrate.html "$site/integrate.html"
           echo "inspectra.kamsker.at" > "$site/CNAME"
           touch "$site/.nojekyll"
 
@@ -267,6 +268,7 @@ jobs:
           mkdir -p "$site/examples" "$site/try"
 
           cp docs/index.html "$site/index.html"
+          cp docs/integrate.html "$site/integrate.html"
           echo "inspectra.kamsker.at" > "$site/CNAME"
           touch "$site/.nojekyll"
 
