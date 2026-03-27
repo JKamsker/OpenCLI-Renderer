@@ -305,19 +305,39 @@ function PackageCard({ pkg }: { pkg: DiscoveryPackageSummary }) {
         </div>
 
         <div className="browse-card-stats">
-          <span className="browse-card-stat" aria-label={`Last updated ${formatRelativeAgeLong(pkg.updatedAt)} ago`}>
+          <span
+            className="browse-card-stat"
+            aria-label={`Last updated ${formatRelativeAgeLong(pkg.updatedAt)} ago`}
+            data-tooltip={buildUpdatedTooltip(pkg.updatedAt)}
+            title={buildUpdatedTooltip(pkg.updatedAt)}
+          >
             <Clock3 aria-hidden="true" size={13} />
             <span>{formatRelativeAgeShort(pkg.updatedAt)}</span>
           </span>
-          <span className="browse-card-stat" aria-label={`${pkg.totalDownloads} total downloads`}>
+          <span
+            className="browse-card-stat"
+            aria-label={`${pkg.totalDownloads} total downloads`}
+            data-tooltip={`Downloads: ${formatNumber(pkg.totalDownloads)}`}
+            title={`Downloads: ${formatNumber(pkg.totalDownloads)}`}
+          >
             <ArrowDownToLine aria-hidden="true" size={13} />
             <span>{formatCount(pkg.totalDownloads)}</span>
           </span>
-          <span className="browse-card-stat" aria-label={`${pkg.commandCount} commands`}>
+          <span
+            className="browse-card-stat"
+            aria-label={`${pkg.commandCount} commands`}
+            data-tooltip={`Commands: ${formatNumber(pkg.commandCount)}`}
+            title={`Commands: ${formatNumber(pkg.commandCount)}`}
+          >
             <Terminal aria-hidden="true" size={13} />
             <span>{pkg.commandCount}</span>
           </span>
-          <span className="browse-card-stat" aria-label={`${pkg.commandGroupCount} command groups`}>
+          <span
+            className="browse-card-stat"
+            aria-label={`${pkg.commandGroupCount} command groups`}
+            data-tooltip={`Groups: ${formatNumber(pkg.commandGroupCount)}`}
+            title={`Groups: ${formatNumber(pkg.commandGroupCount)}`}
+          >
             <Layers3 aria-hidden="true" size={13} />
             <span>{pkg.commandGroupCount}</span>
           </span>
@@ -335,6 +355,10 @@ function handlePackageIconError(event: SyntheticEvent<HTMLImageElement>) {
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(value);
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat().format(value);
 }
 
 function formatRelativeAgeShort(iso: string): string {
@@ -367,6 +391,24 @@ function formatRelativeAgeLong(iso: string): string {
   if (diffMs >= dayMs) return `${Math.floor(diffMs / dayMs)} day${diffMs >= 2 * dayMs ? "s" : ""}`;
   if (diffMs >= hourMs) return `${Math.floor(diffMs / hourMs)} hour${diffMs >= 2 * hourMs ? "s" : ""}`;
   return "less than 1 hour";
+}
+
+function buildUpdatedTooltip(iso: string): string {
+  return `Updated: ${formatRelativeAgeLong(iso)} ago (${formatAbsoluteDate(iso)})`;
+}
+
+function formatAbsoluteDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
 }
 
 function sortPackages(packages: DiscoveryPackageSummary[], orderBy: BrowseOrder): DiscoveryPackageSummary[] {
