@@ -24,6 +24,8 @@ interface NugetBrowserProps {
 
 type BrowseOrder =
   | "index"
+  | "updated"
+  | "created"
   | "downloads"
   | "name"
   | "commands"
@@ -235,6 +237,8 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
               <span className="browse-order-label">Order by</span>
               <select value={orderBy} onChange={(e) => setOrderBy(e.target.value as BrowseOrder)}>
                 <option value="index">Discovery order</option>
+                <option value="updated">Recently updated</option>
+                <option value="created">Recently created</option>
                 <option value="downloads">Downloads</option>
                 <option value="name">Name</option>
                 <option value="commands">Commands</option>
@@ -333,6 +337,14 @@ function sortPackages(packages: DiscoveryPackageSummary[], orderBy: BrowseOrder)
   const sorted = [...packages];
 
   switch (orderBy) {
+    case "updated":
+      return sorted.sort((left, right) =>
+        compareIsoDatesDesc(left.updatedAt, right.updatedAt) || left.packageId.localeCompare(right.packageId),
+      );
+    case "created":
+      return sorted.sort((left, right) =>
+        compareIsoDatesDesc(left.createdAt, right.createdAt) || left.packageId.localeCompare(right.packageId),
+      );
     case "downloads":
       return sorted.sort((left, right) =>
         right.totalDownloads - left.totalDownloads || left.packageId.localeCompare(right.packageId),
@@ -355,4 +367,8 @@ function sortPackages(packages: DiscoveryPackageSummary[], orderBy: BrowseOrder)
     default:
       return sorted;
   }
+}
+
+function compareIsoDatesDesc(left: string, right: string): number {
+  return Date.parse(right) - Date.parse(left);
 }

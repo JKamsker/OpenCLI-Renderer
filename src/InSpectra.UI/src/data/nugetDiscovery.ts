@@ -17,6 +17,8 @@ export interface DiscoveryPackageSummary {
   commandName: string;
   versionCount: number;
   latestVersion: string;
+  createdAt: string;
+  updatedAt: string;
   completeness: DiscoveryCompleteness;
   packageIconUrl?: string;
   totalDownloads: number;
