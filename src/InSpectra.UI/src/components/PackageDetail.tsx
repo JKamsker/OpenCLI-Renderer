@@ -1,9 +1,9 @@
 import { AlertTriangle, ArrowLeft, CheckCircle2, ExternalLink, LoaderCircle, Package } from "lucide-react";
 import { useState } from "react";
-import { DiscoveryPackage, resolvePackageUrls } from "../data/nugetDiscovery";
+import { DiscoveryPackageDetail, resolvePackageUrls } from "../data/nugetDiscovery";
 
 interface PackageDetailProps {
-  pkg: DiscoveryPackage;
+  pkg: DiscoveryPackageDetail;
   selectedVersion?: string;
   onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) => void;
 }

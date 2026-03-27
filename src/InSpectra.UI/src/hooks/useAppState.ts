@@ -4,7 +4,7 @@ import { resolveStartupRequest } from "../boot/bootstrap";
 import { defaultFeatureFlags, defaultViewerOptions, FeatureFlags, ViewerOptions } from "../boot/contracts";
 import { loadFromFiles, loadFromStartupRequest, loadFromUrls, LoadedSource } from "../data/loadSource";
 import { buildCommandHash, buildPackageHash, HashRoute, parseHashRoute } from "../data/navigation";
-import { fetchDiscoveryIndex, findPackageById, resolvePackageUrls } from "../data/nugetDiscovery";
+import { fetchDiscoveryPackage, resolvePackageUrls } from "../data/nugetDiscovery";
 import { findCommandByPath, normalizeOpenCliDocument, NormalizedCliDocument } from "../data/normalize";
 
 interface LoadState {
@@ -141,13 +141,7 @@ export function useAppState() {
   async function loadPackageFromRoute(packageId: string, version: string | undefined, signal?: AbortSignal) {
     try {
       setLoadState({ status: "loading", message: `Loading ${packageId}${version ? ` v${version}` : ""}` });
-      const index = await fetchDiscoveryIndex(signal);
-      const pkg = findPackageById(index, packageId);
-      if (!pkg) {
-        setError(`Package "${packageId}" not found in the discovery index.`);
-        setLoadState({ status: "empty" });
-        return;
-      }
+      const pkg = await fetchDiscoveryPackage(packageId, signal);
       const resolvedVersion = version ?? pkg.latestVersion;
       if (!pkg.versions.some((v) => v.version === resolvedVersion)) {
         setError(`Version "${resolvedVersion}" not found for package "${packageId}".`);

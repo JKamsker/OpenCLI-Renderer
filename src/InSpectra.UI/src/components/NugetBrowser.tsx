@@ -1,10 +1,12 @@
 import { ArrowLeft, LoaderCircle, Package, Search } from "lucide-react";
-import { useEffect, useDeferredValue, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 import {
-  DiscoveryIndex,
-  DiscoveryPackage,
+  DiscoveryPackageDetail,
+  DiscoveryPackageSummary,
+  DiscoverySummaryIndex,
   fetchDiscoveryIndex,
-  findPackageById,
+  fetchDiscoveryPackage,
+  getPackageStatus,
   searchPackages,
 } from "../data/nugetDiscovery";
 import { buildBrowseHash } from "../data/navigation";
@@ -20,9 +22,12 @@ interface NugetBrowserProps {
 
 export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: NugetBrowserProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [index, setIndex] = useState<DiscoveryIndex | null>(null);
+  const [index, setIndex] = useState<DiscoverySummaryIndex | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [packageLoading, setPackageLoading] = useState(false);
+  const [packageError, setPackageError] = useState<string | null>(null);
+  const [packageDetail, setPackageDetail] = useState<DiscoveryPackageDetail | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const deferredSearch = useDeferredValue(searchTerm);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -32,7 +37,10 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
     setLoading(true);
     setError(null);
     fetchDiscoveryIndex(controller.signal)
-      .then((data) => { setIndex(data); setLoading(false); })
+      .then((data) => {
+        setIndex(data);
+        setLoading(false);
+      })
       .catch((err) => {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setError(err instanceof Error ? err.message : "Failed to load index.");
@@ -40,6 +48,31 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
       });
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (!packageId) {
+      setPackageDetail(null);
+      setPackageError(null);
+      setPackageLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setPackageDetail(null);
+    setPackageError(null);
+    setPackageLoading(true);
+    fetchDiscoveryPackage(packageId, controller.signal)
+      .then((data) => {
+        setPackageDetail(data);
+        setPackageLoading(false);
+      })
+      .catch((err) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setPackageError(err instanceof Error ? err.message : "Failed to load package.");
+        setPackageLoading(false);
+      });
+    return () => controller.abort();
+  }, [packageId]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -50,13 +83,67 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
           searchInputRef.current.focus({ preventScroll: true });
           window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
-          setPaletteOpen((o) => !o);
+          setPaletteOpen((open) => !open);
         }
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const browsePalette = index ? (
+    <BrowsePalette
+      packages={index.packages}
+      open={paletteOpen}
+      onClose={() => setPaletteOpen(false)}
+      onSelect={(pkgId) => {
+        window.location.hash = buildBrowseHash(pkgId);
+      }}
+    />
+  ) : null;
+
+  if (packageId) {
+    if (packageError) {
+      return (
+        <>
+          <main className="import-screen">
+            <section className="import-hero panel">
+              <div className="eyebrow">NuGet Browser</div>
+              <h1>Package not found</h1>
+              <p className="inline-alert" role="alert">{packageError}</p>
+              <button type="button" className="secondary-button" onClick={() => history.back()} style={{ marginTop: "1rem" }}>
+                Back to browser
+              </button>
+            </section>
+          </main>
+          {browsePalette}
+        </>
+      );
+    }
+
+    if (packageLoading || !packageDetail) {
+      return (
+        <>
+          <main className="import-screen">
+            <section className="import-hero panel">
+              <div className="browse-loading">
+                <LoaderCircle className="spin" aria-hidden="true" />
+                <span>Loading package details...</span>
+              </div>
+            </section>
+          </main>
+          {browsePalette}
+        </>
+      );
+    }
+
+    return (
+      <>
+        <PackageDetail pkg={packageDetail} selectedVersion={version} onLoadPackage={onLoadPackage} />
+        {browsePalette}
+      </>
+    );
+  }
 
   if (loading) {
     return (
@@ -83,44 +170,6 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
           </button>
         </section>
       </main>
-    );
-  }
-
-  const browsePalette = (
-    <BrowsePalette
-      packages={index.packages}
-      open={paletteOpen}
-      onClose={() => setPaletteOpen(false)}
-      onSelect={(pkgId) => { window.location.hash = buildBrowseHash(pkgId); }}
-    />
-  );
-
-  if (packageId) {
-    const pkg = findPackageById(index, packageId);
-    if (!pkg) {
-      return (
-        <>
-          <main className="import-screen">
-            <section className="import-hero panel">
-              <div className="eyebrow">NuGet Browser</div>
-              <h1>Package not found</h1>
-              <p className="lede">
-                No package matching <code>{packageId}</code> was found in the index.
-              </p>
-              <button type="button" className="secondary-button" onClick={() => history.back()} style={{ marginTop: "1rem" }}>
-                Back to browser
-              </button>
-            </section>
-          </main>
-          {browsePalette}
-        </>
-      );
-    }
-    return (
-      <>
-        <PackageDetail pkg={pkg} selectedVersion={version} onLoadPackage={onLoadPackage} />
-        {browsePalette}
-      </>
     );
   }
 
@@ -182,22 +231,21 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
   );
 }
 
-function PackageCard({ pkg }: { pkg: DiscoveryPackage }) {
-  const latestVer = pkg.versions[0];
+function PackageCard({ pkg }: { pkg: DiscoveryPackageSummary }) {
   return (
     <a className="browse-card panel" href={buildBrowseHash(pkg.packageId)}>
       <div className="browse-card-header">
         <Package aria-hidden="true" className="browse-card-icon" />
         <div className="browse-card-title">{pkg.packageId}</div>
-        <StatusBadge status={pkg.latestStatus} />
+        <StatusBadge status={getPackageStatus(pkg)} />
       </div>
       <div className="browse-card-meta">
-        {latestVer?.command && (
-          <span className="browse-card-command"><code>{latestVer.command}</code></span>
+        {pkg.commandName && (
+          <span className="browse-card-command"><code>{pkg.commandName}</code></span>
         )}
         <span className="browse-card-version">v{pkg.latestVersion}</span>
-        {pkg.versions.length > 1 && (
-          <span className="browse-card-versions">{pkg.versions.length} versions</span>
+        {pkg.versionCount > 1 && (
+          <span className="browse-card-versions">{pkg.versionCount} versions</span>
         )}
       </div>
     </a>

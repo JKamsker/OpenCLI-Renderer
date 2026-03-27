@@ -1,8 +1,8 @@
-import { DiscoveryPackage } from "../data/nugetDiscovery";
+import { DiscoveryPackageSummary } from "../data/nugetDiscovery";
 import { SearchPalette, SearchPaletteItem } from "./SearchPalette";
 
 interface BrowsePaletteProps {
-  packages: DiscoveryPackage[];
+  packages: DiscoveryPackageSummary[];
   open: boolean;
   onClose: () => void;
   onSelect: (packageId: string) => void;
@@ -12,7 +12,7 @@ export function BrowsePalette({ packages, open, onClose, onSelect }: BrowsePalet
   const items: SearchPaletteItem[] = packages.map((pkg) => ({
     key: pkg.packageId,
     title: pkg.packageId,
-    description: pkg.versions[0]?.command ?? "",
+    description: pkg.commandName,
   }));
   return (
     <SearchPalette
