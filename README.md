@@ -1,17 +1,47 @@
 # InSpectra
 
-Turn an OpenCLI export into either Markdown or a relocatable HTML app bundle.
+[![CI](https://github.com/JKamsker/InSpectra/actions/workflows/ci.yml/badge.svg)](https://github.com/JKamsker/InSpectra/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/v/InSpectra.Gen?logo=nuget&label=InSpectra.Gen)](https://www.nuget.org/packages/InSpectra.Gen)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/InSpectra.Gen?logo=nuget&label=downloads)](https://www.nuget.org/packages/InSpectra.Gen)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512bd4?logo=dotnet)](https://dotnet.microsoft.com/)
+[![Website](https://img.shields.io/badge/website-inspectra.kamsker.at-blue)](https://inspectra.kamsker.at)
 
-```bash
-inspectra render file html mycli.json --out-dir ./docs
-```
+**Turn any CLI's [OpenCLI](https://opencli.org/) spec into beautiful, navigable documentation — Markdown or interactive HTML — in a single command.**
 
-InSpectra is a .NET 10 tool that reads [OpenCLI](https://opencli.org/) JSON exports, optionally enriches them with XML metadata, and renders either:
+> Website: [inspectra.kamsker.at](https://inspectra.kamsker.at) | [Live examples](https://inspectra.kamsker.at/examples/inspectra/) | [Try it](https://inspectra.kamsker.at/try/)
 
-- GitHub-friendly Markdown
-- an interactive HTML viewer bundle with `index.html` plus built JS/CSS assets
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Install](#install)
+- [Quick Start](#quick-start)
+- [GitHub Action](#github-action)
+- [Reusable Workflow](#reusable-workflow)
+- [CLI Reference](#cli-reference)
+- [HTML Viewer](#html-viewer-inspectraui)
+- [Architecture](#architecture)
+- [Project Layout](#project-layout)
+- [Contributing](#contributing)
+- [Examples](#examples)
+
+## Features
+
+- **Markdown output** — GitHub-friendly single file or tree layout (one file per command)
+- **Interactive HTML viewer** — relocatable SPA bundle with sidebar navigation, search, dark/light theme, and deep-link hash routing
+- **Command composer** — interactively build CLI invocations from documented options and arguments
+- **Command palette** — fuzzy search across all commands (Ctrl+K)
+- **NuGet browser** — search and explore indexed .NET CLI tool packages
+- **XML enrichment** — additive metadata from XML docs, only fills missing descriptions
+- **Validation first** — broken specs fail early, before any rendering
+- **Self-documentation** — InSpectra can generate its own docs
+- **GitHub Action** — one-step CI integration for any .NET CLI tool
+- **Secure by default** — generated pages expose only the features you explicitly enable
 
 ## Install
+
+### As a .NET global tool
 
 ```bash
 dotnet tool install -g InSpectra.Gen
@@ -19,51 +49,188 @@ dotnet tool install -g InSpectra.Gen
 
 This installs the `inspectra` command globally.
 
-## Why
+### As a GitHub Action
 
-- OpenCLI JSON stays the source of truth. Render docs directly from what the CLI exposes.
-- Validation happens before rendering, so broken specs fail early.
-- XML enrichment is additive. It only fills missing descriptions.
-- Markdown and HTML share the same normalization and enrichment rules.
+```yaml
+- uses: JKamsker/InSpectra@v1
+  with:
+    cli-name: mycli
+```
+
+See [GitHub Action](#github-action) for full documentation.
 
 ## Quick Start
 
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- Node.js for local frontend builds, CI, and `dotnet pack` / `dotnet publish`
+- Node.js (only needed for local frontend builds, CI, and `dotnet pack` / `dotnet publish`)
 
-### Build the viewer bundle
-
-```bash
-cd src/InSpectra.UI
-npm ci
-npm test
-npm run build
-cd ../..
-```
-
-### Render Markdown
+### Render from a live CLI (exec mode)
 
 ```bash
-dotnet run --project src/InSpectra.Gen -- \
-  render file markdown examples/jellyfin-cli/opencli.json \
-  --xmldoc examples/jellyfin-cli/xmldoc.xml \
-  --out jellyfin-docs.md
+# Generate an interactive HTML documentation site
+inspectra render exec html mycli --out-dir ./docs
+
+# Generate Markdown with XML enrichment
+inspectra render exec markdown mycli --with-xmldoc --out docs.md
 ```
 
-### Render HTML
+### Render from a saved OpenCLI JSON file (file mode)
 
 ```bash
-dotnet run --project src/InSpectra.Gen -- \
-  render file html examples/jellyfin-cli/opencli.json \
-  --xmldoc examples/jellyfin-cli/xmldoc.xml \
-  --out-dir jellyfin-docs
+# HTML bundle
+inspectra render file html opencli.json --out-dir ./docs
+
+# Markdown with XML enrichment
+inspectra render file markdown opencli.json \
+  --xmldoc xmldoc.xml \
+  --out docs.md
 ```
 
-Open `jellyfin-docs/index.html` in a browser. The bundle is relocatable because the viewer is built with `base: "./"`.
+### Render from a .NET tool
 
-## Command Surface
+```bash
+# Install the target CLI and generate docs
+dotnet tool install -g JellyfinCli
+inspectra render exec html jf --with-xmldoc --out-dir ./jellyfin-docs
+```
+
+Open `./jellyfin-docs/index.html` in a browser. The bundle is relocatable because the viewer is built with `base: "./"`.
+
+## GitHub Action
+
+The `JKamsker/InSpectra@v1` action generates interactive CLI documentation in your CI pipeline.
+
+### Basic usage (exec mode)
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+
+  - uses: JKamsker/InSpectra@v1
+    with:
+      cli-name: mycli
+```
+
+### Generating docs for a .NET tool
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+
+  - uses: JKamsker/InSpectra@v1
+    with:
+      cli-name: mycli
+      dotnet-tool: MyCompany.MyCli    # installs via dotnet tool install -g
+```
+
+### File mode (from saved spec)
+
+```yaml
+steps:
+  - uses: actions/checkout@v4
+
+  - uses: JKamsker/InSpectra@v1
+    with:
+      mode: file
+      format: html
+      opencli-json: docs/opencli.json
+      xmldoc: docs/xmldoc.xml
+```
+
+### Markdown output
+
+```yaml
+- uses: JKamsker/InSpectra@v1
+  with:
+    cli-name: mycli
+    format: markdown            # tree layout (one file per command)
+
+- uses: JKamsker/InSpectra@v1
+  with:
+    cli-name: mycli
+    format: markdown-monolith   # single file
+```
+
+### Action inputs
+
+| Input | Default | Description |
+| --- | --- | --- |
+| `mode` | `exec` | `exec` (invoke a live CLI) or `file` (from saved opencli.json) |
+| `format` | `html` | `html`, `markdown` (tree), or `markdown-monolith` (single file) |
+| `cli-name` | | CLI executable name or path (exec mode) |
+| `dotnet-tool` | | NuGet package to `dotnet tool install -g` (exec mode) |
+| `dotnet-tool-version` | | Version constraint for the dotnet tool |
+| `opencli-json` | | Path to opencli.json (file mode) |
+| `xmldoc` | | Path to xmldoc.xml (file mode) |
+| `output-dir` | `inspectra-output` | Directory where rendered output is written |
+| `label` | | Custom label shown in the viewer header (e.g. `v1.2.3`) |
+| `extra-args` | | Additional flags forwarded to the `inspectra` CLI |
+| `inspectra-version` | latest | InSpectra.Gen NuGet tool version |
+| `dotnet-version` | `10.0.x` | .NET SDK version to install |
+| `dotnet-quality` | stable | .NET SDK quality channel (`preview` for pre-release) |
+| `opencli-args` | | Override the OpenCLI export arguments |
+| `xmldoc-args` | | Override the xmldoc export arguments |
+| `timeout` | | Timeout in seconds for each export command (exec mode) |
+
+### Action output
+
+| Output | Description |
+| --- | --- |
+| `output-dir` | Path to the rendered output directory |
+
+### End-to-end example: deploy to GitHub Pages
+
+```yaml
+name: Deploy CLI docs
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: JKamsker/InSpectra@v1
+        with:
+          cli-name: mycli
+          dotnet-tool: MyCompany.MyCli
+          output-dir: _site
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+```
+
+## Reusable Workflow
+
+For convenience, a reusable workflow wraps the action with checkout, tool install, and artifact upload:
+
+```yaml
+jobs:
+  docs:
+    uses: JKamsker/InSpectra/.github/workflows/inspectra-generate.yml@v1
+    with:
+      cli-name: mycli
+      dotnet-tool: MyCompany.MyCli
+```
+
+The workflow accepts the same inputs as the action, plus:
+
+| Input | Default | Description |
+| --- | --- | --- |
+| `setup-command` | | Custom shell command to make the CLI available on PATH |
+| `artifact-name` | `inspectra-docs` | Name of the uploaded artifact |
+
+## CLI Reference
 
 ```text
 inspectra render [file|exec] [markdown|html] [OPTIONS]
@@ -149,13 +316,13 @@ By default, statically generated pages are locked down: only the inline command 
 
 | Flag | Default | Description |
 | --- | --- | --- |
-| `--show-home` | off | Show the Home button in the toolbar. Clicking it navigates back to the import/start screen. Required for `--enable-nuget-browser` and `--enable-package-upload` since those features live on the home screen. |
-| `--no-composer` | off | Hide the Composer panel and its toolbar toggle. The Composer lets users interactively build CLI invocations from the documented options and arguments. Pass this flag if the generated page should be read-only reference documentation without the command-building UI. |
-| `--no-dark` | off | Disable the dark theme and remove the theme toggle from the toolbar. The viewer is forced to light mode. Cannot be combined with `--no-light`. |
-| `--no-light` | off | Disable the light theme and remove the theme toggle from the toolbar. The viewer is forced to dark mode. Cannot be combined with `--no-dark`. |
-| `--enable-url` | off | Allow the viewer to load an OpenCLI spec from URL query parameters (`?opencli=`, `?xmldoc=`, `?dir=`). Without this flag, query parameters are ignored and the viewer only displays the inline data baked into the page. |
-| `--enable-nuget-browser` | off | Enable the NuGet package browser, which lets users search and explore indexed .NET CLI tool packages. Requires `--show-home`. |
-| `--enable-package-upload` | off | Enable the file upload drop zone on the home screen, allowing users to import an `opencli.json` (and optional `xmldoc.xml`) from disk. Requires `--show-home`. |
+| `--show-home` | off | Show the Home button in the toolbar. Required for `--enable-nuget-browser` and `--enable-package-upload`. |
+| `--no-composer` | off | Hide the Composer panel and its toolbar toggle. |
+| `--no-dark` | off | Disable the dark theme and force light mode. Cannot be combined with `--no-light`. |
+| `--no-light` | off | Disable the light theme and force dark mode. Cannot be combined with `--no-dark`. |
+| `--enable-url` | off | Allow loading OpenCLI specs from URL query parameters (`?opencli=`, `?xmldoc=`, `?dir=`). |
+| `--enable-nuget-browser` | off | Enable the NuGet package browser on the home screen. Requires `--show-home`. |
+| `--enable-package-upload` | off | Enable the file upload drop zone on the home screen. Requires `--show-home`. |
 
 **Validation rules:**
 
@@ -165,7 +332,7 @@ By default, statically generated pages are locked down: only the inline command 
 
 **Examples:**
 
-Minimal static page (defaults: no home, no URL loading, no nuget, no upload, composer on, both themes):
+Minimal static page (defaults):
 
 ```bash
 inspectra render file html mycli.json --out-dir ./docs
@@ -262,21 +429,37 @@ At runtime, HTML assets are resolved in this order:
 ## Project Layout
 
 ```text
-src/InSpectra.Gen/       CLI tool and render services
-src/InSpectra.UI/        Vite + React + TypeScript viewer app
-tests/InSpectra.Gen.Tests/
-docs/
-examples/
+src/InSpectra.Gen/               CLI tool and render services
+src/InSpectra.UI/                Vite + React + TypeScript viewer app
+tests/InSpectra.Gen.Tests/       xUnit test suite
+docs/                            Website and self-generated docs
+examples/                        Example renders (Jellyfin, JDownloader)
+.github/actions/render/          GitHub Action (composite)
+.github/workflows/               CI, Pages deployment, reusable workflow
 ```
 
-## Testing
+## Contributing
+
+### Build from source
 
 ```bash
+# Build the viewer bundle
 cd src/InSpectra.UI
-npm test
-npm run build
+npm ci && npm test && npm run build
 cd ../..
 
+# Build and test the .NET tool
+dotnet build InSpectra.Gen.sln --configuration Release
+dotnet test InSpectra.Gen.sln --configuration Release
+```
+
+### Testing
+
+```bash
+# Frontend tests
+cd src/InSpectra.UI && npm test
+
+# Backend tests
 dotnet test InSpectra.Gen.sln --configuration Release
 ```
 
@@ -288,14 +471,14 @@ Coverage includes:
 - bundle resolution order
 - Markdown output paths and layout handling
 
-## CI
+### CI
 
-CI builds the frontend before running the .NET test and packaging flow. Each build produces a versioned NuGet package (`0.0.<build-number>`) uploaded as a CI artifact. GitHub Pages publishes HTML examples as bundle directories.
+CI builds the frontend before running the .NET test and packaging flow. Each build produces a versioned NuGet package (`0.0.<build-number>`) uploaded as a CI artifact. GitHub Pages publishes HTML examples as bundle directories at [inspectra.kamsker.at](https://inspectra.kamsker.at).
 
 ## Examples
 
-- [examples/jellyfin-cli](examples/jellyfin-cli/)
-- [examples/jdownloader-remotecli](examples/jdownloader-remotecli/)
-- [docs/inspectra-gen](docs/inspectra-gen/)
-
-The hosted HTML examples live under the Pages site as bundle directories. The repository keeps Markdown renders and source snapshots checked in.
+| Example | Source | Live |
+| --- | --- | --- |
+| InSpectra (self-doc) | [docs/inspectra-gen](docs/inspectra-gen/) | [View](https://inspectra.kamsker.at/examples/inspectra/) |
+| Jellyfin CLI | [examples/jellyfin-cli](examples/jellyfin-cli/) | [View](https://inspectra.kamsker.at/examples/jellyfin-cli/) |
+| JDownloader RemoteCli | [examples/jdownloader-remotecli](examples/jdownloader-remotecli/) | [View](https://inspectra.kamsker.at/examples/jdownloader-remotecli/) |
