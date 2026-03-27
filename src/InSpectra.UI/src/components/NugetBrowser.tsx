@@ -1,4 +1,4 @@
-import { ArrowDownToLine, ArrowLeft, Layers3, LoaderCircle, Search, Terminal } from "lucide-react";
+import { ArrowDownToLine, ArrowLeft, Clock3, Layers3, LoaderCircle, Search, Terminal } from "lucide-react";
 import { SyntheticEvent, useDeferredValue, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_PACKAGE_ICON_URL,
@@ -305,6 +305,10 @@ function PackageCard({ pkg }: { pkg: DiscoveryPackageSummary }) {
         </div>
 
         <div className="browse-card-stats">
+          <span className="browse-card-stat" aria-label={`Last updated ${formatRelativeAgeLong(pkg.updatedAt)} ago`}>
+            <Clock3 aria-hidden="true" size={13} />
+            <span>{formatRelativeAgeShort(pkg.updatedAt)}</span>
+          </span>
           <span className="browse-card-stat" aria-label={`${pkg.totalDownloads} total downloads`}>
             <ArrowDownToLine aria-hidden="true" size={13} />
             <span>{formatCount(pkg.totalDownloads)}</span>
@@ -331,6 +335,38 @@ function handlePackageIconError(event: SyntheticEvent<HTMLImageElement>) {
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(value);
+}
+
+function formatRelativeAgeShort(iso: string): string {
+  const diffMs = Date.now() - Date.parse(iso);
+  if (!Number.isFinite(diffMs) || diffMs < 0) return "?";
+
+  const hourMs = 60 * 60 * 1000;
+  const dayMs = 24 * hourMs;
+  const monthMs = 30 * dayMs;
+  const yearMs = 365 * dayMs;
+
+  if (diffMs >= yearMs) return `${Math.floor(diffMs / yearMs)}yr`;
+  if (diffMs >= monthMs) return `${Math.floor(diffMs / monthMs)}mo`;
+  if (diffMs >= dayMs) return `${Math.floor(diffMs / dayMs)}d`;
+  if (diffMs >= hourMs) return `${Math.floor(diffMs / hourMs)}h`;
+  return "<1h";
+}
+
+function formatRelativeAgeLong(iso: string): string {
+  const diffMs = Date.now() - Date.parse(iso);
+  if (!Number.isFinite(diffMs) || diffMs < 0) return "unknown";
+
+  const hourMs = 60 * 60 * 1000;
+  const dayMs = 24 * hourMs;
+  const monthMs = 30 * dayMs;
+  const yearMs = 365 * dayMs;
+
+  if (diffMs >= yearMs) return `${Math.floor(diffMs / yearMs)} year${diffMs >= 2 * yearMs ? "s" : ""}`;
+  if (diffMs >= monthMs) return `${Math.floor(diffMs / monthMs)} month${diffMs >= 2 * monthMs ? "s" : ""}`;
+  if (diffMs >= dayMs) return `${Math.floor(diffMs / dayMs)} day${diffMs >= 2 * dayMs ? "s" : ""}`;
+  if (diffMs >= hourMs) return `${Math.floor(diffMs / hourMs)} hour${diffMs >= 2 * hourMs ? "s" : ""}`;
+  return "less than 1 hour";
 }
 
 function sortPackages(packages: DiscoveryPackageSummary[], orderBy: BrowseOrder): DiscoveryPackageSummary[] {
