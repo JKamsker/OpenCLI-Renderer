@@ -11,19 +11,19 @@ import {
 
 interface CommandPanelProps {
   command: NormalizedCommand;
-  cliTitle: string;
+  cliPrefix: string;
   includeMetadata: boolean;
   onCommandSelect: (path: string | undefined) => void;
   deepLinkHash?: string;
 }
 
-function resolveExample(example: string, command: NormalizedCommand, cliTitle: string): string {
-  const fullPath = cliTitle ? `${cliTitle} ${command.path}` : command.path;
-  // Already includes the full path (with CLI title)
+function resolveExample(example: string, command: NormalizedCommand, cliPrefix: string): string {
+  const fullPath = cliPrefix ? `${cliPrefix} ${command.path}` : command.path;
+  // Already includes the full path (with the CLI prefix)
   if (example === fullPath || example.startsWith(fullPath + " ")) return example;
   // Already includes the command path (without CLI title)
   if (example === command.path || example.startsWith(command.path + " ")) {
-    return cliTitle ? `${cliTitle} ${example}` : example;
+    return cliPrefix ? `${cliPrefix} ${example}` : example;
   }
   // Starts with just the leaf command name — replace with full path
   const name = command.command.name;
@@ -34,31 +34,36 @@ function resolveExample(example: string, command: NormalizedCommand, cliTitle: s
   return `${fullPath} ${example}`;
 }
 
-export function CommandPanel({ command, cliTitle, includeMetadata, onCommandSelect, deepLinkHash }: CommandPanelProps) {
+export function CommandPanel({ command, cliPrefix, includeMetadata, onCommandSelect, deepLinkHash }: CommandPanelProps) {
   const badges = [
     ...(command.command.interactive ? ["Interactive"] : []),
     ...(command.command.hidden ? ["Hidden"] : []),
     ...(command.command.aliases.length > 0 ? [`Aliases: ${command.command.aliases.join(", ")}`] : []),
   ];
 
-  const displayPath = cliTitle ? `${cliTitle} ${command.path}` : command.path;
+  const commandSegments = command.path.split(" ").filter((segment) => segment.length > 0);
+  const breadcrumbItems = [
+    ...(cliPrefix ? [{ label: cliPrefix, path: undefined }] : []),
+    ...commandSegments.map((segment, index) => ({
+      label: segment,
+      path: commandSegments.slice(0, index + 1).join(" "),
+    })),
+  ];
 
   return (
     <>
       <section className="panel command-hero">
         <div className="breadcrumb-row">
-          {displayPath.split(" ").map((segment, index, all) => {
+          {breadcrumbItems.map((item, index, all) => {
             const isLast = index === all.length - 1;
-            const titleOffset = cliTitle ? 1 : 0;
-            const commandPath = index < titleOffset ? undefined : all.slice(titleOffset, index + 1).join(" ");
             return (
-              <span key={`${segment}-${index}`} className="crumb">
+              <span key={`${item.label}-${index}`} className="crumb">
                 {index > 0 ? <ChevronRight aria-hidden="true" /> : null}
                 {isLast ? (
-                  <strong>{segment}</strong>
+                  <strong>{item.label}</strong>
                 ) : (
-                  <button type="button" className="crumb-link" onClick={() => onCommandSelect(commandPath)}>
-                    {segment}
+                  <button type="button" className="crumb-link" onClick={() => onCommandSelect(item.path)}>
+                    {item.label}
                   </button>
                 )}
               </span>
@@ -134,7 +139,7 @@ export function CommandPanel({ command, cliTitle, includeMetadata, onCommandSele
           </div>
           <div className="example-stack">
             {command.command.examples.map((example) => {
-              const resolved = resolveExample(example, command, cliTitle);
+              const resolved = resolveExample(example, command, cliPrefix);
               return (
                 <div key={example} className="example-wrap">
                   <pre className="example-block">

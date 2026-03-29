@@ -17,7 +17,7 @@ export function InSpectraApp() {
     loadState, error, warnings, sourceLabel, viewerOptions, featureFlags,
     document, searchTerm, deferredSearch, route,
     paletteOpen, composerOpen, composerWidth,
-    mobileSidebarOpen, mobileSidebarSearch,
+    mobileSidebarOpen, mobileSidebarSearch, packageContext,
     searchInputRef, mobileSearchInputRef,
     setSearchTerm, setPaletteOpen, setMobileSidebarOpen, setMobileSidebarSearch, setComposerOpen,
     toggleComposer, handleComposerResize, handleFiles,
@@ -63,6 +63,7 @@ export function InSpectraApp() {
     document.commands.length === 0 &&
     document.rootArguments.length === 0 &&
     document.rootOptions.length === 0;
+  const cliPrefix = packageContext?.command || toCliPrefix(document.source.info.title) || "cli";
 
   return (
     <div className="app-shell">
@@ -226,7 +227,7 @@ export function InSpectraApp() {
             {activeCommand ? (
               <CommandPanel
                 command={activeCommand}
-                cliTitle={document.source.info.title || ""}
+                cliPrefix={cliPrefix}
                 includeMetadata={viewerOptions.includeMetadata}
                 onCommandSelect={(path) => { window.location.hash = buildCurrentHash(path ?? undefined); }}
                 deepLinkHash={buildCurrentHash(activeCommand.path)}
@@ -244,7 +245,7 @@ export function InSpectraApp() {
         {featureFlags.composer && !isEmptyPackage && (
           <ComposerPanel
             command={activeCommand}
-            cliTitle={document.source.info.title || "cli"}
+            cliPrefix={cliPrefix}
             isOpen={composerOpen}
             width={composerWidth}
             onResize={handleComposerResize}
@@ -262,4 +263,16 @@ export function InSpectraApp() {
       />
     </div>
   );
+}
+
+/** Convert a human-readable title to a CLI-safe prefix (e.g. "Abp Dev Tools" → "abp-dev-tools"). */
+function toCliPrefix(title: string | undefined): string | undefined {
+  if (!title) return undefined;
+  const slug = title
+    .trim()
+    .replace(/([a-z])([A-Z])/g, "$1-$2")
+    .replace(/\s+/g, "-")
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "");
+  return slug || undefined;
 }

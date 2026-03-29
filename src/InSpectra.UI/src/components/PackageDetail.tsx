@@ -11,7 +11,14 @@ interface PackageDetailProps {
   pkg: DiscoveryPackageDetail;
   summary?: DiscoveryPackageSummary;
   selectedVersion?: string;
-  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) => void;
+  onLoadPackage: (
+    opencliUrl: string,
+    xmldocUrl: string,
+    label: string,
+    packageId: string,
+    version: string | undefined,
+    command: string | undefined,
+  ) => void;
 }
 
 export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: PackageDetailProps) {
@@ -30,8 +37,9 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
     const isLatest = resolvedVersion === pkg.latestVersion;
     const urls = resolvePackageUrls(pkg, resolvedVersion);
     const label = `${pkg.packageId} v${resolvedVersion}`;
+    const command = pkg.versions.find((candidate) => candidate.version === resolvedVersion)?.command ?? versionInfo.command;
     setLoadingSpec(true);
-    onLoadPackage(urls.opencliUrl, urls.xmldocUrl, label, pkg.packageId, isLatest ? undefined : resolvedVersion);
+    onLoadPackage(urls.opencliUrl, urls.xmldocUrl, label, pkg.packageId, isLatest ? undefined : resolvedVersion, command);
   }
 
   return (
@@ -91,7 +99,11 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
           {summary && (
             <div className="browse-detail-field">
               <span className="browse-detail-label">Coverage</span>
-              <span>{summary.commandCount} commands across {summary.commandGroupCount} groups</span>
+              <span>
+                {pkg.latestStatus === "ok"
+                  ? `${formatNumber(summary.commandCount)} commands across ${formatNumber(summary.commandGroupCount)} groups`
+                  : "Unavailable for partial analysis"}
+              </span>
             </div>
           )}
           <div className="browse-detail-field">

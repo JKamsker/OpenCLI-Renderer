@@ -18,7 +18,14 @@ import { PackageDetail, StatusBadge } from "./PackageDetail";
 interface NugetBrowserProps {
   packageId?: string;
   version?: string;
-  onLoadPackage: (opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) => void;
+  onLoadPackage: (
+    opencliUrl: string,
+    xmldocUrl: string,
+    label: string,
+    packageId: string,
+    version: string | undefined,
+    command: string | undefined,
+  ) => void;
   onBack: () => void;
 }
 

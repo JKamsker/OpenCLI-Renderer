@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { InSpectraApp } from "../InSpectraApp";
+import { buildPackageIndexUrl } from "../data/nugetDiscovery";
 import { testDocument, testXmlDoc } from "./fixtures";
 
 async function renderImportInput() {
@@ -13,6 +14,10 @@ describe("InSpectraUI app", () => {
     document.body.innerHTML =
       '<div id="inspectra-root"></div><script id="inspectra-bootstrap" type="application/json">__INSPECTRA_BOOTSTRAP__</script>';
     window.history.replaceState({}, "", "https://example.test/viewer/index.html#/");
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("imports JSON only through the manual picker", async () => {
@@ -86,5 +91,163 @@ describe("InSpectraUI app", () => {
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent('Unsupported file "notes.txt".');
     });
+  });
+
+  it("uses the package command token instead of the OpenCLI title on package command routes", async () => {
+    const openCliUrl = "https://raw.githubusercontent.com/JKamsker/InSpectra-Discovery/refs/heads/main/index/packages/dotnet-ef/latest/opencli.json";
+    const xmlDocUrl = "https://raw.githubusercontent.com/JKamsker/InSpectra-Discovery/refs/heads/main/index/packages/dotnet-ef/latest/xmldoc.xml";
+    const packageDocument = {
+      ...testDocument,
+      info: {
+        ...testDocument.info,
+        title: "Entity Framework Core .NET Command-line Tools",
+      },
+      arguments: [],
+      options: [],
+      commands: [
+        {
+          name: "dbcontext",
+          aliases: [],
+          options: [],
+          arguments: [],
+          commands: [],
+          exitCodes: [],
+          description: "Commands to manage DbContext types.",
+          hidden: false,
+          examples: ["dbcontext --json"],
+          interactive: false,
+          metadata: [],
+        },
+      ],
+    };
+    const packageDetail = {
+      schemaVersion: 1,
+      packageId: "dotnet-ef",
+      trusted: false,
+      totalDownloads: 0,
+      latestVersion: "11.0.0",
+      latestStatus: "partial",
+      latestPaths: {
+        metadataPath: "index/packages/dotnet-ef/latest/metadata.json",
+        opencliPath: "index/packages/dotnet-ef/latest/opencli.json",
+        xmldocPath: "index/packages/dotnet-ef/latest/xmldoc.xml",
+      },
+      versions: [{
+        version: "11.0.0",
+        publishedAt: "2026-03-28T00:00:00Z",
+        evaluatedAt: "2026-03-28T00:00:00Z",
+        status: "partial",
+        command: "dotnet-ef",
+        timings: {
+          totalMs: 1,
+          installMs: 1,
+          opencliMs: 1,
+          xmldocMs: 1,
+        },
+        paths: {
+          metadataPath: "index/packages/dotnet-ef/11.0.0/metadata.json",
+          opencliPath: "index/packages/dotnet-ef/latest/opencli.json",
+          xmldocPath: "index/packages/dotnet-ef/latest/xmldoc.xml",
+        },
+      }],
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url === buildPackageIndexUrl("dotnet-ef")) {
+        return new Response(JSON.stringify(packageDetail), { status: 200 });
+      }
+
+      if (url === openCliUrl) {
+        return new Response(JSON.stringify(packageDocument), { status: 200 });
+      }
+
+      if (url === xmlDocUrl) {
+        return new Response("", { status: 404, statusText: "Not Found" });
+      }
+
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.replaceState({}, "", "https://example.test/viewer/index.html#/pkg/dotnet-ef/command/dbcontext");
+
+    render(<InSpectraApp />);
+
+    expect(await screen.findByRole("button", { name: "dotnet-ef" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Entity Framework Core .NET Command-line Tools" })).not.toBeInTheDocument();
+    expect(await screen.findByText("dotnet-ef dbcontext")).toBeInTheDocument();
+    expect(await screen.findByText("dotnet-ef dbcontext --json")).toBeInTheDocument();
+  });
+
+  it("hides unreliable coverage counts for partial package analyses", async () => {
+    const summaryIndex = {
+      schemaVersion: 1,
+      generatedAt: "2026-03-28T00:00:00Z",
+      packageCount: 1,
+      packages: [{
+        packageId: "RegisterBot",
+        commandName: "RegisterBot",
+        versionCount: 1,
+        latestVersion: "2.0.20",
+        createdAt: "2024-06-14T16:37:04.1670000+00:00",
+        updatedAt: "2026-03-28T04:13:15.4893253+00:00",
+        completeness: "partial",
+        totalDownloads: 7553,
+        commandCount: 122222,
+        commandGroupCount: 22221,
+      }],
+    };
+    const packageDetail = {
+      schemaVersion: 1,
+      packageId: "RegisterBot",
+      trusted: false,
+      totalDownloads: 7553,
+      latestVersion: "2.0.20",
+      latestStatus: "partial",
+      latestPaths: {
+        metadataPath: "index/packages/registerbot/latest/metadata.json",
+        opencliPath: "index/packages/registerbot/latest/opencli.json",
+        xmldocPath: "index/packages/registerbot/latest/xmldoc.xml",
+      },
+      versions: [{
+        version: "2.0.20",
+        publishedAt: "2024-06-14T16:37:04.1670000+00:00",
+        evaluatedAt: "2026-03-28T04:13:15.4893253+00:00",
+        status: "partial",
+        command: "RegisterBot",
+        timings: {
+          totalMs: 1,
+          installMs: 1,
+          opencliMs: 1,
+          xmldocMs: 1,
+        },
+        paths: {
+          metadataPath: "index/packages/registerbot/2.0.20/metadata.json",
+          opencliPath: "index/packages/registerbot/2.0.20/opencli.json",
+          xmldocPath: "index/packages/registerbot/2.0.20/xmldoc.xml",
+        },
+      }],
+    };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = input.toString();
+      if (url === "https://raw.githubusercontent.com/JKamsker/InSpectra-Discovery/refs/heads/main/index/index.json") {
+        return new Response(JSON.stringify(summaryIndex), { status: 200 });
+      }
+
+      if (url === buildPackageIndexUrl("RegisterBot")) {
+        return new Response(JSON.stringify(packageDetail), { status: 200 });
+      }
+
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+    window.history.replaceState({}, "", "https://example.test/viewer/index.html#/browse/RegisterBot");
+
+    render(<InSpectraApp />);
+
+    expect(await screen.findByRole("heading", { name: "RegisterBot" })).toBeInTheDocument();
+    expect(await screen.findByText("Unavailable for partial analysis")).toBeInTheDocument();
+    expect(screen.queryByText("122222 commands across 22221 groups")).not.toBeInTheDocument();
   });
 });

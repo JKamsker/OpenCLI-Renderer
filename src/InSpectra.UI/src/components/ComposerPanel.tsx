@@ -14,7 +14,7 @@ import { CopyButton } from "./CopyButton";
 
 interface ComposerPanelProps {
   command: NormalizedCommand | undefined;
-  cliTitle: string;
+  cliPrefix: string;
   isOpen: boolean;
   width: number;
   onResize: (width: number) => void;
@@ -22,7 +22,7 @@ interface ComposerPanelProps {
   rootOptions?: OpenCliOption[];
 }
 
-export function ComposerPanel({ command, cliTitle, isOpen, width, onResize, rootArguments = [], rootOptions = [] }: ComposerPanelProps) {
+export function ComposerPanel({ command, cliPrefix, isOpen, width, onResize, rootArguments = [], rootOptions = [] }: ComposerPanelProps) {
   const [flagValues, setFlagValues] = useState<Record<string, boolean>>({});
   const [textValues, setTextValues] = useState<Record<string, string>>({});
   const [argValues, setArgValues] = useState<Record<string, string>>({});
@@ -55,8 +55,8 @@ export function ComposerPanel({ command, cliTitle, isOpen, width, onResize, root
 
   function buildPreview(): string {
     const parts = command
-      ? [cliTitle, ...command.path.split(" ")]
-      : [cliTitle];
+      ? [cliPrefix, ...command.path.split(" ")]
+      : [cliPrefix];
 
     for (const arg of allArguments) {
       const value = argValues[arg.name];
@@ -82,7 +82,7 @@ export function ComposerPanel({ command, cliTitle, isOpen, width, onResize, root
       }
     }
 
-    return parts.join(" ");
+    return parts.filter((part) => part.length > 0).join(" ");
   }
 
   function getValidationIssues(): { missing: number; invalid: number } {

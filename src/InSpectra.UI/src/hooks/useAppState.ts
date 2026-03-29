@@ -45,7 +45,7 @@ export function useAppState() {
   const [composerWidth, setComposerWidth] = useState(() => readNumber("inspectra-composer-width", 304));
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mobileSidebarSearch, setMobileSidebarSearch] = useState(false);
-  const [packageContext, setPackageContext] = useState<{ packageId: string; version: string | undefined } | null>(null);
+  const [packageContext, setPackageContext] = useState<{ packageId: string; version: string | undefined; command?: string } | null>(null);
 
   // --- Effects ---
 
@@ -152,7 +152,11 @@ export function useAppState() {
       const label = `${pkg.packageId} v${resolvedVersion}`;
       const loaded = await loadFromUrls(urls.opencliUrl, urls.xmldocUrl, viewerOptions, label, featureFlags);
       applyLoadedSource(loaded);
-      setPackageContext({ packageId: pkg.packageId, version: resolvedVersion });
+      setPackageContext({
+        packageId: pkg.packageId,
+        version: resolvedVersion,
+        command: resolvePackageCommand(pkg, resolvedVersion),
+      });
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       setError(toMessage(err));
@@ -222,12 +226,19 @@ export function useAppState() {
     setMobileSidebarOpen(false);
   }
 
-  async function handleLoadPackage(opencliUrl: string, xmldocUrl: string, label: string, packageId: string, version: string | undefined) {
+  async function handleLoadPackage(
+    opencliUrl: string,
+    xmldocUrl: string,
+    label: string,
+    packageId: string,
+    version: string | undefined,
+    command: string | undefined,
+  ) {
     try {
       setLoadState({ status: "loading", message: `Loading ${label}` });
       const loaded = await loadFromUrls(opencliUrl, xmldocUrl, viewerOptions, label, featureFlags);
       applyLoadedSource(loaded);
-      setPackageContext({ packageId, version });
+      setPackageContext({ packageId, version, command });
       window.location.hash = buildPackageHash(packageId, version);
     } catch (err) {
       setError(toMessage(err));
@@ -253,4 +264,11 @@ export function useAppState() {
     handlePaletteSelect, handleMobileCommandSelect, handleLoadPackage,
     buildCurrentHash, resetToHome,
   };
+}
+
+function resolvePackageCommand(
+  pkg: Awaited<ReturnType<typeof fetchDiscoveryPackage>>,
+  version: string,
+): string | undefined {
+  return pkg.versions.find((candidate) => candidate.version === version)?.command ?? pkg.versions[0]?.command;
 }
