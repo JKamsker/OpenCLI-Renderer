@@ -24,6 +24,7 @@ export interface DiscoveryPackageSummary {
   totalDownloads: number;
   commandCount: number;
   commandGroupCount: number;
+  cliFramework?: string;
 }
 
 export interface DiscoveryPackageDetail {

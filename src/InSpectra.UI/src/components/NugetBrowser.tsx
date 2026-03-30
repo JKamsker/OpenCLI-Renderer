@@ -1,5 +1,5 @@
 import { ArrowDownToLine, ArrowLeft, Clock3, Layers3, LoaderCircle, Search, Terminal } from "lucide-react";
-import { SyntheticEvent, useDeferredValue, useEffect, useRef, useState } from "react";
+import { SyntheticEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_PACKAGE_ICON_URL,
   DiscoveryPackageDetail,
@@ -50,10 +50,25 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
   const [searchTerm, setSearchTerm] = useState(() => sessionStorage.getItem("browse:search") ?? "");
   const deferredSearch = useDeferredValue(searchTerm);
   const [orderBy, setOrderBy] = useState<BrowseOrder>(() => (sessionStorage.getItem("browse:order") as BrowseOrder) || "index");
+  const [frameworkFilter, setFrameworkFilter] = useState(() => sessionStorage.getItem("browse:framework") ?? "");
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => { sessionStorage.setItem("browse:search", searchTerm); }, [searchTerm]);
   useEffect(() => { sessionStorage.setItem("browse:order", orderBy); }, [orderBy]);
+  useEffect(() => { sessionStorage.setItem("browse:framework", frameworkFilter); }, [frameworkFilter]);
+
+  const frameworkOptions = useMemo(() => {
+    if (!index) return [];
+    const counts = new Map<string, number>();
+    for (const pkg of index.packages) {
+      for (const fw of splitFrameworks(pkg.cliFramework)) {
+        counts.set(fw, (counts.get(fw) ?? 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+  }, [index]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -203,7 +218,9 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
     );
   }
 
-  const results = sortPackages(searchPackages(index, deferredSearch), orderBy);
+  const searched = searchPackages(index, deferredSearch);
+  const filtered = frameworkFilter ? searched.filter((pkg) => splitFrameworks(pkg.cliFramework).includes(frameworkFilter)) : searched;
+  const results = sortPackages(filtered, orderBy);
   const DISPLAY_LIMIT = 200;
   const displayedResults = results.slice(0, DISPLAY_LIMIT);
   const hasMore = results.length > DISPLAY_LIMIT;
@@ -246,6 +263,16 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
                 : `${results.length} of ${index.packageCount} packages`}
               {hasMore && ` (showing first ${DISPLAY_LIMIT})`}
             </span>
+
+            <label className="browse-order-control">
+              <span className="browse-order-label">Framework</span>
+              <select value={frameworkFilter} onChange={(e) => setFrameworkFilter(e.target.value)}>
+                <option value="">All</option>
+                {frameworkOptions.map(({ name, count }) => (
+                  <option key={name} value={name}>{name} ({count})</option>
+                ))}
+              </select>
+            </label>
 
             <label className="browse-order-control">
               <span className="browse-order-label">Order by</span>
@@ -463,4 +490,9 @@ function sortPackages(packages: DiscoveryPackageSummary[], orderBy: BrowseOrder)
 
 function compareIsoDatesDesc(left: string, right: string): number {
   return Date.parse(right) - Date.parse(left);
+}
+
+function splitFrameworks(value: string | undefined): string[] {
+  if (!value) return [];
+  return value.split("+").map((s) => s.trim()).filter(Boolean);
 }
