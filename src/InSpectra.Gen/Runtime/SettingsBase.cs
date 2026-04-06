@@ -146,6 +146,7 @@ public abstract class HtmlCommandSettingsBase : CommonCommandSettings
     [Description("Emit a single self-contained HTML file with all assets inlined. Works from file:// without a web server.")]
     [CommandOption("--single-file")]
     public bool SingleFile { get; init; }
+
 }
 
 /// <summary>
@@ -276,4 +277,5 @@ public abstract class SelfDocHtmlCommandSettingsBase : SelfDocCommandSettingsBas
     [Description("Emit a single self-contained HTML file with all assets inlined. Works from file:// without a web server.")]
     [CommandOption("--single-file")]
     public bool SingleFile { get; init; }
+
 }

@@ -7,7 +7,7 @@ describe("boot resolution", () => {
     document.body.innerHTML = "";
   });
 
-  it("prefers injected bootstrap over URL params", () => {
+  it("prefers injected bootstrap over URL params", async () => {
     document.body.innerHTML = `
       <script id="inspectra-bootstrap" type="application/json">${JSON.stringify({
         mode: "inline",
@@ -16,7 +16,7 @@ describe("boot resolution", () => {
       })}</script>
     `;
 
-    const result = resolveStartupRequest({
+    const result = await resolveStartupRequest({
       documentRef: document,
       search: "?dir=/docs/",
       href: "https://example.test/viewer/index.html",
@@ -29,8 +29,8 @@ describe("boot resolution", () => {
     expect(result.options.includeHidden).toBe(true);
   });
 
-  it("uses query params when no bootstrap is injected", () => {
-    const result = resolveStartupRequest({
+  it("uses query params when no bootstrap is injected", async () => {
+    const result = await resolveStartupRequest({
       documentRef: document,
       search: "?opencli=./opencli.json",
       href: "https://example.test/viewer/index.html",
@@ -44,7 +44,7 @@ describe("boot resolution", () => {
     expect(result.links.openCliUrl).toBe("https://example.test/viewer/opencli.json");
   });
 
-  it("prefers injected links bootstrap over URL params", () => {
+  it("prefers injected links bootstrap over URL params", async () => {
     document.body.innerHTML = `
       <script id="inspectra-bootstrap" type="application/json">${JSON.stringify({
         mode: "links",
@@ -53,7 +53,7 @@ describe("boot resolution", () => {
       })}</script>
     `;
 
-    const result = resolveStartupRequest({
+    const result = await resolveStartupRequest({
       documentRef: document,
       search: "?opencli=./ignored.json",
       href: "https://example.test/viewer/index.html",
@@ -69,8 +69,8 @@ describe("boot resolution", () => {
     expect(result.options.includeMetadata).toBe(true);
   });
 
-  it("falls back to empty mode without bootstrap or query params", () => {
-    const result = resolveStartupRequest({
+  it("falls back to empty mode without bootstrap or query params", async () => {
+    const result = await resolveStartupRequest({
       documentRef: document,
       search: "",
       href: "https://example.test/viewer/index.html",

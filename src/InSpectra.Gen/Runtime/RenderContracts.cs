@@ -147,4 +147,10 @@ public static class JsonOutput
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         WriteIndented = true,
     };
+
+    public static JsonSerializerOptions CompactSerializerOptions { get; } = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = false,
+    };
 }

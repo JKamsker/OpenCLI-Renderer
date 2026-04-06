@@ -121,7 +121,7 @@ export function useAppState() {
 
   async function initialize(signal: AbortSignal) {
     try {
-      const request = resolveStartupRequest({ search: window.location.search, href: window.location.href });
+      const request = await resolveStartupRequest({ search: window.location.search, href: window.location.href });
       setFeatureFlags(request.features);
       const loaded = await loadFromStartupRequest(request, signal);
       if (loaded) { applyLoadedSource(loaded); return; }

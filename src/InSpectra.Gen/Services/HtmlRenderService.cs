@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using InSpectra.Gen.Models;
@@ -88,6 +89,7 @@ public sealed class HtmlRenderService(
             {
                 var html = await File.ReadAllTextAsync(file.SourcePath, cancellationToken);
                 html = html.Replace(BootstrapPlaceholder, bootstrapJson, StringComparison.Ordinal);
+                html = MinifyHtml(html);
                 var indexDestination = Path.Combine(outputDirectory, "index.html");
                 await File.WriteAllTextAsync(indexDestination, html, cancellationToken);
                 writtenFiles.Add(new RenderedFile("index.html", indexDestination, html));
@@ -290,6 +292,33 @@ public sealed class HtmlRenderService(
                $"{cleanedEntry}}})();";
     }
 
+    private static string GzipBase64(string text)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+        using var output = new MemoryStream();
+        using (var gzip = new GZipStream(output, CompressionLevel.SmallestSize, leaveOpen: true))
+        {
+            gzip.Write(bytes);
+        }
+
+        return Convert.ToBase64String(output.ToArray());
+    }
+
+    /// <summary>
+    /// Collapse inter-tag whitespace in the HTML template. Preserves content inside
+    /// &lt;script&gt;, &lt;style&gt;, and &lt;pre&gt; blocks.
+    /// </summary>
+    private static string MinifyHtml(string html)
+    {
+        // Collapse runs of whitespace between > and < to a single space
+        html = Regex.Replace(html, @">\s+<", "> <");
+        // Remove leading whitespace on each line (indentation)
+        html = Regex.Replace(html, @"^\s+", "", RegexOptions.Multiline);
+        // Collapse blank lines
+        html = Regex.Replace(html, @"\n{2,}", "\n");
+        return html.Trim();
+    }
+
     private static HashSet<string> CollectReferencedAssets(string bundleRoot)
     {
         var referenced = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "static.html" };
@@ -339,8 +368,8 @@ public sealed class HtmlRenderService(
             },
         };
 
-        return JsonSerializer.Serialize(payload, JsonOutput.SerializerOptions)
-            .Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
+        var json = JsonSerializer.Serialize(payload, JsonOutput.CompactSerializerOptions);
+        return GzipBase64(json);
     }
 
     private sealed class InlineBootstrap

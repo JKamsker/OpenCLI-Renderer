@@ -22,7 +22,7 @@ export type StartupRequest =
       features: FeatureFlags;
     };
 
-export function readInjectedBootstrap(documentRef: Document = document): InSpectraBootstrap | null {
+export async function readInjectedBootstrap(documentRef: Document = document): Promise<InSpectraBootstrap | null> {
   const element = documentRef.getElementById("inspectra-bootstrap");
   const payload = element?.textContent?.trim();
 
@@ -30,19 +30,31 @@ export function readInjectedBootstrap(documentRef: Document = document): InSpect
     return null;
   }
 
+  // If it starts with '{', it's plain JSON (dev / legacy). Otherwise it's gzip+base64.
+  if (payload.startsWith("{")) {
+    try {
+      return JSON.parse(payload) as InSpectraBootstrap;
+    } catch (error) {
+      throw new Error(`Injected viewer bootstrap is not valid JSON: ${toMessage(error)}`);
+    }
+  }
+
   try {
-    return JSON.parse(payload) as InSpectraBootstrap;
+    const binary = Uint8Array.from(atob(payload), (c) => c.charCodeAt(0));
+    const stream = new Blob([binary]).stream().pipeThrough(new DecompressionStream("gzip"));
+    const text = await new Response(stream).text();
+    return JSON.parse(text) as InSpectraBootstrap;
   } catch (error) {
-    throw new Error(`Injected viewer bootstrap is not valid JSON: ${toMessage(error)}`);
+    throw new Error(`Failed to decompress bootstrap: ${toMessage(error)}`);
   }
 }
 
-export function resolveStartupRequest(params: {
+export async function resolveStartupRequest(params: {
   documentRef?: Document;
   search: string;
   href: string;
-}): StartupRequest {
-  const bootstrap = readInjectedBootstrap(params.documentRef);
+}): Promise<StartupRequest> {
+  const bootstrap = await readInjectedBootstrap(params.documentRef);
 
   if (bootstrap?.mode === "inline") {
     const features = readFeatures(bootstrap.features, true);
