@@ -351,6 +351,15 @@ export function CIGuidePage({ section }: { section?: string }) {
     }
   }, [section]);
 
+  const scrollTo = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    history.replaceState(null, "", `#/guide/${id}`);
+  }, []);
+
   const usageTabs: { id: UsageTab; label: string }[] = [
     { id: "dotnet-tool", label: ".NET Tool" },
     { id: "from-file", label: "From File" },
@@ -400,12 +409,12 @@ export function CIGuidePage({ section }: { section?: string }) {
       {/* ── Quick nav ── */}
       <nav className="ci-guide-nav" aria-label="Page sections">
         {[
-          { href: "#/guide/usage", num: "01", label: "Usage" },
-          { href: "#/guide/inputs", num: "02", label: "Inputs" },
-          { href: "#/guide/pages", num: "03", label: "Pages" },
-          { href: "#/guide/prerequisites", num: "04", label: "Prerequisites" },
+          { id: "usage", num: "01", label: "Usage" },
+          { id: "inputs", num: "02", label: "Inputs" },
+          { id: "pages", num: "03", label: "Pages" },
+          { id: "prerequisites", num: "04", label: "Prerequisites" },
         ].map((link) => (
-          <a key={link.href} href={link.href} className="ci-guide-nav-link">
+          <a key={link.id} href={`#/guide/${link.id}`} className="ci-guide-nav-link" onClick={(e) => scrollTo(e, link.id)}>
             <span className="ci-guide-nav-num">{link.num}</span>
             {link.label}
           </a>
