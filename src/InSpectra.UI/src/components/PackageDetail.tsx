@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowLeft, CheckCircle2, ExternalLink, LoaderCircle, Package } from "lucide-react";
-import { SyntheticEvent, useState } from "react";
+import { ReactNode, SyntheticEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_PACKAGE_ICON_URL,
   DiscoveryPackageDetail,
@@ -67,50 +67,31 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
 
         <div className="browse-detail-meta">
           {versionInfo.command && (
-            <div className="browse-detail-field">
-              <span className="browse-detail-label">Command</span>
+            <DetailField label="Command">
               <code>{versionInfo.command}</code>
-            </div>
+            </DetailField>
           )}
-          <div className="browse-detail-field">
-            <span className="browse-detail-label">Latest version</span>
-            <span>{pkg.latestVersion}</span>
-          </div>
+          <DetailField label="Latest version">{pkg.latestVersion}</DetailField>
           {summary?.cliFramework && (
-            <div className="browse-detail-field">
-              <span className="browse-detail-label">CLI Framework</span>
-              <span>{summary.cliFramework}</span>
-            </div>
+            <DetailField label="CLI Framework">{summary.cliFramework}</DetailField>
           )}
           <div className="browse-detail-field">
             <span className="browse-detail-label">Status</span>
             <StatusBadge status={pkg.latestStatus} />
           </div>
-          <div className="browse-detail-field">
-            <span className="browse-detail-label">Downloads</span>
-            <span>{formatNumber(pkg.totalDownloads)}</span>
-          </div>
+          <DetailField label="Downloads">{formatNumber(pkg.totalDownloads)}</DetailField>
           {summary && (
-            <div className="browse-detail-field">
-              <span className="browse-detail-label">Created</span>
-              <span>{formatDate(summary.createdAt)}</span>
-            </div>
+            <DetailField label="Created">{formatDate(summary.createdAt)}</DetailField>
           )}
           {summary && (
-            <div className="browse-detail-field">
-              <span className="browse-detail-label">Updated</span>
-              <span>{formatDate(summary.updatedAt)}</span>
-            </div>
+            <DetailField label="Updated">{formatDate(summary.updatedAt)}</DetailField>
           )}
           {summary && (
-            <div className="browse-detail-field">
-              <span className="browse-detail-label">Coverage</span>
-              <span>
-                {pkg.latestStatus === "ok"
-                  ? `${formatNumber(summary.commandCount)} commands across ${formatNumber(summary.commandGroupCount)} groups`
-                  : "Unavailable for partial analysis"}
-              </span>
-            </div>
+            <DetailField label="Coverage">
+              {pkg.latestStatus === "ok"
+                ? `${formatNumber(summary.commandCount)} commands across ${formatNumber(summary.commandGroupCount)} groups`
+                : "Unavailable for partial analysis"}
+            </DetailField>
           )}
           <div className="browse-detail-field">
             <span className="browse-detail-label">NuGet</span>
@@ -119,6 +100,7 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
               target="_blank"
               rel="noopener noreferrer"
               className="browse-nuget-link"
+              title={nugetUrl}
             >
               View on nuget.org <ExternalLink aria-hidden="true" size={12} />
             </a>
@@ -131,6 +113,7 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="browse-nuget-link"
+                title={projectUrl}
               >
                 Open project site <ExternalLink aria-hidden="true" size={12} />
               </a>
@@ -144,6 +127,7 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="browse-nuget-link"
+                title={sourceUrl}
               >
                 Open source repo <ExternalLink aria-hidden="true" size={12} />
               </a>
@@ -247,4 +231,32 @@ function formatDate(iso: string): string {
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat().format(value);
+}
+
+function DetailField({ label, children }: { label: string; children: ReactNode }) {
+  const valueRef = useRef<HTMLSpanElement>(null);
+  const [truncated, setTruncated] = useState(false);
+
+  const check = useCallback(() => {
+    const el = valueRef.current;
+    if (el) setTruncated(el.scrollWidth > el.clientWidth);
+  }, []);
+
+  useEffect(() => {
+    check();
+    const observer = new ResizeObserver(check);
+    if (valueRef.current) observer.observe(valueRef.current);
+    return () => observer.disconnect();
+  }, [check]);
+
+  const text = truncated ? (valueRef.current?.textContent ?? undefined) : undefined;
+
+  return (
+    <div className={`browse-detail-field${truncated ? " has-tooltip" : ""}`}>
+      <span className="browse-detail-label">{label}</span>
+      <span ref={valueRef} className="browse-detail-value" data-tooltip={truncated ? text : undefined}>
+        {children}
+      </span>
+    </div>
+  );
 }

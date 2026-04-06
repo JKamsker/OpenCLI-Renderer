@@ -191,6 +191,9 @@
 /* ── Centered content screen ────────────────── */
 
 .ds-content-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   max-width: 54rem;
   margin: 0 auto;
   padding: 3rem 2rem 4rem;
