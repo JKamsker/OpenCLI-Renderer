@@ -138,15 +138,9 @@ public static class RenderRequestFactory
                 throw new CliUsageException("`--compression-level` must be 0, 1, or 2.");
             }
 
-            if (singleFile && explicitLevel < 1)
-            {
-                throw new CliUsageException("`--single-file` requires `--compression-level` 1 or higher.");
-            }
-
             return explicitLevel.Value;
         }
 
-        // Default: 2 (self-extracting), or 2 if --single-file is set
         return 2;
     }
 

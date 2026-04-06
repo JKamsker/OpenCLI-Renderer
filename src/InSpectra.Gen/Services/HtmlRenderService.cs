@@ -262,6 +262,18 @@ public sealed class HtmlRenderService(
         // Remove modulepreload links (the code will be inlined)
         html = Regex.Replace(html, @"<link\s[^>]*rel=""modulepreload""[^>]*/?>[\r\n]*", "");
 
+        // Replace <script type="application/json"> bootstrap with JSON.parse string literal
+        // V8 optimizes JSON.parse('...') with a literal argument — faster than textContent + parse
+        html = Regex.Replace(
+            html,
+            @"<script\s+id=""inspectra-bootstrap""\s+type=""application/json"">[^<]+</script>",
+            match =>
+            {
+                var tagContent = Regex.Match(match.Value, @">([^<]+)<").Groups[1].Value;
+                var escaped = EscapeForJsStringLiteral(tagContent);
+                return $"<script>window.__inspectraBootstrap=JSON.parse('{escaped}')</script>";
+            });
+
         // Inline JS: <script type="module" ... src="./assets/..."> → single inline <script>
         // Remove the script tag from <head> and inject before </body> so the DOM is ready
         string? inlinedScriptBlock = null;
@@ -285,6 +297,19 @@ public sealed class HtmlRenderService(
         }
 
         return html;
+    }
+
+    /// <summary>
+    /// Escapes a string for safe embedding inside a JS single-quoted string literal.
+    /// </summary>
+    private static string EscapeForJsStringLiteral(string value)
+    {
+        return value
+            .Replace("\\", "\\\\")
+            .Replace("'", "\\'")
+            .Replace("\n", "\\n")
+            .Replace("\r", "\\r")
+            .Replace("</script", "<\\/script", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

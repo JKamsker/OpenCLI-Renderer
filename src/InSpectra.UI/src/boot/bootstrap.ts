@@ -23,6 +23,12 @@ export type StartupRequest =
     };
 
 export async function readInjectedBootstrap(documentRef: Document = document): Promise<InSpectraBootstrap | null> {
+  // Fast path: pre-parsed via JSON.parse string literal (V8-optimized)
+  const win = (typeof window !== "undefined" ? window : undefined) as (Window & { __inspectraBootstrap?: InSpectraBootstrap }) | undefined;
+  if (win?.__inspectraBootstrap) {
+    return win.__inspectraBootstrap;
+  }
+
   const element = documentRef.getElementById("inspectra-bootstrap");
   const payload = element?.textContent?.trim();
 
