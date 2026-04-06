@@ -399,13 +399,17 @@ export function CIGuidePage({ section }: { section?: string }) {
 
       {/* ── Quick nav ── */}
       <nav className="ci-guide-nav" aria-label="Page sections">
-        <a href="#/guide/usage" className="ci-guide-nav-link">Usage</a>
-        <span className="ci-guide-nav-sep" aria-hidden="true" />
-        <a href="#/guide/inputs" className="ci-guide-nav-link">Input Reference</a>
-        <span className="ci-guide-nav-sep" aria-hidden="true" />
-        <a href="#/guide/pages" className="ci-guide-nav-link">GitHub Pages</a>
-        <span className="ci-guide-nav-sep" aria-hidden="true" />
-        <a href="#/guide/prerequisites" className="ci-guide-nav-link">Prerequisites</a>
+        {[
+          { href: "#/guide/usage", num: "01", label: "Usage" },
+          { href: "#/guide/inputs", num: "02", label: "Inputs" },
+          { href: "#/guide/pages", num: "03", label: "Pages" },
+          { href: "#/guide/prerequisites", num: "04", label: "Prerequisites" },
+        ].map((link) => (
+          <a key={link.href} href={link.href} className="ci-guide-nav-link">
+            <span className="ci-guide-nav-num">{link.num}</span>
+            {link.label}
+          </a>
+        ))}
       </nav>
 
       {/* ── Timeline content ── */}
