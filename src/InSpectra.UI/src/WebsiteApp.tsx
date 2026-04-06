@@ -44,6 +44,11 @@ export function WebsiteApp() {
   // Clear viewer state when navigating away from package
   useEffect(() => {
     if (route.kind !== "package") {
+      setDocument(null);
+      setPackageContext(null);
+      setLoadState({ status: "empty" });
+      setError(null);
+      setWarnings([]);
       return;
     }
 
