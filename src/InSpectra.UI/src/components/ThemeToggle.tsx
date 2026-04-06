@@ -7,7 +7,7 @@ const COLOR_THEMES = [
   { id: "emerald", label: "Emerald", swatch: "#059669", swatchDark: "#34d399" },
   { id: "amber", label: "Amber", swatch: "#d97706", swatchDark: "#fbbf24" },
   { id: "rose", label: "Rose", swatch: "#e11d48", swatchDark: "#fb7185" },
-  { id: "blue", label: "Slate Blue", swatch: "#4f6df5", swatchDark: "#7c93fa" },
+  { id: "blue", label: "Blue", swatch: "#3b82f6", swatchDark: "#60a5fa" },
 ] as const;
 
 type ColorThemeId = (typeof COLOR_THEMES)[number]["id"];

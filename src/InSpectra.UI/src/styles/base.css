@@ -152,9 +152,9 @@
 [data-color-theme="rose"]                            { --accent: #e11d48; --accent-hover: #f43f5e; --red: #b91c1c; --red-soft: #fef2f2; --red-border: #f87171; }
 [data-theme="dark"][data-color-theme="rose"]         { --accent: #fb7185; --accent-hover: #e11d48; --red: #b91c1c; --red-soft: rgba(185, 28, 28, 0.15); --red-border: rgba(185, 28, 28, 0.3); }
 
-/* ── Slate Blue ────────────────────────────── */
-[data-color-theme="blue"]                            { --accent: #4f6df5; --accent-hover: #3b5de7; }
-[data-theme="dark"][data-color-theme="blue"]         { --accent: #7c93fa; --accent-hover: #4f6df5; }
+/* ── Blue ──────────────────────────────────── */
+[data-color-theme="blue"]                            { --accent: #3b82f6; --accent-hover: #2563eb; }
+[data-theme="dark"][data-color-theme="blue"]         { --accent: #60a5fa; --accent-hover: #3b82f6; }
 
 /* ── Reset ──────────────────────────────────── */
 
