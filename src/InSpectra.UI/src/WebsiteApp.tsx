@@ -148,7 +148,7 @@ export function WebsiteApp() {
     setLoadState({ status: "empty" });
     setError(null);
     setWarnings([]);
-    window.location.hash = "#/";
+    history.back();
   }
 
   // About page
