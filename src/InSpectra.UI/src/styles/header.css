@@ -213,10 +213,10 @@
 }
 
 /* Adjust viewer topbar when nested under site header */
-.site-header + .app-shell {
+.site-header ~ .app-shell {
   height: calc(100vh - 3.5rem);
 }
 
-.site-header + .app-shell .topbar {
+.site-header ~ .app-shell .topbar {
   top: 0;
 }
