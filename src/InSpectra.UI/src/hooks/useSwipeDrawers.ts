@@ -43,12 +43,11 @@ export function useSwipeDrawers(opts: SwipeDrawersOptions) {
     function createOverlay(): HTMLElement {
       const el = document.createElement("div");
       el.className = "swipe-gesture-overlay";
-      const isDark = document.documentElement.dataset.theme === "dark";
       Object.assign(el.style, {
         position: "fixed",
         inset: "0",
         zIndex: "45",
-        background: isDark ? "rgba(0, 0, 0, 0.5)" : "rgba(15, 23, 42, 0.35)",
+        background: "rgba(0, 0, 0, 0.4)",
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
         opacity: "0",

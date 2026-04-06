@@ -3,6 +3,7 @@ import { CliViewer } from "./components/CliViewer";
 import { PackageLoadingScreen } from "./components/PackageLoadingScreen";
 import { resolveStartupRequest } from "./boot/bootstrap";
 import { defaultFeatureFlags, defaultViewerOptions, FeatureFlags, ViewerOptions } from "./boot/contracts";
+import { useThemeEnforcement } from "./hooks/useThemeEnforcement";
 import { loadFromStartupRequest, LoadedSource } from "./data/loadSource";
 import { buildCommandHash, HashRoute, parseHashRoute } from "./data/navigation";
 import { normalizeOpenCliDocument, NormalizedCliDocument } from "./data/normalize";
@@ -33,13 +34,7 @@ export function StaticViewerApp() {
     return () => window.removeEventListener("hashchange", handle);
   }, []);
 
-  useEffect(() => {
-    if (!featureFlags.darkTheme) {
-      window.document.documentElement.dataset.theme = "light";
-    } else if (!featureFlags.lightTheme) {
-      window.document.documentElement.dataset.theme = "dark";
-    }
-  }, [featureFlags.darkTheme, featureFlags.lightTheme]);
+  useThemeEnforcement(featureFlags);
 
   async function initialize(signal: AbortSignal) {
     try {

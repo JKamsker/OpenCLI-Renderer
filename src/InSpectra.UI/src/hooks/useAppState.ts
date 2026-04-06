@@ -2,6 +2,7 @@ import { startTransition, useDeferredValue, useEffect, useRef, useState } from "
 import { toMessage } from "../utils";
 import { resolveStartupRequest } from "../boot/bootstrap";
 import { defaultFeatureFlags, defaultViewerOptions, FeatureFlags, ViewerOptions } from "../boot/contracts";
+import { useThemeEnforcement } from "./useThemeEnforcement";
 import { loadFromFiles, loadFromStartupRequest, loadFromUrls, LoadedSource } from "../data/loadSource";
 import { buildCommandHash, buildPackageHash, HashRoute, parseHashRoute } from "../data/navigation";
 import { fetchDiscoveryPackage, resolvePackageUrls } from "../data/nugetDiscovery";
@@ -109,13 +110,7 @@ export function useAppState() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  useEffect(() => {
-    if (!featureFlags.darkTheme) {
-      window.document.documentElement.dataset.theme = "light";
-    } else if (!featureFlags.lightTheme) {
-      window.document.documentElement.dataset.theme = "dark";
-    }
-  }, [featureFlags.darkTheme, featureFlags.lightTheme]);
+  useThemeEnforcement(featureFlags);
 
   // --- Business logic ---
 

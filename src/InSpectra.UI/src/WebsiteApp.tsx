@@ -8,6 +8,7 @@ import { PackageLoadingScreen } from "./components/PackageLoadingScreen";
 import { SiteHeader } from "./components/SiteHeader";
 import { ViewerDropzone } from "./components/ViewerDropzone";
 import { defaultFeatureFlags, defaultViewerOptions, FeatureFlags, ViewerOptions } from "./boot/contracts";
+import { useThemeEnforcement } from "./hooks/useThemeEnforcement";
 import { loadFromFiles, loadFromUrls, LoadedSource } from "./data/loadSource";
 import { buildPackageHash, HashRoute, parseHashRoute } from "./data/navigation";
 import { fetchDiscoveryPackage, resolvePackageUrls } from "./data/nugetDiscovery";
@@ -67,14 +68,7 @@ export function WebsiteApp() {
     return () => controller.abort();
   }, [route.kind === "package" ? `${route.packageId.toLowerCase()}/${route.version ?? "latest"}` : null]);
 
-  // Theme enforcement
-  useEffect(() => {
-    if (!featureFlags.darkTheme) {
-      window.document.documentElement.dataset.theme = "light";
-    } else if (!featureFlags.lightTheme) {
-      window.document.documentElement.dataset.theme = "dark";
-    }
-  }, [featureFlags.darkTheme, featureFlags.lightTheme]);
+  useThemeEnforcement(featureFlags);
 
   async function loadPackageFromRoute(packageId: string, version: string | undefined, signal?: AbortSignal) {
     try {

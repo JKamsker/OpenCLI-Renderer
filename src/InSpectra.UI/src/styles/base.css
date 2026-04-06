@@ -1,11 +1,23 @@
 /* ═══════════════════════════════════════════════
    InSpectraUI — Variables, theme, reset
+
+   Default (Cyan) uses hand-tuned Tailwind Slate
+   palette. Non-default color themes derive their
+   surfaces & accent family via color-mix() from
+   just --accent + --accent-hover.
    ═══════════════════════════════════════════════ */
 
 :root {
   color-scheme: light;
 
-  /* Surfaces */
+  /* ── Accent (default: Cyan) ──────────────── */
+  --accent: #0891b2;
+  --accent-hover: #06b6d4;
+  --accent-soft: #ecfeff;
+  --accent-border: #a5f3fc;
+  --accent-glow: rgba(6, 182, 212, 0.1);
+
+  /* ── Surfaces (Tailwind Slate) ───────────── */
   --topbar: #ffffff;
   --sidebar: #f8fafc;
   --bg: #f1f5f9;
@@ -13,20 +25,13 @@
   --border: #e2e8f0;
   --border-subtle: #f1f5f9;
 
-  /* Text */
+  /* ── Text ────────────────────────────────── */
   --text: #0f172a;
   --text-secondary: #334155;
   --muted: #64748b;
   --soft: #94a3b8;
 
-  /* Accent — cyan / teal */
-  --accent: #0891b2;
-  --accent-hover: #06b6d4;
-  --accent-soft: #ecfeff;
-  --accent-border: #a5f3fc;
-  --accent-glow: rgba(6, 182, 212, 0.1);
-
-  /* Semantic */
+  /* ── Semantic ────────────────────────────── */
   --green: #059669;
   --green-soft: #d1fae5;
   --green-border: #6ee7b7;
@@ -36,28 +41,34 @@
   --amber: #d97706;
   --amber-soft: #fef3c7;
   --amber-border: #fcd34d;
+  --error: #e53935;
 
-  /* Code blocks */
+  /* ── Code blocks ─────────────────────────── */
   --code-bg: #1e293b;
   --code-border: #334155;
   --code-text: #5eead4;
 
-  /* Type */
+  /* ── Type ─────────────────────────────────── */
   --font: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
 
-  /* Inline code */
+  /* ── Inline code (theme-invariant) ───────── */
   --inline-code-bg: rgba(15, 23, 42, 0.06);
 
-  /* Motion */
+  /* ── Motion ──────────────────────────────── */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
 }
 
-/* ── Dark theme ─────────────────────────────── */
+/* ── Dark theme (Cyan default) ──────────────── */
 
 [data-theme="dark"] {
   color-scheme: dark;
+  --accent: #22d3ee;
+  --accent-hover: #06b6d4;
+  --accent-soft: rgba(6, 182, 212, 0.12);
+  --accent-border: rgba(6, 182, 212, 0.25);
+  --accent-glow: rgba(6, 182, 212, 0.12);
   --topbar: #0f172a;
   --sidebar: #0f172a;
   --bg: #0f172a;
@@ -68,11 +79,6 @@
   --text-secondary: #cbd5e1;
   --muted: #94a3b8;
   --soft: #64748b;
-  --accent: #22d3ee;
-  --accent-hover: #06b6d4;
-  --accent-soft: rgba(6, 182, 212, 0.12);
-  --accent-border: rgba(6, 182, 212, 0.25);
-  --accent-glow: rgba(6, 182, 212, 0.12);
   --green-soft: rgba(5, 150, 105, 0.15);
   --green-border: rgba(5, 150, 105, 0.3);
   --red-soft: rgba(220, 38, 38, 0.15);
@@ -86,197 +92,69 @@
 }
 
 /* ═══════════════════════════════════════════════
-   Color themes — accent overrides
+   Non-default color themes — derived via
+   color-mix() from --accent. Cyan (default)
+   never sets data-color-theme, so these only
+   apply to indigo / emerald / amber / rose / blue.
+   ═══════════════════════════════════════════════ */
+
+/* ── Shared light derivation ───────────────── */
+[data-color-theme] {
+  --accent-soft: color-mix(in srgb, var(--accent) 7%, white);
+  --accent-border: color-mix(in srgb, var(--accent) 35%, white);
+  --accent-glow: color-mix(in srgb, var(--accent) 10%, transparent);
+  --topbar: color-mix(in oklch, var(--accent) 3%, white);
+  --sidebar: color-mix(in oklch, var(--accent) 5%, white);
+  --bg: color-mix(in oklch, var(--accent) 7%, white);
+  --surface: color-mix(in oklch, var(--accent) 3%, white);
+  --border: color-mix(in oklch, var(--accent) 8%, #e0e0e0);
+  --border-subtle: color-mix(in oklch, var(--accent) 7%, white);
+  --code-bg: color-mix(in oklch, var(--accent) 8%, #1a1a24);
+  --code-border: color-mix(in oklch, var(--accent) 10%, #2c2c3a);
+  --code-text: color-mix(in oklch, var(--accent) 45%, white);
+}
+
+/* ── Shared dark derivation ────────────────── */
+[data-theme="dark"][data-color-theme] {
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-border: color-mix(in srgb, var(--accent) 25%, transparent);
+  --accent-glow: color-mix(in srgb, var(--accent) 12%, transparent);
+  --topbar: color-mix(in oklch, var(--accent) 10%, #0c0c0c);
+  --sidebar: color-mix(in oklch, var(--accent) 10%, #0c0c0c);
+  --bg: color-mix(in oklch, var(--accent) 10%, #0c0c0c);
+  --surface: color-mix(in oklch, var(--accent) 10%, #181818);
+  --border: color-mix(in oklch, var(--accent) 12%, #2c2c2c);
+  --border-subtle: color-mix(in oklch, var(--accent) 10%, #181818);
+  --code-bg: color-mix(in oklch, var(--accent) 5%, #060610);
+  --code-border: color-mix(in oklch, var(--accent) 6%, #161620);
+  --code-text: color-mix(in oklch, var(--accent) 65%, white);
+}
+
+/* ═══════════════════════════════════════════════
+   Per-theme: only accent + hover (+ semantic
+   shifts for amber/rose). Everything else is
+   derived by the shared blocks above.
    ═══════════════════════════════════════════════ */
 
 /* ── Indigo ────────────────────────────────── */
-
-[data-color-theme="indigo"] {
-  --topbar: #fdfcff;
-  --sidebar: #f6f5fc;
-  --bg: #efeff8;
-  --surface: #fdfcff;
-  --border: #e0dfee;
-  --border-subtle: #efeff8;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-soft: #eef2ff;
-  --accent-border: #c7d2fe;
-  --accent-glow: rgba(99, 102, 241, 0.1);
-  --code-bg: #1a1a32;
-  --code-border: #2c2c4e;
-}
-
-[data-theme="dark"][data-color-theme="indigo"] {
-  --topbar: #0e0e24;
-  --sidebar: #0e0e24;
-  --bg: #0e0e24;
-  --surface: #1a1a36;
-  --border: #2e2e52;
-  --border-subtle: #1a1a36;
-  --accent: #818cf8;
-  --accent-hover: #6366f1;
-  --accent-soft: rgba(99, 102, 241, 0.12);
-  --accent-border: rgba(99, 102, 241, 0.25);
-  --accent-glow: rgba(99, 102, 241, 0.12);
-  --code-bg: #09091a;
-  --code-border: #1a1a36;
-  --code-text: #a5b4fc;
-}
+[data-color-theme="indigo"]                          { --accent: #6366f1; --accent-hover: #4f46e5; }
+[data-theme="dark"][data-color-theme="indigo"]       { --accent: #818cf8; --accent-hover: #6366f1; }
 
 /* ── Emerald ───────────────────────────────── */
+[data-color-theme="emerald"]                         { --accent: #059669; --accent-hover: #10b981; }
+[data-theme="dark"][data-color-theme="emerald"]      { --accent: #34d399; --accent-hover: #059669; }
 
-[data-color-theme="emerald"] {
-  --topbar: #fcfefd;
-  --sidebar: #f3faf6;
-  --bg: #ecf5f0;
-  --surface: #fcfefd;
-  --border: #dce8e1;
-  --border-subtle: #ecf5f0;
-  --accent: #059669;
-  --accent-hover: #10b981;
-  --accent-soft: #ecfdf5;
-  --accent-border: #a7f3d0;
-  --accent-glow: rgba(5, 150, 105, 0.1);
-  --code-bg: #0e2118;
-  --code-border: #1a3328;
-}
+/* ── Amber (shifts semantic --amber to orange) */
+[data-color-theme="amber"]                           { --accent: #d97706; --accent-hover: #f59e0b; --amber: #ea580c; --amber-soft: #fff7ed; --amber-border: #fdba74; }
+[data-theme="dark"][data-color-theme="amber"]        { --accent: #fbbf24; --accent-hover: #d97706; --amber: #ea580c; --amber-soft: rgba(234, 88, 12, 0.15); --amber-border: rgba(234, 88, 12, 0.3); }
 
-[data-theme="dark"][data-color-theme="emerald"] {
-  --topbar: #0a1810;
-  --sidebar: #0a1810;
-  --bg: #0a1810;
-  --surface: #142a1e;
-  --border: #243e32;
-  --border-subtle: #142a1e;
-  --accent: #34d399;
-  --accent-hover: #059669;
-  --accent-soft: rgba(5, 150, 105, 0.12);
-  --accent-border: rgba(5, 150, 105, 0.25);
-  --accent-glow: rgba(5, 150, 105, 0.12);
-  --code-bg: #06120b;
-  --code-border: #142a1e;
-  --code-text: #6ee7b7;
-}
-
-/* ── Amber ─────────────────────────────────── */
-
-[data-color-theme="amber"] {
-  --topbar: #fffefa;
-  --sidebar: #fdf9f2;
-  --bg: #f6f2eb;
-  --surface: #fffefa;
-  --border: #e8e3d8;
-  --border-subtle: #f6f2eb;
-  --accent: #d97706;
-  --accent-hover: #f59e0b;
-  --accent-soft: #fffbeb;
-  --accent-border: #fde68a;
-  --accent-glow: rgba(217, 119, 6, 0.1);
-  --code-bg: #211a0e;
-  --code-border: #362c1a;
-  /* shift semantic amber to orange to avoid collision */
-  --amber: #ea580c;
-  --amber-soft: #fff7ed;
-  --amber-border: #fdba74;
-}
-
-[data-theme="dark"][data-color-theme="amber"] {
-  --topbar: #18140a;
-  --sidebar: #18140a;
-  --bg: #18140a;
-  --surface: #2a2414;
-  --border: #3e3624;
-  --border-subtle: #2a2414;
-  --accent: #fbbf24;
-  --accent-hover: #d97706;
-  --accent-soft: rgba(217, 119, 6, 0.12);
-  --accent-border: rgba(217, 119, 6, 0.25);
-  --accent-glow: rgba(217, 119, 6, 0.12);
-  --code-bg: #120e06;
-  --code-border: #2a2414;
-  --code-text: #fcd34d;
-  --amber: #ea580c;
-  --amber-soft: rgba(234, 88, 12, 0.15);
-  --amber-border: rgba(234, 88, 12, 0.3);
-}
-
-/* ── Rose ──────────────────────────────────── */
-
-[data-color-theme="rose"] {
-  --topbar: #fffdfd;
-  --sidebar: #fcf5f6;
-  --bg: #f7eeef;
-  --surface: #fffdfd;
-  --border: #ebdcdf;
-  --border-subtle: #f7eeef;
-  --accent: #e11d48;
-  --accent-hover: #f43f5e;
-  --accent-soft: #fff1f2;
-  --accent-border: #fecdd3;
-  --accent-glow: rgba(225, 29, 72, 0.1);
-  --code-bg: #210e14;
-  --code-border: #361a24;
-  /* shift semantic red to darker crimson to avoid collision */
-  --red: #b91c1c;
-  --red-soft: #fef2f2;
-  --red-border: #f87171;
-}
-
-[data-theme="dark"][data-color-theme="rose"] {
-  --topbar: #180a0f;
-  --sidebar: #180a0f;
-  --bg: #180a0f;
-  --surface: #2a141c;
-  --border: #3e242e;
-  --border-subtle: #2a141c;
-  --accent: #fb7185;
-  --accent-hover: #e11d48;
-  --accent-soft: rgba(225, 29, 72, 0.12);
-  --accent-border: rgba(225, 29, 72, 0.25);
-  --accent-glow: rgba(225, 29, 72, 0.12);
-  --code-bg: #12060a;
-  --code-border: #2a141c;
-  --code-text: #fda4af;
-  --red: #b91c1c;
-  --red-soft: rgba(185, 28, 28, 0.15);
-  --red-border: rgba(185, 28, 28, 0.3);
-}
+/* ── Rose (shifts semantic --red to crimson) ── */
+[data-color-theme="rose"]                            { --accent: #e11d48; --accent-hover: #f43f5e; --red: #b91c1c; --red-soft: #fef2f2; --red-border: #f87171; }
+[data-theme="dark"][data-color-theme="rose"]         { --accent: #fb7185; --accent-hover: #e11d48; --red: #b91c1c; --red-soft: rgba(185, 28, 28, 0.15); --red-border: rgba(185, 28, 28, 0.3); }
 
 /* ── Slate Blue ────────────────────────────── */
-
-[data-color-theme="blue"] {
-  --topbar: #fdfeff;
-  --sidebar: #f4f6fc;
-  --bg: #edf0f8;
-  --surface: #fdfeff;
-  --border: #dde1ef;
-  --border-subtle: #edf0f8;
-  --accent: #4f6df5;
-  --accent-hover: #3b5de7;
-  --accent-soft: #eff2fe;
-  --accent-border: #bfcbfc;
-  --accent-glow: rgba(79, 109, 245, 0.1);
-  --code-bg: #141a32;
-  --code-border: #222c4e;
-}
-
-[data-theme="dark"][data-color-theme="blue"] {
-  --topbar: #0c0e22;
-  --sidebar: #0c0e22;
-  --bg: #0c0e22;
-  --surface: #181c36;
-  --border: #2a2f50;
-  --border-subtle: #181c36;
-  --accent: #7c93fa;
-  --accent-hover: #4f6df5;
-  --accent-soft: rgba(79, 109, 245, 0.12);
-  --accent-border: rgba(79, 109, 245, 0.25);
-  --accent-glow: rgba(79, 109, 245, 0.12);
-  --code-bg: #080a1a;
-  --code-border: #181c36;
-  --code-text: #a5b4fc;
-}
+[data-color-theme="blue"]                            { --accent: #4f6df5; --accent-hover: #3b5de7; }
+[data-theme="dark"][data-color-theme="blue"]         { --accent: #7c93fa; --accent-hover: #4f6df5; }
 
 /* ── Reset ──────────────────────────────────── */
 
