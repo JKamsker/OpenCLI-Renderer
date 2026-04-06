@@ -225,16 +225,7 @@ export function AboutPage() {
               View docs <ArrowRight aria-hidden="true" size={13} />
             </span>
           </a>
-          <a href="#/" className="qs-ex">
-            <span className="qs-ex-name">Browse All</span>
-            <span className="qs-ex-alias">NuGet browser</span>
-            <span className="qs-ex-desc">
-              Explore indexed .NET CLI tool packages directly.
-            </span>
-            <span className="qs-ex-link">
-              Open browser <ArrowRight aria-hidden="true" size={13} />
-            </span>
-          </a>
+
         </div>
       </section>
 
