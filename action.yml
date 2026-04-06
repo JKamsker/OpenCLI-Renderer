@@ -80,6 +80,27 @@ inputs:
     required: false
     default: '2'
 
+  theme:
+    description: 'Initial theme mode (light or dark)'
+    required: false
+
+  color-theme:
+    description: 'Color theme (cyan, indigo, emerald, amber, rose, blue)'
+    required: false
+
+  accent:
+    description: 'Custom accent color for light mode (hex, e.g. "#7c3aed")'
+    required: false
+
+  accent-dark:
+    description: 'Custom accent color for dark mode (hex, falls back to accent)'
+    required: false
+
+  no-theme-picker:
+    description: 'Hide the color theme picker from the viewer toolbar'
+    required: false
+    default: 'false'
+
   extra-args:
     description: 'Additional flags forwarded to the inspectra CLI'
     required: false
@@ -178,6 +199,11 @@ runs:
         LABEL: ${{ inputs.label }}
         SINGLE_FILE: ${{ inputs.single-file }}
         COMPRESSION_LEVEL: ${{ inputs.compression-level }}
+        THEME: ${{ inputs.theme }}
+        COLOR_THEME: ${{ inputs.color-theme }}
+        ACCENT: ${{ inputs.accent }}
+        ACCENT_DARK: ${{ inputs.accent-dark }}
+        NO_THEME_PICKER: ${{ inputs.no-theme-picker }}
         OUTPUT_DIR: ${{ inputs.output-dir }}
         EXTRA_ARGS: ${{ inputs.extra-args }}
       run: |
@@ -250,6 +276,21 @@ runs:
             args+=(--single-file)
           fi
           args+=(--compression-level "$COMPRESSION_LEVEL")
+          if [ -n "${THEME:-}" ]; then
+            args+=(--theme "$THEME")
+          fi
+          if [ -n "${COLOR_THEME:-}" ]; then
+            args+=(--color-theme "$COLOR_THEME")
+          fi
+          if [ -n "${ACCENT:-}" ]; then
+            args+=(--accent "$ACCENT")
+          fi
+          if [ -n "${ACCENT_DARK:-}" ]; then
+            args+=(--accent-dark "$ACCENT_DARK")
+          fi
+          if [ "$NO_THEME_PICKER" = "true" ]; then
+            args+=(--no-theme-picker)
+          fi
         fi
 
         if [ -n "${EXTRA_ARGS:-}" ]; then

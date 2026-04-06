@@ -95,6 +95,27 @@ on:
         default: '2'
         description: 'Compression level (0=none, 1=compress JSON, 2=self-extracting)'
 
+      theme:
+        type: string
+        description: 'Initial theme mode (light or dark)'
+
+      color-theme:
+        type: string
+        description: 'Color theme (cyan, indigo, emerald, amber, rose, blue)'
+
+      accent:
+        type: string
+        description: 'Custom accent color for light mode (hex, e.g. "#7c3aed")'
+
+      accent-dark:
+        type: string
+        description: 'Custom accent color for dark mode (hex, falls back to accent)'
+
+      no-theme-picker:
+        type: string
+        default: 'false'
+        description: 'Hide the color theme picker from the viewer toolbar'
+
       extra-args:
         type: string
         description: 'Additional flags forwarded to the inspectra CLI'
@@ -155,6 +176,11 @@ jobs:
           output-dir: _inspectra-site
           single-file: ${{ inputs.single-file }}
           compression-level: ${{ inputs.compression-level }}
+          theme: ${{ inputs.theme }}
+          color-theme: ${{ inputs.color-theme }}
+          accent: ${{ inputs.accent }}
+          accent-dark: ${{ inputs.accent-dark }}
+          no-theme-picker: ${{ inputs.no-theme-picker }}
           extra-args: ${{ inputs.extra-args }}
           inspectra-version: ${{ inputs.inspectra-version }}
           dotnet-version: ${{ inputs.dotnet-version }}
