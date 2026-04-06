@@ -377,6 +377,15 @@
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  min-width: 0;
+}
+
+.browse-detail-field > span,
+.browse-detail-field > code,
+.browse-detail-field > a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .browse-detail-title-row {
