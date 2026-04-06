@@ -43,8 +43,8 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
   }
 
   return (
-    <main className="import-screen">
-      <section className="import-hero panel">
+    <main className="ds-content-screen">
+      <section className="ds-hero-panel panel">
         <div className="browse-header-row">
           <div className="browse-detail-title-row">
             <img
@@ -76,6 +76,12 @@ export function PackageDetail({ pkg, summary, selectedVersion, onLoadPackage }: 
             <span className="browse-detail-label">Latest version</span>
             <span>{pkg.latestVersion}</span>
           </div>
+          {summary?.cliFramework && (
+            <div className="browse-detail-field">
+              <span className="browse-detail-label">CLI Framework</span>
+              <span>{summary.cliFramework}</span>
+            </div>
+          )}
           <div className="browse-detail-field">
             <span className="browse-detail-label">Status</span>
             <StatusBadge status={pkg.latestStatus} />

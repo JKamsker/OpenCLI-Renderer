@@ -5,19 +5,6 @@
     padding: 1.5rem 1rem 3rem;
   }
 
-  .import-facts {
-    grid-template-columns: 1fr;
-  }
-
-  .import-browse-cta {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .browse-cta-content {
-    flex-direction: column;
-  }
-
   .browse-grid {
     grid-template-columns: 1fr;
   }
@@ -370,28 +357,17 @@
     padding: 0.75rem 2.2rem 0.75rem 0.75rem;
   }
 
-  /* Import screen */
-  .import-screen {
+  /* Shared content screen / hero */
+  .ds-content-screen {
     padding: 1rem 0.75rem;
   }
 
-  .import-hero {
+  .ds-hero-panel {
     padding: 1.25rem;
   }
 
-  .import-hero h1 {
+  .ds-hero-panel h1 {
     font-size: clamp(1.25rem, 5vw, 1.6rem);
-  }
-
-  .import-dropzone {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
-
-  .dropzone-icon {
-    margin: 0 auto;
   }
 
   /* Chips wrap better */

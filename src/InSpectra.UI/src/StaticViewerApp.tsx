@@ -72,12 +72,12 @@ export function StaticViewerApp() {
       return <PackageLoadingScreen message={loadState.message} />;
     }
     return (
-      <main className="import-screen">
-        <section className="import-hero panel">
+      <main className="ds-content-screen">
+        <section className="ds-hero-panel panel">
           <div className="eyebrow">InSpectraUI</div>
           <h1>Failed to load</h1>
-          {error && <p className="inline-alert" role="alert">{error}</p>}
-          {loadState.message && <p className="inline-alert" role="alert">{loadState.message}</p>}
+          {error && <p className="ds-inline-alert" role="alert">{error}</p>}
+          {loadState.message && <p className="ds-inline-alert" role="alert">{loadState.message}</p>}
         </section>
       </main>
     );

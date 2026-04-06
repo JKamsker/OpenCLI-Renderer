@@ -177,11 +177,11 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
     if (packageError) {
       return (
         <>
-          <main className="import-screen">
-            <section className="import-hero panel">
+          <main className="ds-content-screen">
+            <section className="ds-hero-panel panel">
               <div className="eyebrow">NuGet Browser</div>
               <h1>Package not found</h1>
-              <p className="inline-alert" role="alert">{packageError}</p>
+              <p className="ds-inline-alert" role="alert">{packageError}</p>
               <button type="button" className="secondary-button" onClick={() => history.back()} style={{ marginTop: "1rem" }}>
                 Back to browser
               </button>
@@ -195,8 +195,8 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
     if (packageLoading || !packageDetail) {
       return (
         <>
-          <main className="import-screen">
-            <section className="import-hero panel">
+          <main className="ds-content-screen">
+            <section className="ds-hero-panel panel">
               <div className="browse-loading">
                 <LoaderCircle className="spin" aria-hidden="true" />
                 <span>Loading package details...</span>
@@ -223,8 +223,8 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
 
   if (loading) {
     return (
-      <main className="import-screen">
-        <section className="import-hero panel">
+      <main className="ds-content-screen">
+        <section className="ds-hero-panel panel">
           <div className="browse-loading">
             <LoaderCircle className="spin" aria-hidden="true" />
             <span>Loading package index...</span>
@@ -236,11 +236,11 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
 
   if (error || !index) {
     return (
-      <main className="import-screen">
-        <section className="import-hero panel">
+      <main className="ds-content-screen">
+        <section className="ds-hero-panel panel">
           <div className="eyebrow">NuGet Browser</div>
           <h1>Failed to load package index</h1>
-          <p className="inline-alert" role="alert">{error}</p>
+          <p className="ds-inline-alert" role="alert">{error}</p>
           <button type="button" className="secondary-button" onClick={onBack} style={{ marginTop: "1rem" }}>
             Go back
           </button>
@@ -262,8 +262,8 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
 
   return (
     <>
-      <main className="import-screen">
-        <section className="import-hero panel">
+      <main className="ds-content-screen">
+        <section className="ds-hero-panel panel">
           <div className="browse-header-row">
             <div>
               <div className="eyebrow">NuGet Browser</div>
