@@ -4,6 +4,14 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   base: "./",
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: "index.html",
+        static: "static.html",
+      },
+    },
+  },
   test: {
     environment: "jsdom",
     environmentOptions: {

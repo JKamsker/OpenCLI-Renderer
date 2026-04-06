@@ -1,0 +1,224 @@
+/* ── Site Header ────────────────────────────── */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  background: var(--topbar);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  gap: 1rem;
+}
+
+.site-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.site-header-brand .brand-mark {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.site-header-brand-name {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.site-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.site-header-nav a,
+.site-header-nav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s var(--ease), background 0.15s var(--ease);
+  white-space: nowrap;
+}
+
+.site-header-nav a:hover,
+.site-header-nav button:hover {
+  color: var(--text);
+  background: var(--accent-soft);
+}
+
+.site-header-nav a.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.site-header-nav a svg,
+.site-header-nav button svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.site-header-import-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.site-header-import-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.site-header-import-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Hidden file input */
+.site-header-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* Mobile hamburger */
+.site-header-mobile-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.4rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.site-header-mobile-btn:hover {
+  color: var(--text);
+}
+
+.site-header-mobile-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mobile nav overlay */
+.site-header-mobile-nav {
+  display: none;
+  position: fixed;
+  top: 3.5rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 29;
+  background: var(--topbar);
+  border-top: 1px solid var(--border);
+  padding: 1rem;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.site-header-mobile-nav.open {
+  display: flex;
+}
+
+.site-header-mobile-nav a,
+.site-header-mobile-nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s var(--ease);
+  width: 100%;
+  text-align: left;
+}
+
+.site-header-mobile-nav a:hover,
+.site-header-mobile-nav button:hover {
+  background: var(--accent-soft);
+}
+
+.site-header-mobile-nav a svg,
+.site-header-mobile-nav button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.site-header-mobile-nav .site-header-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .site-header-nav {
+    display: none;
+  }
+
+  .site-header-mobile-btn {
+    display: flex;
+  }
+
+  .site-header-import-btn span {
+    display: none;
+  }
+}
+
+/* Adjust viewer topbar when nested under site header */
+.site-header + .app-shell {
+  height: calc(100vh - 3.5rem);
+}
+
+.site-header + .app-shell .topbar {
+  top: 0;
+}

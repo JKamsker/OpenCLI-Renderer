@@ -1,11 +1,6 @@
 @import "./styles/base.css";
 @import "./styles/layout.css";
 @import "./styles/components.css";
-@import "./styles/import.css";
-@import "./styles/browse.css";
 @import "./styles/modals.css";
 @import "./styles/composer.css";
-@import "./styles/header.css";
-@import "./styles/about.css";
-@import "./styles/guide.css";
 @import "./styles/responsive.css";

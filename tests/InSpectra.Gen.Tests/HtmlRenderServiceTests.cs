@@ -129,10 +129,10 @@ public class HtmlRenderServiceTests
         var result = await service.RenderFromFileAsync(request, DefaultFeatures, CancellationToken.None);
 
         Assert.True(result.IsDryRun);
-        Assert.Equal(3, result.Files.Count);
+        Assert.Equal(4, result.Files.Count);
         Assert.DoesNotContain(result.Files, file => file.Content is not null);
         Assert.False(Directory.Exists(outputDirectory));
-        Assert.Contains("3 files planned", result.Summary);
+        Assert.Contains("4 files planned", result.Summary);
     }
 
     private static HtmlRenderService CreateHtmlRenderService(ViewerBundleLocatorOptions options)
@@ -148,7 +148,8 @@ public class HtmlRenderServiceTests
     {
         var bundleRoot = Path.Combine(rootPath, folderName);
         Directory.CreateDirectory(Path.Combine(bundleRoot, "assets"));
-        File.WriteAllText(Path.Combine(bundleRoot, "index.html"), "<!doctype html><script id=\"inspectra-bootstrap\" type=\"application/json\">__INSPECTRA_BOOTSTRAP__</script>");
+        File.WriteAllText(Path.Combine(bundleRoot, "static.html"), "<!doctype html><script id=\"inspectra-bootstrap\" type=\"application/json\">__INSPECTRA_BOOTSTRAP__</script>");
+        File.WriteAllText(Path.Combine(bundleRoot, "index.html"), "<!doctype html><div id=\"root\"></div>");
         File.WriteAllText(Path.Combine(bundleRoot, "assets", "app.js"), "console.log('bundle');");
         File.WriteAllText(Path.Combine(bundleRoot, "assets", "app.css"), "body { color: black; }");
         return bundleRoot;

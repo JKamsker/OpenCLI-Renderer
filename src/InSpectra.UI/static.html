@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InSpectra — Explore .NET CLI tool documentation</title>
+    <title>InSpectraUI</title>
     <meta
       name="description"
-      content="Browse indexed .NET CLI tool packages and explore their command structure with interactive documentation."
+      content="Inspect OpenCLI snapshots with a deliberate, bundle-friendly React viewer."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,6 +24,7 @@
         else if (matchMedia("(prefers-color-scheme:dark)").matches) document.documentElement.dataset.theme = "dark";
       })();
     </script>
-    <script type="module" src="/src/main.tsx"></script>
+    <script id="inspectra-bootstrap" type="application/json">__INSPECTRA_BOOTSTRAP__</script>
+    <script type="module" src="/src/main-static.tsx"></script>
   </body>
 </html>

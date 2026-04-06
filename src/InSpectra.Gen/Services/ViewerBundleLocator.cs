@@ -114,6 +114,7 @@ public class ViewerBundleLocator(
 
     private static bool HasBundle(string path)
     {
-        return File.Exists(Path.Combine(path, "index.html"));
+        return File.Exists(Path.Combine(path, "static.html"))
+            || File.Exists(Path.Combine(path, "index.html"));
     }
 }

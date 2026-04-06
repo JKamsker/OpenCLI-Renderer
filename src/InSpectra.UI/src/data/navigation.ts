@@ -1,5 +1,7 @@
 export type HashRoute =
   | { kind: "overview" }
+  | { kind: "about" }
+  | { kind: "guide" }
   | { kind: "command"; commandPath: string }
   | { kind: "browse"; packageId?: string; version?: string }
   | { kind: "package"; packageId: string; version?: string; commandPath?: string };
@@ -37,6 +39,14 @@ export function parseHashRoute(hash: string): HashRoute {
   const normalized = hash.startsWith("#") ? hash.slice(1) : hash;
   if (normalized.length === 0 || normalized === "/") {
     return { kind: "overview" };
+  }
+
+  if (normalized === "/about") {
+    return { kind: "about" };
+  }
+
+  if (normalized === "/guide") {
+    return { kind: "guide" };
   }
 
   if (normalized === "/browse" || normalized.startsWith("/browse/")) {

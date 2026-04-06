@@ -79,12 +79,20 @@ public sealed class HtmlRenderService(
                 Directory.CreateDirectory(destinationDirectory);
             }
 
-            if (string.Equals(file.RelativePath, "index.html", StringComparison.OrdinalIgnoreCase))
+            // static.html is the static bundle template — inject bootstrap and write as index.html
+            if (string.Equals(file.RelativePath, "static.html", StringComparison.OrdinalIgnoreCase))
             {
                 var html = await File.ReadAllTextAsync(file.SourcePath, cancellationToken);
                 html = html.Replace(BootstrapPlaceholder, bootstrapJson, StringComparison.Ordinal);
-                await File.WriteAllTextAsync(destinationPath, html, cancellationToken);
-                writtenFiles.Add(new RenderedFile(file.RelativePath, destinationPath, html));
+                var indexDestination = Path.Combine(outputDirectory, "index.html");
+                await File.WriteAllTextAsync(indexDestination, html, cancellationToken);
+                writtenFiles.Add(new RenderedFile("index.html", indexDestination, html));
+                continue;
+            }
+
+            // Skip the website index.html — static bundles don't need it
+            if (string.Equals(file.RelativePath, "index.html", StringComparison.OrdinalIgnoreCase))
+            {
                 continue;
             }
 

@@ -1,0 +1,404 @@
+/* ── CI Guide Page ──────────────────────────── */
+
+.ci-guide-page {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* Hero */
+.ci-guide-hero {
+  text-align: center;
+  padding: 2.5rem 0 2rem;
+}
+
+.ci-guide-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.02em;
+}
+
+.ci-guide-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: ci-pulse 2s infinite;
+}
+
+@keyframes ci-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.ci-guide-hero h1 {
+  font-family: var(--font);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.ci-guide-accent {
+  background: linear-gradient(135deg, var(--accent), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ci-guide-hero-sub {
+  font-size: 1rem;
+  color: var(--muted);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* TOC */
+.ci-guide-toc-section {
+  padding: 0;
+}
+
+.ci-guide-toc {
+  padding: 1.25rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 2.5rem;
+}
+
+.ci-guide-toc-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: var(--text);
+}
+
+.ci-guide-toc ol {
+  padding-left: 1.4rem;
+  margin: 0;
+}
+
+.ci-guide-toc li {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.ci-guide-toc a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.ci-guide-toc a:hover {
+  color: var(--green);
+}
+
+/* Section styling */
+.ci-guide-section {
+  margin-top: 2.5rem;
+}
+
+.ci-guide-divider {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 2.5rem 0;
+}
+
+.ci-guide-section-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.ci-guide-section-title {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.ci-guide-section-desc {
+  color: var(--muted);
+  font-size: 0.92rem;
+  max-width: 480px;
+  line-height: 1.65;
+  margin-bottom: 1.5rem;
+}
+
+.ci-guide-section-desc code {
+  font-size: 0.84rem;
+  background: var(--accent-soft);
+  padding: 0.12rem 0.4rem;
+  border-radius: 0.25rem;
+  color: var(--accent);
+}
+
+/* Prose */
+.ci-guide-prose p {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.75;
+  margin-bottom: 0.85rem;
+}
+
+.ci-guide-prose p strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ci-guide-prose code {
+  font-size: 0.8rem;
+  background: var(--accent-soft);
+  padding: 0.12rem 0.4rem;
+  border-radius: 0.25rem;
+  color: var(--accent);
+}
+
+.ci-guide-prose a,
+.ci-guide-link {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.ci-guide-prose a:hover,
+.ci-guide-link:hover {
+  text-decoration: underline;
+}
+
+/* Code block */
+.ci-guide-code-block {
+  border-radius: 0.85rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.ci-guide-tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.ci-guide-tab {
+  padding: 0.55rem 1rem;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--soft);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.ci-guide-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.ci-guide-tab:hover {
+  color: var(--text-secondary);
+}
+
+/* Code panels — used by tabbed and static blocks */
+.ci-guide-panel,
+.ci-guide-code-panel {
+  padding: 1.2rem 1.4rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.9;
+  color: var(--muted);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.ci-guide-code-label {
+  padding: 0.5rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--soft);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.03em;
+}
+
+.ci-guide-code-body {
+  padding: 1.2rem 1.4rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.9;
+  color: var(--muted);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Copy button */
+.ci-guide-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.4rem;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+
+.ci-guide-copy-btn:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+}
+
+.ci-guide-copy-btn.copied {
+  color: var(--green);
+  border-color: var(--green-border);
+}
+
+/* Syntax highlighting */
+.ci-guide-syn-comment { color: var(--soft); }
+.ci-guide-syn-key     { color: var(--accent); }
+.ci-guide-syn-flag    { color: var(--amber); }
+.ci-guide-syn-arg     { color: var(--green); }
+.ci-guide-syn-str     { color: #f9a8d4; }
+
+/* Options grid */
+.ci-guide-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.ci-guide-option-card {
+  padding: 1.1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+}
+
+.ci-guide-option-name {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 0.2rem;
+}
+
+.ci-guide-option-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.ci-guide-option-desc code {
+  font-size: 0.75rem;
+  background: var(--accent-soft);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+  color: var(--accent);
+}
+
+.ci-guide-option-default {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--soft);
+  margin-top: 0.2rem;
+}
+
+.ci-guide-option-default code {
+  font-size: 0.7rem;
+  background: var(--accent-soft);
+  padding: 0.08rem 0.25rem;
+  border-radius: 0.2rem;
+  color: var(--accent);
+}
+
+/* Callout */
+.ci-guide-callout {
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  margin-bottom: 1.5rem;
+}
+
+.ci-guide-callout-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ci-guide-callout p {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.ci-guide-callout code {
+  font-size: 0.78rem;
+  background: var(--accent-soft);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .ci-guide-page {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .ci-guide-options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ci-guide-tab-bar {
+    gap: 0;
+  }
+
+  .ci-guide-tab {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.7rem;
+  }
+}

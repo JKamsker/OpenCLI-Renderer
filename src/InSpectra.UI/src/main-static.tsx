@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { WebsiteApp } from "./WebsiteApp";
-import "./styles.css";
+import { StaticViewerApp } from "./StaticViewerApp";
+import "./styles-static.css";
 
 const element = document.getElementById("root");
 if (!element) {
@@ -10,6 +10,6 @@ if (!element) {
 
 createRoot(element).render(
   <StrictMode>
-    <WebsiteApp />
+    <StaticViewerApp />
   </StrictMode>,
 );
