@@ -14,9 +14,9 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="./assets/main-DumhpkYe.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/loadSource-DZ_SNmli.js">
-    <link rel="stylesheet" crossorigin href="./assets/main-CISUeHTm.css">
+    <script type="module" crossorigin src="./assets/main-BBCk5cnK.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/loadSource-DJYDWf49.js">
+    <link rel="stylesheet" crossorigin href="./assets/main-DJB_tNzl.css">
   </head>
   <body>
     <div id="root"></div>
@@ -25,6 +25,8 @@
         var s = localStorage.getItem("inspectra-theme");
         if (s === "dark" || s === "light") document.documentElement.dataset.theme = s;
         else if (matchMedia("(prefers-color-scheme:dark)").matches) document.documentElement.dataset.theme = "dark";
+        var c = localStorage.getItem("inspectra-color-theme");
+        if (c) document.documentElement.dataset.colorTheme = c;
       })();
     </script>
   </body>
