@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Info, Menu, Package, Terminal, Upload, X } from "lucide-react";
+import { FileText, Menu, Package, Terminal, Upload, X, Zap } from "lucide-react";
 import { useRef, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { GitHubIcon } from "./GitHubIcon";
@@ -51,8 +51,8 @@ export function SiteHeader({ route, onFilesSelected }: SiteHeaderProps) {
             <span>CI Guide</span>
           </a>
           <a href="#/about" className={isAbout ? "active" : ""}>
-            <Info aria-hidden="true" size={15} />
-            <span>About</span>
+            <Zap aria-hidden="true" size={15} />
+            <span>Quickstart</span>
           </a>
           <a href="https://github.com/JKamsker/InSpectra" target="_blank" rel="noopener noreferrer">
             <GitHubIcon aria-hidden="true" size={15} />
@@ -104,8 +104,8 @@ export function SiteHeader({ route, onFilesSelected }: SiteHeaderProps) {
           <span>CI Guide</span>
         </a>
         <a href="#/about" onClick={() => setMobileOpen(false)} className={isAbout ? "active" : ""}>
-          <Info aria-hidden="true" />
-          <span>About</span>
+          <Zap aria-hidden="true" />
+          <span>Quickstart</span>
         </a>
         <div className="site-header-divider" />
         <a href="https://github.com/JKamsker/InSpectra" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
