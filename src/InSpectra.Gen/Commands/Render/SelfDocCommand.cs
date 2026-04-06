@@ -88,7 +88,8 @@ public sealed class SelfDocCommand(
             var htmlRequest = new FileRenderRequest(openCliPath, xmlDocPath,
                 fileRequest.Options with { OutputDirectory = htmlDir });
             var features = RenderRequestFactory.CreateHtmlFeatureFlags(settings);
-            var htmlResult = await htmlService.RenderFromFileAsync(htmlRequest, features, cancellationToken, settings.Label);
+            var themeOptions = RenderRequestFactory.CreateHtmlThemeOptions(settings);
+            var htmlResult = await htmlService.RenderFromFileAsync(htmlRequest, features, cancellationToken, settings.Label, themeOptions);
             console.MarkupLine($"[green]\u2713[/] Wrote [bold]{htmlResult.Files.Count}[/] HTML files to [bold]html/[/]");
         }
 

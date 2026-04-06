@@ -11,6 +11,7 @@ public sealed class ExecHtmlCommand(HtmlRenderService renderService) : AsyncComm
     {
         var options = RenderRequestFactory.CreateHtmlOptions(settings, null, null, settings.OutputDirectory, settings.TimeoutSeconds, hasTimeoutSupport: true);
         var features = RenderRequestFactory.CreateHtmlFeatureFlags(settings);
+        var themeOptions = RenderRequestFactory.CreateHtmlThemeOptions(settings);
         var workingDirectory = RenderRequestFactory.ResolveWorkingDirectory(settings.WorkingDirectory);
         var request = new ExecRenderRequest(
             settings.Source,
@@ -25,7 +26,7 @@ public sealed class ExecHtmlCommand(HtmlRenderService renderService) : AsyncComm
         return CommandOutputHandler.ExecuteAsync(
             options.OutputMode,
             options.Verbose,
-            () => renderService.RenderFromExecAsync(request, features, cancellationToken, settings.Label));
+            () => renderService.RenderFromExecAsync(request, features, cancellationToken, settings.Label, themeOptions));
     }
 }
 

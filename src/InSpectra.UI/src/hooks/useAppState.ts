@@ -110,7 +110,7 @@ export function useAppState() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  useThemeEnforcement(featureFlags);
+  useThemeEnforcement(featureFlags, viewerOptions);
 
   // --- Business logic ---
 

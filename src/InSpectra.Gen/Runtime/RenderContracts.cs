@@ -50,7 +50,14 @@ public sealed record HtmlFeatureFlags(
     bool LightTheme,
     bool UrlLoading,
     bool NugetBrowser,
-    bool PackageUpload);
+    bool PackageUpload,
+    bool ColorThemePicker);
+
+public sealed record HtmlThemeOptions(
+    string? Theme,
+    string? ColorTheme,
+    string? CustomAccent,
+    string? CustomAccentDark);
 
 public sealed record FileRenderRequest(
     string OpenCliJsonPath,

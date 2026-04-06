@@ -122,7 +122,9 @@ export function CliViewer({
             </button>
           )}
 
-          {showThemeToggle && featureFlags.darkTheme && featureFlags.lightTheme && <ThemeToggle />}
+          {showThemeToggle && featureFlags.darkTheme && featureFlags.lightTheme && (
+            <ThemeToggle colorThemePicker={featureFlags.colorThemePicker} />
+          )}
         </div>
       </header>
 

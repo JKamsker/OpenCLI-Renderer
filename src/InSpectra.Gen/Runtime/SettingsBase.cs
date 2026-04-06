@@ -154,6 +154,41 @@ public abstract class HtmlCommandSettingsBase : CommonCommandSettings
     [CommandOption("--compression-level <LEVEL>")]
     public int? CompressionLevel { get; init; }
 
+    /// <summary>
+    /// Set the initial theme mode (light or dark).
+    /// </summary>
+    [Description("Set the initial theme mode (light or dark).")]
+    [CommandOption("--theme <MODE>")]
+    public string? Theme { get; init; }
+
+    /// <summary>
+    /// Set the color theme (cyan, indigo, emerald, amber, rose, blue).
+    /// </summary>
+    [Description("Set the color theme (cyan, indigo, emerald, amber, rose, blue).")]
+    [CommandOption("--color-theme <NAME>")]
+    public string? ColorTheme { get; init; }
+
+    /// <summary>
+    /// Custom accent color for light mode (hex, e.g. "#7c3aed").
+    /// </summary>
+    [Description("Custom accent color for light mode (hex, e.g. \"#7c3aed\").")]
+    [CommandOption("--accent <COLOR>")]
+    public string? Accent { get; init; }
+
+    /// <summary>
+    /// Custom accent color for dark mode (hex). Falls back to --accent if omitted.
+    /// </summary>
+    [Description("Custom accent color for dark mode (hex). Falls back to --accent if omitted.")]
+    [CommandOption("--accent-dark <COLOR>")]
+    public string? AccentDark { get; init; }
+
+    /// <summary>
+    /// Hide the color theme picker from the viewer toolbar.
+    /// </summary>
+    [Description("Hide the color theme picker from the viewer toolbar.")]
+    [CommandOption("--no-theme-picker")]
+    public bool NoThemePicker { get; init; }
+
 }
 
 /// <summary>
@@ -291,5 +326,40 @@ public abstract class SelfDocHtmlCommandSettingsBase : SelfDocCommandSettingsBas
     [Description("Compression level: 0 = none, 1 = compress embedded JSON, 2 = self-extracting bundle (default 2).")]
     [CommandOption("--compression-level <LEVEL>")]
     public int? CompressionLevel { get; init; }
+
+    /// <summary>
+    /// Set the initial theme mode (light or dark).
+    /// </summary>
+    [Description("Set the initial theme mode (light or dark).")]
+    [CommandOption("--theme <MODE>")]
+    public string? Theme { get; init; }
+
+    /// <summary>
+    /// Set the color theme (cyan, indigo, emerald, amber, rose, blue).
+    /// </summary>
+    [Description("Set the color theme (cyan, indigo, emerald, amber, rose, blue).")]
+    [CommandOption("--color-theme <NAME>")]
+    public string? ColorTheme { get; init; }
+
+    /// <summary>
+    /// Custom accent color for light mode (hex, e.g. "#7c3aed").
+    /// </summary>
+    [Description("Custom accent color for light mode (hex, e.g. \"#7c3aed\").")]
+    [CommandOption("--accent <COLOR>")]
+    public string? Accent { get; init; }
+
+    /// <summary>
+    /// Custom accent color for dark mode (hex). Falls back to --accent if omitted.
+    /// </summary>
+    [Description("Custom accent color for dark mode (hex). Falls back to --accent if omitted.")]
+    [CommandOption("--accent-dark <COLOR>")]
+    public string? AccentDark { get; init; }
+
+    /// <summary>
+    /// Hide the color theme picker from the viewer toolbar.
+    /// </summary>
+    [Description("Hide the color theme picker from the viewer toolbar.")]
+    [CommandOption("--no-theme-picker")]
+    public bool NoThemePicker { get; init; }
 
 }

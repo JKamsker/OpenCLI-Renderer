@@ -68,7 +68,7 @@ export function WebsiteApp() {
     return () => controller.abort();
   }, [route.kind === "package" ? `${route.packageId.toLowerCase()}/${route.version ?? "latest"}` : null]);
 
-  useThemeEnforcement(featureFlags);
+  useThemeEnforcement(featureFlags, viewerOptions);
 
   async function loadPackageFromRoute(packageId: string, version: string | undefined, signal?: AbortSignal) {
     try {

@@ -34,7 +34,7 @@ export function StaticViewerApp() {
     return () => window.removeEventListener("hashchange", handle);
   }, []);
 
-  useThemeEnforcement(featureFlags);
+  useThemeEnforcement(featureFlags, viewerOptions);
 
   async function initialize(signal: AbortSignal) {
     try {

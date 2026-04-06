@@ -1,5 +1,6 @@
 import { Moon, Sun, Palette } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { syncCustomAccent } from "../hooks/useThemeEnforcement";
 
 const COLOR_THEMES = [
   { id: "cyan", label: "Cyan", swatch: "#0891b2", swatchDark: "#22d3ee" },
@@ -16,17 +17,24 @@ function readTheme(): "light" | "dark" {
   return (document.documentElement.dataset.theme as "light" | "dark") || "light";
 }
 
-function readColorTheme(): ColorThemeId {
-  return (document.documentElement.dataset.colorTheme as ColorThemeId) || "cyan";
+function readColorTheme(): string {
+  return document.documentElement.dataset.colorTheme || "cyan";
 }
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  colorThemePicker?: boolean;
+}
+
+export function ThemeToggle({ colorThemePicker = true }: ThemeToggleProps) {
   const [theme, setTheme] = useState<"light" | "dark">(readTheme);
-  const [colorTheme, setColorTheme] = useState<ColorThemeId>(readColorTheme);
+  const [colorTheme, setColorTheme] = useState<string>(readColorTheme);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPress = useRef(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const isCustom = colorTheme === "custom";
+  const canPickColor = colorThemePicker && !isCustom;
 
   // Toggle light/dark
   function toggleMode() {
@@ -34,6 +42,7 @@ export function ThemeToggle() {
     document.documentElement.dataset.theme = next;
     localStorage.setItem("inspectra-theme", next);
     setTheme(next);
+    syncCustomAccent();
   }
 
   // Apply color theme
@@ -45,12 +54,16 @@ export function ThemeToggle() {
       document.documentElement.dataset.colorTheme = id;
       localStorage.setItem("inspectra-color-theme", id);
     }
+    // Clear any custom accent inline styles when switching to a named theme
+    document.documentElement.style.removeProperty("--accent");
+    document.documentElement.style.removeProperty("--accent-hover");
     setColorTheme(id);
     setDropdownOpen(false);
   }
 
-  // Long-press handlers
+  // Long-press handlers — only if color picker is enabled
   function onPointerDown() {
+    if (!canPickColor) return;
     didLongPress.current = false;
     longPressTimer.current = setTimeout(() => {
       didLongPress.current = true;
@@ -100,6 +113,9 @@ export function ThemeToggle() {
   }, [dropdownOpen]);
 
   const isDark = theme === "dark";
+  const title = canPickColor
+    ? "Click to toggle theme · Long-press for color themes"
+    : "Toggle theme";
 
   return (
     <div className="theme-toggle-wrapper" ref={wrapperRef}>
@@ -110,13 +126,13 @@ export function ThemeToggle() {
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerLeave}
         onContextMenu={(e) => e.preventDefault()}
-        title="Click to toggle theme · Long-press for color themes"
+        title={title}
       >
         {isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
         <span>{isDark ? "Light" : "Dark"}</span>
       </button>
 
-      {dropdownOpen && (
+      {dropdownOpen && canPickColor && (
         <div className="theme-dropdown">
           <div className="theme-dropdown-header">
             <Palette aria-hidden="true" />

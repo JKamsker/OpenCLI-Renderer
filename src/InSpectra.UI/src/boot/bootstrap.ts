@@ -115,6 +115,10 @@ function readOptions(options: Partial<ViewerOptions> | ViewerOptions | undefined
   return {
     includeHidden: options?.includeHidden ?? defaults.includeHidden,
     includeMetadata: options?.includeMetadata ?? defaults.includeMetadata,
+    theme: options?.theme,
+    colorTheme: options?.colorTheme,
+    customAccent: options?.customAccent,
+    customAccentDark: options?.customAccentDark,
   };
 }
 
@@ -132,6 +136,7 @@ function readFeatures(features: Partial<FeatureFlags> | undefined, hasBootstrap:
     urlLoading: features?.urlLoading ?? defaults.urlLoading,
     nugetBrowser: features?.nugetBrowser ?? defaults.nugetBrowser,
     packageUpload: features?.packageUpload ?? defaults.packageUpload,
+    colorThemePicker: features?.colorThemePicker ?? defaults.colorThemePicker,
   };
 }
 

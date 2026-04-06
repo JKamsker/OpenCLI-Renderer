@@ -4,6 +4,14 @@ export interface ViewerOptions {
   includeHidden: boolean;
   includeMetadata: boolean;
   label?: string;
+  /** Preset light/dark mode (overrides localStorage on load). */
+  theme?: "light" | "dark";
+  /** Preset color theme ID (overrides localStorage on load). */
+  colorTheme?: string;
+  /** Custom accent color for light mode (hex, e.g. "#7c3aed"). */
+  customAccent?: string;
+  /** Custom accent color for dark mode (hex). Falls back to customAccent if omitted. */
+  customAccentDark?: string;
 }
 
 export interface FeatureFlags {
@@ -14,6 +22,8 @@ export interface FeatureFlags {
   urlLoading: boolean;
   nugetBrowser: boolean;
   packageUpload: boolean;
+  /** Whether the user can open the color theme picker (long-press). Default true. */
+  colorThemePicker: boolean;
 }
 
 export type InSpectraBootstrap =
@@ -49,6 +59,7 @@ export function defaultFeatureFlags(): FeatureFlags {
     urlLoading: true,
     nugetBrowser: true,
     packageUpload: true,
+    colorThemePicker: true,
   };
 }
 
@@ -61,5 +72,6 @@ export function disabledFeatureFlags(): FeatureFlags {
     urlLoading: false,
     nugetBrowser: false,
     packageUpload: false,
+    colorThemePicker: true,
   };
 }

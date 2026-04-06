@@ -18,20 +18,22 @@ public sealed class HtmlRenderService(
         FileRenderRequest request,
         HtmlFeatureFlags features,
         CancellationToken cancellationToken,
-        string? label = null)
+        string? label = null,
+        HtmlThemeOptions? themeOptions = null)
     {
         var prepared = await documentService.LoadFromFileAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, features, label, cancellationToken);
+        return await RenderAsync(prepared, request.Options, features, label, themeOptions, cancellationToken);
     }
 
     public async Task<RenderExecutionResult> RenderFromExecAsync(
         ExecRenderRequest request,
         HtmlFeatureFlags features,
         CancellationToken cancellationToken,
-        string? label = null)
+        string? label = null,
+        HtmlThemeOptions? themeOptions = null)
     {
         var prepared = await documentService.LoadFromExecAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, features, label, cancellationToken);
+        return await RenderAsync(prepared, request.Options, features, label, themeOptions, cancellationToken);
     }
 
     private async Task<RenderExecutionResult> RenderAsync(
@@ -39,6 +41,7 @@ public sealed class HtmlRenderService(
         RenderExecutionOptions options,
         HtmlFeatureFlags features,
         string? label,
+        HtmlThemeOptions? themeOptions,
         CancellationToken cancellationToken)
     {
         var outputDirectory = options.OutputDirectory
@@ -74,7 +77,7 @@ public sealed class HtmlRenderService(
 
         OutputPathHelper.PrepareDirectory(outputDirectory, options.Overwrite);
 
-        var bootstrapJson = BuildInlineBootstrap(prepared, options.IncludeHidden, options.IncludeMetadata, features, label, options.CompressLevel);
+        var bootstrapJson = BuildInlineBootstrap(prepared, options.IncludeHidden, options.IncludeMetadata, features, label, themeOptions, options.CompressLevel);
         var writtenFiles = new List<RenderedFile>();
         foreach (var file in bundleFiles)
         {
@@ -110,7 +113,7 @@ public sealed class HtmlRenderService(
         if (options.SingleFile)
         {
             var selfExtractingHtml = options.CompressLevel >= 2
-                ? BuildSelfExtractingHtml(prepared, options, features, label, outputDirectory)
+                ? BuildSelfExtractingHtml(prepared, options, features, label, themeOptions, outputDirectory)
                 : InlineAssets(
                     writtenFiles.First(f => f.RelativePath == "index.html").Content!,
                     outputDirectory);
@@ -171,6 +174,7 @@ public sealed class HtmlRenderService(
         RenderExecutionOptions options,
         HtmlFeatureFlags features,
         string? label,
+        HtmlThemeOptions? themeOptions,
         string outputDirectory)
     {
         // Collect assets
@@ -194,7 +198,7 @@ public sealed class HtmlRenderService(
             : string.Join("\n", jsEntryFiles.Select(File.ReadAllText));
 
         // Build raw bootstrap JSON (not pre-compressed — we'll compress everything together)
-        var bootstrapPayload = BuildRawBootstrapJson(prepared, options.IncludeHidden, options.IncludeMetadata, features, label);
+        var bootstrapPayload = BuildRawBootstrapJson(prepared, options.IncludeHidden, options.IncludeMetadata, features, label, themeOptions);
 
         // Pack all payloads into one JSON object and gzip+base64 the whole thing
         var pack = JsonSerializer.Serialize(new { c = css, j = js, b = bootstrapPayload }, JsonOutput.CompactSerializerOptions);
@@ -205,7 +209,7 @@ public sealed class HtmlRenderService(
             """<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>InSpectraUI</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></head><body><div id="root"></div>""";
 
         const string themeScript =
-            """<script>(function(){var s=localStorage.getItem("inspectra-theme");if(s==="dark"||s==="light")document.documentElement.dataset.theme=s;else if(matchMedia("(prefers-color-scheme:dark)").matches)document.documentElement.dataset.theme="dark"})()</script>""";
+            """<script>(function(){var s=localStorage.getItem("inspectra-theme");if(s==="dark"||s==="light")document.documentElement.dataset.theme=s;else if(matchMedia("(prefers-color-scheme:dark)").matches)document.documentElement.dataset.theme="dark";var c=localStorage.getItem("inspectra-color-theme");if(c)document.documentElement.dataset.colorTheme=c})()</script>""";
 
         const string decompressor =
             """<script>var _u=Uint8Array.from(atob(document.getElementById("_z").textContent),function(c){return c.charCodeAt(0)});new Response(new Blob([_u]).stream().pipeThrough(new DecompressionStream("gzip"))).text().then(function(t){var p=JSON.parse(t);var d=document;var s=d.createElement("style");s.textContent=p.c;d.head.appendChild(s);var b=d.createElement("script");b.id="inspectra-bootstrap";b.type="application/json";b.textContent=p.b;d.body.appendChild(b);var j=d.createElement("script");j.textContent=p.j;d.body.appendChild(j)})</script>""";
@@ -220,7 +224,8 @@ public sealed class HtmlRenderService(
         bool includeHidden,
         bool includeMetadata,
         HtmlFeatureFlags features,
-        string? label)
+        string? label,
+        HtmlThemeOptions? themeOptions = null)
     {
         var payload = new InlineBootstrap
         {
@@ -232,6 +237,10 @@ public sealed class HtmlRenderService(
                 IncludeHidden = includeHidden,
                 IncludeMetadata = includeMetadata,
                 Label = label,
+                Theme = themeOptions?.Theme,
+                ColorTheme = themeOptions?.ColorTheme,
+                CustomAccent = themeOptions?.CustomAccent,
+                CustomAccentDark = themeOptions?.CustomAccentDark,
             },
             Features = new FeatureFlagsPayload
             {
@@ -242,6 +251,7 @@ public sealed class HtmlRenderService(
                 UrlLoading = features.UrlLoading,
                 NugetBrowser = features.NugetBrowser,
                 PackageUpload = features.PackageUpload,
+                ColorThemePicker = features.ColorThemePicker,
             },
         };
 
@@ -455,9 +465,10 @@ public sealed class HtmlRenderService(
         bool includeMetadata,
         HtmlFeatureFlags features,
         string? label,
+        HtmlThemeOptions? themeOptions,
         int compressLevel)
     {
-        var json = BuildRawBootstrapJson(prepared, includeHidden, includeMetadata, features, label);
+        var json = BuildRawBootstrapJson(prepared, includeHidden, includeMetadata, features, label, themeOptions);
 
         if (compressLevel >= 1)
         {
@@ -488,6 +499,14 @@ public sealed class HtmlRenderService(
         public required bool IncludeMetadata { get; init; }
 
         public string? Label { get; init; }
+
+        public string? Theme { get; init; }
+
+        public string? ColorTheme { get; init; }
+
+        public string? CustomAccent { get; init; }
+
+        public string? CustomAccentDark { get; init; }
     }
 
     private sealed class FeatureFlagsPayload
@@ -505,5 +524,7 @@ public sealed class HtmlRenderService(
         public required bool NugetBrowser { get; init; }
 
         public required bool PackageUpload { get; init; }
+
+        public required bool ColorThemePicker { get; init; }
     }
 }

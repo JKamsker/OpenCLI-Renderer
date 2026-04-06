@@ -11,6 +11,7 @@ public sealed class FileHtmlCommand(HtmlRenderService renderService) : AsyncComm
     {
         var options = RenderRequestFactory.CreateHtmlOptions(settings, null, null, settings.OutputDirectory, timeoutSeconds: null, hasTimeoutSupport: false);
         var features = RenderRequestFactory.CreateHtmlFeatureFlags(settings);
+        var themeOptions = RenderRequestFactory.CreateHtmlThemeOptions(settings);
         var request = new FileRenderRequest(
             settings.OpenCliJsonPath,
             settings.XmlDocPath,
@@ -19,7 +20,7 @@ public sealed class FileHtmlCommand(HtmlRenderService renderService) : AsyncComm
         return CommandOutputHandler.ExecuteAsync(
             options.OutputMode,
             options.Verbose,
-            () => renderService.RenderFromFileAsync(request, features, cancellationToken, settings.Label));
+            () => renderService.RenderFromFileAsync(request, features, cancellationToken, settings.Label, themeOptions));
     }
 }
 

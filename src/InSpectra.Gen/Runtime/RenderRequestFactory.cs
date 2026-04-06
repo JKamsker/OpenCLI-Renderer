@@ -80,7 +80,8 @@ public static class RenderRequestFactory
             settings.NoLight,
             settings.EnableUrl,
             settings.EnableNugetBrowser,
-            settings.EnablePackageUpload);
+            settings.EnablePackageUpload,
+            settings.NoThemePicker);
     }
 
     public static HtmlFeatureFlags CreateHtmlFeatureFlags(SelfDocHtmlCommandSettingsBase settings)
@@ -92,7 +93,37 @@ public static class RenderRequestFactory
             settings.NoLight,
             settings.EnableUrl,
             settings.EnableNugetBrowser,
-            settings.EnablePackageUpload);
+            settings.EnablePackageUpload,
+            settings.NoThemePicker);
+    }
+
+    public static HtmlThemeOptions CreateHtmlThemeOptions(HtmlCommandSettingsBase settings)
+    {
+        return CreateHtmlThemeOptions(settings.Theme, settings.ColorTheme, settings.Accent, settings.AccentDark);
+    }
+
+    public static HtmlThemeOptions CreateHtmlThemeOptions(SelfDocHtmlCommandSettingsBase settings)
+    {
+        return CreateHtmlThemeOptions(settings.Theme, settings.ColorTheme, settings.Accent, settings.AccentDark);
+    }
+
+    private static HtmlThemeOptions CreateHtmlThemeOptions(string? theme, string? colorTheme, string? accent, string? accentDark)
+    {
+        if (theme is not null and not ("light" or "dark"))
+        {
+            throw new CliUsageException("`--theme` must be `light` or `dark`.");
+        }
+
+        if (accentDark is not null && accent is null)
+        {
+            throw new CliUsageException("`--accent-dark` requires `--accent`.");
+        }
+
+        return new HtmlThemeOptions(
+            Theme: theme,
+            ColorTheme: colorTheme,
+            CustomAccent: accent,
+            CustomAccentDark: accentDark);
     }
 
     private static HtmlFeatureFlags CreateHtmlFeatureFlags(
@@ -102,7 +133,8 @@ public static class RenderRequestFactory
         bool noLight,
         bool enableUrl,
         bool enableNugetBrowser,
-        bool enablePackageUpload)
+        bool enablePackageUpload,
+        bool noThemePicker)
     {
         if (noDark && noLight)
         {
@@ -126,7 +158,8 @@ public static class RenderRequestFactory
             LightTheme: !noLight,
             UrlLoading: enableUrl,
             NugetBrowser: enableNugetBrowser,
-            PackageUpload: enablePackageUpload);
+            PackageUpload: enablePackageUpload,
+            ColorThemePicker: !noThemePicker);
     }
 
     private static int ResolveCompressLevel(int? explicitLevel, bool singleFile)
