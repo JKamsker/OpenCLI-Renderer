@@ -200,7 +200,7 @@
   margin: 0.5rem 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .site-header-nav {
     display: none;
   }
