@@ -353,7 +353,7 @@ export function CIGuidePage({ section }: { section?: string }) {
 
   const sectionIds = ["usage", "inputs", "pages", "prerequisites"];
   const scrollingRef = useRef(false);
-  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const sectionObserver = new IntersectionObserver(

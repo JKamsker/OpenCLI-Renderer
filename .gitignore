@@ -5,3 +5,6 @@
 artifacts/
 node_modules/
 src/InSpectra.UI/dist/
+src/InSpectra.UI/e2e/.rendered/
+src/InSpectra.UI/test-results/
+src/InSpectra.UI/playwright-report/
