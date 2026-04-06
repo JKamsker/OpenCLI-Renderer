@@ -1,4 +1,5 @@
 import { Menu, PanelRight, PanelRightClose, Search, X, ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { CommandPalette } from "./CommandPalette";
 import { CommandPanel } from "./CommandPanel";
 import { CommandTree } from "./CommandTree";
@@ -69,6 +70,29 @@ export function CliViewer({
     document.rootOptions.length === 0;
   const cliPrefix = packageContext?.command || toCliPrefix(document.source.info.title) || "cli";
 
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [composerFloating, setComposerFloating] = useState(false);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    function update() {
+      if (!composerOpen || window.innerWidth <= 768) {
+        setComposerFloating(false);
+        return;
+      }
+      const rem = parseFloat(getComputedStyle(window.document.documentElement).fontSize);
+      const sidebarWidth = 17 * rem;
+      setComposerFloating(grid!.offsetWidth - sidebarWidth - composerWidth < 490);
+    }
+
+    const ro = new ResizeObserver(update);
+    ro.observe(grid);
+    update();
+    return () => ro.disconnect();
+  }, [composerOpen, composerWidth]);
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -128,7 +152,7 @@ export function CliViewer({
         </div>
       </header>
 
-      <div className="app-grid">
+      <div className={`app-grid${composerFloating ? " composer-float-mode" : ""}`} ref={gridRef}>
         {(mobileSidebarOpen || composerOpen) && (
           <div
             className="mobile-drawer-overlay"

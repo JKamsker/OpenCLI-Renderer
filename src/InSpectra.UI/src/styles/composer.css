@@ -16,6 +16,29 @@
   }
 }
 
+/* ── Floating mode (content would be < 490px) ── */
+
+.app-grid.composer-float-mode {
+  position: relative;
+}
+
+.app-grid.composer-float-mode .composer.composer-open {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  box-shadow:
+    -4px 0 24px rgba(0, 0, 0, 0.12),
+    -1px 0 4px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .app-grid.composer-float-mode .composer.composer-open {
+  box-shadow:
+    -4px 0 24px rgba(0, 0, 0, 0.4),
+    -1px 0 4px rgba(0, 0, 0, 0.2);
+}
+
 .composer-resize {
   position: absolute;
   top: 0;

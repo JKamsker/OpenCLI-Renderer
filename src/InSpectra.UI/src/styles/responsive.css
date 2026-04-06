@@ -27,16 +27,7 @@
   }
 }
 
-/* Hide composer inline between 769–960px (tablet: too narrow for inline panel) */
-@media (min-width: 769px) and (max-width: 960px) {
-  .composer {
-    display: none;
-  }
-
-  .toolbar-button.composer-toggle {
-    display: none;
-  }
-}
+/* 769–960px: composer floats via JS-driven .composer-float-mode (no longer hidden) */
 
 /* ── Responsive: Mobile ────────────────────── */
 
