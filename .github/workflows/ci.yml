@@ -71,16 +71,26 @@ jobs:
         run: |
           set -euo pipefail
           tmp_dir="$(mktemp -d)"
-          out_dir="$tmp_dir/inspectra-gen"
 
+          # Test multi-file (level 1)
+          out1="$tmp_dir/multi"
           dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
             render file html \
             docs/inspectra-gen/opencli.json \
             --xmldoc docs/inspectra-gen/xmldoc.xml \
-            --out-dir "$out_dir"
+            --out-dir "$out1" --compression-level 1
+          test -f "$out1/index.html"
+          test -d "$out1/assets"
 
-          test -f "$out_dir/index.html"
-          grep -q './assets/' "$out_dir/index.html"
+          # Test single-file (level 2, default)
+          out2="$tmp_dir/single"
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
+            render file html \
+            docs/inspectra-gen/opencli.json \
+            --xmldoc docs/inspectra-gen/xmldoc.xml \
+            --out-dir "$out2"
+          test -f "$out2/index.html"
+          [ "$(find "$out2" -type f | wc -l)" -eq 1 ]
 
       - name: Validate nupkg
         shell: bash
@@ -237,6 +247,56 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
           cname: inspectra.kamsker.at
+
+  sync-v1:
+    needs: build-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if action files changed
+        id: changed
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^\.github/actions/render/action\.yml$|^\.github/workflows/inspectra-generate\.yml$'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Sync v1 branch
+        if: steps.changed.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Create an orphan worktree for v1
+          tmp=$(mktemp -d)
+          git worktree add --detach "$tmp"
+          cd "$tmp"
+          git checkout v1
+
+          # Copy action files from main
+          cp "$GITHUB_WORKSPACE/.github/actions/render/action.yml" action.yml
+          cp "$GITHUB_WORKSPACE/.github/workflows/inspectra-generate.yml" .github/workflows/inspectra-generate.yml
+
+          # Commit and push if anything changed
+          git add action.yml .github/workflows/inspectra-generate.yml
+          if git diff --cached --quiet; then
+            echo "v1 branch already up to date"
+          else
+            git commit -m "sync action files from main ($(git -C "$GITHUB_WORKSPACE" rev-parse --short HEAD))"
+            git push origin v1
+            echo "v1 branch updated"
+          fi
+
+          cd "$GITHUB_WORKSPACE"
+          git worktree remove "$tmp"
 
   nuget-publish:
     needs: build-test
