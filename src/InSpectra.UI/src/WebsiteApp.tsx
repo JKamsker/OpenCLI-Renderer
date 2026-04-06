@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { AboutPage } from "./components/AboutPage";
 import { CIGuidePage } from "./components/CIGuidePage";
 import { CliViewer } from "./components/CliViewer";
+import { ImportScreen } from "./components/ImportScreen";
 import { NugetBrowser } from "./components/NugetBrowser";
 import { PackageLoadingScreen } from "./components/PackageLoadingScreen";
 import { SiteHeader } from "./components/SiteHeader";
+import { ViewerDropzone } from "./components/ViewerDropzone";
 import { defaultFeatureFlags, defaultViewerOptions, FeatureFlags, ViewerOptions } from "./boot/contracts";
 import { loadFromFiles, loadFromUrls, LoadedSource } from "./data/loadSource";
 import { buildPackageHash, HashRoute, parseHashRoute } from "./data/navigation";
@@ -155,7 +157,7 @@ export function WebsiteApp() {
   if (route.kind === "about") {
     return (
       <>
-        <SiteHeader route={route} onFilesSelected={handleFiles} />
+        <SiteHeader route={route} />
         <AboutPage />
       </>
     );
@@ -165,8 +167,24 @@ export function WebsiteApp() {
   if (route.kind === "guide") {
     return (
       <>
-        <SiteHeader route={route} onFilesSelected={handleFiles} />
+        <SiteHeader route={route} />
         <CIGuidePage section={route.section} />
+      </>
+    );
+  }
+
+  // Import page
+  if (route.kind === "import") {
+    return (
+      <>
+        <SiteHeader route={route} />
+        <ImportScreen
+          error={error}
+          loading={loadState.status === "loading"}
+          onFilesSelected={handleFiles}
+          showUpload={featureFlags.packageUpload}
+          showNugetBrowser={featureFlags.nugetBrowser}
+        />
       </>
     );
   }
@@ -176,7 +194,7 @@ export function WebsiteApp() {
     if (loadState.status === "loading") {
       return (
         <>
-          <SiteHeader route={route} onFilesSelected={handleFiles} />
+          <SiteHeader route={route} />
           <PackageLoadingScreen message={loadState.message} />
         </>
       );
@@ -195,7 +213,7 @@ export function WebsiteApp() {
 
       return (
         <>
-          <SiteHeader route={route} onFilesSelected={handleFiles} />
+          <SiteHeader route={route} />
           <CliViewer
             document={document}
             viewerOptions={viewerOptions}
@@ -208,6 +226,7 @@ export function WebsiteApp() {
             onNavigate={handleNavigate}
             onBack={handleBackToBrowser}
           />
+          {featureFlags.packageUpload && <ViewerDropzone onFilesSelected={handleFiles} />}
         </>
       );
     }
@@ -216,7 +235,7 @@ export function WebsiteApp() {
     if (route.kind === "package") {
       return (
         <>
-          <SiteHeader route={route} onFilesSelected={handleFiles} />
+          <SiteHeader route={route} />
           <PackageLoadingScreen message={`Loading ${route.packageId}${route.version ? ` v${route.version}` : ""}`} />
         </>
       );
@@ -226,7 +245,7 @@ export function WebsiteApp() {
   // NuGet browser (home page) - handles overview, browse with packageId
   return (
     <>
-      <SiteHeader route={route} onFilesSelected={handleFiles} />
+      <SiteHeader route={route} />
       <NugetBrowser
         packageId={route.kind === "browse" ? route.packageId : undefined}
         version={route.kind === "browse" ? route.version : undefined}

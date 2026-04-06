@@ -1,0 +1,179 @@
+/* ── Viewer Dropzone Overlay ────────────────── */
+
+.viewer-dropzone-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.22s var(--ease);
+  cursor: default;
+}
+
+.viewer-dropzone-overlay.active {
+  opacity: 1;
+}
+
+[data-theme="dark"] .viewer-dropzone-overlay {
+  background: rgba(2, 6, 18, 0.7);
+}
+
+.viewer-dropzone-overlay.hovering {
+  background: rgba(15, 23, 42, 0.65);
+}
+
+[data-theme="dark"] .viewer-dropzone-overlay.hovering {
+  background: rgba(2, 6, 18, 0.8);
+}
+
+.viewer-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 3rem 4rem;
+  border: 2px dashed var(--accent-border);
+  border-radius: 1.25rem;
+  background: var(--surface);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.18),
+    0 0 48px var(--accent-glow);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+  max-width: 90vw;
+  text-align: center;
+}
+
+.viewer-dropzone-overlay.active .viewer-dropzone-content {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.viewer-dropzone-overlay.hovering .viewer-dropzone-content {
+  border-color: var(--accent);
+  border-style: solid;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.22),
+    0 0 64px var(--accent-glow),
+    inset 0 0 32px var(--accent-glow);
+}
+
+.viewer-dropzone-icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  background: var(--accent-soft);
+  color: var(--accent);
+  transition: transform 0.2s var(--ease);
+}
+
+.viewer-dropzone-overlay.hovering .viewer-dropzone-icon {
+  transform: scale(1.1);
+}
+
+.viewer-dropzone-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.viewer-dropzone-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.viewer-dropzone-text strong {
+  font-family: var(--font);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.viewer-dropzone-text span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.viewer-dropzone-files {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.viewer-dropzone-file-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+}
+
+.viewer-dropzone-file-tag svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+}
+
+.viewer-dropzone-file-tag.optional {
+  color: var(--muted);
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.viewer-dropzone-file-tag em {
+  font-style: normal;
+  font-family: var(--font);
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  margin-left: 0.15rem;
+}
+
+.viewer-dropzone-plus {
+  font-size: 0.75rem;
+  color: var(--soft);
+  font-weight: 600;
+}
+
+/* ── Mobile ────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .viewer-dropzone-content {
+    padding: 2rem 1.5rem;
+    gap: 1rem;
+  }
+
+  .viewer-dropzone-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .viewer-dropzone-icon svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .viewer-dropzone-text strong {
+    font-size: 1rem;
+  }
+}

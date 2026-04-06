@@ -97,6 +97,7 @@
   background: none;
   border: 1px solid var(--border);
   cursor: pointer;
+  text-decoration: none;
   transition: color 0.15s var(--ease), border-color 0.15s var(--ease), background 0.15s var(--ease);
 }
 
@@ -106,18 +107,15 @@
   background: var(--accent-soft);
 }
 
+.site-header-import-btn.active {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
 .site-header-import-btn svg {
   width: 14px;
   height: 14px;
-}
-
-/* Hidden file input */
-.site-header-file-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
 }
 
 /* Mobile hamburger */

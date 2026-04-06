@@ -2,6 +2,7 @@ export type HashRoute =
   | { kind: "overview" }
   | { kind: "about" }
   | { kind: "guide"; section?: string }
+  | { kind: "import" }
   | { kind: "command"; commandPath: string }
   | { kind: "browse"; packageId?: string; version?: string }
   | { kind: "package"; packageId: string; version?: string; commandPath?: string };
@@ -43,6 +44,10 @@ export function parseHashRoute(hash: string): HashRoute {
 
   if (normalized === "/about") {
     return { kind: "about" };
+  }
+
+  if (normalized === "/import") {
+    return { kind: "import" };
   }
 
   if (normalized === "/guide" || normalized.startsWith("/guide/")) {

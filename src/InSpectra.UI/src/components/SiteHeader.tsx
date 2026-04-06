@@ -1,32 +1,20 @@
 import { FileText, Menu, Package, Terminal, Upload, X, Zap } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { GitHubIcon } from "./GitHubIcon";
 import { HashRoute } from "../data/navigation";
 
 interface SiteHeaderProps {
   route: HashRoute;
-  onFilesSelected: (files: File[]) => void;
 }
 
-export function SiteHeader({ route, onFilesSelected }: SiteHeaderProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export function SiteHeader({ route }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  function handleImportClick() {
-    fileInputRef.current?.click();
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
-      onFilesSelected(Array.from(e.target.files));
-      e.target.value = "";
-    }
-  }
 
   const isHome = route.kind === "overview" || route.kind === "browse";
   const isAbout = route.kind === "about";
   const isGuide = route.kind === "guide";
+  const isImport = route.kind === "import";
   const isCli = route.kind === "package" && route.packageId.toLowerCase() === "inspectra.gen";
 
   return (
@@ -61,23 +49,14 @@ export function SiteHeader({ route, onFilesSelected }: SiteHeaderProps) {
         </nav>
 
         <div className="site-header-actions">
-          <button
-            type="button"
-            className="site-header-import-btn"
-            onClick={handleImportClick}
+          <a
+            href="#/import"
+            className={`site-header-import-btn${isImport ? " active" : ""}`}
             title="Import OpenCLI files"
           >
             <Upload aria-hidden="true" />
             <span>Import</span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="site-header-file-input"
-            multiple
-            accept=".json,.xml"
-            onChange={handleFileChange}
-          />
+          </a>
           <ThemeToggle />
           <button
             type="button"
@@ -112,10 +91,10 @@ export function SiteHeader({ route, onFilesSelected }: SiteHeaderProps) {
           <GitHubIcon aria-hidden="true" size={18} />
           <span>GitHub</span>
         </a>
-        <button type="button" onClick={() => { handleImportClick(); setMobileOpen(false); }}>
+        <a href="#/import" onClick={() => setMobileOpen(false)} className={isImport ? "active" : ""}>
           <Upload aria-hidden="true" />
           <span>Import OpenCLI files</span>
-        </button>
+        </a>
       </nav>
     </>
   );
