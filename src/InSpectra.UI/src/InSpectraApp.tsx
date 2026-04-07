@@ -12,7 +12,7 @@ export function InSpectraApp() {
     document, route,
     packageContext,
     handleFiles,
-    handleLoadPackage, resetToHome,
+    handleLoadPackage,
   } = useAppState();
 
 
@@ -65,7 +65,6 @@ export function InSpectraApp() {
       error={error}
       commandPath={commandPath}
       onNavigate={handleNavigate}
-      onBack={featureFlags.showHome ? resetToHome : undefined}
     />
   );
 }

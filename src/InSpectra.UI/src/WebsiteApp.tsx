@@ -138,15 +138,6 @@ export function WebsiteApp() {
     }
   }
 
-  function handleBackToBrowser() {
-    setDocument(null);
-    setPackageContext(null);
-    setLoadState({ status: "empty" });
-    setError(null);
-    setWarnings([]);
-    history.back();
-  }
-
   // About page
   if (route.kind === "about") {
     return (
@@ -216,7 +207,6 @@ export function WebsiteApp() {
             error={error}
             commandPath={commandPath}
             onNavigate={handleNavigate}
-            onBack={handleBackToBrowser}
             showThemeToggle={false}
           />
           {featureFlags.packageUpload && <ViewerDropzone onFilesSelected={handleFiles} />}
@@ -243,7 +233,7 @@ export function WebsiteApp() {
         packageId={route.kind === "browse" ? route.packageId : undefined}
         version={route.kind === "browse" ? route.version : undefined}
         onLoadPackage={handleLoadPackage}
-        onBack={handleBackToBrowser}
+        onBack={() => { window.location.hash = "#/"; }}
       />
     </>
   );

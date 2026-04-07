@@ -1,4 +1,4 @@
-import { Menu, PanelRight, PanelRightClose, Search, X, ArrowLeft } from "lucide-react";
+import { Menu, PanelRight, PanelRightClose, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CommandPalette } from "./CommandPalette";
 import { CommandPanel } from "./CommandPanel";
@@ -8,7 +8,7 @@ import { OverviewPanel } from "./OverviewPanel";
 import { ThemeToggle } from "./ThemeToggle";
 import { useViewerInteraction } from "../hooks/useViewerInteraction";
 import { findCommandByPath, NormalizedCliDocument } from "../data/normalize";
-import { buildCommandHash, buildPackageHash } from "../data/navigation";
+import { buildBrowseHash, buildCommandHash, buildPackageHash } from "../data/navigation";
 import { FeatureFlags, ViewerOptions } from "../boot/contracts";
 
 interface CliViewerProps {
@@ -21,7 +21,6 @@ interface CliViewerProps {
   error: string | null;
   commandPath: string | undefined;
   onNavigate: (commandPath?: string) => void;
-  onBack?: () => void;
   showThemeToggle?: boolean;
 }
 
@@ -35,7 +34,6 @@ export function CliViewer({
   error,
   commandPath,
   onNavigate,
-  onBack,
   showThemeToggle = true,
 }: CliViewerProps) {
   const {
@@ -119,22 +117,31 @@ export function CliViewer({
           {mobileSidebarOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
         </button>
 
-        <div className="brand-block">
-          {onBack && (
-            <button type="button" className="toolbar-button" onClick={onBack} title="Back to browser">
-              <ArrowLeft aria-hidden="true" />
-              <span>Back</span>
-            </button>
-          )}
-          <span className="brand-mark">{">_"}</span>
-          <div className="brand-info">
-            <div className="brand-title">{document.source.info.title || "OpenCLI Viewer"}</div>
-            <div className="brand-subtitle">
-              <span>{sourceLabel || `v${document.source.info.version || "0.0.0"}`}</span>
-              <span>OpenCLI {document.source.opencli || "unknown"}</span>
-            </div>
-          </div>
-        </div>
+        {(() => {
+          const brandInner = (
+            <>
+              <span className="brand-mark">{">_"}</span>
+              <div className="brand-info">
+                <div className="brand-title">{document.source.info.title || "OpenCLI Viewer"}</div>
+                <div className="brand-subtitle">
+                  <span>{sourceLabel || `v${document.source.info.version || "0.0.0"}`}</span>
+                  <span>OpenCLI {document.source.opencli || "unknown"}</span>
+                </div>
+              </div>
+            </>
+          );
+          return packageContext ? (
+            <a
+              href={buildBrowseHash(packageContext.packageId)}
+              className="brand-block brand-link"
+              title={`Browse ${packageContext.packageId} versions`}
+            >
+              {brandInner}
+            </a>
+          ) : (
+            <div className="brand-block">{brandInner}</div>
+          );
+        })()}
 
         <div className="toolbar">
           <button type="button" className="toolbar-button" onClick={() => setPaletteOpen(true)} title="Search commands (Ctrl+K)">

@@ -28,6 +28,23 @@
   gap: 0.65rem;
 }
 
+.brand-link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0.4rem;
+  padding: 0.2rem 0.35rem;
+  margin: -0.2rem -0.35rem;
+  transition: background 0.15s var(--ease);
+}
+
+.brand-link:hover {
+  background: var(--accent-glow);
+}
+
+.brand-link:hover .brand-title {
+  color: var(--accent);
+}
+
 .brand-mark {
   display: inline-flex;
   align-items: center;
