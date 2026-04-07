@@ -83,7 +83,9 @@ export function CliViewer({
   });
 
   useEffect(() => {
-    if (composerOpen && !hasUsedComposer) {
+    // Only mark the composer as "used" when the user explicitly opens it.
+    // Auto-expansion (from saved prefs / default) shouldn't dismiss the hint.
+    if (composerOpen && !hasUsedComposer && composerOpenedByUser.current) {
       setHasUsedComposer(true);
       try {
         localStorage.setItem("inspectra-composer-used", "true");
@@ -91,7 +93,7 @@ export function CliViewer({
         /* ignore */
       }
     }
-  }, [composerOpen, hasUsedComposer]);
+  }, [composerOpen, hasUsedComposer, composerOpenedByUser]);
 
   const showComposerHint =
     featureFlags.composer &&
