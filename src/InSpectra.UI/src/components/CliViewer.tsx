@@ -72,6 +72,34 @@ export function CliViewer({
   const gridRef = useRef<HTMLDivElement>(null);
   const [composerFloating, setComposerFloating] = useState(false);
 
+  // Track whether the user has ever activated the composer.
+  // Once they open it (at least once), the hint animation stops.
+  const [hasUsedComposer, setHasUsedComposer] = useState(() => {
+    try {
+      return localStorage.getItem("inspectra-composer-used") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (composerOpen && !hasUsedComposer) {
+      setHasUsedComposer(true);
+      try {
+        localStorage.setItem("inspectra-composer-used", "true");
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [composerOpen, hasUsedComposer]);
+
+  const showComposerHint =
+    featureFlags.composer &&
+    !isEmptyPackage &&
+    !composerOpen &&
+    !hasUsedComposer &&
+    !!activeCommand;
+
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
@@ -171,9 +199,9 @@ export function CliViewer({
           {featureFlags.composer && !isEmptyPackage && (
             <button
               type="button"
-              className={`toolbar-button composer-toggle${composerOpen ? " active" : ""}`}
+              className={`toolbar-button composer-toggle${composerOpen ? " active" : ""}${showComposerHint ? " composer-hint" : ""}`}
               onClick={toggleComposer}
-              title="Toggle Composer"
+              title={showComposerHint ? "Try the Composer — build a command visually" : "Toggle Composer"}
             >
               {composerOpen ? <PanelRightClose aria-hidden="true" /> : <PanelRight aria-hidden="true" />}
               <span>Composer</span>

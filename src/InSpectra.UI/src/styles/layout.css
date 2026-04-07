@@ -126,6 +126,40 @@
   border-color: var(--accent-border);
 }
 
+/* ── Composer hint animation ───────────────── */
+
+.toolbar-button.composer-hint {
+  color: var(--accent);
+  border-color: var(--accent-border);
+  animation: composer-hint-pulse 2.4s var(--ease) infinite;
+}
+
+.toolbar-button.composer-hint:hover {
+  animation: none;
+  box-shadow: none;
+}
+
+@keyframes composer-hint-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-glow);
+    border-color: var(--accent-border);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+    border-color: var(--accent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    border-color: var(--accent-border);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar-button.composer-hint {
+    animation: none;
+  }
+}
+
 .toolbar-button {
   display: flex;
   align-items: center;
