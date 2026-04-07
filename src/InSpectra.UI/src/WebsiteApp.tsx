@@ -175,12 +175,7 @@ export function WebsiteApp() {
   // Package viewer (full page transition)
   if (route.kind === "package" || (route.kind === "overview" && loadState.status === "ready" && document && packageContext)) {
     if (loadState.status === "loading") {
-      return (
-        <>
-          <SiteHeader route={route} />
-          <PackageLoadingScreen message={loadState.message} />
-        </>
-      );
+      return <PackageLoadingScreen message={loadState.message} />;
     }
 
     if (loadState.status === "ready" && document) {
@@ -196,7 +191,6 @@ export function WebsiteApp() {
 
       return (
         <>
-          <SiteHeader route={route} />
           <CliViewer
             document={document}
             viewerOptions={viewerOptions}
@@ -207,7 +201,6 @@ export function WebsiteApp() {
             error={error}
             commandPath={commandPath}
             onNavigate={handleNavigate}
-            showThemeToggle={false}
           />
           {featureFlags.packageUpload && <ViewerDropzone onFilesSelected={handleFiles} />}
         </>
@@ -216,12 +209,7 @@ export function WebsiteApp() {
 
     // Package route but not loaded yet - show loading
     if (route.kind === "package") {
-      return (
-        <>
-          <SiteHeader route={route} />
-          <PackageLoadingScreen message={`Loading ${route.packageId}${route.version ? ` v${route.version}` : ""}`} />
-        </>
-      );
+      return <PackageLoadingScreen message={`Loading ${route.packageId}${route.version ? ` v${route.version}` : ""}`} />;
     }
   }
 

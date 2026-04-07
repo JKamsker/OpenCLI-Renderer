@@ -1,4 +1,4 @@
-import { Menu, PanelRight, PanelRightClose, Search, X } from "lucide-react";
+import { Home, Menu, PanelRight, PanelRightClose, Search, Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CommandPalette } from "./CommandPalette";
 import { CommandPanel } from "./CommandPanel";
@@ -144,6 +144,24 @@ export function CliViewer({
         })()}
 
         <div className="toolbar">
+          <div className="toolbar-group toolbar-group-secondary">
+            <a href="#/" className="toolbar-button" title="Home">
+              <Home aria-hidden="true" />
+              <span>Home</span>
+            </a>
+
+            <a href="#/import" className="toolbar-button" title="Import OpenCLI files">
+              <Upload aria-hidden="true" />
+              <span>Import</span>
+            </a>
+
+            {showThemeToggle && featureFlags.darkTheme && featureFlags.lightTheme && (
+              <ThemeToggle colorThemePicker={featureFlags.colorThemePicker} />
+            )}
+          </div>
+
+          <span className="toolbar-divider" aria-hidden="true" />
+
           <button type="button" className="toolbar-button" onClick={() => setPaletteOpen(true)} title="Search commands (Ctrl+K)">
             <Search aria-hidden="true" />
             <span>Search</span>
@@ -160,10 +178,6 @@ export function CliViewer({
               {composerOpen ? <PanelRightClose aria-hidden="true" /> : <PanelRight aria-hidden="true" />}
               <span>Composer</span>
             </button>
-          )}
-
-          {showThemeToggle && featureFlags.darkTheme && featureFlags.lightTheme && (
-            <ThemeToggle colorThemePicker={featureFlags.colorThemePicker} />
           )}
         </div>
       </header>
