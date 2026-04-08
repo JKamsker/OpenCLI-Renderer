@@ -53,7 +53,8 @@ public sealed class DocumentRenderService(
             request.TimeoutSeconds,
             cancellationToken);
 
-        var rawDocument = documentLoader.LoadFromJson(openCliResult.StandardOutput, executablePath);
+        var sanitizedJson = OpenCliJsonSanitizer.Sanitize(openCliResult.StandardOutput);
+        var rawDocument = documentLoader.LoadFromJson(sanitizedJson, executablePath);
         string? xmlDocument = null;
         string? xmlOrigin = null;
 

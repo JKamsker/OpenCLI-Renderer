@@ -9,6 +9,7 @@ public class CliHelpSurfaceTests
     [Theory]
     [InlineData("file")]
     [InlineData("exec")]
+    [InlineData("dotnet")]
     public async Task Html_help_only_exposes_bundle_output_option(string mode)
     {
         var result = await RunRendererAsync(["render", mode, "html", "--help"]);
@@ -23,6 +24,7 @@ public class CliHelpSurfaceTests
     [Theory]
     [InlineData("file")]
     [InlineData("exec")]
+    [InlineData("dotnet")]
     public async Task Markdown_help_keeps_single_and_tree_output_options(string mode)
     {
         var result = await RunRendererAsync(["render", mode, "markdown", "--help"]);

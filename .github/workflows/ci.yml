@@ -92,6 +92,18 @@ jobs:
           test -f "$out2/index.html"
           [ "$(find "$out2" -type f | wc -l)" -eq 1 ]
 
+      - name: Smoke render dotnet mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp_dir="$(mktemp -d)"
+          out="$tmp_dir/dotnet"
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
+            render dotnet html src/InSpectra.Gen \
+            --configuration Release --no-build --with-xmldoc \
+            --out-dir "$out" --overwrite
+          test -f "$out/index.html"
+
       - name: Validate nupkg
         shell: bash
         run: |

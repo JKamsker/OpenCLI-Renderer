@@ -191,7 +191,7 @@ public static class RenderRequestFactory
         return resolved;
     }
 
-    public static int ResolveTimeoutSeconds(int? timeoutSeconds)
+    public static int ResolveTimeoutSeconds(int? timeoutSeconds, int defaultSeconds = 30)
     {
         if (timeoutSeconds is > 0)
         {
@@ -209,7 +209,7 @@ public static class RenderRequestFactory
             return parsed;
         }
 
-        return 30;
+        return defaultSeconds;
     }
 
     private static ResolvedOutputMode ResolveOutputMode(CommonCommandSettings settings)

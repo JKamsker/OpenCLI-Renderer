@@ -8,8 +8,9 @@ inputs:
   mode:
     description: >
       Render mode.
-        exec  - invoke a live CLI (requires cli-name)
-        file  - render from a saved opencli.json (requires opencli-json)
+        exec    - invoke a live CLI (requires cli-name)
+        file    - render from a saved opencli.json (requires opencli-json)
+        dotnet  - run a .NET project from source (requires project)
     required: false
     default: 'exec'
 
@@ -55,6 +56,33 @@ inputs:
   xmldoc:
     description: 'Path to xmldoc.xml file (file mode)'
     required: false
+
+  # ── dotnet mode ────────────────────────────────────────────────────
+  project:
+    description: 'Path to a .csproj/.fsproj/.vbproj (or directory containing one) for `mode: dotnet`'
+    required: false
+
+  configuration:
+    description: 'Build configuration for `dotnet run` (e.g. Release)'
+    required: false
+
+  framework:
+    description: 'Target framework for `dotnet run` (e.g. net10.0)'
+    required: false
+
+  launch-profile:
+    description: 'Launch profile for `dotnet run`'
+    required: false
+
+  no-build:
+    description: 'Pass --no-build to `dotnet run` (use after a separate build step)'
+    required: false
+    default: 'false'
+
+  no-restore:
+    description: 'Pass --no-restore to `dotnet run`'
+    required: false
+    default: 'false'
 
   # ── common ─────────────────────────────────────────────────────────
   output-dir:
@@ -133,6 +161,7 @@ runs:
         CLI_NAME: ${{ inputs.cli-name }}
         DOTNET_TOOL: ${{ inputs.dotnet-tool }}
         OPENCLI_JSON: ${{ inputs.opencli-json }}
+        PROJECT: ${{ inputs.project }}
       run: |
         set -euo pipefail
         if [ "$MODE" = "exec" ] && [ -z "$CLI_NAME" ]; then
@@ -149,6 +178,14 @@ runs:
         fi
         if [ "$MODE" = "file" ] && [ -n "$DOTNET_TOOL" ]; then
           echo "::error::dotnet-tool is not used in file mode"
+          exit 1
+        fi
+        if [ "$MODE" = "dotnet" ] && [ -z "$PROJECT" ]; then
+          echo "::error::dotnet mode requires project"
+          exit 1
+        fi
+        if [ "$MODE" = "dotnet" ] && [ -n "$DOTNET_TOOL" ]; then
+          echo "::error::dotnet-tool is not used in dotnet mode (the project is built from source)"
           exit 1
         fi
 
@@ -206,6 +243,12 @@ runs:
         NO_THEME_PICKER: ${{ inputs.no-theme-picker }}
         OUTPUT_DIR: ${{ inputs.output-dir }}
         EXTRA_ARGS: ${{ inputs.extra-args }}
+        PROJECT: ${{ inputs.project }}
+        CONFIGURATION: ${{ inputs.configuration }}
+        FRAMEWORK: ${{ inputs.framework }}
+        LAUNCH_PROFILE: ${{ inputs.launch-profile }}
+        NO_BUILD: ${{ inputs.no-build }}
+        NO_RESTORE: ${{ inputs.no-restore }}
       run: |
         set -euo pipefail
 
@@ -259,6 +302,43 @@ runs:
           if [ -n "$XMLDOC" ]; then
             args+=(--xmldoc "$XMLDOC")
           fi
+
+        elif [ "$MODE" = "dotnet" ]; then
+          args=(render dotnet "$subcmd" "$PROJECT" --overwrite)
+
+          [ -n "$CONFIGURATION" ]   && args+=(--configuration "$CONFIGURATION")
+          [ -n "$FRAMEWORK" ]       && args+=(--framework "$FRAMEWORK")
+          [ -n "$LAUNCH_PROFILE" ]  && args+=(--launch-profile "$LAUNCH_PROFILE")
+          [ "$NO_BUILD" = "true" ]  && args+=(--no-build)
+          [ "$NO_RESTORE" = "true" ] && args+=(--no-restore)
+
+          # auto-detect xmldoc support by probing the project once
+          # (subsequent dotnet run invocations reuse the same build output)
+          probe_args=(run --project "$PROJECT")
+          [ -n "$CONFIGURATION" ]   && probe_args+=(-c "$CONFIGURATION")
+          [ -n "$FRAMEWORK" ]       && probe_args+=(-f "$FRAMEWORK")
+          [ "$NO_BUILD" = "true" ]  && probe_args+=(--no-build)
+          [ "$NO_RESTORE" = "true" ] && probe_args+=(--no-restore)
+          probe_args+=(--)
+          xmldoc_probe=( ${XMLDOC_ARGS:-cli xmldoc} )
+          if dotnet "${probe_args[@]}" "${xmldoc_probe[@]}" > /dev/null 2>&1; then
+            echo "xmldoc supported — enriching output"
+            args+=(--with-xmldoc)
+            if [ -n "$XMLDOC_ARGS" ]; then
+              for a in $XMLDOC_ARGS; do args+=(--xmldoc-arg "$a"); done
+            fi
+          else
+            echo "xmldoc not available — rendering without enrichment"
+          fi
+
+          if [ -n "$OPENCLI_ARGS" ]; then
+            for a in $OPENCLI_ARGS; do args+=(--opencli-arg "$a"); done
+          fi
+
+          if [ -n "$TIMEOUT" ]; then
+            args+=(--timeout "$TIMEOUT")
+          fi
+
         else
           echo "::error::Unknown mode: $MODE"
           exit 1

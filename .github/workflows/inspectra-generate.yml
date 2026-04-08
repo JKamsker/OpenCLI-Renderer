@@ -22,7 +22,7 @@ on:
       mode:
         type: string
         default: 'exec'
-        description: 'exec (invoke a live CLI) or file (from saved opencli.json)'
+        description: 'exec (invoke a live CLI), file (from saved opencli.json), or dotnet (run a .NET project from source)'
 
       format:
         type: string
@@ -66,6 +66,33 @@ on:
       xmldoc:
         type: string
         description: 'Path to xmldoc.xml (file mode)'
+
+      # ── dotnet mode ──────────────────────────────────────────────
+      project:
+        type: string
+        description: 'Path to a .csproj/.fsproj/.vbproj (or directory containing one) for dotnet mode'
+
+      configuration:
+        type: string
+        description: 'Build configuration for `dotnet run` (e.g. Release)'
+
+      framework:
+        type: string
+        description: 'Target framework for `dotnet run` (e.g. net10.0)'
+
+      launch-profile:
+        type: string
+        description: 'Launch profile for `dotnet run`'
+
+      no-build:
+        type: string
+        default: 'false'
+        description: 'Pass --no-build to `dotnet run` (use after a separate build step)'
+
+      no-restore:
+        type: string
+        default: 'false'
+        description: 'Pass --no-restore to `dotnet run`'
 
       # ── inspectra tool ───────────────────────────────────────────
       inspectra-version:
@@ -173,6 +200,12 @@ jobs:
           timeout: ${{ inputs.timeout }}
           opencli-json: ${{ inputs.opencli-json }}
           xmldoc: ${{ inputs.xmldoc }}
+          project: ${{ inputs.project }}
+          configuration: ${{ inputs.configuration }}
+          framework: ${{ inputs.framework }}
+          launch-profile: ${{ inputs.launch-profile }}
+          no-build: ${{ inputs.no-build }}
+          no-restore: ${{ inputs.no-restore }}
           output-dir: _inspectra-site
           single-file: ${{ inputs.single-file }}
           compression-level: ${{ inputs.compression-level }}

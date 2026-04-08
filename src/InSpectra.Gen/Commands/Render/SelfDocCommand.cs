@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Text.Json;
 using InSpectra.Gen.Runtime;
 using InSpectra.Gen.Services;
 using Spectre.Console;
@@ -31,7 +30,7 @@ public sealed class SelfDocCommand(
             timeoutSeconds: 30,
             cancellationToken);
 
-        var openCliJson = ReserializeJson(openCliResult.StandardOutput);
+        var openCliJson = OpenCliJsonSanitizer.Sanitize(openCliResult.StandardOutput);
 
         console.MarkupLine($"[grey]Exporting XML doc from self...[/]");
         var xmlDocResult = await processRunner.RunAsync(
@@ -97,57 +96,6 @@ public sealed class SelfDocCommand(
         return 0;
     }
 
-    /// <summary>
-    /// Spectre.Console wraps long strings at 80 columns even when stdout is
-    /// redirected, which embeds literal newlines inside JSON string values.
-    /// Fix this by collapsing any newlines that appear inside JSON strings,
-    /// then re-serializing through System.Text.Json for a clean output.
-    /// </summary>
-    private static string ReserializeJson(string raw)
-    {
-        var sb = new System.Text.StringBuilder(raw.Length);
-        var inString = false;
-        var escaped = false;
-
-        foreach (var ch in raw)
-        {
-            if (escaped)
-            {
-                sb.Append(ch);
-                escaped = false;
-                continue;
-            }
-
-            if (ch == '\\' && inString)
-            {
-                sb.Append(ch);
-                escaped = true;
-                continue;
-            }
-
-            if (ch == '"')
-            {
-                inString = !inString;
-                sb.Append(ch);
-                continue;
-            }
-
-            if (inString && (ch == '\n' || ch == '\r'))
-            {
-                if (ch == '\n')
-                {
-                    sb.Append(' ');
-                }
-
-                continue;
-            }
-
-            sb.Append(ch);
-        }
-
-        using var document = JsonDocument.Parse(sb.ToString());
-        return JsonSerializer.Serialize(document, JsonOutput.SerializerOptions);
-    }
 }
 
 /// <summary>
