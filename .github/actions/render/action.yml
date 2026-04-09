@@ -101,6 +101,10 @@ inputs:
     description: 'Custom label shown in the viewer header (e.g. "v1.2.3")'
     required: false
 
+  title:
+    description: 'Override the CLI title shown in the viewer header and overview'
+    required: false
+
   single-file:
     description: 'Emit a single self-contained HTML file (works from file://)'
     required: false
@@ -362,6 +366,7 @@ runs:
         XMLDOC_ARGS: ${{ inputs.xmldoc-args }}
         TIMEOUT: ${{ inputs.timeout }}
         LABEL: ${{ inputs.label }}
+        TITLE: ${{ inputs.title }}
         SINGLE_FILE: ${{ inputs.single-file }}
         COMPRESSION_LEVEL: ${{ inputs.compression-level }}
         THEME: ${{ inputs.theme }}
@@ -487,6 +492,10 @@ runs:
 
         if [ -n "$LABEL" ]; then
           args+=(--label "$LABEL")
+        fi
+
+        if [ -n "$TITLE" ]; then
+          args+=(--title "$TITLE")
         fi
 
         # ── HTML-specific options ──

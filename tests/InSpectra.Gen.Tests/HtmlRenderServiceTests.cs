@@ -24,6 +24,7 @@ public class HtmlRenderServiceTests
         var service = CreateHtmlRenderService(new ViewerBundleLocatorOptions
         {
             PackagedRootPath = bundleRoot,
+            RepositoryRootPath = temp.Path,
         });
 
         var outputDirectory = Path.Combine(temp.Path, "html");
@@ -69,6 +70,7 @@ public class HtmlRenderServiceTests
         var service = CreateHtmlRenderService(new ViewerBundleLocatorOptions
         {
             PackagedRootPath = bundleRoot,
+            RepositoryRootPath = temp.Path,
         });
 
         var outputDirectory = Path.Combine(temp.Path, "html");
@@ -112,6 +114,7 @@ public class HtmlRenderServiceTests
         var service = CreateHtmlRenderService(new ViewerBundleLocatorOptions
         {
             PackagedRootPath = bundleRoot,
+            RepositoryRootPath = temp.Path,
         });
 
         var outputDirectory = Path.Combine(temp.Path, "html");

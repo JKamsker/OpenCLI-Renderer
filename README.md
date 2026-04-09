@@ -230,6 +230,7 @@ steps:
 | `no-restore` | `false` | Pass `--no-restore` to `dotnet run` |
 | `output-dir` | `inspectra-output` | Directory where rendered output is written |
 | `label` | | Custom label shown in the viewer header (e.g. `v1.2.3`) |
+| `title` | | Override the CLI title shown in the viewer header and overview |
 | `extra-args` | | Additional flags forwarded to the `inspectra` CLI |
 | `inspectra-version` | latest | InSpectra.Gen NuGet tool version |
 | `inspectra-cli-package` | `InSpectra.Cli` | NuGet package id auto-added to the target project in dotnet mode |

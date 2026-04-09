@@ -141,6 +141,13 @@ public abstract class HtmlCommandSettingsBase : CommonCommandSettings
     public string? Label { get; init; }
 
     /// <summary>
+    /// Override the CLI title shown in the viewer header and overview.
+    /// </summary>
+    [Description("Override the CLI title shown in the viewer header and overview.")]
+    [CommandOption("--title <TEXT>")]
+    public string? Title { get; init; }
+
+    /// <summary>
     /// Emit a single self-contained HTML file with all assets inlined. Works from file:// without a web server.
     /// </summary>
     [Description("Emit a single self-contained HTML file with all assets inlined. Works from file:// without a web server.")]
@@ -320,6 +327,13 @@ public abstract class SelfDocHtmlCommandSettingsBase : SelfDocCommandSettingsBas
     [Description("Custom label shown in the viewer header (e.g. a version string).")]
     [CommandOption("--label <TEXT>")]
     public string? Label { get; init; }
+
+    /// <summary>
+    /// Override the CLI title shown in the viewer header and overview.
+    /// </summary>
+    [Description("Override the CLI title shown in the viewer header and overview.")]
+    [CommandOption("--title <TEXT>")]
+    public string? Title { get; init; }
 
     /// <summary>
     /// Emit a single self-contained HTML file with all assets inlined. Works from file:// without a web server.

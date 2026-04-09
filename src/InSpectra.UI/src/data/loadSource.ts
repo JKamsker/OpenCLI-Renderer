@@ -131,6 +131,8 @@ function buildLoadedSource(params: {
   const document = cloneOpenCliDocument(params.document);
   const warnings: string[] = [];
 
+  applyTitleOverride(document, params.options.title);
+
   if (params.xmlDoc) {
     const enrichment = enrichDocumentFromXml(document, params.xmlDoc);
     warnings.push(...enrichment.warnings);
@@ -144,6 +146,18 @@ function buildLoadedSource(params: {
     features: params.features,
     label: params.label,
     mode: params.mode,
+  };
+}
+
+function applyTitleOverride(document: OpenCliDocument, title: string | undefined) {
+  const trimmedTitle = title?.trim();
+  if (!trimmedTitle) {
+    return;
+  }
+
+  document.info = {
+    ...document.info,
+    title: trimmedTitle,
   };
 }
 

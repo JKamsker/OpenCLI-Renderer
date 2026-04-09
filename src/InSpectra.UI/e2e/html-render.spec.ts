@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { renderTestFixture } from "./render-helpers";
 import { serveDirectory } from "./serve";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 let server: { url: string; close: () => Promise<void> };
 let outDir: string;
@@ -17,6 +20,22 @@ test.afterAll(async () => {
 test("rendered HTML loads and displays the CLI title", async ({ page }) => {
   await page.goto(server.url);
   await expect(page.locator(".brand-title")).toHaveText("jf");
+});
+
+test("rendered HTML honors an explicit title override", async ({ page }) => {
+  const customDir = renderTestFixture({
+    outDir: fs.mkdtempSync(path.join(os.tmpdir(), "inspectra-title-")),
+    title: "JellyfinCli",
+  });
+  const customServer = await serveDirectory(customDir);
+
+  try {
+    await page.goto(customServer.url);
+    await expect(page.locator(".brand-title")).toHaveText("JellyfinCli");
+    await expect(page.locator(".content-column h1")).toHaveText("JellyfinCli");
+  } finally {
+    await customServer.close();
+  }
 });
 
 test("rendered HTML shows the overview panel with command surface", async ({ page }) => {

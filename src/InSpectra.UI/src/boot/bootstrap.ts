@@ -115,6 +115,8 @@ function readOptions(options: Partial<ViewerOptions> | ViewerOptions | undefined
   return {
     includeHidden: options?.includeHidden ?? defaults.includeHidden,
     includeMetadata: options?.includeMetadata ?? defaults.includeMetadata,
+    label: options?.label,
+    title: options?.title,
     theme: options?.theme,
     colorTheme: options?.colorTheme,
     customAccent: options?.customAccent,

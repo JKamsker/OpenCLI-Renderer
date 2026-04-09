@@ -19,35 +19,35 @@ public class ViewerBundleLocator(
     ViewerBundleLocatorOptions options)
 {
     private const string FrontendBuildHint = "Run `npm ci` and `npm run build` in `src/InSpectra.UI` to build the viewer bundle.";
+    private static readonly string[] FrontendInputFiles =
+    [
+        "index.html",
+        "static.html",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "vite.config.ts",
+    ];
 
     public async Task<string> ResolveAsync(CancellationToken cancellationToken)
     {
         var packagedPath = options.PackagedRootPath ?? Path.Combine(AppContext.BaseDirectory, "InSpectra.UI", "dist");
+        var repositoryRoot = options.RepositoryRootPath ?? FindRepositoryRoot();
+        var frontendRoot = repositoryRoot is null
+            ? null
+            : Path.Combine(repositoryRoot, "src", "InSpectra.UI");
+
+        if (frontendRoot is not null && HasFrontendProject(frontendRoot))
+        {
+            return await ResolveRepositoryBundleAsync(frontendRoot, cancellationToken);
+        }
+
         if (HasBundle(packagedPath))
         {
             return packagedPath;
         }
 
-        var repositoryRoot = options.RepositoryRootPath ?? FindRepositoryRoot();
-        if (repositoryRoot is null)
-        {
-            throw new CliUsageException($"InSpectra.UI bundle could not be located beside the tool. {FrontendBuildHint}");
-        }
-
-        var frontendRoot = Path.Combine(repositoryRoot, "src", "InSpectra.UI");
-        var repositoryDist = Path.Combine(frontendRoot, "dist");
-        if (HasBundle(repositoryDist))
-        {
-            return repositoryDist;
-        }
-
-        await BuildBundleAsync(frontendRoot, repositoryDist, cancellationToken);
-        if (HasBundle(repositoryDist))
-        {
-            return repositoryDist;
-        }
-
-        throw new CliUsageException($"InSpectra.UI bundle is missing after the build attempt. {FrontendBuildHint}");
+        throw new CliUsageException($"InSpectra.UI bundle could not be located beside the tool. {FrontendBuildHint}");
     }
 
     protected virtual async Task BuildBundleAsync(string frontendRoot, string repositoryDist, CancellationToken cancellationToken)
@@ -76,7 +76,16 @@ public class ViewerBundleLocator(
 
         try
         {
-            await processRunner.RunAsync(npmExecutable, frontendRoot, ["ci"], options.NpmTimeoutSeconds, cancellationToken);
+            switch (GetNodeModulesState(frontendRoot))
+            {
+                case NodeModulesState.Missing:
+                    await processRunner.RunAsync(npmExecutable, frontendRoot, ["ci"], options.NpmTimeoutSeconds, cancellationToken);
+                    break;
+                case NodeModulesState.Incomplete:
+                    await processRunner.RunAsync(npmExecutable, frontendRoot, ["install"], options.NpmTimeoutSeconds, cancellationToken);
+                    break;
+            }
+
             await processRunner.RunAsync(npmExecutable, frontendRoot, ["run", "build"], options.NpmTimeoutSeconds, cancellationToken);
         }
         catch (CliException exception)
@@ -116,5 +125,95 @@ public class ViewerBundleLocator(
     {
         return File.Exists(Path.Combine(path, "static.html"))
             || File.Exists(Path.Combine(path, "index.html"));
+    }
+
+    private static NodeModulesState GetNodeModulesState(string frontendRoot)
+    {
+        var nodeModulesPath = Path.Combine(frontendRoot, "node_modules");
+        if (!Directory.Exists(nodeModulesPath))
+        {
+            return NodeModulesState.Missing;
+        }
+
+        var toolsPath = Path.Combine(nodeModulesPath, ".bin");
+        return Directory.Exists(toolsPath)
+            ? NodeModulesState.Ready
+            : NodeModulesState.Incomplete;
+    }
+
+    private async Task<string> ResolveRepositoryBundleAsync(string frontendRoot, CancellationToken cancellationToken)
+    {
+        var repositoryDist = Path.Combine(frontendRoot, "dist");
+        if (HasBundle(repositoryDist) && !IsBundleStale(frontendRoot, repositoryDist))
+        {
+            return repositoryDist;
+        }
+
+        await BuildBundleAsync(frontendRoot, repositoryDist, cancellationToken);
+        if (HasBundle(repositoryDist))
+        {
+            return repositoryDist;
+        }
+
+        throw new CliUsageException($"InSpectra.UI bundle is missing after the build attempt. {FrontendBuildHint}");
+    }
+
+    private static bool HasFrontendProject(string frontendRoot)
+    {
+        return Directory.Exists(frontendRoot)
+            && File.Exists(Path.Combine(frontendRoot, "package.json"))
+            && File.Exists(Path.Combine(frontendRoot, "package-lock.json"));
+    }
+
+    private static bool IsBundleStale(string frontendRoot, string bundleRoot)
+    {
+        var bundleWriteTime = GetLatestWriteTimeUtc(bundleRoot);
+        foreach (var inputPath in EnumerateFrontendInputs(frontendRoot))
+        {
+            if (File.GetLastWriteTimeUtc(inputPath) > bundleWriteTime)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string> EnumerateFrontendInputs(string frontendRoot)
+    {
+        foreach (var relativePath in FrontendInputFiles)
+        {
+            var absolutePath = Path.Combine(frontendRoot, relativePath);
+            if (File.Exists(absolutePath))
+            {
+                yield return absolutePath;
+            }
+        }
+
+        var sourceRoot = Path.Combine(frontendRoot, "src");
+        if (!Directory.Exists(sourceRoot))
+        {
+            yield break;
+        }
+
+        foreach (var sourcePath in Directory.EnumerateFiles(sourceRoot, "*", SearchOption.AllDirectories))
+        {
+            yield return sourcePath;
+        }
+    }
+
+    private static DateTime GetLatestWriteTimeUtc(string directoryPath)
+    {
+        return Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories)
+            .Select(File.GetLastWriteTimeUtc)
+            .DefaultIfEmpty(DateTime.MinValue)
+            .Max();
+    }
+
+    private enum NodeModulesState
+    {
+        Missing,
+        Incomplete,
+        Ready,
     }
 }

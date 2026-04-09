@@ -18,4 +18,22 @@ public class ExecutableResolverTests
         Assert.Equal(executablePath, resolver.Resolve("demo.cmd", temp.Path));
         Assert.Equal(executablePath, resolver.Resolve(executablePath, temp.Path));
     }
+
+    [Fact]
+    public void Resolve_prefers_pathext_match_over_extensionless_file_on_windows()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return;
+        }
+
+        using var temp = new TempDirectory();
+        File.WriteAllText(System.IO.Path.Combine(temp.Path, "npm"), "shim");
+        var commandPath = System.IO.Path.Combine(temp.Path, "npm.cmd");
+        File.WriteAllText(commandPath, "@echo off");
+
+        var resolver = new ExecutableResolver();
+
+        Assert.Equal(commandPath, resolver.Resolve("npm", temp.Path));
+    }
 }

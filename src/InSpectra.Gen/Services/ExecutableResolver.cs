@@ -49,32 +49,40 @@ public sealed class ExecutableResolver
         }
 
         var exactPath = Path.Combine(directory, source);
-        if (File.Exists(exactPath))
-        {
-            return exactPath;
-        }
-
         if (Path.HasExtension(source))
         {
+            if (File.Exists(exactPath))
+            {
+                return exactPath;
+            }
+
             return null;
         }
 
-        var pathExt = (Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM")
-            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-        foreach (var extension in pathExt)
+        if (OperatingSystem.IsWindows())
         {
-            var candidate = exactPath + extension.ToLowerInvariant();
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
+            var pathExt = (Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM")
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            candidate = exactPath + extension.ToUpperInvariant();
-            if (File.Exists(candidate))
+            foreach (var extension in pathExt)
             {
-                return candidate;
+                var candidate = exactPath + extension.ToLowerInvariant();
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+
+                candidate = exactPath + extension.ToUpperInvariant();
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
             }
+        }
+
+        if (File.Exists(exactPath))
+        {
+            return exactPath;
         }
 
         return null;

@@ -19,10 +19,11 @@ public sealed class HtmlRenderService(
         HtmlFeatureFlags features,
         CancellationToken cancellationToken,
         string? label = null,
+        string? title = null,
         HtmlThemeOptions? themeOptions = null)
     {
         var prepared = await documentService.LoadFromFileAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, features, label, themeOptions, cancellationToken);
+        return await RenderAsync(prepared, request.Options, features, label, title, themeOptions, cancellationToken);
     }
 
     public async Task<RenderExecutionResult> RenderFromExecAsync(
@@ -30,10 +31,11 @@ public sealed class HtmlRenderService(
         HtmlFeatureFlags features,
         CancellationToken cancellationToken,
         string? label = null,
+        string? title = null,
         HtmlThemeOptions? themeOptions = null)
     {
         var prepared = await documentService.LoadFromExecAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, features, label, themeOptions, cancellationToken);
+        return await RenderAsync(prepared, request.Options, features, label, title, themeOptions, cancellationToken);
     }
 
     private async Task<RenderExecutionResult> RenderAsync(
@@ -41,6 +43,7 @@ public sealed class HtmlRenderService(
         RenderExecutionOptions options,
         HtmlFeatureFlags features,
         string? label,
+        string? title,
         HtmlThemeOptions? themeOptions,
         CancellationToken cancellationToken)
     {
@@ -77,7 +80,7 @@ public sealed class HtmlRenderService(
 
         OutputPathHelper.PrepareDirectory(outputDirectory, options.Overwrite);
 
-        var bootstrapJson = BuildInlineBootstrap(prepared, options.IncludeHidden, options.IncludeMetadata, features, label, themeOptions, options.CompressLevel);
+        var bootstrapJson = BuildInlineBootstrap(prepared, options.IncludeHidden, options.IncludeMetadata, features, label, title, themeOptions, options.CompressLevel);
         var writtenFiles = new List<RenderedFile>();
         foreach (var file in bundleFiles)
         {
@@ -113,7 +116,7 @@ public sealed class HtmlRenderService(
         if (options.SingleFile)
         {
             var selfExtractingHtml = options.CompressLevel >= 2
-                ? BuildSelfExtractingHtml(prepared, options, features, label, themeOptions, outputDirectory)
+                ? BuildSelfExtractingHtml(prepared, options, features, label, title, themeOptions, outputDirectory)
                 : InlineAssets(
                     writtenFiles.First(f => f.RelativePath == "index.html").Content!,
                     outputDirectory);
@@ -174,6 +177,7 @@ public sealed class HtmlRenderService(
         RenderExecutionOptions options,
         HtmlFeatureFlags features,
         string? label,
+        string? title,
         HtmlThemeOptions? themeOptions,
         string outputDirectory)
     {
@@ -198,7 +202,7 @@ public sealed class HtmlRenderService(
             : string.Join("\n", jsEntryFiles.Select(File.ReadAllText));
 
         // Build raw bootstrap JSON (not pre-compressed — we'll compress everything together)
-        var bootstrapPayload = BuildRawBootstrapJson(prepared, options.IncludeHidden, options.IncludeMetadata, features, label, themeOptions);
+        var bootstrapPayload = BuildRawBootstrapJson(prepared, options.IncludeHidden, options.IncludeMetadata, features, label, title, themeOptions);
 
         // Pack all payloads into one JSON object and gzip+base64 the whole thing
         var pack = JsonSerializer.Serialize(new { c = css, j = js, b = bootstrapPayload }, JsonOutput.CompactSerializerOptions);
@@ -225,6 +229,7 @@ public sealed class HtmlRenderService(
         bool includeMetadata,
         HtmlFeatureFlags features,
         string? label,
+        string? title,
         HtmlThemeOptions? themeOptions = null)
     {
         var payload = new InlineBootstrap
@@ -237,6 +242,7 @@ public sealed class HtmlRenderService(
                 IncludeHidden = includeHidden,
                 IncludeMetadata = includeMetadata,
                 Label = label,
+                Title = title,
                 Theme = themeOptions?.Theme,
                 ColorTheme = themeOptions?.ColorTheme,
                 CustomAccent = themeOptions?.CustomAccent,
@@ -465,10 +471,11 @@ public sealed class HtmlRenderService(
         bool includeMetadata,
         HtmlFeatureFlags features,
         string? label,
+        string? title,
         HtmlThemeOptions? themeOptions,
         int compressLevel)
     {
-        var json = BuildRawBootstrapJson(prepared, includeHidden, includeMetadata, features, label, themeOptions);
+        var json = BuildRawBootstrapJson(prepared, includeHidden, includeMetadata, features, label, title, themeOptions);
 
         if (compressLevel >= 1)
         {
@@ -499,6 +506,8 @@ public sealed class HtmlRenderService(
         public required bool IncludeMetadata { get; init; }
 
         public string? Label { get; init; }
+
+        public string? Title { get; init; }
 
         public string? Theme { get; init; }
 

@@ -74,4 +74,19 @@ describe("startup loading", () => {
       source: "query",
     })).rejects.toThrow(`Failed to load ${xmlDocUrl}: 404 Not Found`);
   });
+
+  it("overrides the visible CLI title when viewer options specify one", async () => {
+    const result = await loadFromStartupRequest({
+      kind: "inline",
+      openCli: testDocument,
+      options: {
+        ...defaultViewerOptions(),
+        title: "JellyfinCli",
+      },
+      features: defaultFeatureFlags(),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.document.info.title).toBe("JellyfinCli");
+  });
 });
