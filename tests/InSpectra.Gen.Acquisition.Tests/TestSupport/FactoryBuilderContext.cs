@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Acquisition.Tests;
+namespace InSpectra.Gen.Acquisition.Tests.TestSupport;
 
 using dnlib.DotNet;
 

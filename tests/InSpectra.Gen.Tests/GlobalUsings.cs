@@ -1,4 +1,5 @@
 global using InSpectra.Gen.Execution;
+global using InSpectra.Gen.Models.OpenCli;
 global using InSpectra.Gen.OpenCli.Acquisition;
 global using InSpectra.Gen.OpenCli.Documents;
 global using InSpectra.Gen.OpenCli.Processing;

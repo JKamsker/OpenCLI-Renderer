@@ -1,6 +1,6 @@
 using InSpectra.Gen.Runtime.Acquisition;
 
-namespace InSpectra.Gen.Tests.Commands;
+namespace InSpectra.Gen.Tests.Targets;
 
 public class DotnetProjectArgsBuilderTests
 {

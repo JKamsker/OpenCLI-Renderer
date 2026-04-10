@@ -6,7 +6,7 @@ using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.Results;
 
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 

@@ -4,7 +4,7 @@ using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.Results;
 
 using InSpectra.Gen.Acquisition.Help.OpenCli;
 using InSpectra.Gen.Acquisition.Help.Documents;
@@ -12,7 +12,6 @@ using InSpectra.Gen.Acquisition.Help.Documents;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using InSpectra.Gen.Acquisition.Analysis;
-using InSpectra.Gen.Acquisition.Analysis.OpenCli;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 

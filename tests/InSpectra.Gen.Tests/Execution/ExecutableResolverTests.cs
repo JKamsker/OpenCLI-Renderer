@@ -1,6 +1,6 @@
 using InSpectra.Gen.Tests.TestSupport;
 
-namespace InSpectra.Gen.Tests.Commands;
+namespace InSpectra.Gen.Tests.Execution;
 
 public class ExecutableResolverTests
 {

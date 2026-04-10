@@ -1,7 +1,7 @@
 using InSpectra.Gen.Tests.TestSupport;
 using InSpectra.Gen.Targets;
 
-namespace InSpectra.Gen.Tests.Commands;
+namespace InSpectra.Gen.Tests.Targets;
 
 public sealed class LocalCliTargetFactoryTests
 {

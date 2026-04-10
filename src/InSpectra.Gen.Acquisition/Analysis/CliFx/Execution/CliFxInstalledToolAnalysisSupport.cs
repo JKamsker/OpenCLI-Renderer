@@ -4,7 +4,7 @@ using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.Results;
 
 using InSpectra.Gen.Acquisition.Analysis.CliFx.Crawling;
 
@@ -15,7 +15,6 @@ using InSpectra.Gen.Acquisition.Analysis.CliFx.OpenCli;
 using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
 
 using InSpectra.Gen.Acquisition.Analysis;
-using InSpectra.Gen.Acquisition.Analysis.OpenCli;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 

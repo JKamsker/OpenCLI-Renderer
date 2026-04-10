@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Acquisition.Help.Inference.Usage;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Usage.Prototypes;
 
 using InSpectra.Gen.Acquisition.Help.Signatures;
 

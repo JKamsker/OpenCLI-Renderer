@@ -1,7 +1,7 @@
 using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Tests.TestSupport;
 
-namespace InSpectra.Gen.Tests.Commands;
+namespace InSpectra.Gen.Tests.Targets;
 
 public class DotnetProjectResolverTests
 {

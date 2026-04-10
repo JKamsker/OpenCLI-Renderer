@@ -1,5 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests.SystemCommandLine;
 
+using InSpectra.Gen.Acquisition.Tests.TestSupport;
+
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 

@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Acquisition.Tests;
+namespace InSpectra.Gen.Acquisition.Tests.TestSupport;
 
 using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes.Cocona;
 using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;

@@ -4,6 +4,7 @@ using InSpectra.Gen.Acquisition.Analysis.Hook;
 using InSpectra.Gen.Acquisition.Analysis.Hook.Models;
 using InSpectra.Gen.Acquisition.Analysis.Results;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Tests.TestSupport;
 
 using System.Text.Json.Nodes;
 

@@ -1,5 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
+using InSpectra.Gen.Acquisition.Tests.TestSupport;
+
 using dnlib.DotNet;
 
 public sealed class CoconaAttributeReaderTests
