@@ -546,3 +546,116 @@ And inside those modules:
 That is the strategy that lets you add a new mode, renderer, framework adapter, or source type without inventing new roots or reshuffling the whole tree again.
 
 The next useful step is turning this into a concrete move-map for the current folders and files.
+
+---
+
+## Current State (verified 2026-04-10)
+
+Repo was scanned with 8 overlapping subagents. The charter above still holds. Below is the delta between the charter and what is actually in the tree today, plus a precise move-map.
+
+### Project footprint
+
+| Project | C# files | Notes |
+|---|---|---|
+| `InSpectra.Gen` | 127 | App shell — still owns OpenCli domain + rendering + targets |
+| `InSpectra.Gen.Acquisition` | 226 | Owns help/cliFx/static/hook analyzers and a cross-cutting `OpenCli/` subtree |
+| `InSpectra.Gen.StartupHook` | 23 | Already close to charter shape |
+| `InSpectra.UI` | — | Vite/TypeScript frontend |
+
+Total backend surface: ~376 C# files.
+
+### Verified charter violations
+
+1. **Non-test `InternalsVisibleTo`** — `src/InSpectra.Gen.Acquisition/Properties/AssemblyInfo.cs:4` exposes internals to the `inspectra` assembly. Only `InSpectra.Gen.Acquisition.Tests` is allowed.
+2. **App shell wires deep acquisition internals** — `src/InSpectra.Gen/Composition/ServiceCollectionExtensions.cs` (`AddAcquisitionAnalyzers`, lines 74–93) directly registers 15 concrete types from Acquisition namespaces: `CommandRuntime`, `OpenCliBuilder`, `CliFxMetadataInspector`, `CliFxOpenCliBuilder`, `CliFxCoverageClassifier`, `StaticAnalysisRuntime`, `DnlibAssemblyScanner`, `StaticAnalysisAssemblyInspectionSupport`, `StaticAnalysisOpenCliBuilder`, `StaticAnalysisCoverageClassifier`, `InstalledToolAnalyzer`, `CliFxInstalledToolAnalysisSupport`, `StaticInstalledToolAnalysisSupport`, `HookInstalledToolAnalysisSupport`, `IToolDescriptorResolver`.
+3. **No module composition methods** — neither `InSpectra.Gen.Acquisition` nor `InSpectra.Gen.StartupHook` exposes an `AddInSpectra*` extension. The app shell reaches in directly.
+4. **OpenCLI domain scattered across 5 locations** — canonical home does not exist yet:
+   - `src/InSpectra.Gen/Models/OpenCli/` — 11 canonical model types (`OpenCliDocument`, `OpenCliCommand`, etc.)
+   - `src/InSpectra.Gen/OpenCli/Documents/` — 6 files: schema provider, loader, serializer, cloner, sanitizers
+   - `src/InSpectra.Gen/OpenCli/Processing/` — 3 files: normalizer, XML enricher, enrichment result
+   - `src/InSpectra.Gen/OpenCli/Acquisition/` — 11 files: acquisition services, generation service, artifact writer, mode planner
+   - `src/InSpectra.Gen.Acquisition/OpenCli/` — 28 files under `Documents/`, `Options/`, `Structure/` (sanitizers, validators, option collision, node validation)
+5. **Render view model lives in `Models/`** — `NormalizedCliDocument.cs`, `NormalizedCommand.cs`, `ResolvedOption.cs` live in `src/InSpectra.Gen/Models/` even though they are only used by `Rendering/*`. They belong inside the rendering pipeline.
+6. **`Runtime/` is a catch-all (40 files)** — mixes acquisition request DTOs (10), rendering contracts (12), JSON envelopes (4), output handlers (2), command settings bases (5), and top-level render request factories (5 files at root).
+7. **Mode-specific `OpenCli` folders inside Acquisition** — four directories use the `OpenCli` name for what are really *projections* from a source representation into the OpenCLI domain:
+   - `Analysis/CliFx/OpenCli/` (7 files)
+   - `Help/OpenCli/` (7 files)
+   - `StaticAnalysis/OpenCli/` (6 files)
+   - (the top-level `OpenCli/` is a separate case — see #4)
+8. **Technical catch-all buckets still exist** — `Analysis/`, `Analysis/Execution/`, `Infrastructure/Commands/`, `Runtime/` (exceptions), `Frameworks/`, `NuGet/`, `Packages/` are not yet grouped under `Modes/`, `Tooling/`, or `Core`.
+
+### Things that are already fine
+
+- `InSpectra.Gen.csproj` references `InSpectra.Gen.Acquisition` and `InSpectra.Gen.StartupHook` only. Acquisition has zero project references. Direction is correct.
+- `InSpectra.Gen.StartupHook` has no backwards project references and is organised framework-first, which matches the charter.
+- `Composition/ServiceCollectionExtensions.cs` already splits registration into `AddOpenCliServices`, `AddTargetServices`, `AddRenderingServices`, `AddAcquisitionAnalyzers`. Good seams — only the last one is leaking internals.
+- Commands are thin. `ExecGenerateCommand`, `PackageGenerateCommand`, `DotnetGenerateCommand` each depend only on `IOpenCliGenerationService` plus request/output support — no deep reach-in.
+- `RepositoryCodeFilePolicyTests.cs` already exists in `tests/InSpectra.Gen.Tests/` as an example of how repo-wide policy tests are wired. New architecture tests should follow the same xUnit + `FixturePaths` pattern.
+- Namespaces already match folder paths (file-scoped, matching `{Project}.{RelativeFolderPath}`). No mass rename required — only the new structure needs to stay on this rule.
+
+### Concrete move-map (for Phase 3)
+
+This expands section "How current folders would map" with verified paths. Nothing here is executed in Phase 1 — the charter is written first.
+
+**Inside `InSpectra.Gen`:**
+
+| From | To |
+|---|---|
+| `Models/OpenCli/*` (11 files) | `OpenCli/Model/*` (new canonical home, eventually `InSpectra.Gen.OpenCli/Model/`) |
+| `Models/NormalizedCliDocument.cs`, `NormalizedCommand.cs`, `ResolvedOption.cs` | `Rendering/Pipeline/Model/*` |
+| `OpenCli/Documents/OpenCliSchemaProvider.cs` | `OpenCli/Schema/*` |
+| `OpenCli/Documents/OpenCliDocumentLoader.cs`, `OpenCliDocumentSerializer.cs`, `OpenCliDocumentCloner.cs` | `OpenCli/Serialization/*` |
+| `OpenCli/Documents/OpenCliCompatibilitySanitizer.cs`, `OpenCliJsonSanitizer.cs` | `OpenCli/Validation/*` (document-level) |
+| `OpenCli/Processing/OpenCliNormalizer.cs`, `OpenCliXmlEnricher.cs`, `XmlEnrichmentResult.cs` | `OpenCli/Enrichment/*` |
+| `OpenCli/Acquisition/*` (11 files) | `UseCases/Generate/*` (acquisition + generation services are application-level use cases) |
+| `Runtime/Acquisition/*` (10 files) | Acquisition contracts → `Acquisition/Contracts/*` inside Acquisition project |
+| `Runtime/Rendering/*` (12 files) | `Rendering/Contracts/*` |
+| `Runtime/Json/*` (4 files) | `Output/Json/*` |
+| `Runtime/Output/*` (2 files) | `Output/*` |
+| `Runtime/Settings/*` (5 files) | `Commands/Common/*` |
+| `Runtime/*.cs` (5 top-level render request factories) | `UseCases/Render/*` or `Commands/Render/RequestBuilders/*` |
+| `Targets/DotnetBuildOutputResolver.cs`, `DotnetProjectArgsBuilder.cs`, `DotnetProjectResolver.cs`, `LocalCliFrameworkDetector.cs`, `LocalCliTargetFactory.cs`, `MaterializedCliTarget.cs`, `PackageCliTargetFactory.cs` | `Acquisition/Sources/Dotnet/*` and `Acquisition/Sources/Targets/*` |
+| `Execution/*` (5 files: `CliInvocationEnvironmentFactory`, `ExecutableResolver`, `IProcessRunner`, `ProcessRunner`, `TemporaryWorkspace`) | `Acquisition/Tooling/Process/*` |
+| `Viewer/*` (3 files) | `Rendering/Html/Bundle/*` |
+| `Commands/Generate/{Exec,Package,Dotnet}*.cs` (flat) | `Commands/Generate/{Exec,Package,Dotnet}/*` (grouped) |
+| `Commands/Render/File*.cs` (flat) | `Commands/Render/File/*` (grouped) |
+
+**Inside `InSpectra.Gen.Acquisition`:**
+
+| From | To |
+|---|---|
+| `Help/*` (70 files) | `Modes/Help/*` (preserve `Crawling/`, `Documents/`, `Inference/`, `Parsing/`, `Signatures/` subtree) |
+| `Help/OpenCli/*` (7 files) | `Modes/Help/Projection/*` |
+| `Analysis/CliFx/*` (18 files) | `Modes/CliFx/*` (preserve `Crawling/`, `Execution/`, `Metadata/` subtrees) |
+| `Analysis/CliFx/OpenCli/*` (7 files) | `Modes/CliFx/Projection/*` |
+| `StaticAnalysis/*` | `Modes/Static/*` (preserve `Attributes/`, `Inspection/`, `Models/` subtrees) |
+| `StaticAnalysis/OpenCli/*` (6 files) | `Modes/Static/Projection/*` |
+| `Analysis/Hook/*` (13 files) | `Modes/Hook/*` |
+| `Analysis/Execution/*` (3 files) | `Tooling/Process/*` (merge with `InSpectra.Gen/Execution/*`) |
+| `Analysis/Introspection/*` (4 files) | `Modes/Static/Introspection/*` or `Tooling/Introspection/*` (decide in Phase 3) |
+| `Analysis/Results/*` (3 files) | `Contracts/Results/*` |
+| `Analysis/Tools/*` (2 files) | `Tooling/Tools/*` (tool descriptor resolver) |
+| `Infrastructure/Commands/*` (9 files) | `Tooling/Process/*` |
+| `Infrastructure/Json/*` (3 files) | `Tooling/Json/*` (or lift to a tiny shared core) |
+| `Infrastructure/Paths/*` (2 files) | `Tooling/Paths/*` |
+| `Infrastructure/ApplicationLifetime.cs`, `InspectraProductInfo.cs` | `Contracts/*` or lift to shared core |
+| `NuGet/*` (7 files) | `Tooling/NuGet/*` |
+| `Packages/*` (11 files) | `Tooling/Packages/*` |
+| `Frameworks/*` (3 files) | `Tooling/FrameworkDetection/*` |
+| `Runtime/CliException.cs`, `CliUsageException.cs`, `CliDataException.cs`, `CliSourceExecutionException.cs` | Cross-cutting core/errors module (shared with `InSpectra.Gen`) |
+| `OpenCli/Documents/*` (9 files) | canonical OpenCLI home (merge with `InSpectra.Gen/OpenCli/Documents/*`) |
+| `OpenCli/Options/*` (14 files incl. `Collisions/`) | canonical OpenCLI home — `OpenCli/Validation/Options/*` |
+| `OpenCli/Structure/*` (5 files) | canonical OpenCLI home — `OpenCli/Validation/Structure/*` |
+
+**New composition seams (Phase 2/3):**
+
+- `AddInSpectraOpenCli(this IServiceCollection)` — registers schema, loader, serializer, cloner, enricher, sanitizers, validators.
+- `AddInSpectraAcquisition(this IServiceCollection)` — registers all mode analyzers, tooling, planners. Replaces `AddAcquisitionAnalyzers` in the app shell.
+- `AddInSpectraRendering(this IServiceCollection)` — registers markdown/html render services, formatters, bundle locator.
+
+After these land, `InSpectra.Gen/Composition/ServiceCollectionExtensions.cs` should contain *only* `AddInSpectraGen` plus the three `AddInSpectra*` calls and command-layer glue. The concrete-type list goes away.
+
+### Phase 1 deliverable
+
+Phase 1 is **charter only**: produce `docs/architecture/ARCHITECTURE.md` capturing module ownership, allowed/forbidden dependencies, placement rules, naming rules, and extension seams. No code moves, no DI changes, no project splits. Phases 2–4 follow.
+
