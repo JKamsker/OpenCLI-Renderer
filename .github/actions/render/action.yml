@@ -7,11 +7,11 @@ branding:
 inputs:
   mode:
     description: >
-      Render mode.
-        exec    - invoke a live CLI (requires cli-name)
+      Source mode.
+        exec    - acquire opencli.json from a live CLI, then render it (requires cli-name)
         file    - render from a saved opencli.json (requires opencli-json)
-        dotnet  - run a .NET project from source (requires project)
-        package - install and analyze a .NET tool package (requires package-id and package-version)
+        dotnet  - acquire opencli.json from a .NET project, then render it (requires project)
+        package - acquire opencli.json from a .NET tool package, then render it (requires package-id and package-version)
     required: false
     default: 'exec'
 
@@ -389,7 +389,7 @@ runs:
         fi
         "${args[@]}"
 
-    - name: Render
+    - name: Generate and render
       shell: bash
       env:
         MODE: ${{ inputs.mode }}
@@ -426,6 +426,11 @@ runs:
         NO_RESTORE: ${{ inputs.no-restore }}
       run: |
         set -euo pipefail
+        tmp_dir="$(mktemp -d)"
+        cleanup() {
+          rm -rf "$tmp_dir"
+        }
+        trap cleanup EXIT
 
         # ── determine subcommand + format flags ──
         case "$FORMAT" in
@@ -459,60 +464,61 @@ runs:
           echo "::warning::split-depth is ignored for format '$FORMAT'; it only applies to markdown-hybrid."
         fi
 
-        # ── build command based on mode ──
+        generated_opencli="$tmp_dir/opencli.json"
+        render_input="$OPENCLI_JSON"
+        render_xmldoc="$XMLDOC"
+
+        # ── acquire OpenCLI when the source is not already a file ──
         if [ "$MODE" = "exec" ]; then
-          args=(render exec "$subcmd" "$CLI_NAME" --overwrite)
+          generate_args=(generate exec "$CLI_NAME" --out "$generated_opencli")
 
           # auto-detect xmldoc support
           xmldoc_probe=( ${XMLDOC_ARGS:-cli xmldoc} )
           if "$CLI_NAME" "${xmldoc_probe[@]}" > /dev/null 2>&1; then
-            echo "xmldoc supported — enriching output"
-            args+=(--with-xmldoc)
+            echo "xmldoc supported — enriching generated OpenCLI"
+            generate_args+=(--with-xmldoc)
             if [ -n "$XMLDOC_ARGS" ]; then
-              for a in $XMLDOC_ARGS; do args+=(--xmldoc-arg "$a"); done
+              for a in $XMLDOC_ARGS; do generate_args+=(--xmldoc-arg "$a"); done
             fi
           else
-            echo "xmldoc not available — rendering without enrichment"
+            echo "xmldoc not available — generating without enrichment"
           fi
 
           if [ -n "$OPENCLI_ARGS" ]; then
-            for a in $OPENCLI_ARGS; do args+=(--opencli-arg "$a"); done
+            for a in $OPENCLI_ARGS; do generate_args+=(--opencli-arg "$a"); done
           fi
 
           if [ -n "$TIMEOUT" ]; then
-            args+=(--timeout "$TIMEOUT")
+            generate_args+=(--timeout "$TIMEOUT")
           fi
 
         elif [ "$MODE" = "file" ]; then
-          args=(render file "$subcmd" "$OPENCLI_JSON" --overwrite)
-          if [ -n "$XMLDOC" ]; then
-            args+=(--xmldoc "$XMLDOC")
-          fi
+          :
 
         elif [ "$MODE" = "package" ]; then
-          args=(render package "$subcmd" "$PACKAGE_ID" --version "$PACKAGE_VERSION" --overwrite)
+          generate_args=(generate package "$PACKAGE_ID" --version "$PACKAGE_VERSION" --out "$generated_opencli")
 
           if [ -n "$OPENCLI_ARGS" ]; then
-            for a in $OPENCLI_ARGS; do args+=(--opencli-arg "$a"); done
+            for a in $OPENCLI_ARGS; do generate_args+=(--opencli-arg "$a"); done
           fi
 
           if [ -n "$XMLDOC_ARGS" ]; then
-            args+=(--with-xmldoc)
-            for a in $XMLDOC_ARGS; do args+=(--xmldoc-arg "$a"); done
+            generate_args+=(--with-xmldoc)
+            for a in $XMLDOC_ARGS; do generate_args+=(--xmldoc-arg "$a"); done
           fi
 
           if [ -n "$TIMEOUT" ]; then
-            args+=(--timeout "$TIMEOUT")
+            generate_args+=(--timeout "$TIMEOUT")
           fi
 
         elif [ "$MODE" = "dotnet" ]; then
-          args=(render dotnet "$subcmd" "$PROJECT" --overwrite)
+          generate_args=(generate dotnet "$PROJECT" --out "$generated_opencli")
 
-          [ -n "$CONFIGURATION" ]   && args+=(--configuration "$CONFIGURATION")
-          [ -n "$FRAMEWORK" ]       && args+=(--framework "$FRAMEWORK")
-          [ -n "$LAUNCH_PROFILE" ]  && args+=(--launch-profile "$LAUNCH_PROFILE")
-          [ "$NO_BUILD" = "true" ]  && args+=(--no-build)
-          [ "$NO_RESTORE" = "true" ] && args+=(--no-restore)
+          [ -n "$CONFIGURATION" ]   && generate_args+=(--configuration "$CONFIGURATION")
+          [ -n "$FRAMEWORK" ]       && generate_args+=(--framework "$FRAMEWORK")
+          [ -n "$LAUNCH_PROFILE" ]  && generate_args+=(--launch-profile "$LAUNCH_PROFILE")
+          [ "$NO_BUILD" = "true" ]  && generate_args+=(--no-build)
+          [ "$NO_RESTORE" = "true" ] && generate_args+=(--no-restore)
 
           # auto-detect xmldoc support by probing the project once
           # (subsequent dotnet run invocations reuse the same build output)
@@ -524,21 +530,21 @@ runs:
           probe_args+=(--)
           xmldoc_probe=( ${XMLDOC_ARGS:-cli xmldoc} )
           if dotnet "${probe_args[@]}" "${xmldoc_probe[@]}" > /dev/null 2>&1; then
-            echo "xmldoc supported — enriching output"
-            args+=(--with-xmldoc)
+            echo "xmldoc supported — enriching generated OpenCLI"
+            generate_args+=(--with-xmldoc)
             if [ -n "$XMLDOC_ARGS" ]; then
-              for a in $XMLDOC_ARGS; do args+=(--xmldoc-arg "$a"); done
+              for a in $XMLDOC_ARGS; do generate_args+=(--xmldoc-arg "$a"); done
             fi
           else
-            echo "xmldoc not available — rendering without enrichment"
+            echo "xmldoc not available — generating without enrichment"
           fi
 
           if [ -n "$OPENCLI_ARGS" ]; then
-            for a in $OPENCLI_ARGS; do args+=(--opencli-arg "$a"); done
+            for a in $OPENCLI_ARGS; do generate_args+=(--opencli-arg "$a"); done
           fi
 
           if [ -n "$TIMEOUT" ]; then
-            args+=(--timeout "$TIMEOUT")
+            generate_args+=(--timeout "$TIMEOUT")
           fi
 
         else
@@ -546,62 +552,76 @@ runs:
           exit 1
         fi
 
-        if [ -n "$OPENCLI_MODE" ]; then
-          args+=(--opencli-mode "$OPENCLI_MODE")
+        if [ "$MODE" != "file" ]; then
+          if [ -n "$OPENCLI_MODE" ]; then
+            generate_args+=(--opencli-mode "$OPENCLI_MODE")
+          fi
+
+          if [ -n "$COMMAND_NAME" ]; then
+            generate_args+=(--command "$COMMAND_NAME")
+          fi
+
+          if [ -n "$CLI_FRAMEWORK" ]; then
+            generate_args+=(--cli-framework "$CLI_FRAMEWORK")
+          fi
+
+          echo "::group::inspectra ${generate_args[*]}"
+          inspectra "${generate_args[@]}"
+          echo "::endgroup::"
+
+          render_input="$generated_opencli"
+          render_xmldoc=""
         fi
 
-        if [ -n "$COMMAND_NAME" ]; then
-          args+=(--command "$COMMAND_NAME")
+        render_args=(render file "$subcmd" "$render_input" --overwrite)
+        if [ -n "$render_xmldoc" ]; then
+          render_args+=(--xmldoc "$render_xmldoc")
         fi
 
-        if [ -n "$CLI_FRAMEWORK" ]; then
-          args+=(--cli-framework "$CLI_FRAMEWORK")
-        fi
-
-        args+=("${format_args[@]}")
+        render_args+=("${format_args[@]}")
 
         if [ -n "$LABEL" ]; then
-          args+=(--label "$LABEL")
+          render_args+=(--label "$LABEL")
         fi
 
         if [ -n "$TITLE" ]; then
-          args+=(--title "$TITLE")
+          render_args+=(--title "$TITLE")
         fi
 
         if [ -n "$COMMAND_PREFIX" ]; then
-          args+=(--command-prefix "$COMMAND_PREFIX")
+          render_args+=(--command-prefix "$COMMAND_PREFIX")
         fi
 
         # ── HTML-specific options ──
         if [ "$subcmd" = "html" ]; then
           if [ "$SINGLE_FILE" = "true" ]; then
-            args+=(--single-file)
+            render_args+=(--single-file)
           fi
-          args+=(--compression-level "$COMPRESSION_LEVEL")
+          render_args+=(--compression-level "$COMPRESSION_LEVEL")
           if [ -n "${THEME:-}" ]; then
-            args+=(--theme "$THEME")
+            render_args+=(--theme "$THEME")
           fi
           if [ -n "${COLOR_THEME:-}" ]; then
-            args+=(--color-theme "$COLOR_THEME")
+            render_args+=(--color-theme "$COLOR_THEME")
           fi
           if [ -n "${ACCENT:-}" ]; then
-            args+=(--accent "$ACCENT")
+            render_args+=(--accent "$ACCENT")
           fi
           if [ -n "${ACCENT_DARK:-}" ]; then
-            args+=(--accent-dark "$ACCENT_DARK")
+            render_args+=(--accent-dark "$ACCENT_DARK")
           fi
           if [ "$NO_THEME_PICKER" = "true" ]; then
-            args+=(--no-theme-picker)
+            render_args+=(--no-theme-picker)
           fi
         fi
 
         if [ -n "${EXTRA_ARGS:-}" ]; then
           # shellcheck disable=SC2206
-          args+=($EXTRA_ARGS)
+          render_args+=($EXTRA_ARGS)
         fi
 
-        echo "::group::inspectra ${args[*]}"
-        inspectra "${args[@]}"
+        echo "::group::inspectra ${render_args[*]}"
+        inspectra "${render_args[@]}"
         echo "::endgroup::"
 
     - name: Verify output

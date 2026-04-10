@@ -94,15 +94,19 @@ jobs:
           test -f "$out2/index.html"
           [ "$(find "$out2" -type f | wc -l)" -eq 1 ]
 
-      - name: Smoke render dotnet mode
+      - name: Smoke pure dotnet generate plus render flow
         shell: bash
         run: |
           set -euo pipefail
           tmp_dir="$(mktemp -d)"
+          opencli="$tmp_dir/opencli.json"
           out="$tmp_dir/dotnet"
           dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
-            render dotnet html src/InSpectra.Gen \
+            generate dotnet src/InSpectra.Gen \
             --configuration Release --no-build --with-xmldoc \
+            --out "$opencli"
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
+            render file html "$opencli" \
             --out-dir "$out" --overwrite
           test -f "$out/index.html"
 

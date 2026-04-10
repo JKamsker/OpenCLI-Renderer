@@ -8,7 +8,7 @@ on the reusable workflow at
 
 | Input | Default | Description |
 |---|---|---|
-| `mode` | `exec` | `exec` (invoke a live CLI), `file` (from saved opencli.json), `dotnet` (run a .NET project from source), or `package` (analyze a published .NET tool package) |
+| `mode` | `exec` | `exec` (generate `opencli.json` from a live CLI, then render it), `file` (render from saved `opencli.json`), `dotnet` (generate from a .NET project), or `package` (analyze a published .NET tool package) |
 | `format` | `html` | `html` (interactive SPA), `markdown` (tree layout), or `markdown-monolith` (single file) |
 | `output-dir` | `inspectra-output` | Directory where the rendered output is written |
 | `label` | | Custom label shown in the viewer header (e.g. `v1.2.3`) |
@@ -33,11 +33,11 @@ on the reusable workflow at
 | Input | Default | Description |
 |---|---|---|
 | `project` | _required_ | Path to a `.csproj` / `.fsproj` / `.vbproj` (or directory containing exactly one) |
-| `configuration` | | Build configuration for `dotnet run` (e.g. `Release`) |
+| `configuration` | | Build configuration for the dotnet acquisition step (e.g. `Release`) |
 | `framework` | | Target framework moniker (e.g. `net10.0`) |
-| `launch-profile` | | Launch profile for `dotnet run` |
-| `no-build` | `false` | Pass `--no-build` to `dotnet run` (use after a separate build step) |
-| `no-restore` | `false` | Pass `--no-restore` to `dotnet run` |
+| `launch-profile` | | Launch profile for the dotnet acquisition step |
+| `no-build` | `false` | Pass `--no-build` to the dotnet acquisition step (use after a separate build step) |
+| `no-restore` | `false` | Pass `--no-restore` to the dotnet acquisition step |
 
 ## `package` mode
 
@@ -68,7 +68,7 @@ no-op (your existing pin is preserved).
 | Input | Default | Description |
 |---|---|---|
 | `opencli-args` | `cli opencli` | Override the OpenCLI export arguments. Useful if your CLI uses a different command (e.g. `export spec`) |
-| `xmldoc-args` | `cli xmldoc` | Override the XML documentation export arguments |
+| `xmldoc-args` | `cli xmldoc` | Override the XML documentation export arguments used when the action enriches generated `opencli.json` |
 | `timeout` | `30` (`exec`) / `120` (`dotnet`) | Per-invocation timeout in seconds |
 
 ## Analysis options (`exec` / `dotnet` / `package`)

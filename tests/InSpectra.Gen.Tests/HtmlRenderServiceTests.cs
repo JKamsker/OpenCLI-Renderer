@@ -64,55 +64,6 @@ public class HtmlRenderServiceTests
     }
 
     [Fact]
-    public async Task Exec_render_writes_bundle_and_tracks_exec_source()
-    {
-        using var temp = new TempDirectory();
-        var bundleRoot = CreateBundle(temp.Path, "packaged");
-        var scriptPath = CreateOpenCliScript(temp.Path);
-        var service = CreateHtmlRenderService(new ViewerBundleLocatorOptions
-        {
-            PackagedRootPath = bundleRoot,
-            RepositoryRootPath = temp.Path,
-        });
-
-        var outputDirectory = Path.Combine(temp.Path, "html");
-        var request = new ExecRenderRequest(
-            "pwsh",
-            ["-NoProfile", "-File", scriptPath],
-            OpenCliMode.Native,
-            null,
-            null,
-            ["cli", "opencli"],
-            true,
-            ["cli", "xmldoc"],
-            temp.Path,
-            30,
-            new OpenCliArtifactOptions(null, null),
-            new RenderExecutionOptions(
-                RenderLayout.App,
-                ResolvedOutputMode.Human,
-                DryRun: false,
-                Quiet: false,
-                Verbose: false,
-                NoColor: false,
-                IncludeHidden: false,
-                IncludeMetadata: false,
-                Overwrite: false,
-                SingleFile: false,
-                CompressLevel: 0,
-                OutputFile: null,
-                OutputDirectory: outputDirectory));
-
-        var result = await service.RenderFromExecAsync(request, DefaultFeatures, CancellationToken.None);
-        var index = await File.ReadAllTextAsync(Path.Combine(outputDirectory, "index.html"));
-
-        Assert.Equal("exec", result.Source.Kind);
-        Assert.Contains("\"includeHidden\":false", index);
-        Assert.Contains("\"xmlDoc\":", index);
-        Assert.Contains("auth", index);
-    }
-
-    [Fact]
     public async Task Dry_run_plans_bundle_files_without_writing_output()
     {
         using var temp = new TempDirectory();
@@ -170,34 +121,5 @@ public class HtmlRenderServiceTests
         File.WriteAllText(Path.Combine(bundleRoot, "assets", "app.js"), "console.log('bundle');");
         File.WriteAllText(Path.Combine(bundleRoot, "assets", "app.css"), "body { color: black; }");
         return bundleRoot;
-    }
-
-    private static string CreateOpenCliScript(string rootPath)
-    {
-        var scriptPath = Path.Combine(rootPath, "opencli-fixture.ps1");
-        var openCliPath = EscapePowerShellPath(FixturePaths.OpenCliJson);
-        var xmlDocPath = EscapePowerShellPath(FixturePaths.XmlDoc);
-        var script = $$"""
-            param([Parameter(ValueFromRemainingArguments = $true)][string[]] $Args)
-            $joined = $Args -join ' '
-            if ($joined -like '*cli opencli') {
-                Get-Content -Raw '{{openCliPath}}'
-                exit 0
-            }
-            if ($joined -like '*cli xmldoc') {
-                Get-Content -Raw '{{xmlDocPath}}'
-                exit 0
-            }
-            Write-Error "Unexpected arguments: $joined"
-            exit 1
-            """;
-
-        File.WriteAllText(scriptPath, script);
-        return scriptPath;
-    }
-
-    private static string EscapePowerShellPath(string value)
-    {
-        return value.Replace("'", "''", StringComparison.Ordinal);
     }
 }

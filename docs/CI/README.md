@@ -18,7 +18,7 @@ attach to a release).
 - [Inputs reference](inputs.md) — every action input, default, and which mode it applies to
 - [Recipes](recipes.md) — full end-to-end pipelines (GitHub Pages, docs PR, release asset)
 
-## TL;DR — render straight from a `.csproj`
+## TL;DR — generate from a `.csproj`, then render automatically
 
 ```yaml
 # .github/workflows/docs.yml
@@ -56,10 +56,10 @@ That's the entire setup. The action takes care of:
 2. **`InSpectra.Cli` package** — auto-added to your `.csproj` so
    `cli opencli` and `cli xmldoc` work without any source changes. Skipped
    if you already reference it.
-3. **`InSpectra.Gen` tool** — installed from NuGet, then used to render
-   the OpenCLI output into the format you asked for.
+3. **`InSpectra.Gen` tool** — installed from NuGet, then used to generate an
+   enriched `opencli.json` and render it into the format you asked for.
 4. **XML enrichment** — auto-detected when your CLI exposes `cli xmldoc`,
-   no flag needed.
+   so the generated `opencli.json` is already enriched before rendering.
 
 You don't need a separate `actions/setup-dotnet` step, you don't need
 `dotnet tool install`, and you don't need to add any `PackageReference`
@@ -87,9 +87,9 @@ Your CLI must support the OpenCLI specification.
 - **For `exec` mode**: your CLI needs to implement `cli opencli` (and
   optionally `cli xmldoc`). Adding the `InSpectra.Cli` NuGet package to your
   project is the easiest way.
-- **For `file` mode**: export your `opencli.json` once (`inspectra render …`
-  has the locally-installed tool, or run the binary's `cli opencli` and
-  redirect stdout) and check it into the repo.
+- **For `file` mode**: export your `opencli.json` once with `inspectra generate …`
+  (or run the binary's `cli opencli` and redirect stdout) and check it into
+  the repo.
 
 If your CLI uses custom export arguments (not `cli opencli`), pass them via
 `opencli-args`. Same for `xmldoc-args`.

@@ -6,7 +6,7 @@
 [![.NET](https://img.shields.io/badge/.NET-10.0-512bd4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![Website](https://img.shields.io/badge/website-inspectra.kamsker.at-blue)](https://inspectra.kamsker.at)
 
-**Turn any CLI's [OpenCLI](https://opencli.org/) spec into beautiful, navigable documentation — Markdown or interactive HTML — in a single command.**
+**Turn any CLI's [OpenCLI](https://opencli.org/) spec into beautiful, navigable documentation — Markdown or interactive HTML.**
 
 > Website: [inspectra.kamsker.at](https://inspectra.kamsker.at) | [Live examples](https://inspectra.kamsker.at/examples/inspectra/) | [Try it](https://inspectra.kamsker.at/try/)
 
@@ -36,8 +36,8 @@
 - **XML enrichment** — additive metadata from XML docs, only fills missing descriptions
 - **Validation first** — broken specs fail early, before any rendering
 - **Acquisition modes** — native OpenCLI export, help crawling, CliFx analysis, static analysis, and startup-hook capture
-- **Raw OpenCLI generation** — emit `opencli.json` directly from a package, executable, or .NET project
-- **Self-documentation** — InSpectra can generate its own docs
+- **Raw OpenCLI generation** — emit enriched `opencli.json` directly from a package, executable, or .NET project
+- **Two-step pipeline** — generate a canonical `opencli.json`, then render Markdown or HTML from that saved artifact
 - **GitHub Action** — one-step CI integration for any .NET CLI tool
 - **Secure by default** — generated pages expose only the features you explicitly enable
 
@@ -71,17 +71,31 @@ auto-installed `InSpectra.Cli` package and SDK detection.
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Node.js (only needed for local frontend builds, CI, and `dotnet pack` / `dotnet publish`)
 
-### Render from a live CLI (exec mode)
+### Generate from a live CLI (exec mode)
 
 ```bash
-# Generate an interactive HTML documentation site
-inspectra render exec html mycli --out-dir ./docs
-
-# Generate Markdown with XML enrichment
-inspectra render exec markdown mycli --with-xmldoc --out docs.md
+# Generate an enriched OpenCLI document
+inspectra generate exec mycli --with-xmldoc --out ./opencli.json
 ```
 
-### Render from a saved OpenCLI JSON file (file mode)
+### Generate from a .NET project on disk (dotnet mode)
+
+```bash
+# Point at a .csproj or directory containing one
+inspectra generate dotnet src/MyCli \
+  --configuration Release \
+  --no-build \
+  --with-xmldoc \
+  --out ./opencli.json
+```
+
+### Generate from a published .NET tool package
+
+```bash
+inspectra generate package JellyfinCli --version 1.1.0 --out ./opencli.json
+```
+
+### Render from a saved OpenCLI JSON file
 
 ```bash
 # HTML bundle
@@ -93,41 +107,10 @@ inspectra render file markdown opencli.json \
   --out docs.md
 ```
 
-### Render from a .NET project on disk (dotnet mode)
+The intended flow is:
 
-```bash
-# Point at a .csproj or directory containing one — InSpectra runs
-# `dotnet run --project <PROJECT> -- cli opencli` for you.
-inspectra render dotnet markdown src/MyCli \
-  --configuration Release \
-  --no-build \
-  --layout tree \
-  --out-dir ./docs
-
-inspectra render dotnet html src/MyCli \
-  --configuration Release \
-  --no-build \
-  --with-xmldoc \
-  --out-dir ./docs
-```
-
-This is the most convenient option when you're iterating on the CLI source —
-no manual export, no published tool, no pre-built binary.
-
-### Render from a .NET tool
-
-```bash
-# Install the target CLI and generate docs
-dotnet tool install -g JellyfinCli
-inspectra render exec html jf --with-xmldoc --out-dir ./jellyfin-docs
-```
-
-### Analyze a published .NET tool package
-
-```bash
-inspectra render package html JellyfinCli --version 1.1.0 --out-dir ./jellyfin-docs
-inspectra generate package JellyfinCli --version 1.1.0 --out ./opencli.json
-```
+1. `inspectra generate ...` from a project, executable, or package.
+2. `inspectra render file ...` from that generated `opencli.json`.
 
 Open `./jellyfin-docs/index.html` in a browser. The bundle is relocatable because the viewer is built with `base: "./"`.
 
@@ -190,7 +173,7 @@ steps:
 ```
 
 `actions/setup-dotnet` and `dotnet tool install` are no longer needed in the
-caller workflow — the action handles both.
+caller workflow — the action handles both, generates `opencli.json`, then renders it.
 
 ### File mode (from saved spec)
 
@@ -234,11 +217,11 @@ steps:
 | `project` | | Path to a `.csproj` / `.fsproj` / `.vbproj` (or directory containing one) for dotnet mode |
 | `package-id` | | NuGet package id for package mode |
 | `package-version` | | NuGet package version for package mode |
-| `configuration` | | Build configuration for `dotnet run` (e.g. `Release`) |
-| `framework` | | Target framework for `dotnet run` (e.g. `net10.0`) |
-| `launch-profile` | | Launch profile for `dotnet run` |
-| `no-build` | `false` | Pass `--no-build` to `dotnet run` (use after a separate build step) |
-| `no-restore` | `false` | Pass `--no-restore` to `dotnet run` |
+| `configuration` | | Build configuration for the dotnet acquisition step (e.g. `Release`) |
+| `framework` | | Target framework for the dotnet acquisition step (e.g. `net10.0`) |
+| `launch-profile` | | Launch profile for the dotnet acquisition step |
+| `no-build` | `false` | Pass `--no-build` to the dotnet acquisition step (use after a separate build step) |
+| `no-restore` | `false` | Pass `--no-restore` to the dotnet acquisition step |
 | `output-dir` | `inspectra-output` | Directory where rendered output is written |
 | `label` | | Custom label shown in the viewer header (e.g. `v1.2.3`) |
 | `title` | | Override the CLI title shown in the viewer header and overview |
@@ -250,9 +233,9 @@ steps:
 | `skip-inspectra-cli` | `false` | Skip the automatic InSpectra.Cli PackageReference (e.g. when the project already manages it) |
 | `dotnet-version` | `10.0.x` | .NET SDK version(s) for InSpectra. In dotnet mode the action also auto-detects the project's `TargetFramework` and installs that SDK; already-installed versions are skipped |
 | `dotnet-quality` | stable | .NET SDK quality channel (`preview` for pre-release) |
-| `opencli-args` | | Override the OpenCLI export arguments |
-| `xmldoc-args` | | Override the xmldoc export arguments |
-| `timeout` | | Timeout in seconds for each export command (exec / dotnet mode) |
+| `opencli-args` | | Override the OpenCLI export arguments used during `generate` |
+| `xmldoc-args` | | Override the xmldoc export arguments used during `generate` |
+| `timeout` | | Timeout in seconds for each acquisition command (exec / dotnet mode) |
 | `opencli-mode` | | `native`, `auto`, `help`, `clifx`, `static`, or `hook` |
 | `command` | | Override the generated root command name |
 | `cli-framework` | | Hint or override the detected CLI framework for non-native analysis |
@@ -357,52 +340,63 @@ The workflow accepts the same inputs as the action, plus:
 ## CLI Reference
 
 ```text
-inspectra render [file|exec|dotnet] [markdown|html] [OPTIONS]
+inspectra generate [exec|dotnet|package] [OPTIONS]
+inspectra render file [markdown|html] [OPTIONS]
 ```
 
-### Markdown
+### Generate
+
+```bash
+generate exec <SOURCE> [OPTIONS]
+generate dotnet <PROJECT> [OPTIONS]
+generate package <PACKAGE_ID> --version <VERSION> [OPTIONS]
+```
+
+Generate supports:
+
+- `--out <FILE>` to write `opencli.json` instead of stdout
+- `--opencli-mode native|auto|help|clifx|static|hook`
+- `--with-xmldoc` to enrich the generated OpenCLI document before it is written
+- `--xmldoc-arg <ARG>` to override the XML documentation export command
+- `--crawl-out <PATH>` when the selected acquisition mode produces crawl data
+
+### Render Markdown
 
 ```bash
 render file markdown <OPENCLI_JSON> [OPTIONS]
-render exec markdown <SOURCE> [OPTIONS]
-render dotnet markdown <PROJECT> [OPTIONS]
 ```
 
-Markdown supports:
+Markdown rendering supports:
 
 - `--out <FILE>` for single-file output
 - `--out-dir <DIR>` with `--layout tree` or `--layout hybrid`
 - `--layout single|tree|hybrid`
 - `--split-depth <N>` with `--layout hybrid` (defaults to `1`) — controls the depth at which per-group Markdown files are emitted. Depth `1` produces `README.md` plus one file per top-level group; depth `2` also emits a file per second-level group; and so on.
 
-### HTML
+### Render HTML
 
 ```bash
 render file html <OPENCLI_JSON> --out-dir <DIR> [OPTIONS]
-render exec html <SOURCE> --out-dir <DIR> [OPTIONS]
-render dotnet html <PROJECT> --out-dir <DIR> [OPTIONS]
 ```
 
-### Dotnet mode
+### Dotnet generate mode
 
 ```bash
-render dotnet markdown <PROJECT> [OPTIONS]
-render dotnet html <PROJECT> --out-dir <DIR> [OPTIONS]
+generate dotnet <PROJECT> [OPTIONS]
 ```
 
 Resolves `<PROJECT>` to a `.csproj` / `.fsproj` / `.vbproj` (a directory with
-exactly one is also accepted) and runs `dotnet run --project <PROJECT> [build flags] -- cli opencli`
-under the hood. Reuses every option from `render exec` plus the dotnet-specific
-build flags:
+exactly one is also accepted) and uses the current project output to generate
+`opencli.json`. Supports these dotnet-specific build flags:
 
 | Option | Description |
 | --- | --- |
 | `-c`, `--configuration <CONFIG>` | Build configuration (e.g. `Release`) |
 | `-f`, `--framework <TFM>` | Target framework moniker (e.g. `net10.0`) |
 | `--launch-profile <NAME>` | Launch profile to use |
-| `--no-build` | Pass `--no-build` to `dotnet run` (after a separate `dotnet build`) |
-| `--no-restore` | Pass `--no-restore` to `dotnet run` |
-| `--with-xmldoc` | Also invoke `cli xmldoc` for XML enrichment |
+| `--no-build` | Pass `--no-build` after a separate `dotnet build` |
+| `--no-restore` | Pass `--no-restore` to the dotnet acquisition step |
+| `--with-xmldoc` | Also invoke `cli xmldoc` so the generated `opencli.json` is enriched |
 | `--timeout <SECONDS>` | Per-invocation timeout (default `120`) |
 
 HTML uses bundle-directory output only:
@@ -412,54 +406,25 @@ HTML uses bundle-directory output only:
 - `--layout` is rejected
 - machine-readable JSON reports `layout: "app"`
 
-### Self-Documentation
-
-```bash
-render self --out-dir <DIR> [OPTIONS]
-```
-
-Generates InSpectra's own documentation by self-invoking `cli opencli` and `cli xmldoc`, then rendering all formats into a single output directory. This is the canonical way to regenerate `docs/inspectra-gen/`.
-
-The output directory will contain:
-
-- `opencli.json` — the raw OpenCLI export (clean JSON, free of Spectre.Console line-wrapping artifacts)
-- `xmldoc.xml` — the raw XML documentation export
-- `tree/` — Markdown tree layout
-- `html/` — HTML app bundle
-
-Additional options:
-
-| Option | Description |
-| --- | --- |
-| `--skip-markdown` | Skip Markdown tree generation |
-| `--skip-html` | Skip HTML bundle generation |
-
-All HTML feature flags (`--show-home`, `--no-composer`, etc.) and common options (`--include-hidden`, `--include-metadata`, `--overwrite`) are supported.
-
-```bash
-# Regenerate docs/inspectra-gen
-inspectra render self --out-dir docs/inspectra-gen --overwrite
-```
-
 ### Common Options
 
 | Option | Description |
 | --- | --- |
 | `--xmldoc <PATH>` | XML enrichment file for `render file ...` |
-| `--with-xmldoc` | Also invoke `cli xmldoc` in exec mode |
-| `--source-arg <ARG>` | Argument passed to the source CLI |
-| `--opencli-arg <ARG>` | Override the OpenCLI export invocation |
-| `--xmldoc-arg <ARG>` | Override the xmldoc invocation |
+| `--with-xmldoc` | Enrich generated `opencli.json` during `generate ...` |
+| `--source-arg <ARG>` | Argument passed to the source CLI during `generate exec ...` |
+| `--opencli-arg <ARG>` | Override the OpenCLI export invocation during `generate ...` |
+| `--xmldoc-arg <ARG>` | Override the xmldoc invocation during `generate ...` |
 | `--include-hidden` | Include hidden commands and options |
 | `--include-metadata` | Include metadata sections in rendered output |
 | `--overwrite` | Overwrite existing output |
 | `--dry-run` | Preview output without writing files |
 | `--json` | Emit machine-readable render results |
-| `--timeout <SECONDS>` | Exec-mode timeout |
+| `--timeout <SECONDS>` | Acquisition timeout for `generate ...` |
 
 ### HTML Feature Flags
 
-When rendering HTML bundles, the following flags control which UI features are available to the end user. These flags only apply to `render file html` and `render exec html`.
+When rendering HTML bundles, the following flags control which UI features are available to the end user. These flags only apply to `render file html`.
 
 By default, statically generated pages are locked down: only the inline command viewer and composer are active. Features like the home screen, NuGet browser, file upload, URL loading, and theme switching must be explicitly opted in. This "secure by default" approach ensures generated documentation pages expose exactly the features you choose.
 
@@ -553,14 +518,13 @@ Missing inferred `xmldoc.xml` is non-fatal.
 ### Data flow
 
 ```text
-OpenCLI JSON ──┐
-XML metadata ──┴─> validate -> enrich -> normalize -> render -> write
+project|exec|package -> generate opencli.json -> render file -> Markdown|HTML
 ```
 
 ### HTML runtime model
 
 - v1 uses raw `opencli.json` plus optional `xmldoc.xml` as the canonical browser input
-- the .NET HTML pipeline keeps the existing acquisition and validation flow
+- acquisition and rendering are now separate CLI stages
 - injected HTML output defaults to inline bootstrap mode
 - internal links-mode support remains available for hosted scenarios
 

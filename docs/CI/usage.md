@@ -17,8 +17,8 @@ Pick the one that matches your situation, copy it into a file under
 ## From source (`dotnet` mode)
 
 The action checks out your repo, parses your `.csproj` to install the right
-.NET SDK, adds `InSpectra.Cli` for you, then runs
-`dotnet run --project <PROJECT> -- cli opencli`.
+.NET SDK, adds `InSpectra.Cli` for you, generates an enriched `opencli.json`,
+then renders from that saved spec.
 
 ```yaml
 # .github/workflows/docs.yml — render straight from a .csproj
@@ -104,9 +104,9 @@ steps:
 
 ## Build then render (legacy `exec` against a built binary)
 
-Pre-`dotnet` mode pattern. Still useful when you need a custom build step
-(e.g. publishing self-contained, signing, vendoring native deps) before the
-binary can run.
+Still useful when you need a custom build step (e.g. publishing self-contained,
+signing, vendoring native deps) before the binary can run. The action still
+acquires `opencli.json` first and then renders from that generated file.
 
 ```yaml
 steps:

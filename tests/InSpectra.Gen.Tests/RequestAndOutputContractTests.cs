@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using InSpectra.Gen.Commands.Generate;
 using InSpectra.Gen.Commands.Render;
 using InSpectra.Gen.Runtime;
 
@@ -138,20 +139,10 @@ public class RequestAndOutputContractTests
     public void Html_command_settings_do_not_expose_markdown_output_flags()
     {
         var fileProperties = typeof(FileHtmlSettings).GetProperties().Select(property => property.Name).ToArray();
-        var execProperties = typeof(ExecHtmlSettings).GetProperties().Select(property => property.Name).ToArray();
-        var packageProperties = typeof(PackageHtmlSettings).GetProperties().Select(property => property.Name).ToArray();
 
         Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.Layout), fileProperties);
         Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.OutputFile), fileProperties);
         Assert.Contains(nameof(HtmlCommandSettingsBase.OutputDirectory), fileProperties);
-
-        Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.Layout), execProperties);
-        Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.OutputFile), execProperties);
-        Assert.Contains(nameof(HtmlCommandSettingsBase.OutputDirectory), execProperties);
-
-        Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.Layout), packageProperties);
-        Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.OutputFile), packageProperties);
-        Assert.Contains(nameof(HtmlCommandSettingsBase.OutputDirectory), packageProperties);
     }
 
     [Theory]
@@ -168,21 +159,32 @@ public class RequestAndOutputContractTests
     }
 
     [Fact]
-    public void Self_doc_settings_only_expose_supported_self_doc_flags()
+    public void Generate_settings_expose_xml_enrichment_flags()
     {
-        var properties = typeof(SelfDocSettings).GetProperties().Select(property => property.Name).ToArray();
+        var execProperties = typeof(ExecGenerateSettings).GetProperties().Select(property => property.Name).ToArray();
+        var dotnetProperties = typeof(DotnetGenerateSettings).GetProperties().Select(property => property.Name).ToArray();
+        var packageProperties = typeof(PackageGenerateSettings).GetProperties().Select(property => property.Name).ToArray();
 
-        Assert.DoesNotContain(nameof(CommonCommandSettings.Json), properties);
-        Assert.DoesNotContain(nameof(CommonCommandSettings.Output), properties);
-        Assert.DoesNotContain(nameof(CommonCommandSettings.Quiet), properties);
-        Assert.DoesNotContain(nameof(CommonCommandSettings.Verbose), properties);
-        Assert.DoesNotContain(nameof(CommonCommandSettings.NoColor), properties);
-        Assert.DoesNotContain(nameof(CommonCommandSettings.DryRun), properties);
+        Assert.Contains(nameof(GenerateCommandSettingsBase.WithXmlDoc), execProperties);
+        Assert.Contains(nameof(GenerateCommandSettingsBase.XmlDocArguments), execProperties);
+        Assert.Contains(nameof(GenerateCommandSettingsBase.WithXmlDoc), dotnetProperties);
+        Assert.Contains(nameof(GenerateCommandSettingsBase.XmlDocArguments), dotnetProperties);
+        Assert.Contains(nameof(GenerateCommandSettingsBase.WithXmlDoc), packageProperties);
+        Assert.Contains(nameof(GenerateCommandSettingsBase.XmlDocArguments), packageProperties);
+    }
 
-        Assert.Contains(nameof(SelfDocHtmlCommandSettingsBase.OutputDirectory), properties);
-        Assert.Contains(nameof(SelfDocCommandSettingsBase.Overwrite), properties);
-        Assert.Contains(nameof(SelfDocCommandSettingsBase.IncludeHidden), properties);
-        Assert.Contains(nameof(SelfDocCommandSettingsBase.IncludeMetadata), properties);
+    [Fact]
+    public void File_render_settings_do_not_expose_acquisition_flags()
+    {
+        var markdownProperties = typeof(FileRenderSettings).GetProperties().Select(property => property.Name).ToArray();
+        var htmlProperties = typeof(FileHtmlSettings).GetProperties().Select(property => property.Name).ToArray();
+
+        Assert.DoesNotContain(nameof(GenerateCommandSettingsBase.OpenCliMode), markdownProperties);
+        Assert.DoesNotContain(nameof(GenerateCommandSettingsBase.CommandName), markdownProperties);
+        Assert.DoesNotContain(nameof(GenerateCommandSettingsBase.CliFramework), markdownProperties);
+        Assert.DoesNotContain(nameof(GenerateCommandSettingsBase.OpenCliMode), htmlProperties);
+        Assert.DoesNotContain(nameof(GenerateCommandSettingsBase.CommandName), htmlProperties);
+        Assert.DoesNotContain(nameof(GenerateCommandSettingsBase.CliFramework), htmlProperties);
     }
 
     [Fact]

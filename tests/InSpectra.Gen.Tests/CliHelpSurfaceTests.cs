@@ -6,14 +6,24 @@ namespace InSpectra.Gen.Tests;
 
 public class CliHelpSurfaceTests
 {
-    [Theory]
-    [InlineData("file")]
-    [InlineData("exec")]
-    [InlineData("dotnet")]
-    [InlineData("package")]
-    public async Task Html_help_only_exposes_bundle_output_option(string mode)
+    [Fact]
+    public async Task Render_help_only_exposes_file_branch()
     {
-        var result = await RunRendererAsync(["render", mode, "html", "--help"]);
+        var result = await RunRendererAsync(["render", "--help"]);
+        var helpText = NormalizeHelpOutput(result.StandardOutput);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("file", helpText);
+        Assert.DoesNotContain("exec", helpText);
+        Assert.DoesNotContain("dotnet", helpText);
+        Assert.DoesNotContain("package", helpText);
+        Assert.DoesNotContain("self", helpText);
+    }
+
+    [Fact]
+    public async Task Html_help_only_exposes_bundle_output_option()
+    {
+        var result = await RunRendererAsync(["render", "file", "html", "--help"]);
         var helpText = NormalizeHelpOutput(result.StandardOutput);
 
         Assert.Equal(0, result.ExitCode);
@@ -22,14 +32,10 @@ public class CliHelpSurfaceTests
         AssertNoOption(helpText, "--layout", "<LAYOUT>");
     }
 
-    [Theory]
-    [InlineData("file")]
-    [InlineData("exec")]
-    [InlineData("dotnet")]
-    [InlineData("package")]
-    public async Task Markdown_help_keeps_single_and_tree_output_options(string mode)
+    [Fact]
+    public async Task Markdown_help_keeps_single_and_tree_output_options()
     {
-        var result = await RunRendererAsync(["render", mode, "markdown", "--help"]);
+        var result = await RunRendererAsync(["render", "file", "markdown", "--help"]);
         var helpText = NormalizeHelpOutput(result.StandardOutput);
 
         Assert.Equal(0, result.ExitCode);
@@ -52,6 +58,8 @@ public class CliHelpSurfaceTests
         AssertNoOption(helpText, "--out-dir", "<DIR>");
         AssertNoOption(helpText, "--layout", "<LAYOUT>");
         AssertOption(helpText, "--opencli-mode", "<MODE>");
+        AssertOption(helpText, "--with-xmldoc", string.Empty);
+        AssertOption(helpText, "--xmldoc-arg", "<ARG>");
         AssertOption(helpText, "--crawl-out", "<PATH>");
     }
 
@@ -120,6 +128,13 @@ public class CliHelpSurfaceTests
 
     private static Regex BuildOptionPattern(string optionName, string argumentName)
     {
+        if (string.IsNullOrEmpty(argumentName))
+        {
+            return new Regex(
+                $@"(?<!\S){Regex.Escape(optionName)}(?!\S)",
+                RegexOptions.CultureInvariant);
+        }
+
         return new Regex(
             $@"(?<!\S){Regex.Escape(optionName)}\s+{Regex.Escape(argumentName)}(?!\S)",
             RegexOptions.CultureInvariant);
