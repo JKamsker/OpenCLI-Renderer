@@ -132,7 +132,7 @@ internal static class RenderRequestHtmlSupport
             return explicitLevel.Value;
         }
 
-        return singleFile ? 2 : 1;
+        return 2;
     }
 
     private static void ValidateOutputCombination(

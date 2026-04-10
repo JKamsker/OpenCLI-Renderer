@@ -105,7 +105,7 @@ rose, blue).</Description>
 examples and the composer.</Description>
           </Option>
           <Option Short="" Long="compression-level" Value="LEVEL" Required="false" Kind="scalar" ClrType="System.Nullable`1[[System.Int32,  System.Private.CoreLib, Version=10.0.0.0, Culture=neutral,  PublicKeyToken=7cec85d7bea7798e]]">
-            <Description>Compression level: 0 = none, 1 = compress embedded JSON (default bundle mode), 2 = self-extracting single-file bundle.</Description>
+            <Description>Compression level: 0 = none, 1 = compress embedded JSON in multi-file bundle mode, 2 = self-extracting single-file bundle (default).</Description>
           </Option>
           <Option Short="" Long="dry-run" Value="NULL" Required="false" Kind="flag" ClrType="System.Boolean">
             <Description>Preview the resolved render plan without writing 

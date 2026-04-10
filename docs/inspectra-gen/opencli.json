@@ -1325,7 +1325,7 @@
                       ]
                     }
                   ],
-                  "description": "Compression level: 0 = none, 1 = compress embedded JSON (default bundle mode), 2 = self-extracting single-file bundle.",
+                  "description": "Compression level: 0 = none, 1 = compress embedded JSON in multi-file bundle mode, 2 = self-extracting single-file bundle (default).",
                   "recursive": false,
                   "hidden": false,
                   "metadata": []

@@ -55,7 +55,7 @@ public abstract class HtmlCommandSettingsBase : CommonCommandSettings
     [Spectre.Console.Cli.CommandOption("--single-file")]
     public bool SingleFile { get; init; }
 
-    [Description("Compression level: 0 = none, 1 = compress embedded JSON (default bundle mode), 2 = self-extracting single-file bundle.")]
+    [Description("Compression level: 0 = none, 1 = compress embedded JSON in multi-file bundle mode, 2 = self-extracting single-file bundle (default).")]
     [Spectre.Console.Cli.CommandOption("--compression-level <LEVEL>")]
     public int? CompressionLevel { get; init; }
 

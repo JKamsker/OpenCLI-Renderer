@@ -126,7 +126,7 @@ public class SelfDocumentationSnapshotTests
         Assert.Contains("HTML app bundle", html["description"]!.GetValue<string>());
         var compression = html["options"]!.AsArray()
             .Single(option => option!["name"]!.GetValue<string>() == "--compression-level")!;
-        Assert.Contains("default bundle mode", compression["description"]!.GetValue<string>());
+        Assert.Contains("single-file bundle (default)", compression["description"]!.GetValue<string>());
     }
 
     private static JsonObject FindCommand(JsonObject document, string commandName)

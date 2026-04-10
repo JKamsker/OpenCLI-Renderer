@@ -139,7 +139,7 @@ public class RenderRequestContractTests
     }
 
     [Fact]
-    public void Html_output_defaults_to_bundle_mode()
+    public void Html_output_defaults_to_single_file_bundle()
     {
         var settings = new TestHtmlSettings
         {
@@ -148,8 +148,8 @@ public class RenderRequestContractTests
 
         var options = RenderRequestFactory.CreateHtmlOptions(settings, null, null, settings.OutputDirectory, timeoutSeconds: null, hasTimeoutSupport: false);
 
-        Assert.False(options.SingleFile);
-        Assert.Equal(1, options.CompressLevel);
+        Assert.True(options.SingleFile);
+        Assert.Equal(2, options.CompressLevel);
     }
 
     [Fact]

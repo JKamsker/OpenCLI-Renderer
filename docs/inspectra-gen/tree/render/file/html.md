@@ -19,7 +19,7 @@ Render an HTML app bundle from an OpenCLI JSON  file and optional XML enrichment
 | --accent-dark | — | <COLOR> | No | No | Declared | — | Custom accent color for dark mode (hex). Falls back to --accent if omitted. | COLOR · required · arity 1 |
 | --color-theme | — | <NAME> | No | No | Declared | — | Set the color theme (cyan, indigo, emerald,  amber, rose, blue). | NAME · required · arity 1 |
 | --command-prefix | — | <TEXT> | No | No | Declared | — | Override the CLI command prefix used in  generated examples and the composer. | TEXT · required · arity 1 |
-| --compression-level | — | <LEVEL> | No | No | Declared | — | Compression level: 0 = none, 1 = compress  embedded JSON (default bundle mode), 2 = self-extracting single-file bundle. | LEVEL · required · arity 1 |
+| --compression-level | — | <LEVEL> | No | No | Declared | — | Compression level: 0 = none, 1 = compress embedded JSON in multi-file bundle mode, 2 = self-extracting single-file bundle (default). | LEVEL · required · arity 1 |
 | --dry-run | — | flag | No | No | Declared | — | Preview the resolved render plan without  writing files. | — |
 | --enable-nuget-browser | — | flag | No | No | Declared | — | Enable the NuGet package browser on the viewer home screen. | — |
 | --enable-package-upload | — | flag | No | No | Declared | — | Enable local package upload on the viewer home screen. | — |
