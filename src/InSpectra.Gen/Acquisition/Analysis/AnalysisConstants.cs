@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis;
+namespace InSpectra.Gen.Acquisition.Analysis;
 
 internal static class AnalysisMode
 {

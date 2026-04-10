@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
+using InSpectra.Gen.Runtime;
+
 internal sealed class NuGetApiClient
 {
     private readonly HttpClient _httpClient;
@@ -192,9 +194,9 @@ internal sealed class NuGetApiClient
             }
             catch (JsonException ex)
             {
-                throw new InvalidOperationException(
+                throw new CliDataException(
                     $"Failed to deserialize JSON from '{url}' as {typeof(TModel).Name}: {ex.Message}",
-                    ex);
+                    innerException: ex);
             }
         }
 

@@ -2,7 +2,7 @@ namespace InSpectra.Gen.Acquisition.Analysis.Help.Models;
 
 using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Text.Json.Nodes;
 

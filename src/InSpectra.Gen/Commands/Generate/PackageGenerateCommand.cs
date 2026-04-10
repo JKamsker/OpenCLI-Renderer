@@ -1,19 +1,15 @@
 using System.ComponentModel;
 using InSpectra.Gen.Runtime;
 using InSpectra.Gen.Services;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace InSpectra.Gen.Commands.Generate;
 
-public sealed class PackageGenerateCommand(OpenCliGenerationService generationService) : AsyncCommand<PackageGenerateSettings>
+public sealed class PackageGenerateCommand(IOpenCliGenerationService generationService) : AsyncCommand<PackageGenerateSettings>
 {
     public override Task<int> ExecuteAsync(CommandContext context, PackageGenerateSettings settings, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(settings.Version))
-        {
-            throw new CliUsageException("`--version` is required.");
-        }
-
         var outputMode = RenderRequestFactory.ResolveOutputMode(settings);
         var request = new PackageAcquisitionRequest(
             settings.PackageId,
@@ -36,6 +32,16 @@ public sealed class PackageGenerateCommand(OpenCliGenerationService generationSe
 
 public sealed class PackageGenerateSettings : GenerateCommandSettingsBase
 {
+    public override ValidationResult Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Version))
+        {
+            return ValidationResult.Error("`--version` is required.");
+        }
+
+        return ValidationResult.Success();
+    }
+
     [Description("NuGet package id for the .NET tool package to analyze.")]
     [CommandArgument(0, "<PACKAGE_ID>")]
     public string PackageId { get; init; } = string.Empty;

@@ -1,4 +1,4 @@
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 namespace InSpectra.Gen.Runtime;
 

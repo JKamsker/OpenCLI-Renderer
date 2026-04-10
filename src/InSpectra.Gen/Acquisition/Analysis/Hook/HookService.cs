@@ -6,7 +6,7 @@ using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Text.Json.Nodes;
 

@@ -10,7 +10,7 @@ using InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
 
 using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 internal sealed class CliFxService
 {

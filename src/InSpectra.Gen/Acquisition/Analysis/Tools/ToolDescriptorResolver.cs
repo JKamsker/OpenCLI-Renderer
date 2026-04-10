@@ -8,7 +8,7 @@ using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using InSpectra.Gen.Acquisition.NuGet;
 

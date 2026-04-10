@@ -2,7 +2,7 @@ namespace InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
 using InSpectra.Gen.Acquisition.Analysis.Output;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Text.Json.Nodes;
 

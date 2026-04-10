@@ -8,7 +8,7 @@ using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
 using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 internal sealed class StaticService
 {

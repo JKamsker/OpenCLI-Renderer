@@ -6,7 +6,7 @@ using InSpectra.Gen.Acquisition.Analysis.Tools;
 using InSpectra.Gen.Acquisition.Analysis.Output;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Text.Json.Nodes;
 

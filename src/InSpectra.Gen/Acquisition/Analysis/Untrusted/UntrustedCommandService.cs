@@ -141,6 +141,10 @@ internal sealed class UntrustedCommandService
                     cancellationToken);
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             result["disposition"] = "retryable-failure";

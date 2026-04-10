@@ -5,7 +5,7 @@ using InSpectra.Gen.Acquisition.Packages;
 
 using InSpectra.Gen.Acquisition.NuGet;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Text.Json;
 using System.Text.Json.Nodes;

@@ -8,7 +8,7 @@ using InSpectra.Gen.Acquisition.Analysis.Tools;
 
 using InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Text.Json.Nodes;
 

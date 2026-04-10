@@ -6,7 +6,7 @@ using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -282,11 +282,13 @@ internal static class NonSpectreExecutionSupport
         {
             Directory.Delete(tempRoot, recursive: true);
         }
-        catch (IOException)
+        catch (IOException ex)
         {
+            System.Diagnostics.Trace.TraceWarning($"Failed to clean up: {ex.Message}");
         }
-        catch (UnauthorizedAccessException)
+        catch (UnauthorizedAccessException ex)
         {
+            System.Diagnostics.Trace.TraceWarning($"Failed to clean up: {ex.Message}");
         }
     }
 }

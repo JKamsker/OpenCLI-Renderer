@@ -1,7 +1,7 @@
 using InSpectra.Gen.Acquisition.Frameworks;
 using InSpectra.Gen.Runtime;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 namespace InSpectra.Gen.Services;
 

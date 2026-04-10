@@ -4,7 +4,7 @@ using InSpectra.Gen.Acquisition.Frameworks;
 
 using InSpectra.Gen.Acquisition.Analysis.Tools;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 internal static class AutoModeSupport
 {

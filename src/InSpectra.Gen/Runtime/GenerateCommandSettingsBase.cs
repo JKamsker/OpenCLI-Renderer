@@ -3,28 +3,8 @@ using Spectre.Console.Cli;
 
 namespace InSpectra.Gen.Runtime;
 
-public abstract class GenerateCommandSettingsBase : CommandSettings
+public abstract class GenerateCommandSettingsBase : CommonCommandSettings
 {
-    [Description("Emit the stable machine-readable JSON envelope instead of human output.")]
-    [CommandOption("--json")]
-    public bool Json { get; init; }
-
-    [Description("Override the output mode. Supported values are human and json.")]
-    [CommandOption("--output <MODE>")]
-    public string? Output { get; init; }
-
-    [Description("Suppress non-essential console output.")]
-    [CommandOption("-q|--quiet")]
-    public bool Quiet { get; init; }
-
-    [Description("Increase diagnostic detail in machine-readable failures.")]
-    [CommandOption("--verbose")]
-    public bool Verbose { get; init; }
-
-    [Description("Disable ANSI color sequences in human-readable console output.")]
-    [CommandOption("--no-color")]
-    public bool NoColor { get; init; }
-
     [Description("OpenCLI acquisition mode: native, auto, help, clifx, static, or hook.")]
     [CommandOption("--opencli-mode <MODE>")]
     public string? OpenCliMode { get; init; }

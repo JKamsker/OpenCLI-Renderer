@@ -12,7 +12,7 @@ internal sealed class TypeRegistrar(IServiceCollection services) : ITypeRegistra
 
     public void Register(Type service, Type implementation)
     {
-        services.AddSingleton(service, implementation);
+        services.AddTransient(service, implementation);
     }
 
     public void RegisterInstance(Type service, object implementation)

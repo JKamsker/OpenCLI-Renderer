@@ -6,7 +6,7 @@ using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.NuGet;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
 using System.Text.Json.Nodes;
 
