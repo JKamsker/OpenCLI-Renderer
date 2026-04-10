@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+using InSpectra.Gen.Acquisition.Runtime;
+
 namespace InSpectra.Gen.Runtime;
 
 public static class CommandOutputHandler

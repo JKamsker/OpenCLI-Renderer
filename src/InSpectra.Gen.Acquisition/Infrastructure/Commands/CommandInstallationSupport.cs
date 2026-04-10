@@ -1,6 +1,5 @@
 namespace InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
@@ -63,43 +62,6 @@ internal static class CommandInstallationSupport
             Environment: sandbox.Values,
             InstallDirectory: installDirectory,
             CommandPath: commandPath);
-    }
-
-    public static bool TryWriteCrawlArtifactOrApplyFailure(string outputDirectory, JsonObject result, JsonObject crawlArtifact)
-    {
-        if (TryWriteCrawlArtifact(outputDirectory, result, crawlArtifact, out var validationError))
-        {
-            return true;
-        }
-
-        NonSpectreResultSupport.ApplyTerminalFailure(
-            result,
-            phase: "crawl",
-            classification: "crawl-artifact-too-large",
-            validationError ?? "Generated crawl.json exceeded the allowed size.");
-        return false;
-    }
-
-    public static bool TryWriteCrawlArtifact(string outputDirectory, JsonObject result, JsonObject crawlArtifact, out string? validationError)
-    {
-        var crawlPath = Path.Combine(outputDirectory, "crawl.json");
-        var artifacts = result["artifacts"]?.AsObject()
-            ?? throw new InvalidOperationException("Result is missing artifacts container.");
-
-        if (!CrawlArtifactValidationSupport.TryValidate(crawlArtifact, out _, out validationError))
-        {
-            artifacts.Remove("crawlArtifact");
-            if (File.Exists(crawlPath))
-            {
-                File.Delete(crawlPath);
-            }
-
-            return false;
-        }
-
-        RepositoryPathResolver.WriteJsonFile(crawlPath, crawlArtifact);
-        artifacts["crawlArtifact"] = "crawl.json";
-        return true;
     }
 
     private static void EnsureDirectories(IReadOnlyList<string> directories)

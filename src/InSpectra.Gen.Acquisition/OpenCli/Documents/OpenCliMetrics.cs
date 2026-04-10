@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
 using System.Text.Json.Nodes;
 
@@ -83,36 +83,57 @@ internal static class OpenCliMetrics
         var latestPaths = summary["latestPaths"] as JsonObject;
         var versionedOpenCliPath = summary["versions"]?.AsArray().OfType<JsonObject>().FirstOrDefault()?["paths"]?["opencliPath"]?.GetValue<string>();
 
-        if (OpenCliArtifactLoadSupport.TryLoadFirstValidOpenCliDocument(
-            repositoryRoot,
-            [latestPaths?["opencliPath"]?.GetValue<string>(), versionedOpenCliPath],
-            out var directDocument,
-            out _))
+        var directCandidates = new[] { latestPaths?["opencliPath"]?.GetValue<string>(), versionedOpenCliPath };
+        if (TryLoadFirstValidOpenCliDocument(repositoryRoot, directCandidates, out var directDocument))
         {
             return GetFromDocument(directDocument);
         }
 
-        var metadataPath = OpenCliArtifactLoadSupport.ResolveExistingPath(
-            repositoryRoot,
-            latestPaths?["metadataPath"]?.GetValue<string>());
-        if (metadataPath is not null)
+        var metadataRelativePath = latestPaths?["metadataPath"]?.GetValue<string>();
+        if (!string.IsNullOrWhiteSpace(metadataRelativePath))
         {
-            if (ArtifactFileSupport.TryLoadJsonObject(metadataPath, out var metadata) && metadata is not null
-                && OpenCliArtifactLoadSupport.TryLoadFirstValidOpenCliDocument(
-                    repositoryRoot,
-                    [
+            var metadataPath = Path.Combine(repositoryRoot, metadataRelativePath);
+            if (File.Exists(metadataPath))
+            {
+                var metadata = JsonNodeFileLoader.TryLoadJsonObject(metadataPath);
+                if (metadata is not null)
+                {
+                    var metadataCandidates = new[]
+                    {
                         metadata["artifacts"]?["opencliPath"]?.GetValue<string>(),
                         metadata["steps"]?["opencli"]?["path"]?.GetValue<string>(),
                         versionedOpenCliPath,
-                    ],
-                    out var metadataDocument,
-                    out _))
-            {
-                return GetFromDocument(metadataDocument);
+                    };
+                    if (TryLoadFirstValidOpenCliDocument(repositoryRoot, metadataCandidates, out var metadataDocument))
+                    {
+                        return GetFromDocument(metadataDocument);
+                    }
+                }
             }
         }
 
         return OpenCliMetricsResult.Empty;
+    }
+
+    private static bool TryLoadFirstValidOpenCliDocument(string repositoryRoot, string?[] candidates, out JsonObject? document)
+    {
+        document = null;
+        foreach (var candidate in candidates)
+        {
+            if (string.IsNullOrWhiteSpace(candidate))
+            {
+                continue;
+            }
+
+            var fullPath = Path.Combine(repositoryRoot, candidate);
+            if (File.Exists(fullPath) && OpenCliDocumentValidator.TryLoadValidDocument(fullPath, out var loaded, out _))
+            {
+                document = loaded;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void AddOptionMetrics(MetricsState state, JsonArray? options)

@@ -1,9 +1,7 @@
 namespace InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
 using InSpectra.Gen.Acquisition.Frameworks;
-using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 using InSpectra.Gen.Acquisition.Infrastructure.Paths;
-using InSpectra.Gen.Acquisition.StaticAnalysis.Artifacts;
 
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
@@ -111,16 +109,6 @@ internal sealed class StaticInstalledToolAnalysisSupport
 
         result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
         result["coverage"] = coverageJson;
-        if (!CommandInstallationSupport.TryWriteCrawlArtifactOrApplyFailure(
-            outputDirectory,
-            result,
-            CrawlArtifactBuilder.Build(
-                crawl.Documents.Count,
-                crawl.Captures,
-                StaticAnalysisCrawlArtifactSupport.BuildMetadata(staticCommands, coverageJson))))
-        {
-            return;
-        }
 
         if (crawl.Documents.Count == 0 && staticCommands.Count == 0)
         {

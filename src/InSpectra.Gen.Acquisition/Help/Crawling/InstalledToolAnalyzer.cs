@@ -1,6 +1,5 @@
 namespace InSpectra.Gen.Acquisition.Help.Crawling;
 
-using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
@@ -109,14 +108,6 @@ internal sealed class InstalledToolAnalyzer
                 phase: "crawl",
                 classification: "help-crawl-budget-exceeded",
                 string.Join(" ", guardrailFailureMessages));
-            return;
-        }
-
-        if (!CommandInstallationSupport.TryWriteCrawlArtifactOrApplyFailure(
-            outputDirectory,
-            result,
-            CrawlArtifactBuilder.Build(crawl.Documents.Count, crawl.Captures)))
-        {
             return;
         }
 

@@ -1,3 +1,4 @@
+using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime;
 using Microsoft.Extensions.Options;
 

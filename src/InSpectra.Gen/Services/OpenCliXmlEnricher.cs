@@ -1,6 +1,7 @@
 using System.Xml;
 using System.Xml.Linq;
 using InSpectra.Gen.Models;
+using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime;
 
 namespace InSpectra.Gen.Services;

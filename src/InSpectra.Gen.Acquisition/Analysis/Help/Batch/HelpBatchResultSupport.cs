@@ -1,9 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
-using InSpectra.Gen.Acquisition.OpenCli.Documents;
-
 using InSpectra.Gen.Acquisition.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using InSpectra.Gen.Acquisition.Analysis.Help.Models;
 
@@ -130,14 +128,24 @@ internal static class HelpBatchResultSupport
 
     private static bool HasUsableCrawlArtifact(string artifactDirectory, string? artifactName)
     {
-        var artifactPath = ArtifactFileSupport.ResolveOptionalArtifactPath(artifactDirectory, artifactName);
-        return artifactPath is not null && CrawlArtifactValidationSupport.TryLoadValidatedJsonObject(artifactPath, out _, out _);
+        if (string.IsNullOrWhiteSpace(artifactName))
+        {
+            return false;
+        }
+
+        var artifactPath = Path.Combine(artifactDirectory, artifactName);
+        return File.Exists(artifactPath) && JsonNodeFileLoader.TryLoadJsonObject(artifactPath) is not null;
     }
 
     private static bool HasUsableOpenCliArtifact(string artifactDirectory, string? artifactName)
     {
-        var artifactPath = ArtifactFileSupport.ResolveOptionalArtifactPath(artifactDirectory, artifactName);
-        return artifactPath is not null && OpenCliDocumentValidator.TryLoadValidDocument(artifactPath, out _, out _);
+        if (string.IsNullOrWhiteSpace(artifactName))
+        {
+            return false;
+        }
+
+        var artifactPath = Path.Combine(artifactDirectory, artifactName);
+        return File.Exists(artifactPath) && OpenCliDocumentValidator.TryLoadValidDocument(artifactPath, out _, out _);
     }
 
     private static void SetOptionalString(JsonObject target, string propertyName, string? value)

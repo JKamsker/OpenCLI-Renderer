@@ -1,7 +1,5 @@
 namespace InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
 
-using InSpectra.Gen.Acquisition.Analysis.CliFx.Artifacts;
-using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
@@ -125,17 +123,6 @@ internal sealed class CliFxInstalledToolAnalysisSupport
                 phase: "crawl",
                 classification: "clifx-crawl-budget-exceeded",
                 string.Join(" ", guardrailFailureMessages));
-            return;
-        }
-
-        if (!CommandInstallationSupport.TryWriteCrawlArtifactOrApplyFailure(
-            outputDirectory,
-            result,
-            CrawlArtifactBuilder.Build(
-                crawl.Documents.Count,
-                crawl.Captures,
-                CliFxCrawlArtifactSupport.BuildMetadata(staticCommands, coverageJson))))
-        {
             return;
         }
 

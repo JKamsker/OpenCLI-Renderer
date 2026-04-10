@@ -1,5 +1,7 @@
 using InSpectra.Gen.Acquisition.Analysis;
 
+using InSpectra.Gen.Acquisition.Runtime;
+
 namespace InSpectra.Gen.Runtime;
 
 public static class RenderRequestFactory

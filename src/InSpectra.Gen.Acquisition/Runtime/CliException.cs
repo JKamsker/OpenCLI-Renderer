@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Runtime;
+namespace InSpectra.Gen.Acquisition.Runtime;
 
 public class CliException(string message, string errorKind, int exitCode, IReadOnlyList<string>? details = null, Exception? innerException = null)
     : Exception(message, innerException)

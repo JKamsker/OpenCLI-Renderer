@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime;
 
 namespace InSpectra.Gen.Services;

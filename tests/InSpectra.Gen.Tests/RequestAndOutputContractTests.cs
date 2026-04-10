@@ -1,6 +1,7 @@
 using System.Text.Json.Nodes;
 using InSpectra.Gen.Commands.Generate;
 using InSpectra.Gen.Commands.Render;
+using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime;
 
 namespace InSpectra.Gen.Tests;
