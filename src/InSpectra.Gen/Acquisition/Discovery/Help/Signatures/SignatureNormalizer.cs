@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Help.Signatures;
+namespace InSpectra.Gen.Acquisition.Help.Signatures;
 
 internal static class SignatureNormalizer
 {

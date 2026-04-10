@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Packages;
+namespace InSpectra.Gen.Acquisition.Packages;
 
 
 using System.Xml.Linq;

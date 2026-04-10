@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Catalog.Delta;
+namespace InSpectra.Gen.Acquisition.Catalog.Delta;
 
 
 internal sealed record IndexDeltaSpectreConsoleCliOptions

@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Catalog.Delta;
+namespace InSpectra.Gen.Acquisition.Catalog.Delta;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
 using System.Text.Json;
 

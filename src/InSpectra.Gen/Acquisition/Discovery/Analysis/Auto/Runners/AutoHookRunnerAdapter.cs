@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Runners;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
 
-using InSpectra.Discovery.Tool.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Analysis.Hook;
 
 internal sealed class AutoHookRunnerAdapter : IAutoHookRunner
 {

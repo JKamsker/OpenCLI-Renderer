@@ -1,11 +1,11 @@
-using InSpectra.Discovery.Tool.Analysis.Tools;
-using InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
-using InSpectra.Discovery.Tool.Infrastructure.Host;
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
-using InSpectra.Discovery.Tool.Packages;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Packages;
 using InSpectra.Gen.Runtime;
-using DiscoveryRuntime = InSpectra.Discovery.Tool.Infrastructure.Host.Runtime;
+using DiscoveryRuntime = InSpectra.Gen.Acquisition.Infrastructure.Host.Runtime;
 
 namespace InSpectra.Gen.Services;
 

@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Queue.Planning;
+namespace InSpectra.Gen.Acquisition.Queue.Planning;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
-using InSpectra.Discovery.Tool.Queue.Models;
+using InSpectra.Gen.Acquisition.Queue.Models;
 
 using System.IO.Compression;
 using System.Text.Json.Nodes;

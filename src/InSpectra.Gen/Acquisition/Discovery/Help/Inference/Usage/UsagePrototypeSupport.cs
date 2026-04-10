@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Inference.Usage;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Usage;
 
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
 internal static class UsagePrototypeSupport
 {

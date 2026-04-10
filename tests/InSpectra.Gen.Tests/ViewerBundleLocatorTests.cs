@@ -191,7 +191,7 @@ public class ViewerBundleLocatorTests
 
     private sealed class TestViewerBundleLocator(
         ExecutableResolver executableResolver,
-        ProcessRunner processRunner,
+        IProcessRunner processRunner,
         ViewerBundleLocatorOptions options)
         : ViewerBundleLocator(executableResolver, processRunner, options)
     {

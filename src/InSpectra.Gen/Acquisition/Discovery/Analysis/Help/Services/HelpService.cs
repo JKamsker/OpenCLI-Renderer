@@ -1,19 +1,21 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Services;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Services;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Help.OpenCli;
 
-using InSpectra.Discovery.Tool.Help.Crawling;
+using InSpectra.Gen.Acquisition.Help.Crawling;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 internal sealed class HelpService
 {
     private static readonly NonSpectreAnalysisExecutionDefinition Definition = new(
-        AnalysisMode: "help",
+        AnalysisMode: AnalysisMode.Help,
         TempRootPrefix: "inspectra-help",
         TimeoutLabel: "Help analysis");
 

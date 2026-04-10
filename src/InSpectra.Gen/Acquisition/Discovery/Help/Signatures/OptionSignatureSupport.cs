@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Signatures;
+namespace InSpectra.Gen.Acquisition.Help.Signatures;
 
-using InSpectra.Discovery.Tool.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage;
 
 internal static class OptionSignatureSupport
 {

@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.OpenCli;
+namespace InSpectra.Gen.Acquisition.Analysis.OpenCli;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using System.Text.Json.Nodes;
 

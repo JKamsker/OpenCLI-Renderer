@@ -1,16 +1,16 @@
-namespace InSpectra.Discovery.Tool.Queue.Backfill;
+namespace InSpectra.Gen.Acquisition.Queue.Backfill;
 
-using InSpectra.Discovery.Tool.Queue.Planning;
+using InSpectra.Gen.Acquisition.Queue.Planning;
 
-using InSpectra.Discovery.Tool.Catalog.Delta;
+using InSpectra.Gen.Acquisition.Catalog.Delta;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Queue.Models;
+using InSpectra.Gen.Acquisition.Queue.Models;
 
 using System.Text.Json;
 using System.Text.Json.Nodes;

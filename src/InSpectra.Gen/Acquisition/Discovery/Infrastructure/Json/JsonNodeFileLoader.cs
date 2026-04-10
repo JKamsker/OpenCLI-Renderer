@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Infrastructure.Json;
+namespace InSpectra.Gen.Acquisition.Infrastructure.Json;
 
 using System.Text.Json.Nodes;
 

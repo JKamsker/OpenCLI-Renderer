@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Help.OpenCli;
+namespace InSpectra.Gen.Acquisition.Help.OpenCli;
 
-using InSpectra.Discovery.Tool.OpenCli.Structure;
+using InSpectra.Gen.Acquisition.OpenCli.Structure;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
 internal sealed class CommandTreeBuilder
 {

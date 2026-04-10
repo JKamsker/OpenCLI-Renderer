@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Catalog;
+namespace InSpectra.Gen.Acquisition.Catalog;
 
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;

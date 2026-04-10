@@ -1,7 +1,7 @@
-namespace InSpectra.Discovery.Tool.Docs.Services;
+namespace InSpectra.Gen.Acquisition.Docs.Services;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
-using InSpectra.Discovery.Tool.OpenCli.Artifacts;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.OpenCli.Artifacts;
 
 using System.Text.Json.Nodes;
 

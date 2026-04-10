@@ -1,7 +1,7 @@
-namespace InSpectra.Discovery.Tool.Help.Parsing;
+namespace InSpectra.Gen.Acquisition.Help.Parsing;
 
-using InSpectra.Discovery.Tool.Help.Documents;
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
 using System.Text.RegularExpressions;
 

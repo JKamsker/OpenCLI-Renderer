@@ -1,8 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Crawling;
-using InSpectra.Discovery.Tool.Help.Crawling;
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Crawling;
+using InSpectra.Gen.Acquisition.Help.Crawling;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using Xunit;
 

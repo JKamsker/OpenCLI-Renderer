@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Catalog.Delta.SpectreConsole;
+namespace InSpectra.Gen.Acquisition.Catalog.Delta.SpectreConsole;
 
-using InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+using InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
 
 
 internal sealed record SpectreConsoleCliDeltaSnapshot(

@@ -1,5 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Hook;
+namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
+using System.Diagnostics;
 using System.Text.Json;
 
 internal static class HookCaptureDeserializer
@@ -11,8 +12,9 @@ internal static class HookCaptureDeserializer
             var json = File.ReadAllText(path);
             return JsonSerializer.Deserialize<HookCaptureResult>(json);
         }
-        catch
+        catch (Exception ex) when (ex is IOException or JsonException)
         {
+            Trace.TraceWarning($"Failed to deserialize hook capture from '{path}': {ex.Message}");
             return null;
         }
     }

@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.Inspection;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.Models;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
 
 internal static class StaticCommandDefinitionSupport
 {

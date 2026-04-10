@@ -1,22 +1,24 @@
-namespace InSpectra.Discovery.Tool.Promotion.Services;
+namespace InSpectra.Gen.Acquisition.Promotion.Services;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Indexing;
+using InSpectra.Gen.Acquisition.Indexing;
 
-using InSpectra.Discovery.Tool.Promotion.State;
+using InSpectra.Gen.Acquisition.Promotion.State;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Promotion.Results;
+using InSpectra.Gen.Acquisition.Promotion.Results;
 
-using InSpectra.Discovery.Tool.Promotion.Artifacts;
+using InSpectra.Gen.Acquisition.Promotion.Artifacts;
 
-using InSpectra.Discovery.Tool.Promotion.Planning;
+using InSpectra.Gen.Acquisition.Promotion.Planning;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -53,7 +55,7 @@ internal sealed class PromotionApplyCommandService
         var summary = new JsonObject
         {
             ["schemaVersion"] = 1,
-            ["batchId"] = plan.BatchId,
+            [ResultKey.BatchId] = plan.BatchId,
             ["targetBranch"] = plan.TargetBranch,
             ["promotedAt"] = now.ToString("O"),
             ["expectedCount"] = plan.Items.Count,
@@ -75,7 +77,7 @@ internal sealed class PromotionApplyCommandService
                 ? resultEntry!.Result
                 : PromotionFailureResultSupport.NewSyntheticFailureResult(
                     item,
-                    item["attempt"]?.GetValue<int?>() ?? 1,
+                    item[ResultKey.Attempt]?.GetValue<int?>() ?? 1,
                     "missing-result-artifact",
                     "No result artifact was uploaded for this matrix item.",
                     plan.BatchId ?? string.Empty,
@@ -87,7 +89,7 @@ internal sealed class PromotionApplyCommandService
                 summary["missingCount"] = (summary["missingCount"]?.GetValue<int>() ?? 0) + 1;
             }
 
-            if (string.Equals(result["disposition"]?.GetValue<string>(), "success", StringComparison.Ordinal))
+            if (string.Equals(result[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal))
             {
                 var validatedSuccess = PromotionSuccessArtifactValidationSupport.Validate(
                     item,
@@ -109,7 +111,7 @@ internal sealed class PromotionApplyCommandService
             var existingPackageIndex = await JsonNodeFileLoader.TryLoadJsonObjectAsync(existingPackageIndexPath, cancellationToken);
 
             JsonObject? indexedPaths = null;
-            if (string.Equals(result["disposition"]?.GetValue<string>(), "success", StringComparison.Ordinal))
+            if (string.Equals(result[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal))
             {
                 try
                 {
@@ -124,7 +126,7 @@ internal sealed class PromotionApplyCommandService
                 {
                     result = PromotionFailureResultSupport.NewSyntheticFailureResult(
                         item,
-                        result["attempt"]?.GetValue<int?>() ?? item["attempt"]?.GetValue<int?>() ?? 1,
+                        result[ResultKey.Attempt]?.GetValue<int?>() ?? item[ResultKey.Attempt]?.GetValue<int?>() ?? 1,
                         "invalid-success-artifact",
                         $"Success artifacts could not be promoted: {ex.Message}",
                         plan.BatchId ?? string.Empty,
@@ -133,7 +135,7 @@ internal sealed class PromotionApplyCommandService
                 }
             }
 
-            if (!string.Equals(result["disposition"]?.GetValue<string>(), "success", StringComparison.Ordinal))
+            if (!string.Equals(result[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal))
             {
                 PromotionIndexCleanupSupport.RemoveIndexedVersionArtifacts(packagesRoot, packageId, version);
             }
@@ -145,16 +147,16 @@ internal sealed class PromotionApplyCommandService
             PromotionSummarySupport.RecordSuccessItem(summary, existingPackageIndex, result);
             PromotionSummarySupport.UpdatePackageChangeSummary(summary, existingPackageIndex, result);
 
-            if (!string.Equals(stateRecord["currentStatus"]?.GetValue<string>(), "success", StringComparison.Ordinal))
+            if (!string.Equals(stateRecord["currentStatus"]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal))
             {
                 ((JsonArray)summary["nonSuccessItems"]!).Add(new JsonObject
                 {
                     ["packageId"] = result["packageId"]?.GetValue<string>(),
                     ["version"] = result["version"]?.GetValue<string>(),
                     ["status"] = stateRecord["currentStatus"]?.GetValue<string>(),
-                    ["disposition"] = result["disposition"]?.GetValue<string>(),
+                    [ResultKey.Disposition] = result[ResultKey.Disposition]?.GetValue<string>(),
                     ["phase"] = result["phase"]?.GetValue<string>(),
-                    ["classification"] = result["classification"]?.GetValue<string>(),
+                    [ResultKey.Classification] = result[ResultKey.Classification]?.GetValue<string>(),
                     ["reason"] = PromotionFailureResultSupport.GetNonSuccessReason(result, stateRecord),
                 });
             }
@@ -177,7 +179,7 @@ internal sealed class PromotionApplyCommandService
             exitCode = await output.WriteSuccessAsync(
                 new
                 {
-                    batchId = summary["batchId"]?.GetValue<string>(),
+                    batchId = summary[ResultKey.BatchId]?.GetValue<string>(),
                     targetBranch = summary["targetBranch"]?.GetValue<string>(),
                     successCount = summary["successCount"]?.GetValue<int>() ?? 0,
                     terminalNegativeCount = summary["terminalNegativeCount"]?.GetValue<int>() ?? 0,
@@ -187,7 +189,7 @@ internal sealed class PromotionApplyCommandService
                     summaryOutputPath = resolvedSummaryOutputPath,
                 },
                 [
-                    new SummaryRow("Batch", summary["batchId"]?.GetValue<string>() ?? string.Empty),
+                    new SummaryRow("Batch", summary[ResultKey.BatchId]?.GetValue<string>() ?? string.Empty),
                     new SummaryRow("Success", (summary["successCount"]?.GetValue<int>() ?? 0).ToString()),
                     new SummaryRow("Terminal negative", (summary["terminalNegativeCount"]?.GetValue<int>() ?? 0).ToString()),
                     new SummaryRow("Retryable failure", (summary["retryableFailureCount"]?.GetValue<int>() ?? 0).ToString()),

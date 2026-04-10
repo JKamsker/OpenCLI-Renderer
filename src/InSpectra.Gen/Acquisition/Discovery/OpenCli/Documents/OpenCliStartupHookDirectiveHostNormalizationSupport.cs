@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.OpenCli.Documents;
+namespace InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using System.Text.Json.Nodes;
 

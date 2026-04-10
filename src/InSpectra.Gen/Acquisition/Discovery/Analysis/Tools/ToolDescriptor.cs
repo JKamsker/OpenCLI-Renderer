@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.Tools;
+namespace InSpectra.Gen.Acquisition.Analysis.Tools;
 
 
 internal sealed record ToolDescriptor(

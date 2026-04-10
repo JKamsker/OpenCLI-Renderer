@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.OpenCli;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.Inspection;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.Models;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
 
 using System.Text.Json.Nodes;
 

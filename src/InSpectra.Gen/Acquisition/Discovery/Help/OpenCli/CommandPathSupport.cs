@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.OpenCli;
+namespace InSpectra.Gen.Acquisition.Help.OpenCli;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
 internal static class CommandPathSupport
 {

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.App.Summaries;
+namespace InSpectra.Gen.Acquisition.App.Summaries;
 
 
 internal sealed record IndexDeltaSpectreConsoleCliCommandSummary(

@@ -1,16 +1,18 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Selection;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Selection;
 
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 internal static class AutoModeSupport
 {
     public static IReadOnlyList<AutoAnalysisAttempt> BuildAttemptPlan(ToolDescriptor descriptor)
     {
-        if (string.Equals(descriptor.PreferredAnalysisMode, "help", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(descriptor.PreferredAnalysisMode, AnalysisMode.Help, StringComparison.OrdinalIgnoreCase))
         {
-            return [new AutoAnalysisAttempt("help", null)];
+            return [new AutoAnalysisAttempt(AnalysisMode.Help, null)];
         }
 
         var attempts = new List<AutoAnalysisAttempt>();
@@ -19,33 +21,33 @@ internal static class AutoModeSupport
         {
             if (provider.SupportsCliFxAnalysis)
             {
-                attempts.Add(new AutoAnalysisAttempt("clifx", provider.Name));
+                attempts.Add(new AutoAnalysisAttempt(AnalysisMode.CliFx, provider.Name));
             }
 
             if (provider.SupportsHookAnalysis && hookFrameworks.Contains(provider.Name))
             {
-                attempts.Add(new AutoAnalysisAttempt("hook", provider.Name));
+                attempts.Add(new AutoAnalysisAttempt(AnalysisMode.Hook, provider.Name));
             }
 
             if (provider.StaticAnalysisAdapter is not null)
             {
-                attempts.Add(new AutoAnalysisAttempt("static", provider.Name));
+                attempts.Add(new AutoAnalysisAttempt(AnalysisMode.Static, provider.Name));
             }
         }
 
         if (attempts.Count == 0)
         {
-            return [new AutoAnalysisAttempt("help", null)];
+            return [new AutoAnalysisAttempt(AnalysisMode.Help, null)];
         }
 
-        attempts.Add(new AutoAnalysisAttempt("help", null));
+        attempts.Add(new AutoAnalysisAttempt(AnalysisMode.Help, null));
         return attempts;
     }
 
     public static string ResolveFallbackMode(ToolDescriptor descriptor)
     {
         var attempts = BuildAttemptPlan(descriptor);
-        return attempts.Count == 0 ? "help" : attempts[0].Mode;
+        return attempts.Count == 0 ? AnalysisMode.Help : attempts[0].Mode;
     }
 
     private static HashSet<string> ResolveHookFrameworks(ToolDescriptor descriptor)

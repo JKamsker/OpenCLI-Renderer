@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Help.Inference.Descriptions;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Descriptions;
 
 internal static class RequiredDescriptionSupport
 {

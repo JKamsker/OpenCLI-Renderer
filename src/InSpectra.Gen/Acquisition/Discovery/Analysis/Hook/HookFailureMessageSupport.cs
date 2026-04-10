@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Hook;
+namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using System.Text;
 

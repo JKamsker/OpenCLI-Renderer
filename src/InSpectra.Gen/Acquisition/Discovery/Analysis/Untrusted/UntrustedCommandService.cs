@@ -1,16 +1,16 @@
-namespace InSpectra.Discovery.Tool.Analysis.Untrusted;
+namespace InSpectra.Gen.Acquisition.Analysis.Untrusted;
 
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Analysis.Execution;
+using InSpectra.Gen.Acquisition.Analysis.Execution;
 
-using InSpectra.Discovery.Tool.Analysis.Output;
+using InSpectra.Gen.Acquisition.Analysis.Output;
 
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
 
 using System.Diagnostics;
 using System.Text.Json.Nodes;

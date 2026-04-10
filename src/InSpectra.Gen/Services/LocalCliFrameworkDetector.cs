@@ -1,4 +1,4 @@
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 
 namespace InSpectra.Gen.Services;
 

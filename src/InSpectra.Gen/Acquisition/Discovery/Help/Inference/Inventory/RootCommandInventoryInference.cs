@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Help.Inference.Inventory;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Inventory;
 
-using InSpectra.Discovery.Tool.Help.Documents;
-using InSpectra.Discovery.Tool.Help.Parsing;
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Parsing;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
 internal static class RootCommandInventoryInference
 {

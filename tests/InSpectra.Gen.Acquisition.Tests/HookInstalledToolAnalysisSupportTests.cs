@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Analysis.Hook;
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using System.Text.Json;
 using System.Text.Json.Nodes;

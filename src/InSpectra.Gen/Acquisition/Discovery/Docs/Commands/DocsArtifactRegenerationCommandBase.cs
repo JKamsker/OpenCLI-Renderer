@@ -1,14 +1,14 @@
-namespace InSpectra.Discovery.Tool.Docs.Commands;
+namespace InSpectra.Gen.Acquisition.Docs.Commands;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.OpenCli.Artifacts;
+using InSpectra.Gen.Acquisition.OpenCli.Artifacts;
 
-using InSpectra.Discovery.Tool.Infrastructure.Settings;
+using InSpectra.Gen.Acquisition.Infrastructure.Settings;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

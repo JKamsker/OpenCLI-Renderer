@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using System.Text.Json.Nodes;
 using Xunit;

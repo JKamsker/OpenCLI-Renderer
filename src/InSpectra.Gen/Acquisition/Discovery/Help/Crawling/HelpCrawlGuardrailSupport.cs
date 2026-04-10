@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Help.Crawling;
+namespace InSpectra.Gen.Acquisition.Help.Crawling;
 
 internal static class HelpCrawlGuardrailSupport
 {

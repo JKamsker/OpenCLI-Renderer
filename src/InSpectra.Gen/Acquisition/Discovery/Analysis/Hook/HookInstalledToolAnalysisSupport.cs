@@ -1,14 +1,14 @@
-namespace InSpectra.Discovery.Tool.Analysis.Hook;
+namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
-using InSpectra.Discovery.Tool.Frameworks;
-using InSpectra.Discovery.Tool.Help.Inference.Text;
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Frameworks;
+using InSpectra.Gen.Acquisition.Help.Inference.Text;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using System.Diagnostics;
 using System.Reflection;

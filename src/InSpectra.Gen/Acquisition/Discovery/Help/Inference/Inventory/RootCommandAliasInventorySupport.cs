@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Inference.Inventory;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Inventory;
 
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
 internal static class RootCommandAliasInventorySupport
 {

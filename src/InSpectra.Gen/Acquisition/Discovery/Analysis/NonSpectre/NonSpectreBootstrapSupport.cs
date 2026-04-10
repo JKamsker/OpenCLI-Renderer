@@ -1,10 +1,12 @@
-namespace InSpectra.Discovery.Tool.Analysis.NonSpectre;
+namespace InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Packages;
+using InSpectra.Gen.Acquisition.Packages;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -40,8 +42,8 @@ internal static class NonSpectreBootstrapSupport
         result["catalogEntryUrl"] = registrationLeaf.CatalogEntryUrl;
         result["packageContentUrl"] = registrationLeaf.PackageContent;
         result["publishedAt"] = registrationLeaf.Published?.ToUniversalTime().ToString("O");
-        result["nugetTitle"] = catalogLeaf.Title;
-        result["nugetDescription"] = catalogLeaf.Description;
+        result[ResultKey.NugetTitle] = catalogLeaf.Title;
+        result[ResultKey.NugetDescription] = catalogLeaf.Description;
     }
 
     private static async Task<ResolvedToolCommandInfo> ResolveCommandInfoAsync(

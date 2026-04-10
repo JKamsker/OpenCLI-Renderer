@@ -1,20 +1,20 @@
-namespace InSpectra.Discovery.Tool.Help.Crawling;
+namespace InSpectra.Gen.Acquisition.Help.Crawling;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Infrastructure.Artifacts;
+using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 
-using InSpectra.Discovery.Tool.Help.OpenCli;
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Discovery.Tool.Analysis;
-using InSpectra.Discovery.Tool.Analysis.OpenCli;
+using InSpectra.Gen.Acquisition.Analysis;
+using InSpectra.Gen.Acquisition.Analysis.OpenCli;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 

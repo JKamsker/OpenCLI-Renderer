@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Help.OpenCli;
+namespace InSpectra.Gen.Acquisition.Help.OpenCli;
 
-using InSpectra.Discovery.Tool.Help.Inference.Descriptions;
+using InSpectra.Gen.Acquisition.Help.Inference.Descriptions;
 
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
 using System.Text.Json.Nodes;
 
@@ -19,7 +19,7 @@ internal sealed class OptionNodeBuilder
 
         var optionItems = helpDocument.Options.Count > 0
             ? helpDocument.Options
-            : InSpectra.Discovery.Tool.Help.Inference.Usage.UsageOptionInferenceSupport.ExtractOptions(
+            : InSpectra.Gen.Acquisition.Help.Inference.Usage.UsageOptionInferenceSupport.ExtractOptions(
                 rootCommandName,
                 commandPath,
                 helpDocument.UsageLines);

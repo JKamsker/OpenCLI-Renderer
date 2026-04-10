@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Runners;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Services;
+using InSpectra.Gen.Acquisition.Analysis.Help.Services;
 
-using InSpectra.Discovery.Tool.Analysis.Help;
+using InSpectra.Gen.Acquisition.Analysis.Help;
 
 internal sealed class AutoHelpRunnerAdapter : IAutoHelpRunner
 {

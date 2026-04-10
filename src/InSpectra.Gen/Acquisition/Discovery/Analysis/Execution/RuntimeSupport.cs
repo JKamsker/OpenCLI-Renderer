@@ -1,9 +1,9 @@
-namespace InSpectra.Discovery.Tool.Analysis.Execution;
+namespace InSpectra.Gen.Acquisition.Analysis.Execution;
 
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 internal static class RuntimeSupport
 {

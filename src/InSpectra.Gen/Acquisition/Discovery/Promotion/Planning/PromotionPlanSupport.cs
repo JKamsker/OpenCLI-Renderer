@@ -1,11 +1,11 @@
-namespace InSpectra.Discovery.Tool.Promotion.Planning;
+namespace InSpectra.Gen.Acquisition.Promotion.Planning;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Batch;
+using InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
 
-using InSpectra.Discovery.Tool.Analysis.Help;
+using InSpectra.Gen.Acquisition.Analysis.Help;
 using System.Text.Json.Nodes;
 
 internal static class PromotionPlanSupport

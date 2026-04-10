@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Catalog.Indexing;
+namespace InSpectra.Gen.Acquisition.Catalog.Indexing;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
 using System.Text.Json;
 

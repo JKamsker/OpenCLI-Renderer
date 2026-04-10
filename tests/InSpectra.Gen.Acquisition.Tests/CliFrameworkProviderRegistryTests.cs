@@ -1,8 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Frameworks;
-using InSpectra.Discovery.Tool.NuGet;
-using InSpectra.Discovery.Tool.StaticAnalysis.Attributes;
+using InSpectra.Gen.Acquisition.Frameworks;
+using InSpectra.Gen.Acquisition.NuGet;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
 
 using Xunit;
 

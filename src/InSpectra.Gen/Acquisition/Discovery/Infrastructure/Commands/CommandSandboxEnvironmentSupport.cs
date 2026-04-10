@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Infrastructure.Commands;
+namespace InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 internal static class CommandSandboxEnvironmentSupport
 {

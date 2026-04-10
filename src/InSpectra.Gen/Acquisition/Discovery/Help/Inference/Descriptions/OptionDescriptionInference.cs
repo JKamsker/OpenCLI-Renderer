@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Inference.Descriptions;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Descriptions;
 
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
 internal static class OptionDescriptionInference
 {

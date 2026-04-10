@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Docs.Commands;
+namespace InSpectra.Gen.Acquisition.Docs.Commands;
 
-using InSpectra.Discovery.Tool.Help.Artifacts;
+using InSpectra.Gen.Acquisition.Help.Artifacts;
 
-using InSpectra.Discovery.Tool.OpenCli.Artifacts;
+using InSpectra.Gen.Acquisition.OpenCli.Artifacts;
 
 internal sealed class DocsRegenerateHelpCrawlsCommand : DocsArtifactRegenerationCommandBase
 {

@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Catalog.Delta;
+namespace InSpectra.Gen.Acquisition.Catalog.Delta;
 
-using InSpectra.Discovery.Tool.Catalog.Delta.SpectreConsole;
+using InSpectra.Gen.Acquisition.Catalog.Delta.SpectreConsole;
 
-using InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+using InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
 internal static class DeltaStateProjection
 {

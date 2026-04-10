@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Catalog.Delta;
+namespace InSpectra.Gen.Acquisition.Catalog.Delta;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
 
 internal sealed record IndexDeltaOptions

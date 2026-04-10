@@ -15,7 +15,7 @@ public sealed class ViewerBundleLocatorOptions
 
 public class ViewerBundleLocator(
     ExecutableResolver executableResolver,
-    ProcessRunner processRunner,
+    IProcessRunner processRunner,
     ViewerBundleLocatorOptions options)
 {
     private const string FrontendBuildHint = "Run `npm ci` and `npm run build` in `src/InSpectra.UI` to build the viewer bundle.";

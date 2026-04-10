@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Runners;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
 
 internal interface IAutoNativeRunner
 {

@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.Inspection;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 internal sealed class StaticAnalysisRuntime : CommandRuntime
 {

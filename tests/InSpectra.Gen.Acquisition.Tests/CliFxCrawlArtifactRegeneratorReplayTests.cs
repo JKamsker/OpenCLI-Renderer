@@ -1,8 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Artifacts;
-using InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Artifacts;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using System.Text.Json.Nodes;
 

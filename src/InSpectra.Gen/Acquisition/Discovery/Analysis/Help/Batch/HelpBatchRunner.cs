@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Batch;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Services;
+using InSpectra.Gen.Acquisition.Analysis.Help.Services;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Models;
+using InSpectra.Gen.Acquisition.Analysis.Help.Models;
 
 internal sealed class HelpBatchRunner : IHelpBatchRunner
 {

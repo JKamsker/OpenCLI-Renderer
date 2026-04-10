@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Queue.Models;
+namespace InSpectra.Gen.Acquisition.Queue.Models;
 
 internal sealed record DotnetRuntimeRequirement(
     string Name,

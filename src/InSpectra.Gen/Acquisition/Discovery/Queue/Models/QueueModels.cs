@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Queue.Models;
+namespace InSpectra.Gen.Acquisition.Queue.Models;
 
-using InSpectra.Discovery.Tool.Catalog.Delta;
+using InSpectra.Gen.Acquisition.Catalog.Delta;
 
 
 internal sealed record QueueDispatchBatch(

@@ -1,13 +1,15 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Batch;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Discovery.Tool.Promotion.Artifacts;
-using InSpectra.Discovery.Tool.Infrastructure.Artifacts;
+using InSpectra.Gen.Acquisition.Promotion.Artifacts;
+using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Models;
+using InSpectra.Gen.Acquisition.Analysis.Help.Models;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -57,9 +59,9 @@ internal static class HelpBatchResultSupport
         var openCliExists = HasUsableOpenCliArtifact(itemOutputRoot, openCliArtifactName);
         var crawlExists = !HelpBatchArtifactSupport.RequiresCrawlArtifact(item.AnalysisMode)
             || HasUsableCrawlArtifact(itemOutputRoot, crawlArtifactName);
-        var disposition = result?["disposition"]?.GetValue<string>();
+        var disposition = result?[ResultKey.Disposition]?.GetValue<string>();
         var success = exitCode == 0
-                      && string.Equals(disposition, "success", StringComparison.Ordinal)
+                      && string.Equals(disposition, AnalysisDisposition.Success, StringComparison.Ordinal)
                       && openCliExists
                       && crawlExists;
         var snapshot = snapshotLookup.TryGetValue(item.PackageId, out var value) ? value : null;
@@ -100,14 +102,14 @@ internal static class HelpBatchResultSupport
             ["totalDownloads"] = result?["totalDownloads"]?.GetValue<long?>() ?? item.TotalDownloads ?? snapshot?.TotalDownloads,
         };
 
-        SetOptionalString(expectedItem, "cliFramework", item.CliFramework ?? result?["cliFramework"]?.GetValue<string>());
+        SetOptionalString(expectedItem, ResultKey.CliFramework, item.CliFramework ?? result?[ResultKey.CliFramework]?.GetValue<string>());
         return expectedItem;
     }
 
     private static string BuildFailureSummary(HelpBatchItem item, JsonObject? result, string? disposition, bool openCliExists, bool crawlExists)
     {
-        var failureMessage = result?["failureMessage"]?.GetValue<string>();
-        if (!string.Equals(disposition, "success", StringComparison.Ordinal))
+        var failureMessage = result?[ResultKey.FailureMessage]?.GetValue<string>();
+        if (!string.Equals(disposition, AnalysisDisposition.Success, StringComparison.Ordinal))
         {
             return $"{item.PackageId} {item.Version}: {disposition ?? "missing-result"} {failureMessage ?? "No failure message was recorded."}";
         }

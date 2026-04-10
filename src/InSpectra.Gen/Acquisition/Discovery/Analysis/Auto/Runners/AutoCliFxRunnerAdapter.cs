@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Runners;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx;
+using InSpectra.Gen.Acquisition.Analysis.CliFx;
 
 internal sealed class AutoCliFxRunnerAdapter : IAutoCliFxRunner
 {

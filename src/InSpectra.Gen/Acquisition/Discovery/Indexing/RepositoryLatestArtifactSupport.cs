@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Indexing;
+namespace InSpectra.Gen.Acquisition.Indexing;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 
 using System.Text.Json.Nodes;

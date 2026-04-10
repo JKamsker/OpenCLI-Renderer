@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Docs.Services;
+namespace InSpectra.Gen.Acquisition.Docs.Services;
 
-using InSpectra.Discovery.Tool.App.Machine;
-using InSpectra.Discovery.Tool.Infrastructure.Host;
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.App.Machine;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 internal sealed class DocsPartialPlanCommandService
 {

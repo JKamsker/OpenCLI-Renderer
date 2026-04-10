@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Inference.Descriptions;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Descriptions;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
 using System.Text.RegularExpressions;
 

@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Infrastructure.Host;
+namespace InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
 using System.Net;
 

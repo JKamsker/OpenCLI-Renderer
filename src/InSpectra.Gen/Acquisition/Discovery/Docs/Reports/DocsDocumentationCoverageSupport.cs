@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Docs.Reports;
+namespace InSpectra.Gen.Acquisition.Docs.Reports;
 
 using System.Text.Json.Nodes;
 

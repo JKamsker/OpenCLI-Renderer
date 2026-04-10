@@ -1,4 +1,6 @@
-namespace InSpectra.Discovery.Tool.Promotion.Results;
+namespace InSpectra.Gen.Acquisition.Promotion.Results;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -8,7 +10,7 @@ internal static class PromotionSummarySupport
     {
         switch (status)
         {
-            case "success":
+            case AnalysisDisposition.Success:
                 summary["successCount"] = (summary["successCount"]?.GetValue<int>() ?? 0) + 1;
                 break;
             case "terminal-negative":
@@ -25,7 +27,7 @@ internal static class PromotionSummarySupport
 
     public static void UpdatePackageChangeSummary(JsonObject summary, JsonObject? existingPackageIndex, JsonObject result)
     {
-        if (!string.Equals(result["disposition"]?.GetValue<string>(), "success", StringComparison.Ordinal))
+        if (!string.Equals(result[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal))
         {
             return;
         }
@@ -55,7 +57,7 @@ internal static class PromotionSummarySupport
 
     public static void RecordSuccessItem(JsonObject summary, JsonObject? existingPackageIndex, JsonObject result)
     {
-        if (!string.Equals(result["disposition"]?.GetValue<string>(), "success", StringComparison.Ordinal))
+        if (!string.Equals(result[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal))
         {
             return;
         }

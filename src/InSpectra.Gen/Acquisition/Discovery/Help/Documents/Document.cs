@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Help.Documents;
+namespace InSpectra.Gen.Acquisition.Help.Documents;
 
 
 internal sealed record Document(

@@ -1,7 +1,7 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.Execution;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Crawling;
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Crawling;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 internal sealed class CliFxRuntimeCompatibilityDetector
 {

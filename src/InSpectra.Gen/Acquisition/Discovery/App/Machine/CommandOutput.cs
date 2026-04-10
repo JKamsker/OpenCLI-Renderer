@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.App.Machine;
+namespace InSpectra.Gen.Acquisition.App.Machine;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
 using System.Text.Json;
 

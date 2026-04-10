@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Introspection;
+namespace InSpectra.Gen.Acquisition.Analysis.Introspection;
 
-using InSpectra.Discovery.Tool.Analysis.Execution;
+using InSpectra.Gen.Acquisition.Analysis.Execution;
 
 using System.Text.Json.Nodes;
 

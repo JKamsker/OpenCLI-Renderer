@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Frameworks;
+namespace InSpectra.Gen.Acquisition.Frameworks;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.Attributes;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
 internal static class CliFrameworkProviderRegistry
 {

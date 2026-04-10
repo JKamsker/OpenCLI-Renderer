@@ -1,3 +1,5 @@
+using InSpectra.Discovery.Tool.Analysis;
+
 namespace InSpectra.Gen.Runtime;
 
 public static class RenderRequestFactory
@@ -223,12 +225,12 @@ public static class RenderRequestFactory
 
         return normalized switch
         {
-            "native" => OpenCliMode.Native,
-            "auto" => OpenCliMode.Auto,
-            "help" => OpenCliMode.Help,
-            "clifx" => OpenCliMode.CliFx,
-            "static" => OpenCliMode.Static,
-            "hook" => OpenCliMode.Hook,
+            AnalysisMode.Native => OpenCliMode.Native,
+            AnalysisMode.Auto => OpenCliMode.Auto,
+            AnalysisMode.Help => OpenCliMode.Help,
+            AnalysisMode.CliFx => OpenCliMode.CliFx,
+            AnalysisMode.Static => OpenCliMode.Static,
+            AnalysisMode.Hook => OpenCliMode.Hook,
             _ => throw new CliUsageException("`--opencli-mode` must be `native`, `auto`, `help`, `clifx`, `static`, or `hook`."),
         };
     }

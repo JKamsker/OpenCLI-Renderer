@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Selection;
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Selection;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
 
 using Xunit;
 

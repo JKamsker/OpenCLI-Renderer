@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Infrastructure.Settings;
+namespace InSpectra.Gen.Acquisition.Infrastructure.Settings;
 
 using Spectre.Console.Cli;
 

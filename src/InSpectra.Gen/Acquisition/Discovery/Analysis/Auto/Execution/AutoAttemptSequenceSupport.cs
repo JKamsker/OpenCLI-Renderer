@@ -1,9 +1,11 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Execution;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Execution;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Results;
-using InSpectra.Discovery.Tool.Analysis.Auto.Runners;
-using InSpectra.Discovery.Tool.Analysis.Auto.Selection;
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Results;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Selection;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -100,8 +102,8 @@ internal static class AutoAttemptSequenceSupport
             {
                 ["mode"] = attempt.Mode,
                 ["framework"] = attempt.Framework,
-                ["disposition"] = result["disposition"]?.GetValue<string>(),
-                ["classification"] = result["classification"]?.GetValue<string>(),
+                [ResultKey.Disposition] = result[ResultKey.Disposition]?.GetValue<string>(),
+                [ResultKey.Classification] = result[ResultKey.Classification]?.GetValue<string>(),
             });
     }
 }

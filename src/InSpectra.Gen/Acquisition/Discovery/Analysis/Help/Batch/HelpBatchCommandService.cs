@@ -1,12 +1,14 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Batch;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Models;
+using InSpectra.Gen.Acquisition.Analysis.Help.Models;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -71,9 +73,9 @@ internal sealed class HelpBatchCommandService
 
         foreach (var item in plan.Items)
         {
-            if (!string.Equals(item.AnalysisMode, "help", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(item.AnalysisMode, "clifx", StringComparison.OrdinalIgnoreCase)
-                && !string.Equals(item.AnalysisMode, "static", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(item.AnalysisMode, AnalysisMode.Help, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(item.AnalysisMode, AnalysisMode.CliFx, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(item.AnalysisMode, AnalysisMode.Static, StringComparison.OrdinalIgnoreCase))
             {
                 skippedItems.Add(HelpBatchResultSupport.CreateSkippedItem(
                     item,
@@ -156,9 +158,9 @@ internal sealed class HelpBatchCommandService
     {
         var artifactName = HelpBatchArtifactSupport.ResolveArtifactName(item);
         var itemOutputRoot = Path.Combine(downloadRoot, artifactName);
-        var exitCode = string.Equals(item.AnalysisMode, "clifx", StringComparison.OrdinalIgnoreCase)
+        var exitCode = string.Equals(item.AnalysisMode, AnalysisMode.CliFx, StringComparison.OrdinalIgnoreCase)
             ? await _cliFxRunner.RunAsync(item, itemOutputRoot, batchId, source, timeouts, cancellationToken)
-            : string.Equals(item.AnalysisMode, "static", StringComparison.OrdinalIgnoreCase)
+            : string.Equals(item.AnalysisMode, AnalysisMode.Static, StringComparison.OrdinalIgnoreCase)
                 ? await _staticRunner.RunAsync(item, itemOutputRoot, batchId, source, timeouts, cancellationToken)
                 : await _helpRunner.RunAsync(item, itemOutputRoot, batchId, source, timeouts, cancellationToken);
         return HelpBatchResultSupport.CreateOutcome(item, artifactName, itemOutputRoot, exitCode, snapshotLookup);

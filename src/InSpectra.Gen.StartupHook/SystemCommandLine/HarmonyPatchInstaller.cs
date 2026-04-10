@@ -231,7 +231,11 @@ internal static class HarmonyPatchInstaller
             var result = GetPropertyValue(intermediate, second);
             return result is not null && IsCommandType(result.GetType()) ? result : null;
         }
-        catch { return null; }
+        catch
+        {
+            // Intentionally swallowed: reflection on unknown types may throw TypeLoadException or TargetInvocationException
+            return null;
+        }
     }
 
     private static object? GetPropertyValue(object obj, string name)
@@ -240,7 +244,11 @@ internal static class HarmonyPatchInstaller
         {
             return obj.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance)?.GetValue(obj);
         }
-        catch { return null; }
+        catch
+        {
+            // Intentionally swallowed: property access via reflection on unknown types may throw TargetInvocationException
+            return null;
+        }
     }
 
     private static object NavigateToRoot(object command)
@@ -280,10 +288,16 @@ internal static class HarmonyPatchInstaller
                                 if (value is not null) return value;
                             }
                         }
-                        catch { }
+                        catch
+                        {
+                            // Intentionally swallowed: reading static fields via reflection may throw on inaccessible or problematic members
+                        }
                     }
             }
-            catch { }
+            catch
+            {
+                // Intentionally swallowed: assembly.GetTypes() may throw ReflectionTypeLoadException for assemblies with missing dependencies
+            }
         }
         return null;
     }

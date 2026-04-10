@@ -3,7 +3,7 @@ using InSpectra.Gen.Runtime;
 
 namespace InSpectra.Gen.Services;
 
-public sealed class ProcessRunner
+public sealed class ProcessRunner : IProcessRunner
 {
     public async Task<ProcessResult> RunAsync(
         string executablePath,
@@ -102,6 +102,7 @@ public sealed class ProcessRunner
         }
         catch
         {
+            // Expected: process may have already exited (InvalidOperationException/Win32Exception)
         }
     }
 }

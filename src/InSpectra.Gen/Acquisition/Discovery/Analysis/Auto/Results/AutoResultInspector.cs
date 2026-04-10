@@ -1,4 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Results;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Results;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -24,12 +26,12 @@ internal static class AutoResultInspector
             && !IsSuccessful(helpResult);
 
     private static bool IsSuccessful(JsonObject result)
-        => string.Equals(result["disposition"]?.GetValue<string>(), "success", StringComparison.Ordinal);
+        => string.Equals(result[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal);
 
     private static bool HasOpenCliArtifact(JsonObject result)
         => !string.IsNullOrWhiteSpace(result["artifacts"]?["opencliArtifact"]?.GetValue<string>());
 
     private static bool IsTerminalFailure(JsonObject result)
-        => string.Equals(result["disposition"]?.GetValue<string>(), "terminal-failure", StringComparison.Ordinal);
+        => string.Equals(result[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.TerminalFailure, StringComparison.Ordinal);
 }
 

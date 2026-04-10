@@ -1,6 +1,8 @@
-namespace InSpectra.Discovery.Tool.Promotion.Planning;
+namespace InSpectra.Gen.Acquisition.Promotion.Planning;
 
-using InSpectra.Discovery.Tool.OpenCli.Artifacts;
+using InSpectra.Gen.Acquisition.OpenCli.Artifacts;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
@@ -16,14 +18,14 @@ internal static class PromotionAnalysisModeSupport
             InferCrawlBackedModeFromCrawl(crawlArtifact),
             InferAnalysisModeFromOpenCli(openCliArtifact),
             OpenCliArtifactSourceSupport.InferAnalysisMode(result["artifacts"]?["opencliSource"]?.GetValue<string>()),
-            crawlArtifact is not null ? PreferCrawlBackedMode(result["analysisMode"]?.GetValue<string>()) : null,
-            crawlArtifact is not null ? PreferCrawlBackedMode(item["analysisMode"]?.GetValue<string>()) : null,
-            result["analysisMode"]?.GetValue<string>(),
-            item["analysisMode"]?.GetValue<string>(),
+            crawlArtifact is not null ? PreferCrawlBackedMode(result[ResultKey.AnalysisMode]?.GetValue<string>()) : null,
+            crawlArtifact is not null ? PreferCrawlBackedMode(item[ResultKey.AnalysisMode]?.GetValue<string>()) : null,
+            result[ResultKey.AnalysisMode]?.GetValue<string>(),
+            item[ResultKey.AnalysisMode]?.GetValue<string>(),
             InferAnalysisModeFromOpenCliClassification(
                 result["steps"]?["opencli"] as JsonObject,
                 result["introspection"]?["opencli"] as JsonObject),
-            crawlArtifact is not null ? "help" : null);
+            crawlArtifact is not null ? AnalysisMode.Help : null);
 
     public static void BackfillAnalysisModeSelection(JsonObject result, string? analysisMode)
     {
@@ -32,7 +34,7 @@ internal static class PromotionAnalysisModeSupport
             return;
         }
 
-        result["analysisMode"] = analysisMode;
+        result[ResultKey.AnalysisMode] = analysisMode;
 
         var analysisSelection = result["analysisSelection"] as JsonObject;
         if (analysisSelection is null)
@@ -70,7 +72,7 @@ internal static class PromotionAnalysisModeSupport
     private static string? InferAnalysisModeFromOpenCliClassification(params JsonObject?[] sources)
         => sources
             .Select(source => OpenCliArtifactSourceSupport.InferAnalysisModeFromClassification(
-                source?["classification"]?.GetValue<string>()))
+                source?[ResultKey.Classification]?.GetValue<string>()))
             .FirstOrDefault(mode => !string.IsNullOrWhiteSpace(mode));
 
     private static string? InferCrawlBackedModeFromCrawl(JsonObject? crawlArtifact)
@@ -83,16 +85,16 @@ internal static class PromotionAnalysisModeSupport
         var coverageMode = crawlArtifact["coverage"]?["coverageMode"]?.GetValue<string>();
         if (coverageMode is not null && coverageMode.Contains("static", StringComparison.OrdinalIgnoreCase))
         {
-            return "static";
+            return AnalysisMode.Static;
         }
 
-        return "clifx";
+        return AnalysisMode.CliFx;
     }
 
     private static string? PreferCrawlBackedMode(string? analysisMode)
-        => string.Equals(analysisMode, "help", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(analysisMode, "clifx", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(analysisMode, "static", StringComparison.OrdinalIgnoreCase)
+        => string.Equals(analysisMode, AnalysisMode.Help, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(analysisMode, AnalysisMode.CliFx, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(analysisMode, AnalysisMode.Static, StringComparison.OrdinalIgnoreCase)
                 ? analysisMode
                 : null;
 

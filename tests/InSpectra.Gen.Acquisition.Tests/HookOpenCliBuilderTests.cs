@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Analysis.Hook;
 
 using System.Text.Json.Nodes;
 using Xunit;

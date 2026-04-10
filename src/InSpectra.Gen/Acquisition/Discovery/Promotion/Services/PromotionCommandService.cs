@@ -1,12 +1,12 @@
-namespace InSpectra.Discovery.Tool.Promotion.Services;
+namespace InSpectra.Gen.Acquisition.Promotion.Services;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
 using System.Text;
 using System.Text.Json.Nodes;

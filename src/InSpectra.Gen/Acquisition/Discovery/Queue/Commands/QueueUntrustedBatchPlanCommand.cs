@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Queue.Commands;
+namespace InSpectra.Gen.Acquisition.Queue.Commands;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Queue.Planning;
+using InSpectra.Gen.Acquisition.Queue.Planning;
 
-using InSpectra.Discovery.Tool.Infrastructure.Settings;
+using InSpectra.Gen.Acquisition.Infrastructure.Settings;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

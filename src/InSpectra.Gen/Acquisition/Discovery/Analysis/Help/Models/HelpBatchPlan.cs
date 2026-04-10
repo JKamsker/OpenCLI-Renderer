@@ -1,7 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Models;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Models;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -15,7 +16,7 @@ internal sealed record HelpBatchPlan(string? BatchId, IReadOnlyList<HelpBatchIte
             ?? throw new InvalidOperationException($"Plan '{path}' is missing an 'items' array.");
 
         var items = itemsNode.OfType<JsonObject>().Select(ParseItem).ToList();
-        return new HelpBatchPlan(document["batchId"]?.GetValue<string>(), items);
+        return new HelpBatchPlan(document[ResultKey.BatchId]?.GetValue<string>(), items);
     }
 
     private static HelpBatchItem ParseItem(JsonObject item)
@@ -23,12 +24,12 @@ internal sealed record HelpBatchPlan(string? BatchId, IReadOnlyList<HelpBatchIte
             PackageId: ReadRequiredString(item, "packageId"),
             Version: ReadRequiredString(item, "version"),
             CommandName: item["command"]?.GetValue<string>(),
-            CliFramework: item["cliFramework"]?.GetValue<string>(),
-            AnalysisMode: item["analysisMode"]?.GetValue<string>() ?? "help",
+            CliFramework: item[ResultKey.CliFramework]?.GetValue<string>(),
+            AnalysisMode: item[ResultKey.AnalysisMode]?.GetValue<string>() ?? AnalysisMode.Help,
             ExpectedCommands: ReadStringList(item, "expectedCommands"),
             ExpectedOptions: ReadStringList(item, "expectedOptions"),
             ExpectedArguments: ReadStringList(item, "expectedArguments"),
-            Attempt: item["attempt"]?.GetValue<int?>() ?? 1,
+            Attempt: item[ResultKey.Attempt]?.GetValue<int?>() ?? 1,
             ArtifactName: item["artifactName"]?.GetValue<string>(),
             PackageUrl: item["packageUrl"]?.GetValue<string>(),
             PackageContentUrl: item["packageContentUrl"]?.GetValue<string>(),

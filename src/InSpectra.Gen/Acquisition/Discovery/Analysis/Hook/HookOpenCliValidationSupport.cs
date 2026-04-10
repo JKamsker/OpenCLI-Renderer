@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Hook;
+namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
-using InSpectra.Discovery.Tool.Analysis.OpenCli;
+using InSpectra.Gen.Acquisition.Analysis.OpenCli;
 
 using System.Text.Json.Nodes;
 

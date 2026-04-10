@@ -1,16 +1,18 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Services;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Services;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Selection;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Selection;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Execution;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Execution;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Results;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Results;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Runners;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
 
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -171,9 +173,9 @@ internal sealed class AutoCommandService
             resultPath,
             nativeOutcome.Result,
             cancellationToken);
-        var selectedMode = selectedResult["analysisMode"]?.GetValue<string>() ?? AutoModeSupport.ResolveFallbackMode(descriptor);
+        var selectedMode = selectedResult[ResultKey.AnalysisMode]?.GetValue<string>() ?? AutoModeSupport.ResolveFallbackMode(descriptor);
 
-        if (string.Equals(selectedMode, "help", StringComparison.Ordinal)
+        if (string.Equals(selectedMode, AnalysisMode.Help, StringComparison.Ordinal)
             && AutoResultInspector.ShouldPreserveNativeResult(nativeOutcome.Result, selectedResult))
         {
             var preservedNativeResult = nativeOutcome.Result!;

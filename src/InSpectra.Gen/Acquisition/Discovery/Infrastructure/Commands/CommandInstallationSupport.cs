@@ -1,12 +1,12 @@
-namespace InSpectra.Discovery.Tool.Infrastructure.Commands;
+namespace InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
-using InSpectra.Discovery.Tool.Infrastructure.Artifacts;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 using System.Text.Json.Nodes;
 
 internal static class CommandInstallationSupport

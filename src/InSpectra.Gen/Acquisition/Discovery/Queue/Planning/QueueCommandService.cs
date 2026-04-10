@@ -1,16 +1,18 @@
-namespace InSpectra.Discovery.Tool.Queue.Planning;
+namespace InSpectra.Gen.Acquisition.Queue.Planning;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Queue.Models;
+using InSpectra.Gen.Acquisition.Queue.Models;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -139,7 +141,7 @@ internal sealed class QueueCommandService
             {
                 var status = stateDocument["currentStatus"]?.GetValue<string>() ?? string.Empty;
                 var nextAttemptAtText = stateDocument["nextAttemptAt"]?.GetValue<string>();
-                if (status is "success" or "terminal-failure")
+                if (status is AnalysisDisposition.Success or AnalysisDisposition.TerminalFailure)
                 {
                     skippedItems.Add(new { packageId, version, reason = $"existing-{status}" });
                     continue;
@@ -195,8 +197,8 @@ internal sealed class QueueCommandService
                 PackageContentUrl: item["packageContentUrl"]?.GetValue<string>(),
                 CatalogEntryUrl: item["catalogEntryUrl"]?.GetValue<string>(),
                 Command: analysisDescriptor?.CommandName ?? item["command"]?.GetValue<string>(),
-                CliFramework: analysisDescriptor?.CliFramework ?? item["cliFramework"]?.GetValue<string>(),
-                AnalysisMode: analysisDescriptor?.PreferredAnalysisMode ?? item["analysisMode"]?.GetValue<string>() ?? "auto",
+                CliFramework: analysisDescriptor?.CliFramework ?? item[ResultKey.CliFramework]?.GetValue<string>(),
+                AnalysisMode: analysisDescriptor?.PreferredAnalysisMode ?? item[ResultKey.AnalysisMode]?.GetValue<string>() ?? AnalysisMode.Auto,
                 AnalysisReason: analysisDescriptor?.SelectionReason ?? analysisDescriptorError,
                 Attempt: (stateDocument?["attemptCount"]?.GetValue<int?>() ?? 0) + 1,
                 ArtifactName: QueueCommandSupport.GetArtifactName(lowerId, lowerVersion),

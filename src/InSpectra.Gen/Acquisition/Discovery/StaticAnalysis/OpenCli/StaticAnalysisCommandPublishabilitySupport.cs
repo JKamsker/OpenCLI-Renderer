@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.OpenCli;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.Models;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
 
 internal static class StaticAnalysisCommandPublishabilitySupport
 {

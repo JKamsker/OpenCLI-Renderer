@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.NonSpectre;
+namespace InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
 
 internal sealed record ResolvedToolCommandInfo(

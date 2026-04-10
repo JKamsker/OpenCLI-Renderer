@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Promotion;
+namespace InSpectra.Gen.Acquisition.Promotion;
 
-using InSpectra.Discovery.Tool.Promotion.Commands;
+using InSpectra.Gen.Acquisition.Promotion.Commands;
 
-using InSpectra.Discovery.Tool.Promotion.Services;
+using InSpectra.Gen.Acquisition.Promotion.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;

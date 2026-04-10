@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Catalog.Filtering.CliFx;
+namespace InSpectra.Gen.Acquisition.Catalog.Filtering.CliFx;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
 internal sealed class CliFxCatalogInspector
 {

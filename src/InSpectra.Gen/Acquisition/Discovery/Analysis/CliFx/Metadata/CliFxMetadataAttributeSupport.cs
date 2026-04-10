@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
 
 using System.Reflection;
 

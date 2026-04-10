@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Frameworks;
+namespace InSpectra.Gen.Acquisition.Frameworks;
 
 internal sealed record CliFrameworkReferenceProbe(
     string FrameworkName,

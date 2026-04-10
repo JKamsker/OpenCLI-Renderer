@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Models;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Models;
 
 
 internal sealed record HelpBatchTimeouts(

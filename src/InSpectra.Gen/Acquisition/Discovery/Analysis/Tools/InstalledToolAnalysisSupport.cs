@@ -1,14 +1,16 @@
-namespace InSpectra.Discovery.Tool.Analysis.Tools;
+namespace InSpectra.Gen.Acquisition.Analysis.Tools;
 
-using InSpectra.Discovery.Tool.Analysis.Execution;
+using InSpectra.Gen.Acquisition.Analysis.Execution;
 
-using InSpectra.Discovery.Tool.Analysis.Output;
+using InSpectra.Gen.Acquisition.Analysis.Output;
 
-using InSpectra.Discovery.Tool.Packages;
+using InSpectra.Gen.Acquisition.Packages;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
-using InSpectra.Discovery.Tool.Analysis.Introspection;
+using InSpectra.Discovery.Tool.Analysis;
+
+using InSpectra.Gen.Acquisition.Analysis.Introspection;
 using System.Text.Json.Nodes;
 
 internal sealed class InstalledToolAnalysisSupport
@@ -38,8 +40,8 @@ internal sealed class InstalledToolAnalysisSupport
         if (string.IsNullOrWhiteSpace(commandName))
         {
             result["phase"] = "bootstrap";
-            result["classification"] = "tool-command-missing";
-            result["failureMessage"] = $"No tool command could be resolved for package '{packageId}' version '{version}'.";
+            result[ResultKey.Classification] = "tool-command-missing";
+            result[ResultKey.FailureMessage] = $"No tool command could be resolved for package '{packageId}' version '{version}'.";
             return;
         }
 
@@ -57,8 +59,8 @@ internal sealed class InstalledToolAnalysisSupport
         if (installResult.TimedOut || installResult.ExitCode != 0)
         {
             result["phase"] = "install";
-            result["classification"] = installResult.TimedOut ? "install-timeout" : "install-failed";
-            result["failureMessage"] = RuntimeSupport.GetPreferredMessage(installResult.Stdout, installResult.Stderr);
+            result[ResultKey.Classification] = installResult.TimedOut ? "install-timeout" : "install-failed";
+            result[ResultKey.FailureMessage] = RuntimeSupport.GetPreferredMessage(installResult.Stdout, installResult.Stderr);
             return;
         }
 
@@ -66,8 +68,8 @@ internal sealed class InstalledToolAnalysisSupport
         if (commandPath is null)
         {
             result["phase"] = "install";
-            result["classification"] = "installed-command-missing";
-            result["failureMessage"] = $"Installed tool command '{commandName}' was not found.";
+            result[ResultKey.Classification] = "installed-command-missing";
+            result[ResultKey.FailureMessage] = $"Installed tool command '{commandName}' was not found.";
             return;
         }
 

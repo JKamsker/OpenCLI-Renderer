@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Analysis.Output;
+namespace InSpectra.Gen.Acquisition.Analysis.Output;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
 
 internal static class CommandOutputSupport

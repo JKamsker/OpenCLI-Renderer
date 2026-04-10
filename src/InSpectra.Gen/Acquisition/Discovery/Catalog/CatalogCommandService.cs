@@ -1,22 +1,22 @@
-namespace InSpectra.Discovery.Tool.Catalog;
+namespace InSpectra.Gen.Acquisition.Catalog;
 
-using InSpectra.Discovery.Tool.Catalog.Delta.SpectreConsole;
+using InSpectra.Gen.Acquisition.Catalog.Delta.SpectreConsole;
 
-using InSpectra.Discovery.Tool.App.Machine;
+using InSpectra.Gen.Acquisition.App.Machine;
 
-using InSpectra.Discovery.Tool.App.Summaries;
+using InSpectra.Gen.Acquisition.App.Summaries;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Catalog.Filtering.CliFx;
+using InSpectra.Gen.Acquisition.Catalog.Filtering.CliFx;
 
-using InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+using InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
 
-using InSpectra.Discovery.Tool.Catalog.Delta;
+using InSpectra.Gen.Acquisition.Catalog.Delta;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
 using System.Text.Json;
 

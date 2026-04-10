@@ -1,5 +1,7 @@
 namespace InSpectra.Gen.Services;
 
+using System.Diagnostics;
+
 internal sealed class TemporaryWorkspace : IDisposable
 {
     public TemporaryWorkspace(string prefix)
@@ -19,8 +21,9 @@ internal sealed class TemporaryWorkspace : IDisposable
                 Directory.Delete(RootPath, recursive: true);
             }
         }
-        catch
+        catch (IOException ex)
         {
+            Trace.TraceWarning($"Failed to clean up temporary workspace '{RootPath}': {ex.Message}");
         }
     }
 }

@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Commands;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Commands;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Services;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Services;
 
-using InSpectra.Discovery.Tool.Analysis.Settings;
+using InSpectra.Gen.Acquisition.Analysis.Settings;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Help.Parsing;
+namespace InSpectra.Gen.Acquisition.Help.Parsing;
 
 
 using System.Text.RegularExpressions;

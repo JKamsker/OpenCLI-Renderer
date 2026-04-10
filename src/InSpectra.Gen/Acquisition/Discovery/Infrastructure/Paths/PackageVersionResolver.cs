@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Infrastructure.Paths;
+namespace InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
 internal static class PackageVersionResolver
 {

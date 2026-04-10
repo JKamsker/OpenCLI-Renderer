@@ -1,22 +1,22 @@
-namespace InSpectra.Discovery.Tool.Analysis;
+namespace InSpectra.Gen.Acquisition.Analysis;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Commands;
+using InSpectra.Gen.Acquisition.Analysis.Help.Commands;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Commands;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Commands;
 
-using InSpectra.Discovery.Tool.Analysis.Untrusted;
+using InSpectra.Gen.Acquisition.Analysis.Untrusted;
 
-using InSpectra.Discovery.Tool.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Analysis.Hook;
 
-using InSpectra.Discovery.Tool.Analysis.Static;
+using InSpectra.Gen.Acquisition.Analysis.Static;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx;
+using InSpectra.Gen.Acquisition.Analysis.CliFx;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Batch;
+using InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Services;
+using InSpectra.Gen.Acquisition.Analysis.Help.Services;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Services;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;

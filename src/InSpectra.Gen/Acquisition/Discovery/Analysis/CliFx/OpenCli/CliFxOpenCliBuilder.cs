@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.OpenCli;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.OpenCli;
 
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
 
 using System.Text.Json.Nodes;
 

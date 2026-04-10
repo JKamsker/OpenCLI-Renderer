@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Docs.Reports;
+namespace InSpectra.Gen.Acquisition.Docs.Reports;
 
-using InSpectra.Discovery.Tool.OpenCli.Artifacts;
+using InSpectra.Gen.Acquisition.OpenCli.Artifacts;
 
-using InSpectra.Discovery.Tool.Promotion.Artifacts;
+using InSpectra.Gen.Acquisition.Promotion.Artifacts;
 
 
 using System.Text.Json.Nodes;

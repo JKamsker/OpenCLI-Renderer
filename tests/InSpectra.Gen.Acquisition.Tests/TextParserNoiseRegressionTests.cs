@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Help.Parsing;
+using InSpectra.Gen.Acquisition.Help.Parsing;
 
 public sealed class TextParserNoiseRegressionTests
 {

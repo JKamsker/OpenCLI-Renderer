@@ -1,11 +1,11 @@
 using System.Text.Json.Nodes;
-using InSpectra.Discovery.Tool.Analysis.CliFx.Execution;
-using InSpectra.Discovery.Tool.Analysis.Hook;
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
-using InSpectra.Discovery.Tool.Help.Crawling;
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
-using InSpectra.Discovery.Tool.StaticAnalysis.Inspection;
-using InSpectra.Discovery.Tool.StaticAnalysis.OpenCli;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
+using InSpectra.Gen.Acquisition.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Help.Crawling;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
+using InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
 using InSpectra.Gen.Runtime;
 
 namespace InSpectra.Gen.Services;
@@ -21,18 +21,22 @@ internal sealed record AcquisitionAnalysisOutcome(
 
 public sealed class AcquisitionAnalyzerService
 {
-    private readonly InstalledToolAnalyzer _helpAnalyzer = new(new CommandRuntime(), new InSpectra.Discovery.Tool.Help.OpenCli.OpenCliBuilder());
-    private readonly CliFxInstalledToolAnalysisSupport _cliFxAnalyzer = new(
-        new CommandRuntime(),
-        new InSpectra.Discovery.Tool.Analysis.CliFx.Metadata.CliFxMetadataInspector(),
-        new InSpectra.Discovery.Tool.Analysis.CliFx.OpenCli.CliFxOpenCliBuilder(),
-        new CliFxCoverageClassifier());
-    private readonly StaticInstalledToolAnalysisSupport _staticAnalyzer = new(
-        new StaticAnalysisRuntime(),
-        new StaticAnalysisAssemblyInspectionSupport(new DnlibAssemblyScanner()),
-        new StaticAnalysisOpenCliBuilder(),
-        new StaticAnalysisCoverageClassifier());
-    private readonly HookInstalledToolAnalysisSupport _hookAnalyzer = new();
+    private readonly InstalledToolAnalyzer _helpAnalyzer;
+    private readonly CliFxInstalledToolAnalysisSupport _cliFxAnalyzer;
+    private readonly StaticInstalledToolAnalysisSupport _staticAnalyzer;
+    private readonly HookInstalledToolAnalysisSupport _hookAnalyzer;
+
+    internal AcquisitionAnalyzerService(
+        InstalledToolAnalyzer helpAnalyzer,
+        CliFxInstalledToolAnalysisSupport cliFxAnalyzer,
+        StaticInstalledToolAnalysisSupport staticAnalyzer,
+        HookInstalledToolAnalysisSupport hookAnalyzer)
+    {
+        _helpAnalyzer = helpAnalyzer;
+        _cliFxAnalyzer = cliFxAnalyzer;
+        _staticAnalyzer = staticAnalyzer;
+        _hookAnalyzer = hookAnalyzer;
+    }
 
     internal async Task<AcquisitionAnalysisOutcome> TryAnalyzeAsync(
         MaterializedCliTarget target,

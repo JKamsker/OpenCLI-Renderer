@@ -1,5 +1,7 @@
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 using InSpectra.Gen.Runtime;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 namespace InSpectra.Gen.Services;
 
@@ -17,39 +19,39 @@ internal static class OpenCliModePlanner
         {
             if (provider.SupportsCliFxAnalysis)
             {
-                attempts.Add(new OpenCliAcquisitionAttempt("clifx", provider.Name, "planned"));
+                attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.CliFx, provider.Name, AnalysisDisposition.Planned));
             }
 
             if (provider.SupportsHookAnalysis && hookFrameworks.Contains(provider.Name))
             {
-                attempts.Add(new OpenCliAcquisitionAttempt("hook", provider.Name, "planned"));
+                attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Hook, provider.Name, AnalysisDisposition.Planned));
             }
 
             if (provider.StaticAnalysisAdapter is not null)
             {
-                attempts.Add(new OpenCliAcquisitionAttempt("static", provider.Name, "planned"));
+                attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Static, provider.Name, AnalysisDisposition.Planned));
             }
         }
 
         if (attempts.Count == 0)
         {
-            attempts.Add(new OpenCliAcquisitionAttempt("help", null, "planned"));
+            attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Help, null, AnalysisDisposition.Planned));
             return attempts;
         }
 
-        attempts.Add(new OpenCliAcquisitionAttempt("help", null, "planned"));
+        attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Help, null, AnalysisDisposition.Planned));
         return attempts;
     }
 
     public static string ToModeValue(OpenCliMode mode)
         => mode switch
         {
-            OpenCliMode.Native => "native",
-            OpenCliMode.Auto => "auto",
-            OpenCliMode.Help => "help",
-            OpenCliMode.CliFx => "clifx",
-            OpenCliMode.Static => "static",
-            OpenCliMode.Hook => "hook",
+            OpenCliMode.Native => AnalysisMode.Native,
+            OpenCliMode.Auto => AnalysisMode.Auto,
+            OpenCliMode.Help => AnalysisMode.Help,
+            OpenCliMode.CliFx => AnalysisMode.CliFx,
+            OpenCliMode.Static => AnalysisMode.Static,
+            OpenCliMode.Hook => AnalysisMode.Hook,
             _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null),
         };
 }

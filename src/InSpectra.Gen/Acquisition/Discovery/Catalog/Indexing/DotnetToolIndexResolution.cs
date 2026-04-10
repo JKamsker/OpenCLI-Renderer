@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Catalog.Indexing;
+namespace InSpectra.Gen.Acquisition.Catalog.Indexing;
 
 
 internal sealed record DotnetToolIndexResolution(

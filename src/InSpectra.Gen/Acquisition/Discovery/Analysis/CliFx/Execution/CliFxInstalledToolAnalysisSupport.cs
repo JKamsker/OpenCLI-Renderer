@@ -1,25 +1,25 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.Execution;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Artifacts;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Artifacts;
 
-using InSpectra.Discovery.Tool.Infrastructure.Artifacts;
+using InSpectra.Gen.Acquisition.Infrastructure.Artifacts;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Crawling;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Crawling;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.OpenCli;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.OpenCli;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
 
-using InSpectra.Discovery.Tool.Analysis;
-using InSpectra.Discovery.Tool.Analysis.OpenCli;
+using InSpectra.Gen.Acquisition.Analysis;
+using InSpectra.Gen.Acquisition.Analysis.OpenCli;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 

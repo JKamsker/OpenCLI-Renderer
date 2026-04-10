@@ -1,16 +1,18 @@
-namespace InSpectra.Discovery.Tool.Analysis.Tools;
+namespace InSpectra.Gen.Acquisition.Analysis.Tools;
 
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 
-using InSpectra.Discovery.Tool.Packages;
+using InSpectra.Gen.Acquisition.Packages;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+using InSpectra.Discovery.Tool.Analysis;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
+
+using InSpectra.Gen.Acquisition.NuGet;
 
 internal interface IToolDescriptorResolver
 {
@@ -79,16 +81,16 @@ internal sealed class ToolDescriptorResolver : IToolDescriptorResolver
 
     private static (string PreferredMode, string Reason) SelectMode(CatalogLeaf catalogLeaf, SpectrePackageInspection? packageInspection, string? cliFramework)
         => HasConfirmedSpectreCli(catalogLeaf, packageInspection)
-            ? ("native", "confirmed-spectre-console-cli")
+            ? (AnalysisMode.Native, "confirmed-spectre-console-cli")
             : CliFrameworkProviderRegistry.HasCliFxAnalysisSupport(cliFramework)
-                ? ("clifx", "confirmed-clifx")
+                ? (AnalysisMode.CliFx, "confirmed-clifx")
                 : CliFrameworkProviderRegistry.HasStaticAnalysisSupport(cliFramework)
                     ? (
-                        "static",
+                        AnalysisMode.Static,
                         HasConfirmedStaticFramework(cliFramework, packageInspection)
                             ? "confirmed-static-analysis-framework"
                             : "candidate-static-analysis-framework")
-                    : ("help", "generic-help-crawl");
+                    : (AnalysisMode.Help, "generic-help-crawl");
 
     private static bool HasConfirmedStaticFramework(string? cliFramework, SpectrePackageInspection? packageInspection)
         => packageInspection is not null

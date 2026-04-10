@@ -1,10 +1,12 @@
 using InSpectra.Gen.Runtime;
 
+using InSpectra.Discovery.Tool.Analysis;
+
 namespace InSpectra.Gen.Services;
 
 public sealed class OpenCliAcquisitionService(
     ExecutableResolver executableResolver,
-    ProcessRunner processRunner,
+    IProcessRunner processRunner,
     LocalCliTargetFactory localTargetFactory,
     PackageCliTargetFactory packageCliTargetFactory,
     DotnetBuildOutputResolver dotnetBuildOutputResolver,
@@ -97,14 +99,14 @@ public sealed class OpenCliAcquisitionService(
                 "dotnet",
                 request.ProjectPath,
                 "dotnet",
-                "native",
+                AnalysisMode.Native,
                 request.CommandName,
                 request.CliFramework,
                 nativeResult.OpenCliJson,
                 nativeResult.XmlDocument,
                 crawlJson: null,
                 request.Artifacts,
-                [new OpenCliAcquisitionAttempt("native", request.CliFramework, "success")],
+                [new OpenCliAcquisitionAttempt(AnalysisMode.Native, request.CliFramework, AnalysisDisposition.Success)],
                 warnings);
         }
 
@@ -238,7 +240,7 @@ public sealed class OpenCliAcquisitionService(
             : [new OpenCliAcquisitionAttempt(
                 OpenCliModePlanner.ToModeValue(mode),
                 mode == OpenCliMode.Hook ? target.HookCliFramework ?? target.CliFramework : target.CliFramework,
-                "planned")];
+                AnalysisDisposition.Planned)];
         var failureDetails = new List<string>();
 
         foreach (var plannedAttempt in plannedAttempts)
@@ -253,11 +255,11 @@ public sealed class OpenCliAcquisitionService(
             attempts.Add(new OpenCliAcquisitionAttempt(
                 plannedAttempt.Mode,
                 plannedAttempt.Framework,
-                outcome.Success ? "success" : "failed",
+                outcome.Success ? AnalysisDisposition.Success : AnalysisDisposition.Failed,
                 outcome.FailureMessage));
             if (!outcome.Success)
             {
-                failureDetails.Add($"{plannedAttempt.Mode}: {outcome.FailureMessage ?? outcome.FailureClassification ?? "failed"}");
+                failureDetails.Add($"{plannedAttempt.Mode}: {outcome.FailureMessage ?? outcome.FailureClassification ?? AnalysisDisposition.Failed}");
                 continue;
             }
 
@@ -315,13 +317,13 @@ public sealed class OpenCliAcquisitionService(
                 timeoutSeconds,
                 cancellationToken);
             var completedAttempts = attempts
-                .Concat([new OpenCliAcquisitionAttempt("native", cliFramework, "success")])
+                .Concat([new OpenCliAcquisitionAttempt(AnalysisMode.Native, cliFramework, AnalysisDisposition.Success)])
                 .ToArray();
             return CreateResult(
                 kind,
                 sourceLabel,
                 executablePath,
-                "native",
+                AnalysisMode.Native,
                 commandName,
                 cliFramework,
                 nativeResult.OpenCliJson,
@@ -333,7 +335,7 @@ public sealed class OpenCliAcquisitionService(
         }
         catch (CliException exception)
         {
-            attempts.Add(new OpenCliAcquisitionAttempt("native", cliFramework, "failed", exception.Message));
+            attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Native, cliFramework, AnalysisDisposition.Failed, exception.Message));
             return null;
         }
     }
@@ -370,14 +372,14 @@ public sealed class OpenCliAcquisitionService(
             kind,
             sourceLabel,
             executablePath,
-            "native",
+            AnalysisMode.Native,
             commandName,
             cliFramework,
             nativeResult.OpenCliJson,
             nativeResult.XmlDocument,
             crawlJson: null,
             artifacts,
-            [new OpenCliAcquisitionAttempt("native", cliFramework, "success")],
+            [new OpenCliAcquisitionAttempt(AnalysisMode.Native, cliFramework, AnalysisDisposition.Success)],
             warnings);
     }
 
@@ -456,10 +458,10 @@ public sealed class OpenCliAcquisitionService(
     private static OpenCliMode ParseMode(string value)
         => value switch
         {
-            "help" => OpenCliMode.Help,
-            "clifx" => OpenCliMode.CliFx,
-            "static" => OpenCliMode.Static,
-            "hook" => OpenCliMode.Hook,
+            AnalysisMode.Help => OpenCliMode.Help,
+            AnalysisMode.CliFx => OpenCliMode.CliFx,
+            AnalysisMode.Static => OpenCliMode.Static,
+            AnalysisMode.Hook => OpenCliMode.Hook,
             _ => throw new InvalidOperationException($"Unsupported acquisition mode `{value}`."),
         };
 }

@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Queue;
+namespace InSpectra.Gen.Acquisition.Queue;
 
-using InSpectra.Discovery.Tool.Queue.Commands;
+using InSpectra.Gen.Acquisition.Queue.Commands;
 
-using InSpectra.Discovery.Tool.Queue.Backfill;
+using InSpectra.Gen.Acquisition.Queue.Backfill;
 
-using InSpectra.Discovery.Tool.Queue.Planning;
+using InSpectra.Gen.Acquisition.Queue.Planning;
 
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;

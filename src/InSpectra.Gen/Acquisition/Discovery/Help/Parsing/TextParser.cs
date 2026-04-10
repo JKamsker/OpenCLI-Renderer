@@ -1,14 +1,14 @@
-namespace InSpectra.Discovery.Tool.Help.Parsing;
+namespace InSpectra.Gen.Acquisition.Help.Parsing;
 
-using InSpectra.Discovery.Tool.Help.Inference.Descriptions;
+using InSpectra.Gen.Acquisition.Help.Inference.Descriptions;
 
-using InSpectra.Discovery.Tool.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage;
 
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
-using InSpectra.Discovery.Tool.Help.Inference.Text;
+using InSpectra.Gen.Acquisition.Help.Inference.Text;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
 internal sealed class TextParser
 {

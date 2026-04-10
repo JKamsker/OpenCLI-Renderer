@@ -1,10 +1,12 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Selection;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Selection;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Results;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Results;
 
-using InSpectra.Discovery.Tool.Analysis.Tools;
-using InSpectra.Discovery.Tool.Analysis.Output;
-using InSpectra.Discovery.Tool.OpenCli.Documents;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Output;
+using InSpectra.Gen.Acquisition.OpenCli.Documents;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -41,7 +43,7 @@ internal static class AutoSelectedAnalyzerSupport
 
     private static void ValidateSuccessfulOpenCliArtifact(JsonObject selectedResult, string resultPath)
     {
-        if (!string.Equals(selectedResult["disposition"]?.GetValue<string>(), "success", StringComparison.Ordinal))
+        if (!string.Equals(selectedResult[ResultKey.Disposition]?.GetValue<string>(), AnalysisDisposition.Success, StringComparison.Ordinal))
         {
             return;
         }
@@ -65,11 +67,11 @@ internal static class AutoSelectedAnalyzerSupport
         }
 
         var failureMessage = $"Selected analyzer produced an invalid OpenCLI artifact. {reason}";
-        selectedResult["disposition"] = "retryable-failure";
+        selectedResult[ResultKey.Disposition] = AnalysisDisposition.RetryableFailure;
         selectedResult["retryEligible"] = true;
         selectedResult["phase"] = "opencli-validation";
-        selectedResult["classification"] = "invalid-success-artifact";
-        selectedResult["failureMessage"] = failureMessage;
+        selectedResult[ResultKey.Classification] = "invalid-success-artifact";
+        selectedResult[ResultKey.FailureMessage] = failureMessage;
         selectedResult["failureSignature"] = ResultSupport.GetFailureSignature(
             "opencli-validation",
             "invalid-success-artifact",
@@ -84,7 +86,7 @@ internal static class AutoSelectedAnalyzerSupport
         if (selectedResult["steps"]?["opencli"] is JsonObject openCliStep)
         {
             openCliStep["status"] = "invalid";
-            openCliStep["classification"] = "invalid-success-artifact";
+            openCliStep[ResultKey.Classification] = "invalid-success-artifact";
             openCliStep["message"] = reason;
             openCliStep.Remove("artifactSource");
         }

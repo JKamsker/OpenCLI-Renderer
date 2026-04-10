@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.Execution;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 internal sealed class CliFxRuntime : CommandRuntime
 {

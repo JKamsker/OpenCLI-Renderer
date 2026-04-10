@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Promotion.Planning;
+namespace InSpectra.Gen.Acquisition.Promotion.Planning;
 
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 
 using System.Text.Json.Nodes;
 

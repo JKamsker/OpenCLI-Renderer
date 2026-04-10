@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Help.Inference.Usage;
+namespace InSpectra.Gen.Acquisition.Help.Inference.Usage;
 
 using System.Text.RegularExpressions;
 

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.Hook;
+namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
 using System.Text.Json.Serialization;
 

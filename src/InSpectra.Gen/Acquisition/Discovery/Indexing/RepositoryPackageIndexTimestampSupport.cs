@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Indexing;
+namespace InSpectra.Gen.Acquisition.Indexing;
 
 
 using System.Text.Json.Nodes;

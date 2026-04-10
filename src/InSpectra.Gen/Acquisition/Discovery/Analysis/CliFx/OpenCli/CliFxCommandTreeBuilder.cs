@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.OpenCli;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.OpenCli;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
 
 
 internal sealed class CliFxCommandTreeBuilder

@@ -1,12 +1,14 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Results;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Results;
 
-using InSpectra.Discovery.Tool.Analysis.Output;
+using InSpectra.Gen.Acquisition.Analysis.Output;
 
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -36,16 +38,16 @@ internal static class AutoResultSupport
         }
 
         analysisSelection["candidateFrameworks"] = candidateFrameworks;
-        result["analysisMode"] = analysisMode;
+        result[ResultKey.AnalysisMode] = analysisMode;
         result["analysisSelection"] = analysisSelection;
 
-        if (CliFrameworkProviderRegistry.ShouldReplace(result["cliFramework"]?.GetValue<string>(), descriptor.CliFramework))
+        if (CliFrameworkProviderRegistry.ShouldReplace(result[ResultKey.CliFramework]?.GetValue<string>(), descriptor.CliFramework))
         {
-            result["cliFramework"] = descriptor.CliFramework;
+            result[ResultKey.CliFramework] = descriptor.CliFramework;
         }
-        else if (result["cliFramework"] is null && !string.IsNullOrWhiteSpace(descriptor.CliFramework))
+        else if (result[ResultKey.CliFramework] is null && !string.IsNullOrWhiteSpace(descriptor.CliFramework))
         {
-            result["cliFramework"] = descriptor.CliFramework;
+            result[ResultKey.CliFramework] = descriptor.CliFramework;
         }
 
         if (result["command"] is null && !string.IsNullOrWhiteSpace(descriptor.CommandName))
@@ -73,7 +75,7 @@ internal static class AutoResultSupport
             return;
         }
 
-        ApplyFallback(result, "native", fallbackResult);
+        ApplyFallback(result, AnalysisMode.Native, fallbackResult);
     }
 
     public static void ApplyAttemptLog(JsonObject result, JsonArray attemptLog)
@@ -92,9 +94,9 @@ internal static class AutoResultSupport
         result["fallback"] = new JsonObject
         {
             ["from"] = fallbackFrom,
-            ["disposition"] = fallbackResult["disposition"]?.GetValue<string>(),
-            ["classification"] = fallbackResult["classification"]?.GetValue<string>(),
-            ["message"] = fallbackResult["failureMessage"]?.GetValue<string>(),
+            [ResultKey.Disposition] = fallbackResult[ResultKey.Disposition]?.GetValue<string>(),
+            [ResultKey.Classification] = fallbackResult[ResultKey.Classification]?.GetValue<string>(),
+            ["message"] = fallbackResult[ResultKey.FailureMessage]?.GetValue<string>(),
         };
     }
 
@@ -104,14 +106,14 @@ internal static class AutoResultSupport
             ["schemaVersion"] = 1,
             ["packageId"] = packageId,
             ["version"] = version,
-            ["batchId"] = batchId,
-            ["attempt"] = attempt,
-            ["source"] = source,
-            ["analyzedAt"] = DateTimeOffset.UtcNow.ToString("O"),
-            ["disposition"] = "retryable-failure",
+            [ResultKey.BatchId] = batchId,
+            [ResultKey.Attempt] = attempt,
+            [ResultKey.Source] = source,
+            [ResultKey.AnalyzedAt] = DateTimeOffset.UtcNow.ToString("O"),
+            [ResultKey.Disposition] = AnalysisDisposition.RetryableFailure,
             ["phase"] = "selection",
-            ["classification"] = "analysis-selection-failed",
-            ["failureMessage"] = message,
+            [ResultKey.Classification] = "analysis-selection-failed",
+            [ResultKey.FailureMessage] = message,
             ["timings"] = new JsonObject { ["totalMs"] = null },
             ["steps"] = new JsonObject { ["install"] = null, ["opencli"] = null, ["xmldoc"] = null },
             ["artifacts"] = new JsonObject { ["opencliArtifact"] = null, ["xmldocArtifact"] = null },
@@ -135,10 +137,10 @@ internal static class AutoResultSupport
             packageId,
             version,
             resultPath,
-            result["disposition"]?.GetValue<string>(),
+            result[ResultKey.Disposition]?.GetValue<string>(),
             json,
             cancellationToken,
-            result["analysisMode"]?.GetValue<string>(),
+            result[ResultKey.AnalysisMode]?.GetValue<string>(),
             result["analysisSelection"]?["reason"]?.GetValue<string>(),
             result["fallback"]?["from"]?.GetValue<string>());
     }

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.NuGet;
+namespace InSpectra.Gen.Acquisition.NuGet;
 
 using System.Text.Json;
 

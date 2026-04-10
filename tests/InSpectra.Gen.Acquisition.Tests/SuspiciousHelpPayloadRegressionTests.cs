@@ -1,8 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
-using InSpectra.Discovery.Tool.Help.Artifacts;
-using InSpectra.Discovery.Tool.Infrastructure.Host;
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Help.Artifacts;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using System.Text.Json.Nodes;
 using Xunit;

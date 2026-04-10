@@ -1,15 +1,16 @@
-namespace InSpectra.Discovery.Tool.App.Composition;
+namespace InSpectra.Gen.Acquisition.App.Composition;
 
-using InSpectra.Discovery.Tool.Promotion;
+using InSpectra.Gen.Acquisition.Promotion;
 
-using InSpectra.Discovery.Tool.Docs;
+using InSpectra.Gen.Acquisition.Docs;
 
-using InSpectra.Discovery.Tool.Analysis;
+using InSpectra.Gen.Acquisition.Analysis;
 
-using InSpectra.Discovery.Tool.Queue;
+using InSpectra.Gen.Acquisition.Queue;
 
-using InSpectra.Discovery.Tool.Catalog;
+using InSpectra.Gen.Acquisition.Catalog;
 
+using InSpectra.Gen.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;
 using System.Reflection;

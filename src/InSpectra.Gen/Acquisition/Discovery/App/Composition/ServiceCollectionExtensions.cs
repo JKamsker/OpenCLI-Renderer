@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.App.Composition;
+namespace InSpectra.Gen.Acquisition.App.Composition;
 
-using InSpectra.Discovery.Tool.Analysis;
-using InSpectra.Discovery.Tool.Catalog;
-using InSpectra.Discovery.Tool.Docs;
-using InSpectra.Discovery.Tool.Promotion;
-using InSpectra.Discovery.Tool.Queue;
+using InSpectra.Gen.Acquisition.Analysis;
+using InSpectra.Gen.Acquisition.Catalog;
+using InSpectra.Gen.Acquisition.Docs;
+using InSpectra.Gen.Acquisition.Promotion;
+using InSpectra.Gen.Acquisition.Queue;
 using Microsoft.Extensions.DependencyInjection;
 
 internal static class ServiceCollectionExtensions

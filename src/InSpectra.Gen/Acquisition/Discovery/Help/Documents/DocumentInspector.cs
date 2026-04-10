@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Help.Documents;
+namespace InSpectra.Gen.Acquisition.Help.Documents;
 
-using InSpectra.Discovery.Tool.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Help.OpenCli;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using System.Text.RegularExpressions;
 

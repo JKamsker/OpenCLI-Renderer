@@ -1,4 +1,6 @@
-namespace InSpectra.Discovery.Tool.Promotion.Results;
+namespace InSpectra.Gen.Acquisition.Promotion.Results;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -10,16 +12,16 @@ internal static class PromotionFailureResultSupport
             ["schemaVersion"] = 1,
             ["packageId"] = item["packageId"]?.GetValue<string>(),
             ["version"] = item["version"]?.GetValue<string>(),
-            ["batchId"] = batchId,
-            ["attempt"] = attempt,
+            [ResultKey.BatchId] = batchId,
+            [ResultKey.Attempt] = attempt,
             ["trusted"] = false,
-            ["source"] = "workflow_run",
-            ["analyzedAt"] = now.ToString("O"),
-            ["disposition"] = "retryable-failure",
+            [ResultKey.Source] = "workflow_run",
+            [ResultKey.AnalyzedAt] = now.ToString("O"),
+            [ResultKey.Disposition] = AnalysisDisposition.RetryableFailure,
             ["retryEligible"] = true,
             ["phase"] = "infra",
-            ["classification"] = classification,
-            ["failureMessage"] = message,
+            [ResultKey.Classification] = classification,
+            [ResultKey.FailureMessage] = message,
             ["failureSignature"] = $"infra|{classification}|{message}",
             ["packageUrl"] = item["packageUrl"]?.GetValue<string>(),
             ["totalDownloads"] = item["totalDownloads"]?.GetValue<long?>(),
@@ -64,9 +66,9 @@ internal static class PromotionFailureResultSupport
         };
 
     public static string GetNonSuccessReason(JsonObject result, JsonObject stateRecord)
-        => result["failureMessage"]?.GetValue<string>() ??
+        => result[ResultKey.FailureMessage]?.GetValue<string>() ??
            stateRecord["lastFailureMessage"]?.GetValue<string>() ??
-           GetDefaultReasonMessage(stateRecord["currentStatus"]?.GetValue<string>(), result["classification"]?.GetValue<string>());
+           GetDefaultReasonMessage(stateRecord["currentStatus"]?.GetValue<string>(), result[ResultKey.Classification]?.GetValue<string>());
 
     private static string GetDefaultReasonMessage(string? status, string? classification)
         => classification switch
@@ -82,7 +84,7 @@ internal static class PromotionFailureResultSupport
             "unsupported-platform" => "The tool does not support the runner operating system.",
             "unsupported-command" => "The tool does not implement the expected introspection command.",
             "invalid-json" => "The tool exited, but its JSON output could not be parsed.",
-            _ when string.Equals(status, "terminal-negative", StringComparison.Ordinal) => "The package did not satisfy the selected analyzer preconditions.",
+            _ when string.Equals(status, AnalysisDisposition.TerminalNegative, StringComparison.Ordinal) => "The package did not satisfy the selected analyzer preconditions.",
             _ => "No explicit reason was recorded.",
         };
 }

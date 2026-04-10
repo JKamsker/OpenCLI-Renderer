@@ -1,7 +1,7 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.Crawling;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.Crawling;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
 using System.Text.RegularExpressions;
 

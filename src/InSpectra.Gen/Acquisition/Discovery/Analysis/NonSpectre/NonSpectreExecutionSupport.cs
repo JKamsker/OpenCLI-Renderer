@@ -1,10 +1,12 @@
-namespace InSpectra.Discovery.Tool.Analysis.NonSpectre;
+namespace InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Analysis.Output;
+using InSpectra.Gen.Acquisition.Analysis.Output;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -173,7 +175,7 @@ internal static class NonSpectreExecutionSupport
             packageId,
             version,
             resultPath,
-            result["disposition"]?.GetValue<string>(),
+            result[ResultKey.Disposition]?.GetValue<string>(),
             json,
             cancellationToken);
     }

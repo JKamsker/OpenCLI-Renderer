@@ -1,12 +1,14 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Execution;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Execution;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Results;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Results;
 
-using InSpectra.Discovery.Tool.Analysis.Tools;
+using InSpectra.Gen.Acquisition.Analysis.Tools;
 
-using InSpectra.Discovery.Tool.Analysis.Auto.Runners;
+using InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -28,7 +30,7 @@ internal static class AutoNativeExecutionSupport
         bool suppressOutput,
         CancellationToken cancellationToken)
     {
-        if (!string.Equals(descriptor.PreferredAnalysisMode, "native", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(descriptor.PreferredAnalysisMode, AnalysisMode.Native, StringComparison.OrdinalIgnoreCase))
         {
             return NativeAnalysisOutcome.Continue(null);
         }
@@ -50,7 +52,7 @@ internal static class AutoNativeExecutionSupport
             return NativeAnalysisOutcome.Continue(null);
         }
 
-        AutoResultSupport.ApplyDescriptor(nativeResult, descriptor, "native", null, descriptor.CliFramework);
+        AutoResultSupport.ApplyDescriptor(nativeResult, descriptor, AnalysisMode.Native, null, descriptor.CliFramework);
         RepositoryPathResolver.WriteJsonFile(resultPath, nativeResult);
         if (!AutoResultInspector.ShouldTryHelpFallback(nativeResult))
         {

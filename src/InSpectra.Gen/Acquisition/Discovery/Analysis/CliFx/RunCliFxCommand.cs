@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

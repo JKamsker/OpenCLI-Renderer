@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Catalog.Filtering.CliFx;
+namespace InSpectra.Gen.Acquisition.Catalog.Filtering.CliFx;
 
 internal sealed class CliFxFilterOptions
 {

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.NuGet;
+namespace InSpectra.Gen.Acquisition.NuGet;
 
 using System.Net;
 using System.Net.Http.Headers;
@@ -11,7 +11,7 @@ internal sealed class NuGetApiClient
     public NuGetApiClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("InSpectra.Discovery.Tool", "0.1.0"));
+        _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("InSpectra.Gen.Acquisition", "0.1.0"));
     }
 
     public Task<NuGetServiceIndex> GetServiceResourcesAsync(string serviceIndexUrl, CancellationToken cancellationToken)

@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Catalog;
+namespace InSpectra.Gen.Acquisition.Catalog;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
-using InSpectra.Discovery.Tool.Catalog.Delta;
+using InSpectra.Gen.Acquisition.Catalog.Delta;
 
-using InSpectra.Discovery.Tool.Infrastructure.Settings;
+using InSpectra.Gen.Acquisition.Infrastructure.Settings;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

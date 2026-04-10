@@ -1,19 +1,21 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.OpenCli;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.OpenCli;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Execution;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 internal sealed class CliFxService
 {
     private static readonly NonSpectreAnalysisExecutionDefinition Definition = new(
-        AnalysisMode: "clifx",
+        AnalysisMode: AnalysisMode.CliFx,
         TempRootPrefix: "inspectra-clifx",
         TimeoutLabel: "CliFx analysis",
         DefaultCliFramework: "CliFx",

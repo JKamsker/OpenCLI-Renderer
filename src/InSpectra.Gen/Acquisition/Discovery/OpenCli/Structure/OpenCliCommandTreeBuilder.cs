@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.OpenCli.Structure;
+namespace InSpectra.Gen.Acquisition.OpenCli.Structure;
 
 
 internal sealed class OpenCliCommandTreeBuilder

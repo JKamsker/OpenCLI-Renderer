@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Static;
+namespace InSpectra.Gen.Acquisition.Analysis.Static;
 
-using InSpectra.Discovery.Tool.Analysis.Settings;
+using InSpectra.Gen.Acquisition.Analysis.Settings;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

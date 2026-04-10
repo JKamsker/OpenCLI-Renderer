@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.Inspection;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
 
 using dnlib.DotNet;

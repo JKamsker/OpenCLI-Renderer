@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.App.Machine;
+namespace InSpectra.Gen.Acquisition.App.Machine;
 
 
 internal sealed record MachineEnvelope<T>(

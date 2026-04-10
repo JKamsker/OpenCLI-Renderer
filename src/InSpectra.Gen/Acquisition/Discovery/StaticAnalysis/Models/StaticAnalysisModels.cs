@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.Models;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.Models;
 
 
 internal sealed record StaticCommandDefinition(

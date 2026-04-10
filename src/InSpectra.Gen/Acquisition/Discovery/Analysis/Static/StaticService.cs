@@ -1,17 +1,19 @@
-namespace InSpectra.Discovery.Tool.Analysis.Static;
+namespace InSpectra.Gen.Acquisition.Analysis.Static;
 
-using InSpectra.Discovery.Tool.Infrastructure.Host;
+using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.OpenCli;
+using InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.Inspection;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
-using InSpectra.Discovery.Tool.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 internal sealed class StaticService
 {
     private static readonly NonSpectreAnalysisExecutionDefinition Definition = new(
-        AnalysisMode: "static",
+        AnalysisMode: AnalysisMode.Static,
         TempRootPrefix: "inspectra-static",
         TimeoutLabel: "Static analysis",
         DefaultCliFramework: "CommandLineParser",

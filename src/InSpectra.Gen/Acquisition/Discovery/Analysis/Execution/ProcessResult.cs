@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.Execution;
+namespace InSpectra.Gen.Acquisition.Analysis.Execution;
 
 
 using System.Text;

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.Attributes;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
 
 using dnlib.DotNet;
 

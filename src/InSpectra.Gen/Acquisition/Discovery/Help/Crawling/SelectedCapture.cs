@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Crawling;
+namespace InSpectra.Gen.Acquisition.Help.Crawling;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
 
 internal sealed record SelectedCapture(string CommandKey, Document Document);

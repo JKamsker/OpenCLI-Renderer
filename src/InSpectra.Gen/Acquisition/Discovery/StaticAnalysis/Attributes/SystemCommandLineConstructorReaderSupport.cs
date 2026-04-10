@@ -1,7 +1,7 @@
-namespace InSpectra.Discovery.Tool.StaticAnalysis.Attributes;
+namespace InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
 
-using InSpectra.Discovery.Tool.StaticAnalysis.Inspection;
-using InSpectra.Discovery.Tool.StaticAnalysis.Models;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
 
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;

@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Commands;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Commands;
 
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Batch;
+using InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Discovery.Tool.Infrastructure.Settings;
+using InSpectra.Gen.Acquisition.Infrastructure.Settings;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

@@ -1,11 +1,12 @@
-namespace InSpectra.Discovery.Tool.Analysis.Output;
+namespace InSpectra.Gen.Acquisition.Analysis.Output;
 
-using InSpectra.Discovery.Tool.Infrastructure.Json;
+using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
-using InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+using InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -19,16 +20,16 @@ internal static class ResultSupport
             ["schemaVersion"] = 1,
             ["packageId"] = packageId,
             ["version"] = version,
-            ["batchId"] = batchId,
-            ["attempt"] = attempt,
+            [ResultKey.BatchId] = batchId,
+            [ResultKey.Attempt] = attempt,
             ["trusted"] = false,
-            ["source"] = source,
-            ["analyzedAt"] = analyzedAt.ToString("O"),
-            ["disposition"] = "retryable-failure",
+            [ResultKey.Source] = source,
+            [ResultKey.AnalyzedAt] = analyzedAt.ToString("O"),
+            [ResultKey.Disposition] = AnalysisDisposition.RetryableFailure,
             ["retryEligible"] = true,
             ["phase"] = "bootstrap",
-            ["classification"] = "uninitialized",
-            ["failureMessage"] = null,
+            [ResultKey.Classification] = "uninitialized",
+            [ResultKey.FailureMessage] = null,
             ["failureSignature"] = null,
             ["packageUrl"] = $"https://www.nuget.org/packages/{packageId}/{version}",
             ["totalDownloads"] = null,

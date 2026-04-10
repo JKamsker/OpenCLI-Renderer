@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Analysis.Auto.Runners;
+namespace InSpectra.Gen.Acquisition.Analysis.Auto.Runners;
 
-using InSpectra.Discovery.Tool.Analysis.Untrusted;
+using InSpectra.Gen.Acquisition.Analysis.Untrusted;
 
 internal sealed class AutoNativeRunnerAdapter : IAutoNativeRunner
 {

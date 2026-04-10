@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Signatures;
+namespace InSpectra.Gen.Acquisition.Help.Signatures;
 
-using InSpectra.Discovery.Tool.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Documents;
 
 internal static class InvocationSupport
 {

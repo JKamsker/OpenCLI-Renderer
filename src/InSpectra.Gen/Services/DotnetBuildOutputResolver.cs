@@ -6,7 +6,7 @@ internal sealed record DotnetBuildOutput(
     string TargetPath,
     IReadOnlyList<string> Warnings);
 
-public sealed class DotnetBuildOutputResolver(ProcessRunner processRunner)
+public sealed class DotnetBuildOutputResolver(IProcessRunner processRunner)
 {
     internal async Task<DotnetBuildOutput> ResolveAsync(
         string projectPath,

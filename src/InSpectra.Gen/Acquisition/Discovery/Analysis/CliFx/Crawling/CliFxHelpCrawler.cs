@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Analysis.CliFx.Crawling;
+namespace InSpectra.Gen.Acquisition.Analysis.CliFx.Crawling;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
 
-using InSpectra.Discovery.Tool.Analysis.CliFx.Execution;
-using InSpectra.Discovery.Tool.Help.Crawling;
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
+using InSpectra.Gen.Acquisition.Help.Crawling;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 
 using System.Collections.Concurrent;

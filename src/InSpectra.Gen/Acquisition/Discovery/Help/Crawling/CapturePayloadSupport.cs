@@ -1,13 +1,13 @@
-namespace InSpectra.Discovery.Tool.Help.Crawling;
+namespace InSpectra.Gen.Acquisition.Help.Crawling;
 
-using InSpectra.Discovery.Tool.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Help.OpenCli;
 
-using InSpectra.Discovery.Tool.Help.Documents;
-using InSpectra.Discovery.Tool.Help.Signatures;
+using InSpectra.Gen.Acquisition.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
-using InSpectra.Discovery.Tool.Infrastructure.Commands;
+using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Discovery.Tool.Help.Parsing;
+using InSpectra.Gen.Acquisition.Help.Parsing;
 
 using System.Text.Json.Nodes;
 

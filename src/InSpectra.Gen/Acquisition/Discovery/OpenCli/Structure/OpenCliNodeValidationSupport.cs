@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.OpenCli.Structure;
+namespace InSpectra.Gen.Acquisition.OpenCli.Structure;
 
-using InSpectra.Discovery.Tool.OpenCli.Options;
+using InSpectra.Gen.Acquisition.OpenCli.Options;
 
 using System.Text.Json.Nodes;
 

@@ -1,6 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.Help.Batch;
+namespace InSpectra.Gen.Acquisition.Analysis.Help.Batch;
 
-using InSpectra.Discovery.Tool.Analysis.Help.Models;
+using InSpectra.Gen.Acquisition.Analysis.Help.Models;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -36,9 +38,9 @@ internal static class HelpBatchArtifactSupport
     }
 
     public static bool RequiresCrawlArtifact(string? analysisMode)
-        => string.Equals(analysisMode, "help", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(analysisMode, "clifx", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(analysisMode, "static", StringComparison.OrdinalIgnoreCase);
+        => string.Equals(analysisMode, AnalysisMode.Help, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(analysisMode, AnalysisMode.CliFx, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(analysisMode, AnalysisMode.Static, StringComparison.OrdinalIgnoreCase);
 
     public static string BuildPackageVersionKey(string packageId, string version)
         => $"{packageId}|{version}";

@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Docs.Commands;
+namespace InSpectra.Gen.Acquisition.Docs.Commands;
 
-using InSpectra.Discovery.Tool.Docs.Services;
-using InSpectra.Discovery.Tool.Infrastructure.Paths;
-using InSpectra.Discovery.Tool.Infrastructure.Settings;
+using InSpectra.Gen.Acquisition.Docs.Services;
+using InSpectra.Gen.Acquisition.Infrastructure.Paths;
+using InSpectra.Gen.Acquisition.Infrastructure.Settings;
 
 using Spectre.Console;
 using Spectre.Console.Cli;

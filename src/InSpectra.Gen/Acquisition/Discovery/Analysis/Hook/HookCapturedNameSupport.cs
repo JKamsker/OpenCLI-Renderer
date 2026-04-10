@@ -1,7 +1,7 @@
-namespace InSpectra.Discovery.Tool.Analysis.Hook;
+namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
-using InSpectra.Discovery.Tool.Help.Signatures;
-using InSpectra.Discovery.Tool.OpenCli.Structure;
+using InSpectra.Gen.Acquisition.Help.Signatures;
+using InSpectra.Gen.Acquisition.OpenCli.Structure;
 
 internal static class HookCapturedNameSupport
 {

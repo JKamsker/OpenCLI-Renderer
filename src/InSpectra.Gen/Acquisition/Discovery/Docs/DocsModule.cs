@@ -1,8 +1,8 @@
-namespace InSpectra.Discovery.Tool.Docs;
+namespace InSpectra.Gen.Acquisition.Docs;
 
-using InSpectra.Discovery.Tool.Docs.Commands;
+using InSpectra.Gen.Acquisition.Docs.Commands;
 
-using InSpectra.Discovery.Tool.Docs.Services;
+using InSpectra.Gen.Acquisition.Docs.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console.Cli;

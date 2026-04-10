@@ -1,10 +1,10 @@
-namespace InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+namespace InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
 
-using InSpectra.Discovery.Tool.Packages;
+using InSpectra.Gen.Acquisition.Packages;
 
-using InSpectra.Discovery.Tool.NuGet;
+using InSpectra.Gen.Acquisition.NuGet;
 
-using InSpectra.Discovery.Tool.Catalog.Indexing;
+using InSpectra.Gen.Acquisition.Catalog.Indexing;
 
 internal sealed class SpectreConsoleCatalogInspector
 {

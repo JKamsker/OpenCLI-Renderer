@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Queue.Planning;
+namespace InSpectra.Gen.Acquisition.Queue.Planning;
 
-using InSpectra.Discovery.Tool.Queue.Models;
+using InSpectra.Gen.Acquisition.Queue.Models;
 
 internal static class DotnetTargetFrameworkRuntimeSupport
 {

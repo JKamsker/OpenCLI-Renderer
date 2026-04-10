@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Packages;
+namespace InSpectra.Gen.Acquisition.Packages;
 
-using InSpectra.Discovery.Tool.Frameworks;
+using InSpectra.Gen.Acquisition.Frameworks;
 
 using System.IO.Compression;
 

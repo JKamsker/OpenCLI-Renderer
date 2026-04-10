@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+namespace InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
 
-using InSpectra.Discovery.Tool.Packages;
+using InSpectra.Gen.Acquisition.Packages;
 
 
 internal sealed record SpectreConsoleFilterSnapshot(

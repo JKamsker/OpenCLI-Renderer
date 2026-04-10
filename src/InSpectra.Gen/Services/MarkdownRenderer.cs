@@ -171,14 +171,14 @@ public sealed class MarkdownRenderer(
     }
 
     private void AppendCommandSections(
-        IEnumerable<NormalizedCommand> commands,
+        IReadOnlyList<NormalizedCommand> commands,
         StringBuilder builder,
         bool includeMetadata,
         int headingLevel,
         HybridLinkContext? hybridContext = null,
         MarkdownRenderOptions? markdownOptions = null)
     {
-        if (!commands.Any())
+        if (commands.Count == 0)
         {
             return;
         }

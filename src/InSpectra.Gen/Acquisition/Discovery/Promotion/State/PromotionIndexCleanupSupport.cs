@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Promotion.State;
+namespace InSpectra.Gen.Acquisition.Promotion.State;
 
 internal static class PromotionIndexCleanupSupport
 {

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Analysis.Introspection;
+namespace InSpectra.Gen.Acquisition.Analysis.Introspection;
 
 using System.Text.RegularExpressions;
 

@@ -1,4 +1,4 @@
-namespace InSpectra.Discovery.Tool.Catalog.Filtering.SpectreConsole;
+namespace InSpectra.Gen.Acquisition.Catalog.Filtering.SpectreConsole;
 
 internal enum SpectreConsoleFilterMode
 {

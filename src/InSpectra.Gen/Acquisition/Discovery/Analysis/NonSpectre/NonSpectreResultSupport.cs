@@ -1,6 +1,8 @@
-namespace InSpectra.Discovery.Tool.Analysis.NonSpectre;
+namespace InSpectra.Gen.Acquisition.Analysis.NonSpectre;
 
-using InSpectra.Discovery.Tool.Analysis.Output;
+using InSpectra.Gen.Acquisition.Analysis.Output;
+
+using InSpectra.Discovery.Tool.Analysis;
 
 using System.Text.Json.Nodes;
 
@@ -19,8 +21,8 @@ internal static class NonSpectreResultSupport
     {
         var result = ResultSupport.CreateInitialResult(packageId, version, batchId, attempt, source, analyzedAt);
         result["command"] = commandName;
-        result["cliFramework"] = cliFramework;
-        result["analysisMode"] = analysisMode;
+        result[ResultKey.CliFramework] = cliFramework;
+        result[ResultKey.AnalysisMode] = analysisMode;
         result["timings"]!.AsObject()["crawlMs"] = null;
         result["artifacts"]!.AsObject()["crawlArtifact"] = null;
         return result;
@@ -28,17 +30,17 @@ internal static class NonSpectreResultSupport
 
     public static void ApplyRetryableFailure(JsonObject result, string phase, string classification, string? message)
     {
-        result["disposition"] = "retryable-failure";
+        result[ResultKey.Disposition] = AnalysisDisposition.RetryableFailure;
         result["retryEligible"] = true;
         result["phase"] = phase;
-        result["classification"] = classification;
-        result["failureMessage"] = message;
+        result[ResultKey.Classification] = classification;
+        result[ResultKey.FailureMessage] = message;
     }
 
     public static void ApplyUnexpectedRetryableFailure(JsonObject result, string? message)
     {
         var phase = result["phase"]?.GetValue<string>();
-        var classification = result["classification"]?.GetValue<string>();
+        var classification = result[ResultKey.Classification]?.GetValue<string>();
         if (string.IsNullOrWhiteSpace(phase))
         {
             phase = "bootstrap";
@@ -54,27 +56,27 @@ internal static class NonSpectreResultSupport
 
     public static void ApplyTerminalFailure(JsonObject result, string phase, string classification, string? message)
     {
-        result["disposition"] = "terminal-failure";
+        result[ResultKey.Disposition] = AnalysisDisposition.TerminalFailure;
         result["retryEligible"] = false;
         result["phase"] = phase;
-        result["classification"] = classification;
-        result["failureMessage"] = message;
+        result[ResultKey.Classification] = classification;
+        result[ResultKey.FailureMessage] = message;
     }
 
     public static void ApplySuccess(JsonObject result, string classification, string artifactSource)
     {
-        result["disposition"] = "success";
+        result[ResultKey.Disposition] = AnalysisDisposition.Success;
         result["retryEligible"] = false;
         result["phase"] = "complete";
-        result["classification"] = classification;
-        result["failureMessage"] = null;
+        result[ResultKey.Classification] = classification;
+        result[ResultKey.FailureMessage] = null;
         result["failureSignature"] = null;
         result["opencliSource"] = artifactSource;
 
         var openCliStep = new JsonObject
         {
             ["status"] = "ok",
-            ["classification"] = classification,
+            [ResultKey.Classification] = classification,
             ["artifactSource"] = artifactSource,
         };
         result["steps"]!.AsObject()["opencli"] = openCliStep.DeepClone();
@@ -83,13 +85,13 @@ internal static class NonSpectreResultSupport
 
     public static void FinalizeFailureSignature(JsonObject result)
     {
-        var disposition = result["disposition"]?.GetValue<string>();
+        var disposition = result[ResultKey.Disposition]?.GetValue<string>();
         if (disposition is "retryable-failure" or "terminal-failure")
         {
             result["failureSignature"] = ResultSupport.GetFailureSignature(
                 result["phase"]?.GetValue<string>() ?? "unknown",
-                result["classification"]?.GetValue<string>() ?? "unknown",
-                result["failureMessage"]?.GetValue<string>());
+                result[ResultKey.Classification]?.GetValue<string>() ?? "unknown",
+                result[ResultKey.FailureMessage]?.GetValue<string>());
         }
         else
         {

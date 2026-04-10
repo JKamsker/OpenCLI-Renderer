@@ -1,6 +1,6 @@
-namespace InSpectra.Discovery.Tool.Help.Documents;
+namespace InSpectra.Gen.Acquisition.Help.Documents;
 
-using InSpectra.Discovery.Tool.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Help.OpenCli;
 
 internal static class ReachableDocumentSupport
 {
