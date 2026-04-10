@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Help.Parsing;
 
+using InSpectra.Gen.Acquisition.Help.Parsing.OptionTable;
 
 using System.Text.RegularExpressions;
 

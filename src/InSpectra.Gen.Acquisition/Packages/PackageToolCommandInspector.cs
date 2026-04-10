@@ -1,6 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Packages;
 
 using InSpectra.Gen.Acquisition.NuGet;
+using InSpectra.Gen.Acquisition.Packages.Archive;
 
 internal sealed class PackageToolCommandInspector
 {

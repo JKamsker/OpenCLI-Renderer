@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests.Help;
 
-using InSpectra.Gen.Acquisition.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Commands;
 
 public sealed class UsageCommandInferenceSupportTests
 {

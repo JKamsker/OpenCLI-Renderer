@@ -1,5 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Help.Parsing;
 
+using InSpectra.Gen.Acquisition.Help.Parsing.OptionTable;
+
 using InSpectra.Gen.Acquisition.Help.Documents;
 using InSpectra.Gen.Acquisition.Help.Signatures;
 

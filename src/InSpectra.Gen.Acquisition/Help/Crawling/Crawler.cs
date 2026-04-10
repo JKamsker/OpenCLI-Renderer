@@ -3,7 +3,7 @@ namespace InSpectra.Gen.Acquisition.Help.Crawling;
 using InSpectra.Gen.Acquisition.Help.OpenCli;
 
 using InSpectra.Gen.Acquisition.Help.Signatures;
-using InSpectra.Gen.Acquisition.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Commands;
 
 using InSpectra.Gen.Acquisition.Help.Documents;
 

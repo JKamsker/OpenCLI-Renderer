@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
 using InSpectra.Gen.Acquisition.Analysis.Hook;
-using InSpectra.Gen.Acquisition.Analysis.NonSpectre;
+using InSpectra.Gen.Acquisition.Analysis.Results;
 using InSpectra.Gen.Acquisition.Help.Crawling;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 using InSpectra.Gen.Acquisition.Infrastructure;

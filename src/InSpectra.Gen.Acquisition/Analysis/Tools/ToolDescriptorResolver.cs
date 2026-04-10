@@ -3,10 +3,10 @@ namespace InSpectra.Gen.Acquisition.Analysis.Tools;
 using InSpectra.Gen.Acquisition.Frameworks;
 
 using InSpectra.Gen.Acquisition.Packages;
+using InSpectra.Gen.Acquisition.Packages.Archive;
 
+using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.Infrastructure.Paths;
-
-using InSpectra.Gen.Acquisition.Infrastructure.Host;
 
 using InSpectra.Gen.Acquisition.Analysis;
 
@@ -34,7 +34,7 @@ internal sealed class ToolDescriptorResolver : IToolDescriptorResolver
         string? commandName,
         CancellationToken cancellationToken)
     {
-        using var scope = Runtime.CreateNuGetApiClientScope();
+        using var scope = ApplicationLifetime.CreateNuGetApiClientScope();
         var (leaf, catalogLeaf) = await PackageVersionResolver.ResolveAsync(scope.Client, packageId, version, cancellationToken);
         var packageInspection = await new PackageArchiveInspector(scope.Client).InspectAsync(leaf.PackageContent, cancellationToken);
         var resolvedCommandName = ResolveCommandName(packageId, commandName, packageInspection);

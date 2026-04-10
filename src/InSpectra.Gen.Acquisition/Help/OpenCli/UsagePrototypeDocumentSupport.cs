@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Help.OpenCli;
 
 using InSpectra.Gen.Acquisition.Help.Documents;
-using InSpectra.Gen.Acquisition.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Prototypes;
 
 internal static class UsagePrototypeDocumentSupport
 {

@@ -1,5 +1,7 @@
 namespace InSpectra.Gen.Acquisition.OpenCli.Options;
 
+using InSpectra.Gen.Acquisition.OpenCli.Options.Collisions;
+
 using System.Text.Json.Nodes;
 
 internal static class OpenCliOptionSanitizer

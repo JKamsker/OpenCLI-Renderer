@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Packages;
 
+using InSpectra.Gen.Acquisition.Packages.Archive;
 
 using System.Xml.Linq;
 

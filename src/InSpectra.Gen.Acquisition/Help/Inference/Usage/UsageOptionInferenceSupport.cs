@@ -1,6 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Help.Inference.Usage;
 
 using InSpectra.Gen.Acquisition.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Arguments;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Prototypes;
 using InSpectra.Gen.Acquisition.Help.OpenCli;
 using InSpectra.Gen.Acquisition.Help.Signatures;
 

@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
 
 using InSpectra.Gen.Acquisition.Help.Documents;
-using InSpectra.Gen.Acquisition.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Commands;
 using InSpectra.Gen.Acquisition.Help.OpenCli;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 using InSpectra.Gen.Acquisition.OpenCli.Structure;

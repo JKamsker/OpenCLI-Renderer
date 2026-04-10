@@ -1,5 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
+using InSpectra.Gen.Acquisition.Analysis.Hook.Models;
+
 using System.Diagnostics;
 using System.Text.Json;
 

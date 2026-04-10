@@ -2,7 +2,7 @@ namespace InSpectra.Gen.Acquisition.Help.OpenCli;
 
 using InSpectra.Gen.Acquisition.Help.Inference.Descriptions;
 
-using InSpectra.Gen.Acquisition.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Arguments;
 
 using InSpectra.Gen.Acquisition.Help.Signatures;
 

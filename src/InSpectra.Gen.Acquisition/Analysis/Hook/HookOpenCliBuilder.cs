@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
+using InSpectra.Gen.Acquisition.Analysis.Hook.Models;
 using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 

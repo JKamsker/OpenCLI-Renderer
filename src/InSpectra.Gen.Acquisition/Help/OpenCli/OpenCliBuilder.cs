@@ -4,7 +4,7 @@ using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using InSpectra.Gen.Acquisition.Help.Documents;
-using InSpectra.Gen.Acquisition.Help.Inference.Usage;
+using InSpectra.Gen.Acquisition.Help.Inference.Usage.Commands;
 
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
