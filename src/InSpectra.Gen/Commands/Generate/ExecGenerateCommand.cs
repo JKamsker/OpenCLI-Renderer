@@ -1,8 +1,6 @@
-using System.ComponentModel;
 using InSpectra.Gen.Runtime;
 using InSpectra.Gen.Runtime.Acquisition;
 using InSpectra.Gen.Runtime.Output;
-using InSpectra.Gen.Runtime.Settings;
 using InSpectra.Gen.Services;
 using Spectre.Console.Cli;
 
@@ -31,27 +29,4 @@ public sealed class ExecGenerateCommand(IOpenCliGenerationService generationServ
             settings.Verbose,
             () => generationService.GenerateFromExecAsync(request, settings.OutputFile, cancellationToken));
     }
-}
-
-public sealed class ExecGenerateSettings : GenerateCommandSettingsBase
-{
-    [Description("CLI executable or script to invoke.")]
-    [CommandArgument(0, "<SOURCE>")]
-    public string Source { get; init; } = string.Empty;
-
-    [Description("Additional arguments passed directly to the source executable before the export command.")]
-    [CommandOption("--source-arg <ARG>")]
-    public string[] SourceArguments { get; init; } = [];
-
-    [Description("Override the arguments used to invoke the source CLI's OpenCLI export command.")]
-    [CommandOption("--opencli-arg <ARG>")]
-    public string[] OpenCliArguments { get; init; } = [];
-
-    [Description("Working directory to use when invoking the source CLI.")]
-    [CommandOption("--cwd <PATH>")]
-    public string? WorkingDirectory { get; init; }
-
-    [Description("Timeout in seconds for source execution.")]
-    [CommandOption("--timeout <SECONDS>")]
-    public int? TimeoutSeconds { get; init; }
 }

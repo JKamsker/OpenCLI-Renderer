@@ -2,28 +2,31 @@ using System.Text.Json.Serialization;
 
 namespace InSpectra.Gen.Models;
 
-public sealed class OpenCliDocument
+public sealed class OpenCliCommand
 {
-    [JsonPropertyName("opencli")]
-    public string OpenCliVersion { get; init; } = string.Empty;
+    [JsonPropertyName("name")]
+    public string Name { get; init; } = string.Empty;
 
-    [JsonPropertyName("info")]
-    public OpenCliInfo Info { get; init; } = new();
-
-    [JsonPropertyName("conventions")]
-    public OpenCliConventions? Conventions { get; init; }
-
-    [JsonPropertyName("arguments")]
-    public List<OpenCliArgument> Arguments { get; init; } = [];
+    [JsonPropertyName("aliases")]
+    public List<string> Aliases { get; init; } = [];
 
     [JsonPropertyName("options")]
     public List<OpenCliOption> Options { get; init; } = [];
+
+    [JsonPropertyName("arguments")]
+    public List<OpenCliArgument> Arguments { get; init; } = [];
 
     [JsonPropertyName("commands")]
     public List<OpenCliCommand> Commands { get; init; } = [];
 
     [JsonPropertyName("exitCodes")]
     public List<OpenCliExitCode> ExitCodes { get; init; } = [];
+
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    [JsonPropertyName("hidden")]
+    public bool Hidden { get; init; }
 
     [JsonPropertyName("examples")]
     public List<string> Examples { get; init; } = [];

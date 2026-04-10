@@ -2,7 +2,6 @@ using System.Xml;
 using System.Xml.Linq;
 using InSpectra.Gen.Models;
 using InSpectra.Gen.Acquisition.Runtime;
-using InSpectra.Gen.Runtime;
 
 namespace InSpectra.Gen.Services;
 
@@ -195,13 +194,4 @@ public sealed class OpenCliXmlEnricher
 
         public string? Description { get; init; }
     }
-}
-
-public sealed class XmlEnrichmentResult
-{
-    public int MatchedCommandCount { get; set; }
-
-    public int EnrichedDescriptionCount { get; set; }
-
-    public List<string> Warnings { get; } = [];
 }
