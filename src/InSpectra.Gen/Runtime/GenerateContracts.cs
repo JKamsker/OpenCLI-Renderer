@@ -1,3 +1,6 @@
+using InSpectra.Gen.Runtime.Acquisition;
+using InSpectra.Gen.Runtime.Rendering;
+
 namespace InSpectra.Gen.Runtime;
 
 public sealed record GenerateExecutionResult(

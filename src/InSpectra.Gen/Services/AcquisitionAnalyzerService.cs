@@ -8,6 +8,7 @@ using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 using InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
 using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime;
+using InSpectra.Gen.Runtime.Acquisition;
 
 namespace InSpectra.Gen.Services;
 

@@ -1,5 +1,8 @@
 using System.ComponentModel;
 using InSpectra.Gen.Runtime;
+using InSpectra.Gen.Runtime.Acquisition;
+using InSpectra.Gen.Runtime.Output;
+using InSpectra.Gen.Runtime.Settings;
 using InSpectra.Gen.Services;
 using Spectre.Console;
 using Spectre.Console.Cli;

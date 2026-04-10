@@ -3,6 +3,10 @@ using InSpectra.Gen.Commands.Generate;
 using InSpectra.Gen.Commands.Render;
 using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime;
+using InSpectra.Gen.Runtime.Acquisition;
+using InSpectra.Gen.Runtime.Output;
+using InSpectra.Gen.Runtime.Rendering;
+using InSpectra.Gen.Runtime.Settings;
 
 namespace InSpectra.Gen.Tests;
 

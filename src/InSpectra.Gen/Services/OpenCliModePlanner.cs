@@ -1,5 +1,6 @@
 using InSpectra.Gen.Acquisition.Frameworks;
 using InSpectra.Gen.Runtime;
+using InSpectra.Gen.Runtime.Acquisition;
 
 using InSpectra.Gen.Acquisition.Analysis;
 

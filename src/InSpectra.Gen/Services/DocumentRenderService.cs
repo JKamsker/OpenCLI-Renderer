@@ -1,6 +1,8 @@
 using InSpectra.Gen.Models;
 using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime;
+using InSpectra.Gen.Runtime.Acquisition;
+using InSpectra.Gen.Runtime.Rendering;
 
 namespace InSpectra.Gen.Services;
 
