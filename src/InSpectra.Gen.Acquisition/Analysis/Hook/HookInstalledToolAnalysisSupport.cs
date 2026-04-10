@@ -1,7 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
 using InSpectra.Gen.Acquisition.Frameworks;
-using InSpectra.Gen.Acquisition.Help.Inference.Text;
 using InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
@@ -24,8 +23,8 @@ internal sealed class HookInstalledToolAnalysisSupport
     private readonly CommandRuntime _runtime;
     private readonly Func<string?> _hookDllPathResolver;
 
-    public HookInstalledToolAnalysisSupport()
-        : this(new CommandRuntime(), ResolveHookDllPath)
+    public HookInstalledToolAnalysisSupport(CommandRuntime runtime)
+        : this(runtime, ResolveHookDllPath)
     {
     }
 
@@ -92,7 +91,7 @@ internal sealed class HookInstalledToolAnalysisSupport
         }
 
         // Prepare capture path and hook environment.
-        var capturePath = Path.Combine(workingDirectory, "inspectra-capture.json");
+        var capturePath = Path.Combine(outputDirectory, $"inspectra-capture.{Guid.NewGuid():N}.json");
         var hookEnvironment = new Dictionary<string, string>(installedTool.Environment, StringComparer.OrdinalIgnoreCase)
         {
             ["DOTNET_STARTUP_HOOKS"] = hookDllPath,
@@ -111,7 +110,8 @@ internal sealed class HookInstalledToolAnalysisSupport
         var invocationResolution = HookToolProcessInvocationResolver.Resolve(
             installedTool.InstallDirectory,
             commandName,
-            installedTool.CommandPath);
+            installedTool.CommandPath,
+            installedTool.PreferredEntryPointPath);
         if (invocationResolution.TerminalFailureClassification is not null)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
@@ -129,12 +129,16 @@ internal sealed class HookInstalledToolAnalysisSupport
             hookEnvironment[PreferredFrameworkDirectoryEnvironmentVariableName] = preferredFrameworkDirectory;
         }
 
-        var processResult = await InvokeWithHelpFallbackAsync(
+        var processResult = await HookProcessRetrySupport.InvokeWithHelpFallbackAsync(
             invocation,
-            workingDirectory,
             hookEnvironment,
-            commandTimeoutSeconds,
             capturePath,
+            (candidateInvocation, effectiveEnvironment, token) => InvokeHookProcessAsync(
+                candidateInvocation,
+                workingDirectory,
+                effectiveEnvironment,
+                commandTimeoutSeconds,
+                token),
             cancellationToken);
         hookStopwatch.Stop();
 
@@ -143,6 +147,11 @@ internal sealed class HookInstalledToolAnalysisSupport
         // Read and validate the capture file.
         if (!File.Exists(capturePath))
         {
+            if (TryApplyMissingSharedRuntimeFailure(result, commandName, processResult))
+            {
+                return;
+            }
+
             NonSpectreResultSupport.ApplyRetryableFailure(
                 result,
                 phase: "hook-capture",
@@ -164,11 +173,25 @@ internal sealed class HookInstalledToolAnalysisSupport
 
         if (capture.Status != "ok" || capture.Root is null)
         {
-            NonSpectreResultSupport.ApplyRetryableFailure(
-                result,
-                phase: "hook-capture",
-                classification: $"hook-{capture.Status}",
-                capture.Error ?? "Hook capture did not produce an ok result.");
+            var classification = $"hook-{capture.Status}";
+            var failureMessage = capture.Error ?? "Hook capture did not produce an ok result.";
+            if (string.Equals(capture.Status, "capture-version-mismatch", StringComparison.Ordinal))
+            {
+                NonSpectreResultSupport.ApplyTerminalFailure(
+                    result,
+                    phase: "hook-capture",
+                    classification: classification,
+                    failureMessage);
+            }
+            else
+            {
+                NonSpectreResultSupport.ApplyRetryableFailure(
+                    result,
+                    phase: "hook-capture",
+                    classification: classification,
+                    failureMessage);
+            }
+
             return;
         }
 
@@ -197,155 +220,6 @@ internal sealed class HookInstalledToolAnalysisSupport
         return File.Exists(hookPath) ? hookPath : null;
     }
 
-    private async Task<CommandRuntime.ProcessResult> InvokeWithHelpFallbackAsync(
-        HookToolProcessInvocation invocation,
-        string workingDirectory,
-        IReadOnlyDictionary<string, string> environment,
-        int timeoutSeconds,
-        string capturePath,
-        CancellationToken cancellationToken)
-    {
-        var processResult = await InvokeWithInvariantGlobalizationRetryAsync(
-            invocation,
-            workingDirectory,
-            environment,
-            timeoutSeconds,
-            capturePath,
-            cancellationToken);
-        if (!ShouldRetryWithAlternateHelp(processResult, capturePath))
-        {
-            return processResult;
-        }
-
-        foreach (var fallbackInvocation in HookToolProcessInvocationResolver.BuildHelpFallbackInvocations(invocation))
-        {
-            TryDeleteCaptureFile(capturePath);
-            processResult = await InvokeWithInvariantGlobalizationRetryAsync(
-                fallbackInvocation,
-                workingDirectory,
-                environment,
-                timeoutSeconds,
-                capturePath,
-                cancellationToken);
-            if (!ShouldRetryWithAlternateHelp(processResult, capturePath))
-            {
-                return processResult;
-            }
-        }
-
-        return processResult;
-    }
-
-    private async Task<CommandRuntime.ProcessResult> InvokeWithInvariantGlobalizationRetryAsync(
-        HookToolProcessInvocation invocation,
-        string workingDirectory,
-        IReadOnlyDictionary<string, string> environment,
-        int timeoutSeconds,
-        string capturePath,
-        CancellationToken cancellationToken)
-    {
-        var effectiveEnvironment = environment;
-        var processResult = await InvokeHookProcessAsync(
-            invocation,
-            workingDirectory,
-            effectiveEnvironment,
-            timeoutSeconds,
-            cancellationToken);
-        if (!File.Exists(capturePath)
-            && DotnetRuntimeCompatibilitySupport.LooksLikeMissingIcu(processResult)
-            && !effectiveEnvironment.ContainsKey(GlobalizationInvariantEnvironmentVariableName))
-        {
-            effectiveEnvironment = new Dictionary<string, string>(effectiveEnvironment, StringComparer.OrdinalIgnoreCase)
-            {
-                [GlobalizationInvariantEnvironmentVariableName] = "1",
-            };
-
-            TryDeleteCaptureFile(capturePath);
-            processResult = await InvokeHookProcessAsync(
-                invocation,
-                workingDirectory,
-                effectiveEnvironment,
-                timeoutSeconds,
-                cancellationToken);
-            if (File.Exists(capturePath) || !LooksLikeRejectedHelpInvocation(processResult))
-            {
-                return processResult;
-            }
-
-            foreach (var fallbackInvocation in HookToolProcessInvocationResolver.BuildHelpFallbackInvocations(invocation))
-            {
-                TryDeleteCaptureFile(capturePath);
-                processResult = await InvokeHookProcessAsync(
-                    fallbackInvocation,
-                    workingDirectory,
-                    effectiveEnvironment,
-                    timeoutSeconds,
-                    cancellationToken);
-                if (File.Exists(capturePath) || !LooksLikeRejectedHelpInvocation(processResult))
-                {
-                    return processResult;
-                }
-            }
-        }
-
-        if (File.Exists(capturePath)
-            || !DotnetRuntimeCompatibilitySupport.LooksLikeMissingSharedRuntime(processResult)
-            || effectiveEnvironment.ContainsKey(DotnetRollForwardEnvironmentVariableName))
-        {
-            return processResult;
-        }
-
-        effectiveEnvironment = new Dictionary<string, string>(effectiveEnvironment, StringComparer.OrdinalIgnoreCase)
-        {
-            [DotnetRollForwardEnvironmentVariableName] = DotnetRollForwardMajorValue,
-        };
-
-        TryDeleteCaptureFile(capturePath);
-        processResult = await InvokeHookProcessAsync(
-            invocation,
-            workingDirectory,
-            effectiveEnvironment,
-            timeoutSeconds,
-            cancellationToken);
-        if (File.Exists(capturePath) || !LooksLikeRejectedHelpInvocation(processResult))
-        {
-            return processResult;
-        }
-
-        foreach (var fallbackInvocation in HookToolProcessInvocationResolver.BuildHelpFallbackInvocations(invocation))
-        {
-            TryDeleteCaptureFile(capturePath);
-            processResult = await InvokeHookProcessAsync(
-                fallbackInvocation,
-                workingDirectory,
-                effectiveEnvironment,
-                timeoutSeconds,
-                cancellationToken);
-            if (File.Exists(capturePath) || !LooksLikeRejectedHelpInvocation(processResult))
-            {
-                return processResult;
-            }
-        }
-
-        return processResult;
-    }
-
-    private static bool ShouldRetryWithAlternateHelp(CommandRuntime.ProcessResult processResult, string capturePath)
-    {
-        if (!File.Exists(capturePath))
-        {
-            return LooksLikeRejectedHelpInvocation(processResult);
-        }
-
-        var capture = HookCaptureDeserializer.Deserialize(capturePath);
-        if (capture is null || (capture.Status == "ok" && capture.Root is not null))
-        {
-            return false;
-        }
-
-        return LooksLikeRejectedHelpMessage(capture.Error);
-    }
-
     private Task<CommandRuntime.ProcessResult> InvokeHookProcessAsync(
         HookToolProcessInvocation invocation,
         string workingDirectory,
@@ -361,74 +235,34 @@ internal sealed class HookInstalledToolAnalysisSupport
             workingDirectory,
             cancellationToken);
 
-    private static bool LooksLikeRejectedHelpInvocation(CommandRuntime.ProcessResult processResult)
+    private static bool TryApplyMissingSharedRuntimeFailure(
+        JsonObject result,
+        string commandName,
+        CommandRuntime.ProcessResult processResult)
     {
-        var lines = SplitLines(processResult.Stderr)
-            .Concat(SplitLines(processResult.Stdout))
-            .ToArray();
-        return LooksLikeRejectedHelpLines(lines);
-    }
-
-    private static bool LooksLikeRejectedHelpMessage(string? message)
-        => LooksLikeRejectedHelpLines(SplitLines(message).ToArray());
-
-    private static bool LooksLikeRejectedHelpLines(IReadOnlyList<string?> lines)
-    {
-        for (var index = 0; index < lines.Count; index++)
+        if (!DotnetRuntimeCompatibilitySupport.LooksLikeMissingSharedRuntime(processResult))
         {
-            var firstLine = NormalizeRejectedHelpLine(lines[index]);
-            var secondLine = index + 1 < lines.Count
-                ? NormalizeRejectedHelpLine(lines[index + 1])
-                : null;
-            if (TextNoiseClassifier.LooksLikeRejectedHelpInvocation(firstLine, secondLine))
-            {
-                return true;
-            }
+            return false;
         }
 
-        return false;
-    }
-
-    private static string? NormalizeRejectedHelpLine(string? line)
-    {
-        if (string.IsNullOrWhiteSpace(line))
-        {
-            return line;
-        }
-
-        var trimmed = line.Trim();
-        var separatorIndex = trimmed.IndexOf(": ", StringComparison.Ordinal);
-        if (separatorIndex <= 0 || separatorIndex + 2 >= trimmed.Length)
-        {
-            return trimmed;
-        }
-
-        var prefix = trimmed[..separatorIndex];
-        if (!prefix.EndsWith("Exception", StringComparison.OrdinalIgnoreCase)
-            && !prefix.EndsWith("Error", StringComparison.OrdinalIgnoreCase))
-        {
-            return trimmed;
-        }
-
-        return trimmed[(separatorIndex + 2)..].TrimStart();
-    }
-
-    private static IEnumerable<string?> SplitLines(string? value)
-        => string.IsNullOrWhiteSpace(value)
+        var runtimeIssue = DotnetRuntimeCompatibilitySupport.DetectMissingFramework(
+            commandName,
+            processResult.Stdout,
+            processResult.Stderr);
+        var blockedCommands = runtimeIssue is null
+            ? [DotnetRuntimeCompatibilitySupport.ToDisplayCommand(commandName)]
+            : new[] { runtimeIssue.Command };
+        var requiredFrameworks = runtimeIssue?.Requirement is null
             ? []
-            : value.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+            : new[] { runtimeIssue.Requirement };
 
-    private static void TryDeleteCaptureFile(string capturePath)
-    {
-        try
-        {
-            if (File.Exists(capturePath))
-            {
-                File.Delete(capturePath);
-            }
-        }
-        catch
-        {
-        }
+        NonSpectreResultSupport.ApplyTerminalFailure(
+            result,
+            phase: "hook-capture",
+            classification: "hook-runtime-blocked",
+            DotnetRuntimeCompatibilitySupport.BuildMissingFrameworkFailureMessage(
+                blockedCommands,
+                requiredFrameworks));
+        return true;
     }
 }

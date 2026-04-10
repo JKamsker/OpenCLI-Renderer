@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Packages;
 
+using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.NuGet;
 
 using System.IO.Compression;
@@ -18,7 +19,7 @@ internal sealed class PackageArchiveInspector
         => PackageArchiveInspectionSupport.InspectAsync(
             _apiClient,
             packageContentUrl,
-            "inspectra",
+            InspectraProductInfo.CliCommandName,
             InspectArchive,
             cancellationToken);
 

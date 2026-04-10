@@ -10,8 +10,8 @@ internal static class SystemCommandLineConstructorReaderSupport
 {
     public static (IReadOnlyList<StaticOptionDefinition> Options, IReadOnlyList<StaticValueDefinition> Values) ReadSurface(TypeDef typeDef)
     {
-        var options = new Dictionary<string, StaticOptionDefinition>(StringComparer.OrdinalIgnoreCase);
-        var values = new List<StaticValueDefinition>();
+        var options = new Dictionary<string, ConstructorOptionValue>(StringComparer.OrdinalIgnoreCase);
+        var values = new List<ConstructorArgumentValue>();
 
         foreach (var constructor in typeDef.Methods.Where(static method => method.IsInstanceConstructor && method.HasBody))
         {
@@ -19,23 +19,87 @@ internal static class SystemCommandLineConstructorReaderSupport
         }
 
         return (
-            options.Values.OrderBy(static option => option.LongName ?? option.ShortName?.ToString()).ToArray(),
-            values.OrderBy(static value => value.Index).ToArray());
+            options.Values
+                .Select(static option => option.Definition)
+                .OrderBy(static option => option.LongName ?? option.ShortName?.ToString())
+                .ToArray(),
+            values
+                .Select(static (value, index) => value.Definition with { Index = index })
+                .ToArray());
+    }
+
+    internal static ConstructorArgumentValue? TryBuildArgumentValue(TypeSig? typeSig, IReadOnlyList<ConstructorValue> arguments)
+    {
+        var rawName = arguments.FirstOrDefault() switch
+        {
+            ConstructorStringValue stringValue => stringValue.Value,
+            ConstructorStringArrayValue arrayValue => arrayValue.Values.FirstOrDefault(static value => !string.IsNullOrWhiteSpace(value)),
+            _ => null,
+        };
+        var name = SystemCommandLineConstructorOperationSupport.NormalizeArgumentName(rawName);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return null;
+        }
+
+        var valueType = SystemCommandLineTypeHierarchySupport.ExtractArgumentValueType(typeSig);
+        return new ConstructorArgumentValue(
+            new StaticValueDefinition(
+                Index: 0,
+                Name: name,
+                IsRequired: true,
+                IsSequence: StaticAnalysisTypeSupport.IsSequenceType(valueType),
+                ClrType: StaticAnalysisTypeSupport.GetClrTypeName(valueType),
+                Description: arguments.Skip(1).OfType<ConstructorStringValue>().Select(static value => value.Value).FirstOrDefault(static value => !string.IsNullOrWhiteSpace(value)),
+                DefaultValue: null,
+                AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(valueType)));
+    }
+
+    internal static ConstructorOptionValue? TryBuildOptionValue(TypeSig? typeSig, IReadOnlyList<ConstructorValue> arguments)
+    {
+        var (longName, shortName) = SystemCommandLineConstructorOperationSupport.ReadOptionAliases(arguments.FirstOrDefault());
+        if (longName is null && shortName is null)
+        {
+            return null;
+        }
+
+        var valueType = SystemCommandLineTypeHierarchySupport.ExtractOptionValueType(typeSig);
+        return new ConstructorOptionValue(
+            new StaticOptionDefinition(
+                LongName: longName,
+                ShortName: shortName,
+                IsRequired: false,
+                IsSequence: StaticAnalysisTypeSupport.IsSequenceType(valueType),
+                IsBoolLike: StaticAnalysisTypeSupport.IsBoolType(valueType),
+                ClrType: StaticAnalysisTypeSupport.GetClrTypeName(valueType),
+                Description: arguments.Skip(1).OfType<ConstructorStringValue>().Select(static value => value.Value).FirstOrDefault(static value => !string.IsNullOrWhiteSpace(value)),
+                DefaultValue: null,
+                MetaValue: null,
+                AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(valueType),
+                PropertyName: null));
     }
 
     private static void ReadConstructorSurface(
         MethodDef constructor,
-        IDictionary<string, StaticOptionDefinition> options,
-        ICollection<StaticValueDefinition> values)
+        IDictionary<string, ConstructorOptionValue> options,
+        ICollection<ConstructorArgumentValue> values)
     {
         var stack = new List<ConstructorValue>();
         var locals = new Dictionary<int, ConstructorValue>();
+        var instanceFields = new Dictionary<string, ConstructorValue>(StringComparer.Ordinal);
+        var staticFields = new Dictionary<string, ConstructorValue>(StringComparer.Ordinal);
 
         foreach (var instruction in constructor.Body.Instructions)
         {
-            if (TryReadInt32(instruction, out var intValue))
+            if (SystemCommandLineInstructionSupport.TryReadInt32(instruction, out var intValue))
             {
-                stack.Add(new Int32Value(intValue));
+                stack.Add(new ConstructorInt32Value(intValue));
+                continue;
+            }
+
+            if (SystemCommandLineConstructorOperationSupport.TryReadArgumentValue(constructor, instruction, out var argumentValue))
+            {
+                stack.Add(argumentValue);
                 continue;
             }
 
@@ -44,17 +108,14 @@ internal static class SystemCommandLineConstructorReaderSupport
                 case Code.Nop:
                 case Code.Ret:
                     break;
-                case Code.Ldarg_0:
-                    stack.Add(CurrentCommandValue.Instance);
-                    break;
                 case Code.Ldstr:
-                    stack.Add(new StringValue((string)instruction.Operand));
+                    stack.Add(new ConstructorStringValue((string)instruction.Operand));
                     break;
                 case Code.Ldnull:
-                    stack.Add(NullValue.Instance);
+                    stack.Add(ConstructorNullValue.Instance);
                     break;
                 case Code.Newarr:
-                    stack.Add(BuildArrayValue(stack, instruction.Operand as ITypeDefOrRef));
+                    stack.Add(SystemCommandLineConstructorOperationSupport.BuildArrayValue(stack, instruction.Operand as ITypeDefOrRef));
                     break;
                 case Code.Dup:
                     if (stack.Count > 0)
@@ -64,10 +125,10 @@ internal static class SystemCommandLineConstructorReaderSupport
 
                     break;
                 case Code.Pop:
-                    Pop(stack);
+                    SystemCommandLineConstructorOperationSupport.Pop(stack);
                     break;
                 case Code.Stelem_Ref:
-                    ApplyArrayElementAssignment(stack);
+                    SystemCommandLineConstructorOperationSupport.ApplyArrayElementAssignment(stack);
                     break;
                 case Code.Stloc:
                 case Code.Stloc_S:
@@ -75,9 +136,9 @@ internal static class SystemCommandLineConstructorReaderSupport
                 case Code.Stloc_1:
                 case Code.Stloc_2:
                 case Code.Stloc_3:
-                    if (TryGetLocalIndex(instruction, out var storeIndex))
+                    if (SystemCommandLineInstructionSupport.TryGetLocalIndex(instruction, out var storeIndex))
                     {
-                        locals[storeIndex] = Pop(stack);
+                        locals[storeIndex] = SystemCommandLineConstructorOperationSupport.Pop(stack);
                     }
 
                     break;
@@ -87,11 +148,23 @@ internal static class SystemCommandLineConstructorReaderSupport
                 case Code.Ldloc_1:
                 case Code.Ldloc_2:
                 case Code.Ldloc_3:
-                    if (TryGetLocalIndex(instruction, out var loadIndex))
+                    if (SystemCommandLineInstructionSupport.TryGetLocalIndex(instruction, out var loadIndex))
                     {
-                        stack.Add(locals.TryGetValue(loadIndex, out var value) ? value : UnknownValue.Instance);
+                        stack.Add(locals.TryGetValue(loadIndex, out var value) ? value : ConstructorUnknownValue.Instance);
                     }
 
+                    break;
+                case Code.Stfld:
+                    SystemCommandLineConstructorOperationSupport.ApplyFieldStore(stack, instruction.Operand as IField, instanceFields);
+                    break;
+                case Code.Ldfld:
+                    SystemCommandLineConstructorOperationSupport.ApplyFieldLoad(stack, instruction.Operand as IField, instanceFields);
+                    break;
+                case Code.Stsfld:
+                    SystemCommandLineConstructorOperationSupport.ApplyStaticFieldStore(stack, instruction.Operand as IField, staticFields);
+                    break;
+                case Code.Ldsfld:
+                    SystemCommandLineConstructorOperationSupport.ApplyStaticFieldLoad(stack, instruction.Operand as IField, staticFields);
                     break;
                 case Code.Newobj:
                     stack.Add(BuildConstructedValue(stack, instruction.Operand as IMethod));
@@ -107,63 +180,42 @@ internal static class SystemCommandLineConstructorReaderSupport
         }
     }
 
-    private static ConstructorValue BuildArrayValue(List<ConstructorValue> stack, ITypeDefOrRef? elementType)
-    {
-        if (!string.Equals(elementType?.FullName, "System.String", StringComparison.Ordinal))
-        {
-            Pop(stack);
-            return UnknownValue.Instance;
-        }
-
-        return Pop(stack) is Int32Value length && length.Value >= 0
-            ? new StringArrayValue(length.Value)
-            : UnknownValue.Instance;
-    }
-
-    private static void ApplyArrayElementAssignment(List<ConstructorValue> stack)
-    {
-        var value = Pop(stack);
-        var index = Pop(stack) as Int32Value;
-        var array = Pop(stack) as StringArrayValue;
-        if (array is null || index is null || value is not StringValue stringValue)
-        {
-            return;
-        }
-
-        if (index.Value >= 0 && index.Value < array.Values.Length)
-        {
-            array.Values[index.Value] = stringValue.Value;
-        }
-    }
-
     private static ConstructorValue BuildConstructedValue(List<ConstructorValue> stack, IMethod? method)
     {
         if (method?.MethodSig is null)
         {
-            return UnknownValue.Instance;
+            return ConstructorUnknownValue.Instance;
         }
 
-        var arguments = PopArguments(stack, method.MethodSig.Params.Count);
-        if (IsOptionType(method.DeclaringType))
+        var arguments = SystemCommandLineConstructorOperationSupport.PopArguments(stack, method.MethodSig.Params.Count);
+        if (SystemCommandLineTypeHierarchySupport.IsOptionType(method.DeclaringType))
         {
-            var optionValue = TryBuildOptionValue(method.DeclaringType.ToTypeSig(), arguments);
-            return optionValue is not null ? optionValue : UnknownValue.Instance;
+            if (TryBuildOptionValue(method.DeclaringType.ToTypeSig(), arguments) is { } optionValue)
+            {
+                return optionValue;
+            }
+
+            return ConstructorUnknownValue.Instance;
         }
 
-        if (IsArgumentType(method.DeclaringType))
+        if (SystemCommandLineTypeHierarchySupport.IsArgumentType(method.DeclaringType))
         {
-            var argumentValue = TryBuildArgumentValue(method.DeclaringType.ToTypeSig(), arguments);
-            return argumentValue is not null ? argumentValue : UnknownValue.Instance;
+            if (TryBuildArgumentValue(method.DeclaringType.ToTypeSig(), arguments) is { } argumentValue)
+            {
+                return argumentValue;
+            }
+
+            return ConstructorUnknownValue.Instance;
         }
 
-        return UnknownValue.Instance;
+        return ConstructorUnknownValue.Instance;
     }
 
     private static void ApplyMethodCall(
         List<ConstructorValue> stack,
         IMethod? method,
-        IDictionary<string, StaticOptionDefinition> options,
-        ICollection<StaticValueDefinition> values)
+        IDictionary<string, ConstructorOptionValue> options,
+        ICollection<ConstructorArgumentValue> values)
     {
         if (method?.MethodSig is null)
         {
@@ -172,24 +224,35 @@ internal static class SystemCommandLineConstructorReaderSupport
         }
 
         var argumentCount = method.MethodSig.Params.Count + (method.MethodSig.HasThis ? 1 : 0);
-        var arguments = PopArguments(stack, argumentCount);
-        if (method.MethodSig.HasThis
-            && arguments.Length >= 2
-            && arguments[0] is CurrentCommandValue
-            && arguments[1] is OptionValue optionValue
-            && IsOptionAttachMethod(method))
+        var arguments = SystemCommandLineConstructorOperationSupport.PopArguments(stack, argumentCount);
+        if (SystemCommandLineSymbolConfigurationSupport.TryApplyOptionMethod(method, arguments)
+            || SystemCommandLineSymbolConfigurationSupport.TryApplyArgumentMethod(method, arguments))
         {
-            UpsertOption(options, optionValue.Definition);
+            if (!string.Equals(method.MethodSig.RetType.FullName, "System.Void", StringComparison.Ordinal))
+            {
+                stack.Add(ResolveReturnValue(arguments, method.MethodSig.RetType));
+            }
+
             return;
         }
 
         if (method.MethodSig.HasThis
             && arguments.Length >= 2
             && arguments[0] is CurrentCommandValue
-            && arguments[1] is ArgumentValue argumentValue
-            && IsArgumentAttachMethod(method))
+            && arguments[1] is ConstructorOptionValue optionValue
+            && SystemCommandLineConstructorOperationSupport.IsOptionAttachMethod(method))
         {
-            values.Add(argumentValue.Definition with { Index = values.Count });
+            SystemCommandLineConstructorOperationSupport.UpsertOption(options, optionValue);
+            return;
+        }
+
+        if (method.MethodSig.HasThis
+            && arguments.Length >= 2
+            && arguments[0] is CurrentCommandValue
+            && arguments[1] is ConstructorArgumentValue argumentValue
+            && SystemCommandLineConstructorOperationSupport.IsArgumentAttachMethod(method))
+        {
+            values.Add(argumentValue);
             return;
         }
 
@@ -204,228 +267,10 @@ internal static class SystemCommandLineConstructorReaderSupport
         var instance = arguments.FirstOrDefault();
         return instance switch
         {
-            OptionValue optionValue when IsOptionType(returnType.ToTypeDefOrRef()) => optionValue,
-            ArgumentValue argumentValue when IsArgumentType(returnType.ToTypeDefOrRef()) => argumentValue,
-            _ => UnknownValue.Instance,
+            ConstructorOptionValue optionValue when SystemCommandLineTypeHierarchySupport.IsOptionType(returnType.ToTypeDefOrRef()) => optionValue,
+            ConstructorArgumentValue argumentValue when SystemCommandLineTypeHierarchySupport.IsArgumentType(returnType.ToTypeDefOrRef()) => argumentValue,
+            _ => ConstructorUnknownValue.Instance,
         };
     }
 
-    private static void UpsertOption(IDictionary<string, StaticOptionDefinition> options, StaticOptionDefinition definition)
-    {
-        var key = definition.LongName
-            ?? (definition.ShortName is char shortName ? shortName.ToString() : null)
-            ?? "value";
-        if (!options.ContainsKey(key))
-        {
-            options[key] = definition;
-        }
-    }
-
-    internal static OptionValue? TryBuildOptionValue(TypeSig? typeSig, IReadOnlyList<ConstructorValue> arguments)
-    {
-        var (longName, shortName) = ReadOptionAliases(arguments.FirstOrDefault());
-        if (longName is null && shortName is null)
-        {
-            return null;
-        }
-
-        var valueType = ExtractGenericArgument(typeSig);
-        return new OptionValue(
-            new StaticOptionDefinition(
-                LongName: longName,
-                ShortName: shortName,
-                IsRequired: false,
-                IsSequence: StaticAnalysisTypeSupport.IsSequenceType(valueType),
-                IsBoolLike: StaticAnalysisTypeSupport.IsBoolType(valueType),
-                ClrType: StaticAnalysisTypeSupport.GetClrTypeName(valueType),
-                Description: arguments.Skip(1).OfType<StringValue>().Select(static value => value.Value).FirstOrDefault(static value => !string.IsNullOrWhiteSpace(value)),
-                DefaultValue: null,
-                MetaValue: null,
-                AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(valueType),
-                PropertyName: null));
-    }
-
-    internal static ArgumentValue? TryBuildArgumentValue(TypeSig? typeSig, IReadOnlyList<ConstructorValue> arguments)
-    {
-        var rawName = arguments.FirstOrDefault() switch
-        {
-            StringValue stringValue => stringValue.Value,
-            StringArrayValue arrayValue => arrayValue.Values.FirstOrDefault(static value => !string.IsNullOrWhiteSpace(value)),
-            _ => null,
-        };
-        var name = NormalizeArgumentName(rawName);
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return null;
-        }
-
-        var valueType = ExtractGenericArgument(typeSig);
-        return new ArgumentValue(
-            new StaticValueDefinition(
-                Index: 0,
-                Name: name,
-                IsRequired: true,
-                IsSequence: StaticAnalysisTypeSupport.IsSequenceType(valueType),
-                ClrType: StaticAnalysisTypeSupport.GetClrTypeName(valueType),
-                Description: arguments.Skip(1).OfType<StringValue>().Select(static value => value.Value).FirstOrDefault(static value => !string.IsNullOrWhiteSpace(value)),
-                DefaultValue: null,
-                AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(valueType)));
-    }
-
-    private static (string? LongName, char? ShortName) ReadOptionAliases(ConstructorValue? value)
-    {
-        var aliases = value switch
-        {
-            StringValue stringValue => [stringValue.Value],
-            StringArrayValue arrayValue => arrayValue.Values,
-            _ => [],
-        };
-        var longName = aliases
-            .FirstOrDefault(static alias => !string.IsNullOrWhiteSpace(alias) && alias.StartsWith("--", StringComparison.Ordinal))
-            ?? aliases.FirstOrDefault(static alias => !string.IsNullOrWhiteSpace(alias) && !alias.StartsWith("-", StringComparison.Ordinal));
-        var shortAlias = aliases.FirstOrDefault(static alias => !string.IsNullOrWhiteSpace(alias) && alias.Length == 2 && alias[0] == '-');
-        return (NormalizeOptionName(longName), shortAlias is { Length: 2 } ? shortAlias[1] : null);
-    }
-
-    private static string? NormalizeOptionName(string? alias)
-        => string.IsNullOrWhiteSpace(alias)
-            ? null
-            : alias.Trim().TrimStart('-', '/');
-
-    private static string? NormalizeArgumentName(string? name)
-        => string.IsNullOrWhiteSpace(name)
-            ? null
-            : name.Trim().Trim('<', '>', '[', ']', '(', ')');
-
-    private static bool IsOptionAttachMethod(IMethod method)
-        => string.Equals(method.Name, "AddOption", StringComparison.Ordinal)
-            || string.Equals(method.Name, "Add", StringComparison.Ordinal)
-                && method.MethodSig?.Params.FirstOrDefault() is { } parameter
-                && IsOptionType(parameter.ToTypeDefOrRef());
-
-    private static bool IsArgumentAttachMethod(IMethod method)
-        => string.Equals(method.Name, "AddArgument", StringComparison.Ordinal)
-            || string.Equals(method.Name, "Add", StringComparison.Ordinal)
-                && method.MethodSig?.Params.FirstOrDefault() is { } parameter
-                && IsArgumentType(parameter.ToTypeDefOrRef());
-
-    private static TypeSig? ExtractGenericArgument(TypeSig? typeSig)
-        => typeSig is GenericInstSig genericInstSig && genericInstSig.GenericArguments.Count > 0
-            ? genericInstSig.GenericArguments[0]
-            : null;
-
-    internal static bool IsOptionType(ITypeDefOrRef? type)
-        => type?.FullName.StartsWith("System.CommandLine.Option", StringComparison.Ordinal) == true;
-
-    internal static bool IsArgumentType(ITypeDefOrRef? type)
-        => type?.FullName.StartsWith("System.CommandLine.Argument", StringComparison.Ordinal) == true;
-
-    internal static bool TryGetLocalIndex(Instruction instruction, out int index)
-    {
-        index = instruction.OpCode.Code switch
-        {
-            Code.Ldloc_0 or Code.Stloc_0 => 0,
-            Code.Ldloc_1 or Code.Stloc_1 => 1,
-            Code.Ldloc_2 or Code.Stloc_2 => 2,
-            Code.Ldloc_3 or Code.Stloc_3 => 3,
-            _ => -1,
-        };
-        if (index >= 0)
-        {
-            return true;
-        }
-
-        if (instruction.Operand is Local local)
-        {
-            index = local.Index;
-            return true;
-        }
-
-        index = -1;
-        return false;
-    }
-
-    internal static bool TryReadInt32(Instruction instruction, out int value)
-    {
-        value = instruction.OpCode.Code switch
-        {
-            Code.Ldc_I4_M1 => -1,
-            Code.Ldc_I4_0 => 0,
-            Code.Ldc_I4_1 => 1,
-            Code.Ldc_I4_2 => 2,
-            Code.Ldc_I4_3 => 3,
-            Code.Ldc_I4_4 => 4,
-            Code.Ldc_I4_5 => 5,
-            Code.Ldc_I4_6 => 6,
-            Code.Ldc_I4_7 => 7,
-            Code.Ldc_I4_8 => 8,
-            Code.Ldc_I4_S => (sbyte)instruction.Operand,
-            Code.Ldc_I4 => (int)instruction.Operand,
-            _ => 0,
-        };
-        return instruction.OpCode.Code is >= Code.Ldc_I4_M1 and <= Code.Ldc_I4
-            || instruction.OpCode.Code == Code.Ldc_I4_S;
-    }
-
-    private static ConstructorValue[] PopArguments(List<ConstructorValue> stack, int count)
-    {
-        var values = new ConstructorValue[count];
-        for (var index = count - 1; index >= 0; index--)
-        {
-            values[index] = Pop(stack);
-        }
-
-        return values;
-    }
-
-    private static ConstructorValue Pop(List<ConstructorValue> stack)
-    {
-        if (stack.Count == 0)
-        {
-            return UnknownValue.Instance;
-        }
-
-        var value = stack[^1];
-        stack.RemoveAt(stack.Count - 1);
-        return value;
-    }
-
-    internal abstract record ConstructorValue;
-
-    internal sealed record StringValue(string? Value) : ConstructorValue;
-
-    internal sealed record Int32Value(int Value) : ConstructorValue;
-
-    internal sealed record StringArrayValue(int Length) : ConstructorValue
-    {
-        public StringArrayValue(string?[] values)
-            : this(values.Length)
-        {
-            for (var index = 0; index < values.Length; index++)
-            {
-                Values[index] = values[index];
-            }
-        }
-
-        public string?[] Values { get; } = new string?[Length];
-    }
-
-    internal sealed record OptionValue(StaticOptionDefinition Definition) : ConstructorValue;
-
-    internal sealed record ArgumentValue(StaticValueDefinition Definition) : ConstructorValue;
-
-    private sealed record CurrentCommandValue : ConstructorValue
-    {
-        public static CurrentCommandValue Instance { get; } = new();
-    }
-
-    private sealed record NullValue : ConstructorValue
-    {
-        public static NullValue Instance { get; } = new();
-    }
-
-    internal sealed record UnknownValue : ConstructorValue
-    {
-        public static UnknownValue Instance { get; } = new();
-    }
 }

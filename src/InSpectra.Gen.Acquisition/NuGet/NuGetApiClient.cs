@@ -2,6 +2,7 @@ namespace InSpectra.Gen.Acquisition.NuGet;
 
 using System.Net;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.Json;
 
 using InSpectra.Gen.Acquisition.Runtime;
@@ -13,7 +14,12 @@ internal sealed class NuGetApiClient
     public NuGetApiClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("InSpectra.Gen.Acquisition", "0.1.0"));
+        var version = typeof(NuGetApiClient).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion
+            ?.Split('+')[0]
+            ?? "0.0.0";
+        _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("InSpectra.Gen.Acquisition", version));
     }
 
     public Task<NuGetServiceIndex> GetServiceResourcesAsync(string serviceIndexUrl, CancellationToken cancellationToken)

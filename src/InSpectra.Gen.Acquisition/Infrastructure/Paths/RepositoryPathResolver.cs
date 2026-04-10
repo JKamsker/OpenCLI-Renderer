@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Infrastructure.Paths;
 
+using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.Infrastructure.Json;
 
 using System.Text;
@@ -13,10 +14,11 @@ internal static class RepositoryPathResolver
             return Path.GetFullPath(explicitRoot);
         }
 
-        var envRoot = Environment.GetEnvironmentVariable("INSPECTRA_REPO_ROOT");
+        var envRoot = Environment.GetEnvironmentVariable(InspectraProductInfo.RepositoryRootEnvironmentVariableName);
         if (string.IsNullOrWhiteSpace(envRoot))
         {
-            envRoot = Environment.GetEnvironmentVariable("INSPECTRA_DISCOVERY_REPO_ROOT");
+            // Keep the old variable as a compatibility alias while the renamed repo shape settles.
+            envRoot = Environment.GetEnvironmentVariable(InspectraProductInfo.LegacyRepositoryRootEnvironmentVariableName);
         }
 
         if (!string.IsNullOrWhiteSpace(envRoot))
@@ -27,8 +29,7 @@ internal static class RepositoryPathResolver
         var current = new DirectoryInfo(Environment.CurrentDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "InSpectra.Gen.sln"))
-                || File.Exists(Path.Combine(current.FullName, "InSpectra.Discovery.sln")))
+            if (ContainsRepositoryMarker(current.FullName))
             {
                 return current.FullName;
             }
@@ -68,6 +69,19 @@ internal static class RepositoryPathResolver
     {
         EnsureParentDirectory(path);
         File.WriteAllLines(path, lines, new UTF8Encoding(false));
+    }
+
+    private static bool ContainsRepositoryMarker(string directoryPath)
+    {
+        foreach (var solutionFileName in InspectraProductInfo.RepositorySolutionFileNames)
+        {
+            if (File.Exists(Path.Combine(directoryPath, solutionFileName)))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

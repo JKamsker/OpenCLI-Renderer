@@ -12,7 +12,15 @@ internal sealed class StaticAnalysisOpenCliArgumentBuilder
     {
         if (helpDocument is not null)
         {
-            return BuildHelpAnchoredArguments(staticCommand, helpDocument);
+            if (helpDocument.Arguments.Count > 0)
+            {
+                return BuildHelpAnchoredArguments(staticCommand, helpDocument);
+            }
+
+            if (!ShouldFallbackToStaticSurface(helpDocument))
+            {
+                return null;
+            }
         }
 
         if (staticCommand?.Values.Count is > 0)
@@ -53,15 +61,20 @@ internal sealed class StaticAnalysisOpenCliArgumentBuilder
 
             array.Add(BuildArgumentNode(
                 helpArgument.Key,
-                helpArgument.IsRequired,
-                isSequence: false,
-                helpArgument.Description,
+                helpArgument.IsRequired || staticArgument?.IsRequired == true,
+                isSequence: staticArgument?.IsSequence ?? false,
+                helpArgument.Description ?? staticArgument?.Description,
                 staticArgument?.ClrType,
                 staticArgument?.AcceptedValues));
         }
 
         return array.Count > 0 ? array : null;
     }
+
+    private static bool ShouldFallbackToStaticSurface(Document helpDocument)
+        => helpDocument.Options.Count == 0
+            && helpDocument.Arguments.Count == 0
+            && helpDocument.Commands.Count == 0;
 
     private JsonArray? BuildMetadataFirstArguments(StaticCommandDefinition staticCommand)
     {

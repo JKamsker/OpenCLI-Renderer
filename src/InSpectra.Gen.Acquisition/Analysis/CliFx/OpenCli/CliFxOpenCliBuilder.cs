@@ -3,6 +3,7 @@ namespace InSpectra.Gen.Acquisition.Analysis.CliFx.OpenCli;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using InSpectra.Gen.Acquisition.Analysis.CliFx.Metadata;
+using InSpectra.Gen.Acquisition.Infrastructure;
 
 using System.Text.Json.Nodes;
 
@@ -28,7 +29,7 @@ internal sealed class CliFxOpenCliBuilder
             ["x-inspectra"] = new JsonObject
             {
                 ["artifactSource"] = "crawled-from-clifx-help",
-                ["generator"] = "InSpectra.Discovery",
+                ["generator"] = InspectraProductInfo.GeneratorName,
                 ["metadataEnriched"] = staticCommands.Count > 0,
                 ["helpDocumentCount"] = helpDocuments.Count,
             },

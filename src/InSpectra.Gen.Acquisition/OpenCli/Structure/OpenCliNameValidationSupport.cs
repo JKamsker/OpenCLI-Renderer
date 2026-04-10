@@ -14,19 +14,29 @@ internal static partial class OpenCliNameValidationSupport
         => IsPublishableName(name, LooksLikeNonPublishableArgumentName);
 
     public static bool TryValidateCommandName(string? name, string path, out string? reason)
-        => TryValidateName(name, path, "command", LooksLikeNonPublishableCommandName, out reason);
+        => TryValidateName(name, path, "command", LooksLikeNonPublishableCommandName, requireNonEmpty: false, out reason);
 
     public static bool TryValidateOptionName(string? name, string path, out string? reason)
-        => TryValidateName(name, path, "option", LooksLikeNonPublishableOptionName, out reason);
+        => TryValidateName(name, path, "option", LooksLikeNonPublishableOptionName, requireNonEmpty: false, out reason);
 
     public static bool TryValidateArgumentName(string? name, string path, out string? reason)
-        => TryValidateName(name, path, "argument", LooksLikeNonPublishableArgumentName, out reason);
+        => TryValidateName(name, path, "argument", LooksLikeNonPublishableArgumentName, requireNonEmpty: false, out reason);
+
+    public static bool TryRequireCommandName(string? name, string path, out string? reason)
+        => TryValidateName(name, path, "command", LooksLikeNonPublishableCommandName, requireNonEmpty: true, out reason);
+
+    public static bool TryRequireOptionName(string? name, string path, out string? reason)
+        => TryValidateName(name, path, "option", LooksLikeNonPublishableOptionName, requireNonEmpty: true, out reason);
+
+    public static bool TryRequireArgumentName(string? name, string path, out string? reason)
+        => TryValidateName(name, path, "argument", LooksLikeNonPublishableArgumentName, requireNonEmpty: true, out reason);
 
     private static bool TryValidateName(
         string? name,
         string path,
         string kind,
         Func<string, bool> isNonPublishable,
+        bool requireNonEmpty,
         out string? reason)
     {
         reason = null;
@@ -34,7 +44,13 @@ internal static partial class OpenCliNameValidationSupport
         var trimmed = name?.Trim();
         if (string.IsNullOrWhiteSpace(trimmed))
         {
-            return true;
+            if (!requireNonEmpty)
+            {
+                return true;
+            }
+
+            reason = $"OpenCLI artifact is missing a {kind} name at '{path}'.";
+            return false;
         }
 
         if (!isNonPublishable(trimmed))

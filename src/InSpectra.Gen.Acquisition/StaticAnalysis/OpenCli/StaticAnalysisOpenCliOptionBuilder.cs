@@ -3,6 +3,7 @@ namespace InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
 using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
 
 using InSpectra.Gen.Acquisition.Help.Documents;
+using InSpectra.Gen.Acquisition.Help.Signatures;
 
 using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
 
@@ -14,7 +15,15 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
     {
         if (helpDocument is not null)
         {
-            return BuildHelpAnchoredOptions(staticCommand, helpDocument);
+            if (helpDocument.Options.Count > 0)
+            {
+                return BuildHelpAnchoredOptions(staticCommand, helpDocument);
+            }
+
+            if (!ShouldFallbackToStaticSurface(helpDocument))
+            {
+                return null;
+            }
         }
 
         if (staticCommand?.Options.Count is not > 0)
@@ -37,6 +46,7 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
 
         foreach (var helpOption in helpDocument.Options)
         {
+            var signature = OptionSignatureSupport.Parse(helpOption.Key);
             var names = StaticAnalysisOpenCliNodeSupport.ParseHelpOptionNames(helpOption.Key);
             var definition = matcher.TakeMatch(names.LongName, names.ShortName);
             array.Add(BuildOptionNode(
@@ -44,12 +54,21 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
                 definition,
                 helpOption.Description ?? definition?.Description,
                 helpOption.IsRequired || definition?.IsRequired == true,
+                signature.ArgumentName,
+                signature.ArgumentName is not null
+                    ? signature.ArgumentRequired
+                    : definition is not null && !definition.IsBoolLike,
                 names.LongName,
                 names.ShortName));
         }
 
         return array.Count > 0 ? array : null;
     }
+
+    private static bool ShouldFallbackToStaticSurface(Document helpDocument)
+        => helpDocument.Options.Count == 0
+            && helpDocument.Arguments.Count == 0
+            && helpDocument.Commands.Count == 0;
 
     private JsonArray? BuildStaticOnlyOptions(IReadOnlyList<StaticOptionDefinition> options)
     {
@@ -67,6 +86,8 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
                 option,
                 option.Description,
                 option.IsRequired,
+                argumentName: null,
+                argumentRequired: !option.IsBoolLike,
                 option.LongName,
                 option.ShortName));
         }
@@ -79,6 +100,8 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
         StaticOptionDefinition? definition,
         string? description,
         bool required,
+        string? argumentName,
+        bool argumentRequired,
         string? longName,
         char? shortName)
     {
@@ -96,7 +119,7 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
             optionNode["aliases"] = aliases;
         }
 
-        var argument = BuildOptionArgument(definition, longName, shortName, required);
+        var argument = BuildOptionArgument(definition, longName, shortName, argumentName, argumentRequired);
         if (argument is not null)
         {
             optionNode["arguments"] = new JsonArray { argument };
@@ -109,24 +132,25 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
         StaticOptionDefinition? definition,
         string? longName,
         char? shortName,
-        bool required)
+        string? argumentName,
+        bool argumentRequired)
     {
         if (definition is null)
         {
-            if (!required)
+            if (string.IsNullOrWhiteSpace(argumentName))
             {
                 return null;
             }
 
             return new JsonObject
             {
-                ["name"] = StaticAnalysisOpenCliNodeSupport.NormalizeArgumentName(longName ?? shortName?.ToString() ?? "VALUE"),
-                ["required"] = required,
-                ["arity"] = StaticAnalysisOpenCliNodeSupport.BuildArity(false, 1),
+                ["name"] = StaticAnalysisOpenCliNodeSupport.NormalizeArgumentName(argumentName),
+                ["required"] = argumentRequired,
+                ["arity"] = StaticAnalysisOpenCliNodeSupport.BuildArity(false, argumentRequired ? 1 : 0),
             };
         }
 
-        if (!definition.IsRequired && definition.IsBoolLike)
+        if (definition.IsBoolLike)
         {
             return null;
         }
@@ -134,9 +158,14 @@ internal sealed class StaticAnalysisOpenCliOptionBuilder
         var argument = new JsonObject
         {
             ["name"] = StaticAnalysisOpenCliNodeSupport.NormalizeArgumentName(
-                definition.MetaValue ?? definition.PropertyName ?? definition.LongName ?? shortName?.ToString() ?? "VALUE"),
-            ["required"] = definition.IsRequired,
-            ["arity"] = StaticAnalysisOpenCliNodeSupport.BuildArity(definition.IsSequence, definition.IsRequired ? 1 : 0),
+                argumentName
+                ?? definition.MetaValue
+                ?? definition.PropertyName
+                ?? definition.LongName
+                ?? shortName?.ToString()
+                ?? "VALUE"),
+            ["required"] = argumentRequired,
+            ["arity"] = StaticAnalysisOpenCliNodeSupport.BuildArity(definition.IsSequence, argumentRequired ? 1 : 0),
         };
 
         StaticAnalysisOpenCliNodeSupport.ApplyInputMetadata(argument, definition.ClrType, definition.AcceptedValues);

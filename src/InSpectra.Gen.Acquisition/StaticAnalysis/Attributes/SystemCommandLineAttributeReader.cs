@@ -1,9 +1,8 @@
 namespace InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
 
+using InSpectra.Gen.Acquisition.Help.Signatures;
 using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
-
 using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
-
 using dnlib.DotNet;
 
 /// <summary>
@@ -21,11 +20,6 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
     [
         "System.CommandLine.Command",
         "System.CommandLine.RootCommand",
-    ];
-
-    private static readonly string[] ArgumentBaseTypeNames =
-    [
-        "System.CommandLine.Argument",
     ];
 
     public IReadOnlyDictionary<string, StaticCommandDefinition> Read(IReadOnlyList<ScannedModule> modules)
@@ -65,10 +59,13 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
         return commands;
     }
 
-    private static StaticCommandDefinition? ReadCommandType(TypeDef typeDef)
+    internal static StaticCommandDefinition? ReadCommandType(TypeDef typeDef)
     {
         var isRoot = IsRootCommand(typeDef);
-        var name = isRoot ? null : typeDef.Name?.String?.Replace("Command", string.Empty).ToLowerInvariant();
+        var constructorMetadata = SystemCommandLineCommandMetadataSupport.Read(typeDef, isRoot);
+        var name = isRoot
+            ? null
+            : constructorMetadata.Name ?? BuildTypeDerivedCommandName(typeDef.Name?.String);
         if (!isRoot && string.IsNullOrWhiteSpace(name))
         {
             return null;
@@ -125,20 +122,12 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
         options.AddRange(constructorSurface.Options);
         values.AddRange(constructorSurface.Values);
 
-        return new StaticCommandDefinition(
-            Name: name,
-            Description: null,
-            IsDefault: isRoot,
-            IsHidden: false,
-            Values: values
-                .GroupBy(static value => value.Name ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                .Select(static group => group.First())
-                .ToArray(),
-            Options: options
-                .GroupBy(static option => option.LongName ?? option.PropertyName ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                .Select(static group => group.First())
-                .OrderBy(static option => option.LongName)
-                .ToArray());
+        return SystemCommandLineAttributeMergeSupport.CreateCommandDefinition(
+            name,
+            constructorMetadata.Description,
+            isRoot,
+            values,
+            options);
     }
 
     private static bool InheritsFromCommand(TypeDef typeDef)
@@ -180,55 +169,16 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
     }
 
     private static bool IsOptionType(TypeSig? typeSig)
-    {
-        if (typeSig is GenericInstSig g)
-        {
-            var name = g.GenericType?.FullName?.Split('`')[0];
-            return string.Equals(name, "System.CommandLine.Option", StringComparison.Ordinal);
-        }
-
-        for (var current = typeSig?.ToTypeDefOrRef(); current is not null;)
-        {
-            if (current.FullName.StartsWith("System.CommandLine.Option", StringComparison.Ordinal))
-            {
-                return true;
-            }
-
-            var resolved = current.ResolveTypeDef();
-            current = resolved?.BaseType?.ResolveTypeDef();
-        }
-
-        return false;
-    }
+        => SystemCommandLineTypeHierarchySupport.IsOptionType(typeSig?.ToTypeDefOrRef());
 
     private static bool IsArgumentType(TypeSig? typeSig)
-    {
-        if (typeSig is GenericInstSig g)
-        {
-            var name = g.GenericType?.FullName?.Split('`')[0];
-            return ArgumentBaseTypeNames.Any(argumentTypeName => string.Equals(name, argumentTypeName, StringComparison.Ordinal));
-        }
-
-        for (var current = typeSig?.ToTypeDefOrRef(); current is not null;)
-        {
-            if (current.FullName.StartsWith("System.CommandLine.Argument", StringComparison.Ordinal))
-            {
-                return true;
-            }
-
-            var resolved = current.ResolveTypeDef();
-            current = resolved?.BaseType?.ResolveTypeDef();
-        }
-
-        return false;
-    }
+        => SystemCommandLineTypeHierarchySupport.IsArgumentType(typeSig?.ToTypeDefOrRef());
 
     private static StaticOptionDefinition BuildOptionDefinition(string? memberName, TypeSig memberType)
     {
-        var innerType = ExtractGenericArgument(memberType);
-        var normalizedMemberName = NormalizeMemberName(memberName);
+        var innerType = SystemCommandLineTypeHierarchySupport.ExtractOptionValueType(memberType);
         return new StaticOptionDefinition(
-            LongName: ConvertToKebabCase(StripSuffix(normalizedMemberName, "Option")),
+            LongName: BuildMemberDerivedOptionName(memberName),
             ShortName: null,
             IsRequired: false,
             IsSequence: StaticAnalysisTypeSupport.IsSequenceType(innerType),
@@ -241,9 +191,12 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
             PropertyName: memberName);
     }
 
+    internal static string BuildMemberDerivedOptionName(string? memberName)
+        => ConvertToKebabCase(StripSuffix(NormalizeMemberName(memberName), "Option"));
+
     private static StaticValueDefinition BuildValueDefinition(string? memberName, TypeSig memberType)
     {
-        var innerType = ExtractGenericArgument(memberType);
+        var innerType = SystemCommandLineTypeHierarchySupport.ExtractArgumentValueType(memberType);
         var normalizedMemberName = NormalizeMemberName(memberName);
         return new StaticValueDefinition(
             Index: 0,
@@ -255,11 +208,6 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
             DefaultValue: null,
             AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(innerType));
     }
-
-    private static TypeSig? ExtractGenericArgument(TypeSig? typeSig)
-        => typeSig is GenericInstSig g && g.GenericArguments.Count > 0
-            ? g.GenericArguments[0]
-            : null;
 
     private static string? StripSuffix(string? name, string suffix)
     {
@@ -292,7 +240,15 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
         return sb.ToString();
     }
 
-    private static void UpsertMerged(
+    internal static string? BuildTypeDerivedCommandName(string? typeName)
+    {
+        var trimmed = StripSuffix(typeName, "Command");
+        return string.IsNullOrWhiteSpace(trimmed)
+            ? null
+            : SignatureNormalizer.NormalizeCommandKey(ConvertToKebabCase(trimmed));
+    }
+
+    internal static void UpsertMerged(
         IDictionary<string, StaticCommandDefinition> commands,
         string key,
         StaticCommandDefinition candidate)
@@ -303,22 +259,6 @@ internal sealed class SystemCommandLineAttributeReader : IStaticAttributeReader
             return;
         }
 
-        commands[key] = new StaticCommandDefinition(
-            Name: existing.Name ?? candidate.Name,
-            Description: existing.Description ?? candidate.Description,
-            IsDefault: existing.IsDefault || candidate.IsDefault,
-            IsHidden: existing.IsHidden && candidate.IsHidden,
-            Values: existing.Values
-                .Concat(candidate.Values)
-                .GroupBy(static value => value.Name ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                .Select(static group => group.OrderBy(static value => value.Index).First())
-                .OrderBy(static value => value.Index)
-                .ToArray(),
-            Options: existing.Options
-                .Concat(candidate.Options)
-                .GroupBy(static option => option.LongName ?? option.PropertyName ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                .Select(static group => group.First())
-                .OrderBy(static option => option.LongName)
-                .ToArray());
+        commands[key] = SystemCommandLineAttributeMergeSupport.Merge(existing, candidate);
     }
 }

@@ -13,15 +13,16 @@ public sealed class HookInstalledToolAnalysisSupportTests
     {
         using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
         var hookDllPath = HookInstalledToolAnalysisTestSupport.CreateHookPlaceholder(tempDirectory.Path);
-        var capturePath = Path.Combine(tempDirectory.Path, "inspectra-capture.json");
         var installedTool = HookInstalledToolAnalysisTestSupport.CreateInstalledTool(tempDirectory);
         var runtime = new HookInstalledToolAnalysisTestSupport.FakeHookCommandRuntime(invocation =>
         {
+            var capturePath = invocation.Environment["INSPECTRA_CAPTURE_PATH"];
             Assert.Equal(installedTool.CommandPath, invocation.FilePath);
             Assert.Single(invocation.ArgumentList);
             Assert.Equal("--help", invocation.ArgumentList[0]);
             Assert.Equal(hookDllPath, invocation.Environment["DOTNET_STARTUP_HOOKS"]);
-            Assert.Equal(capturePath, invocation.Environment["INSPECTRA_CAPTURE_PATH"]);
+            Assert.StartsWith(tempDirectory.Path, capturePath, StringComparison.OrdinalIgnoreCase);
+            Assert.EndsWith(".json", capturePath, StringComparison.OrdinalIgnoreCase);
             Assert.Equal(
                 "System.CommandLine",
                 invocation.Environment[HookInstalledToolAnalysisSupport.ExpectedCliFrameworkEnvironmentVariableName]);
@@ -136,60 +137,27 @@ public sealed class HookInstalledToolAnalysisSupportTests
     }
 
     [Fact]
-    public async Task AnalyzeInstalledAsync_Retries_With_DotnetRollForward_When_Shared_Runtime_Is_Missing()
+    public async Task AnalyzeInstalledAsync_Uses_A_Fresh_Capture_Path_Per_Run()
     {
         using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
         var hookDllPath = HookInstalledToolAnalysisTestSupport.CreateHookPlaceholder(tempDirectory.Path);
+        var staleCapturePath = Path.Combine(tempDirectory.Path, "inspectra-capture.json");
+        File.WriteAllText(staleCapturePath, "{\"status\":\"stale\"}");
         var installedTool = HookInstalledToolAnalysisTestSupport.CreateInstalledTool(tempDirectory);
-        var invocationCount = 0;
         var runtime = new HookInstalledToolAnalysisTestSupport.FakeHookCommandRuntime(invocation =>
         {
-            invocationCount++;
-            if (invocationCount == 1)
-            {
-                Assert.False(invocation.Environment.ContainsKey(HookInstalledToolAnalysisSupport.DotnetRollForwardEnvironmentVariableName));
-                return new CommandRuntime.ProcessResult(
-                    Status: "failed",
-                    TimedOut: false,
-                    ExitCode: -2147450730,
-                    DurationMs: 15,
-                    Stdout: string.Empty,
-                    Stderr:
-                    """
-                    You must install or update .NET to run this application.
-
-                    Framework: 'Microsoft.NETCore.App', version '6.0.0' (x64)
-                    The following frameworks were found:
-                      8.0.15 at [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
-                    """);
-            }
-
-            Assert.Equal(2, invocationCount);
-            Assert.Equal(
-                HookInstalledToolAnalysisSupport.DotnetRollForwardMajorValue,
-                invocation.Environment[HookInstalledToolAnalysisSupport.DotnetRollForwardEnvironmentVariableName]);
-
-            var capturePath = invocation.Environment["INSPECTRA_CAPTURE_PATH"];
-            File.WriteAllText(capturePath, JsonSerializer.Serialize(new HookCaptureResult
-            {
-                CaptureVersion = 1,
-                Status = "ok",
-                CliFramework = "Microsoft.Extensions.CommandLineUtils",
-                FrameworkVersion = "2.2.0.0",
-                PatchTarget = "Execute-postfix",
-                Root = HookInstalledToolAnalysisTestSupport.CreateValidRootCommand(),
-            }));
-
+            Assert.NotEqual(staleCapturePath, invocation.Environment["INSPECTRA_CAPTURE_PATH"]);
+            Assert.True(File.Exists(staleCapturePath));
             return new CommandRuntime.ProcessResult(
-                Status: "ok",
+                Status: "failed",
                 TimedOut: false,
-                ExitCode: 0,
-                DurationMs: 15,
+                ExitCode: 1,
+                DurationMs: 12,
                 Stdout: string.Empty,
-                Stderr: string.Empty);
+                Stderr: "boom");
         });
         var support = new HookInstalledToolAnalysisSupport(runtime, () => hookDllPath);
-        var result = HookInstalledToolAnalysisTestSupport.CreateInitialResult("Microsoft.Extensions.CommandLineUtils");
+        var result = HookInstalledToolAnalysisTestSupport.CreateInitialResult();
 
         await support.AnalyzeInstalledAsync(
             result,
@@ -201,9 +169,55 @@ public sealed class HookInstalledToolAnalysisSupportTests
             commandTimeoutSeconds: 30,
             cancellationToken: CancellationToken.None);
 
-        Assert.Equal(2, invocationCount);
-        Assert.Equal("success", result["disposition"]?.GetValue<string>());
-        Assert.Equal("startup-hook", result["classification"]?.GetValue<string>());
-        Assert.Equal("startup-hook", result["opencliSource"]?.GetValue<string>());
+        Assert.Equal("hook-no-capture-file", result["classification"]?.GetValue<string>());
     }
+
+    [Fact]
+    public async Task AnalyzeInstalledAsync_Uses_Preferred_Entry_Point_For_Framework_Directory()
+    {
+        using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
+        var hookDllPath = HookInstalledToolAnalysisTestSupport.CreateHookPlaceholder(tempDirectory.Path);
+        var entryPointPath = Path.Combine(tempDirectory.Path, "app", "demo.dll");
+        Directory.CreateDirectory(Path.GetDirectoryName(entryPointPath)!);
+        File.WriteAllText(entryPointPath, string.Empty);
+        var installedTool = HookInstalledToolAnalysisTestSupport.CreateInstalledTool(tempDirectory, entryPointPath);
+        var runtime = new HookInstalledToolAnalysisTestSupport.FakeHookCommandRuntime(invocation =>
+        {
+            Assert.Equal(
+                Path.GetDirectoryName(entryPointPath),
+                invocation.Environment[HookInstalledToolAnalysisSupport.PreferredFrameworkDirectoryEnvironmentVariableName]);
+
+            var capturePath = invocation.Environment["INSPECTRA_CAPTURE_PATH"];
+            File.WriteAllText(capturePath, JsonSerializer.Serialize(new HookCaptureResult
+            {
+                CaptureVersion = 1,
+                Status = "ok",
+                CliFramework = "System.CommandLine",
+                Root = HookInstalledToolAnalysisTestSupport.CreateValidRootCommand(),
+            }));
+
+            return new CommandRuntime.ProcessResult(
+                Status: "ok",
+                TimedOut: false,
+                ExitCode: 0,
+                DurationMs: 12,
+                Stdout: string.Empty,
+                Stderr: string.Empty);
+        });
+        var support = new HookInstalledToolAnalysisSupport(runtime, () => hookDllPath);
+        var result = HookInstalledToolAnalysisTestSupport.CreateInitialResult();
+
+        await support.AnalyzeInstalledAsync(
+            result,
+            version: "1.2.3",
+            commandName: "demo",
+            outputDirectory: tempDirectory.Path,
+            installedTool: installedTool,
+            workingDirectory: tempDirectory.Path,
+            commandTimeoutSeconds: 30,
+            cancellationToken: CancellationToken.None);
+
+        Assert.Equal("success", result["disposition"]?.GetValue<string>());
+    }
+
 }

@@ -11,20 +11,34 @@ using InSpectra.Gen.Acquisition.Infrastructure.Host;
 using InSpectra.Gen.Acquisition.Analysis;
 
 using InSpectra.Gen.Acquisition.NuGet;
+using InSpectra.Gen.Acquisition.Runtime;
 
 internal interface IToolDescriptorResolver
 {
-    Task<ToolDescriptor> ResolveAsync(string packageId, string version, CancellationToken cancellationToken);
+    Task<ToolDescriptorResolution> ResolveAsync(
+        string packageId,
+        string version,
+        string? commandName,
+        CancellationToken cancellationToken);
 }
+
+internal sealed record ToolDescriptorResolution(
+    ToolDescriptor Descriptor,
+    SpectrePackageInspection Inspection);
 
 internal sealed class ToolDescriptorResolver : IToolDescriptorResolver
 {
-    public async Task<ToolDescriptor> ResolveAsync(string packageId, string version, CancellationToken cancellationToken)
+    public async Task<ToolDescriptorResolution> ResolveAsync(
+        string packageId,
+        string version,
+        string? commandName,
+        CancellationToken cancellationToken)
     {
         using var scope = Runtime.CreateNuGetApiClientScope();
         var (leaf, catalogLeaf) = await PackageVersionResolver.ResolveAsync(scope.Client, packageId, version, cancellationToken);
         var packageInspection = await new PackageArchiveInspector(scope.Client).InspectAsync(leaf.PackageContent, cancellationToken);
-        return ResolveFromCatalogLeaf(
+        var resolvedCommandName = ResolveCommandName(packageId, commandName, packageInspection);
+        var descriptor = ResolveFromCatalogLeaf(
             packageId,
             version,
             catalogLeaf,
@@ -32,7 +46,8 @@ internal sealed class ToolDescriptorResolver : IToolDescriptorResolver
             packageContentUrl: leaf.PackageContent,
             catalogEntryUrl: leaf.CatalogEntryUrl,
             packageInspection,
-            packageInspection.ToolCommandNames.FirstOrDefault());
+            resolvedCommandName);
+        return new ToolDescriptorResolution(descriptor, packageInspection);
     }
 
     internal static ToolDescriptor ResolveFromCatalogLeaf(
@@ -128,5 +143,43 @@ internal sealed class ToolDescriptorResolver : IToolDescriptorResolver
             || packageInspection?.ToolAssembliesReferencingSpectreConsoleCli.Count > 0
             || packageInspection?.SpectreConsoleCliDependencyVersions.Count > 0
             || packageEntryNames.Any(name => string.Equals(name, "Spectre.Console.Cli.dll", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string ResolveCommandName(
+        string packageId,
+        string? commandName,
+        SpectrePackageInspection inspection)
+    {
+        var commands = inspection.ToolCommandNames
+            .Where(static name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (commands.Length == 0)
+        {
+            throw new CliUsageException(
+                $"Package `{packageId}` does not expose a .NET tool command in DotnetToolSettings.xml.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(commandName))
+        {
+            var resolved = commands.FirstOrDefault(candidate =>
+                string.Equals(candidate, commandName, StringComparison.OrdinalIgnoreCase));
+            if (resolved is null)
+            {
+                throw new CliUsageException(
+                    $"Package `{packageId}` does not expose command `{commandName}`. Available commands: {string.Join(", ", commands)}.");
+            }
+
+            return resolved;
+        }
+
+        if (commands.Length > 1)
+        {
+            throw new CliUsageException(
+                $"Package `{packageId}` exposes multiple tool commands ({string.Join(", ", commands)}). Use `--command` to select one.");
+        }
+
+        return commands[0];
     }
 }

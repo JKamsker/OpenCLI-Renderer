@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
+using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using System.Text.Json.Nodes;
@@ -13,7 +14,7 @@ internal static class HookOpenCliBuilder
         var inspectra = new JsonObject
         {
             ["artifactSource"] = "startup-hook",
-            ["generator"] = "InSpectra.Discovery",
+            ["generator"] = InspectraProductInfo.GeneratorName,
             ["hookCapture"] = new JsonObject
             {
                 ["cliFramework"] = capture.CliFramework,
@@ -151,7 +152,9 @@ internal static class HookOpenCliBuilder
                 node["aliases"] = aliases;
 
             // Arguments sub-node for the option's value.
-            if (opt.ValueType is not null && opt.ValueType is not "Void")
+            if (opt.ValueType is not null
+                && opt.ValueType is not "Void"
+                && opt.ValueType is not "Boolean")
             {
                 var argNode = new JsonObject();
 
@@ -177,7 +180,7 @@ internal static class HookOpenCliBuilder
                 {
                     var valuesArray = new JsonArray();
                     foreach (var v in opt.AllowedValues) valuesArray.Add(v);
-                    argNode["allowedValues"] = valuesArray;
+                    argNode["acceptedValues"] = valuesArray;
                 }
 
                 node["arguments"] = new JsonArray { argNode };
@@ -228,7 +231,7 @@ internal static class HookOpenCliBuilder
             {
                 var valuesArray = new JsonArray();
                 foreach (var v in arg.AllowedValues) valuesArray.Add(v);
-                node["allowedValues"] = valuesArray;
+                node["acceptedValues"] = valuesArray;
             }
 
             array.Add(node);

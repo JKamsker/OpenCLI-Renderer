@@ -1,42 +1,16 @@
 namespace InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
 
-using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
-
 using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
+using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
 
 using dnlib.DotNet;
 
 internal sealed class CoconaAttributeReader : IStaticAttributeReader
 {
-    private static readonly string[] FrameworkNamespacePrefixes =
-    [
-        "Cocona",
-        "Microsoft",
-        "System",
-    ];
-
     private static readonly string[] CommandAttributeNames =
     [
         "Cocona.CommandAttribute",
         "Cocona.Lite.CommandAttribute",
-    ];
-
-    private static readonly string[] OptionAttributeNames =
-    [
-        "Cocona.OptionAttribute",
-        "Cocona.Lite.OptionAttribute",
-    ];
-
-    private static readonly string[] ArgumentAttributeNames =
-    [
-        "Cocona.ArgumentAttribute",
-        "Cocona.Lite.ArgumentAttribute",
-    ];
-
-    private static readonly string[] IgnoreAttributeNames =
-    [
-        "Cocona.IgnoreAttribute",
-        "Cocona.Lite.IgnoreAttribute",
     ];
 
     private static readonly string[] PrimaryCommandAttributeNames =
@@ -45,257 +19,254 @@ internal sealed class CoconaAttributeReader : IStaticAttributeReader
         "Cocona.Lite.PrimaryCommandAttribute",
     ];
 
+    private static readonly string[] HasSubCommandsAttributeNames =
+    [
+        "Cocona.HasSubCommandsAttribute",
+        "Cocona.Lite.HasSubCommandsAttribute",
+    ];
+
     public IReadOnlyDictionary<string, StaticCommandDefinition> Read(IReadOnlyList<ScannedModule> modules)
     {
         var commands = new Dictionary<string, StaticCommandDefinition>(StringComparer.OrdinalIgnoreCase);
+        var referencedSubcommandTypes = CollectReferencedSubcommandTypes(modules);
 
         foreach (var scannedModule in modules)
         {
             foreach (var typeDef in scannedModule.Module.GetTypes())
             {
-                if (!typeDef.IsClass || typeDef.IsAbstract || typeDef.IsInterface)
+                if (!IsEligibleCommandType(typeDef)
+                    || referencedSubcommandTypes.Contains(typeDef.FullName))
                 {
                     continue;
                 }
 
-                ReadCommandMethods(typeDef, commands);
+                ReadCommandContainer(typeDef, commands, prefix: null, new HashSet<string>(StringComparer.Ordinal));
             }
         }
 
         return commands;
     }
 
-    private static void ReadCommandMethods(TypeDef typeDef, Dictionary<string, StaticCommandDefinition> commands)
+    private static void ReadCommandContainer(
+        TypeDef typeDef,
+        IDictionary<string, StaticCommandDefinition> commands,
+        string? prefix,
+        ISet<string> visitedTypeNames)
     {
-        foreach (var method in typeDef.Methods)
+        if (!visitedTypeNames.Add(typeDef.FullName))
         {
-            if (!method.IsPublic || method.IsStatic || method.IsConstructor || method.IsSpecialName)
-            {
-                continue;
-            }
+            return;
+        }
 
-            if (StaticAnalysisAttributeSupport.FindAttribute(method.CustomAttributes, IgnoreAttributeNames) is not null)
-            {
-                continue;
-            }
+        try
+        {
+            ReadCommandMethods(typeDef, commands, prefix);
+            ReadNestedSubcommands(typeDef, commands, prefix, visitedTypeNames);
+        }
+        finally
+        {
+            visitedTypeNames.Remove(typeDef.FullName);
+        }
+    }
 
-            var commandAttr = StaticAnalysisAttributeSupport.FindAttribute(method.CustomAttributes, CommandAttributeNames);
-            var isPrimary = StaticAnalysisAttributeSupport.FindAttribute(method.CustomAttributes, PrimaryCommandAttributeNames) is not null;
-            if (ShouldIgnoreImplicitInfrastructureMethod(method, commandAttr is not null || isPrimary))
-            {
-                continue;
-            }
+    private static void ReadCommandMethods(
+        TypeDef typeDef,
+        IDictionary<string, StaticCommandDefinition> commands,
+        string? prefix)
+    {
+        var candidates = typeDef.Methods
+            .Where(static method => method.IsPublic && !method.IsStatic && !method.IsConstructor && !method.IsSpecialName)
+            .Select(static method => CreateCommandCandidate(method))
+            .Where(static candidate => candidate is not null)
+            .Cast<CommandCandidate>()
+            .ToArray();
 
-            var name = StaticAnalysisAttributeSupport.GetConstructorArgumentString(commandAttr, 0);
-            var description = StaticAnalysisAttributeSupport.GetNamedArgumentString(commandAttr, "Description");
+        var useImplicitDefault = candidates.Length == 1
+            && candidates[0].ExplicitName is null
+            && !candidates[0].IsPrimary
+            && !HasNestedSubcommands(typeDef);
 
-            var isDefault = isPrimary || (name is null && !commands.ContainsKey(string.Empty));
-            var key = name ?? (isDefault ? string.Empty : method.Name?.String?.ToLowerInvariant() ?? string.Empty);
-
-            var (options, values) = ReadMethodParameters(method);
+        foreach (var candidate in candidates)
+        {
+            var isDefault = candidate.IsPrimary || useImplicitDefault;
+            var localName = candidate.ExplicitName ?? CoconaParameterAnalysisSupport.ConvertToKebabCase(candidate.Method.Name?.String);
+            var key = isDefault
+                ? prefix ?? string.Empty
+                : BuildQualifiedKey(prefix, localName);
+            var (options, values) = CoconaParameterAnalysisSupport.ReadMethodParameters(candidate.Method);
             var definition = new StaticCommandDefinition(
                 Name: string.IsNullOrEmpty(key) ? null : key,
-                Description: description,
+                Description: candidate.Description,
                 IsDefault: isDefault,
                 IsHidden: false,
-                Values: values,
-                Options: options);
+                Values: values.OrderBy(static value => value.Index).ToArray(),
+                Options: options
+                    .OrderByDescending(static option => option.IsRequired)
+                    .ThenBy(static option => option.LongName, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(static option => option.ShortName)
+                    .ToArray());
 
             StaticCommandDefinitionSupport.UpsertBest(commands, key, definition);
         }
     }
 
-    private static (IReadOnlyList<StaticOptionDefinition> Options, IReadOnlyList<StaticValueDefinition> Values) ReadMethodParameters(MethodDef method)
+    private static void ReadNestedSubcommands(
+        TypeDef typeDef,
+        IDictionary<string, StaticCommandDefinition> commands,
+        string? prefix,
+        ISet<string> visitedTypeNames)
     {
-        var options = new List<StaticOptionDefinition>();
-        var values = new List<StaticValueDefinition>();
-        var valueIndex = 0;
-
-        foreach (var param in method.Parameters)
+        foreach (var attr in typeDef.CustomAttributes)
         {
-            if (param.IsHiddenThisParameter)
+            if (!HasSubCommandsAttributeNames.Contains(attr.AttributeType?.FullName, StringComparer.Ordinal))
             {
                 continue;
             }
 
-            var paramDef = param.ParamDef;
-            if (paramDef is null)
+            var subcommandType = ResolveSubcommandType(typeDef, attr);
+            if (subcommandType is null || !IsEligibleCommandType(subcommandType))
             {
                 continue;
             }
 
-            if (IsCancellationToken(param.Type))
+            var localName = ResolveSubcommandName(subcommandType, attr);
+            if (string.IsNullOrWhiteSpace(localName))
             {
                 continue;
             }
 
-            var optionAttr = StaticAnalysisAttributeSupport.FindAttribute(paramDef.CustomAttributes, OptionAttributeNames);
-            if (optionAttr is not null)
+            var key = BuildQualifiedKey(prefix, localName);
+            var description = StaticAnalysisAttributeSupport.GetNamedArgumentString(attr, "Description")
+                ?? StaticAnalysisAttributeSupport.GetNamedArgumentString(
+                    StaticAnalysisAttributeSupport.FindAttribute(subcommandType.CustomAttributes, CommandAttributeNames),
+                    "Description");
+            StaticCommandDefinitionSupport.UpsertBest(
+                commands,
+                key,
+                new StaticCommandDefinition(
+                    Name: key,
+                    Description: description,
+                    IsDefault: false,
+                    IsHidden: false,
+                    Values: [],
+                    Options: []));
+
+            ReadCommandContainer(subcommandType, commands, key, visitedTypeNames);
+        }
+    }
+
+    private static CommandCandidate? CreateCommandCandidate(MethodDef method)
+    {
+        if (CoconaParameterAnalysisSupport.IsIgnored(method))
+        {
+            return null;
+        }
+
+        var commandAttr = StaticAnalysisAttributeSupport.FindAttribute(method.CustomAttributes, CommandAttributeNames);
+        var isPrimary = StaticAnalysisAttributeSupport.FindAttribute(method.CustomAttributes, PrimaryCommandAttributeNames) is not null;
+        if (CoconaParameterAnalysisSupport.ShouldIgnoreImplicitInfrastructureMethod(method, commandAttr is not null || isPrimary))
+        {
+            return null;
+        }
+
+        return new CommandCandidate(
+            method,
+            StaticAnalysisAttributeSupport.GetConstructorArgumentString(commandAttr, 0),
+            StaticAnalysisAttributeSupport.GetNamedArgumentString(commandAttr, "Description"),
+            isPrimary);
+    }
+
+    private static HashSet<string> CollectReferencedSubcommandTypes(IReadOnlyList<ScannedModule> modules)
+    {
+        var referencedTypeNames = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var scannedModule in modules)
+        {
+            foreach (var typeDef in scannedModule.Module.GetTypes())
             {
-                options.Add(ReadOptionFromParameter(param, optionAttr));
-                continue;
-            }
+                foreach (var attr in typeDef.CustomAttributes)
+                {
+                    if (!HasSubCommandsAttributeNames.Contains(attr.AttributeType?.FullName, StringComparer.Ordinal))
+                    {
+                        continue;
+                    }
 
-            var argumentAttr = StaticAnalysisAttributeSupport.FindAttribute(paramDef.CustomAttributes, ArgumentAttributeNames);
-            if (argumentAttr is not null)
-            {
-                values.Add(ReadValueFromParameter(param, argumentAttr, valueIndex));
-                valueIndex++;
-                continue;
-            }
-
-            if (StaticAnalysisTypeSupport.IsBoolType(param.Type))
-            {
-                options.Add(new StaticOptionDefinition(
-                    LongName: ConvertToKebabCase(param.Name),
-                    ShortName: null,
-                    IsRequired: false,
-                    IsSequence: false,
-                    IsBoolLike: true,
-                    ClrType: StaticAnalysisTypeSupport.GetClrTypeName(param.Type),
-                    Description: null,
-                    DefaultValue: null,
-                    MetaValue: null,
-                    AcceptedValues: [],
-                    PropertyName: param.Name));
-            }
-            else
-            {
-                options.Add(new StaticOptionDefinition(
-                    LongName: ConvertToKebabCase(param.Name),
-                    ShortName: null,
-                    IsRequired: !(param.ParamDef?.HasConstant ?? false),
-                    IsSequence: StaticAnalysisTypeSupport.IsSequenceType(param.Type),
-                    IsBoolLike: false,
-                    ClrType: StaticAnalysisTypeSupport.GetClrTypeName(param.Type),
-                    Description: null,
-                    DefaultValue: null,
-                    MetaValue: null,
-                    AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(param.Type),
-                    PropertyName: param.Name));
+                    var subcommandType = ResolveSubcommandType(typeDef, attr);
+                    if (subcommandType is not null)
+                    {
+                        referencedTypeNames.Add(subcommandType.FullName);
+                    }
+                }
             }
         }
 
-        return (options, values);
+        return referencedTypeNames;
     }
 
-    private static bool ShouldIgnoreImplicitInfrastructureMethod(MethodDef method, bool hasExplicitCommandMetadata)
+    private static TypeDef? ResolveSubcommandType(TypeDef ownerType, CustomAttribute attr)
     {
-        if (hasExplicitCommandMetadata || HasParameterCliMetadata(method))
+        if (attr.ConstructorArguments.Count == 0)
         {
-            return false;
+            return null;
         }
 
-        if (IsFrameworkType(method.DeclaringType))
+        return attr.ConstructorArguments[0].Value switch
         {
-            return true;
+            ClassSig classSig => classSig.TypeDefOrRef.ResolveTypeDef()
+                ?? ResolveSubcommandTypeByName(ownerType, classSig.TypeDefOrRef.FullName),
+            TypeSig typeSig => typeSig.ToTypeDefOrRef()?.ResolveTypeDef()
+                ?? ResolveSubcommandTypeByName(ownerType, typeSig.FullName),
+            ITypeDefOrRef typeDefOrRef => typeDefOrRef.ResolveTypeDef()
+                ?? ResolveSubcommandTypeByName(ownerType, typeDefOrRef.FullName),
+            UTF8String utf8String => ResolveSubcommandTypeByName(ownerType, utf8String.String),
+            string typeName => ResolveSubcommandTypeByName(ownerType, typeName),
+            _ => null,
+        };
+    }
+
+    private static TypeDef? ResolveSubcommandTypeByName(TypeDef ownerType, string? typeName)
+    {
+        if (string.IsNullOrWhiteSpace(typeName))
+        {
+            return null;
         }
 
-        var relevantParameters = method.Parameters
-            .Where(static parameter => !parameter.IsHiddenThisParameter)
-            .Where(static parameter => parameter.ParamDef is not null)
-            .Where(parameter => !IsCancellationToken(parameter.Type))
-            .ToArray();
-        return relevantParameters.Length > 0
-            && relevantParameters.All(parameter => LooksLikeInfrastructureType(parameter.Type));
+        var normalizedName = typeName.Split(',')[0].Trim();
+        return ownerType.Module.GetTypes().FirstOrDefault(type =>
+            string.Equals(type.FullName, normalizedName, StringComparison.Ordinal)
+            || string.Equals($"{type.Namespace}.{type.Name}", normalizedName, StringComparison.Ordinal)
+            || string.Equals(type.Name?.String, normalizedName, StringComparison.Ordinal));
     }
 
-    private static bool HasParameterCliMetadata(MethodDef method)
-        => method.Parameters
-            .Where(static parameter => !parameter.IsHiddenThisParameter)
-            .Select(static parameter => parameter.ParamDef)
-            .Where(static parameter => parameter is not null)
-            .Any(parameter =>
-                StaticAnalysisAttributeSupport.FindAttribute(parameter!.CustomAttributes, OptionAttributeNames) is not null
-                || StaticAnalysisAttributeSupport.FindAttribute(parameter.CustomAttributes, ArgumentAttributeNames) is not null);
-
-    private static bool IsFrameworkType(TypeDef? typeDef)
+    private static string? ResolveSubcommandName(TypeDef subcommandType, CustomAttribute attr)
     {
-        var typeNamespace = typeDef?.Namespace?.String;
-        if (HasFrameworkPrefix(typeNamespace))
+        var explicitName = StaticAnalysisAttributeSupport.GetNamedArgumentString(attr, "Name")
+            ?? StaticAnalysisAttributeSupport.GetConstructorArgumentString(attr, 1)
+            ?? StaticAnalysisAttributeSupport.GetConstructorArgumentString(
+                StaticAnalysisAttributeSupport.FindAttribute(subcommandType.CustomAttributes, CommandAttributeNames),
+                0);
+        if (!string.IsNullOrWhiteSpace(explicitName))
         {
-            return true;
+            return explicitName;
         }
 
-        var assemblyName = typeDef?.Module?.Assembly?.Name?.String;
-        return HasFrameworkPrefix(assemblyName);
+        return CoconaParameterAnalysisSupport.ConvertToKebabCase(subcommandType.Name?.String);
     }
 
-    private static bool HasFrameworkPrefix(string? value)
-        => !string.IsNullOrWhiteSpace(value)
-            && FrameworkNamespacePrefixes.Any(prefix => value.StartsWith(prefix, StringComparison.Ordinal));
+    private static bool IsEligibleCommandType(TypeDef typeDef)
+        => typeDef.IsClass && !typeDef.IsAbstract && !typeDef.IsInterface;
 
-    private static bool LooksLikeInfrastructureType(TypeSig? typeSig)
-    {
-        var fullName = StaticAnalysisTypeSupport.GetClrTypeName(typeSig);
-        if (string.IsNullOrWhiteSpace(fullName))
-        {
-            return false;
-        }
+    private static bool HasNestedSubcommands(TypeDef typeDef)
+        => typeDef.CustomAttributes.Any(attr =>
+            HasSubCommandsAttributeNames.Contains(attr.AttributeType?.FullName, StringComparer.Ordinal));
 
-        if (fullName.Contains("Microsoft.Extensions.", StringComparison.Ordinal)
-            || fullName.Contains("Microsoft.AspNetCore.", StringComparison.Ordinal)
-            || fullName.Contains("Cocona.", StringComparison.Ordinal))
-        {
-            return true;
-        }
+    private static string BuildQualifiedKey(string? prefix, string? localName)
+        => string.IsNullOrWhiteSpace(prefix)
+            ? localName ?? string.Empty
+            : $"{prefix} {localName}".Trim();
 
-        return string.Equals(fullName, "System.IServiceProvider", StringComparison.Ordinal)
-            || string.Equals(fullName, "System.IServiceScope", StringComparison.Ordinal)
-            || string.Equals(fullName, "System.IAsyncDisposable", StringComparison.Ordinal);
-    }
-
-    private static StaticOptionDefinition ReadOptionFromParameter(Parameter param, CustomAttribute attr)
-    {
-        var longName = StaticAnalysisAttributeSupport.GetConstructorArgumentString(attr, 0) ?? ConvertToKebabCase(param.Name);
-        var description = StaticAnalysisAttributeSupport.GetNamedArgumentString(attr, "Description");
-        var shortNames = StaticAnalysisAttributeSupport.GetNamedArgumentStrings(attr, "ShortNames");
-
-        return new StaticOptionDefinition(
-            LongName: longName,
-            ShortName: shortNames.Length > 0 && shortNames[0].Length == 1 ? shortNames[0][0] : null,
-            IsRequired: !(param.ParamDef?.HasConstant ?? false),
-            IsSequence: StaticAnalysisTypeSupport.IsSequenceType(param.Type),
-            IsBoolLike: StaticAnalysisTypeSupport.IsBoolType(param.Type),
-            ClrType: StaticAnalysisTypeSupport.GetClrTypeName(param.Type),
-            Description: description,
-            DefaultValue: null,
-            MetaValue: null,
-            AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(param.Type),
-            PropertyName: param.Name);
-    }
-
-    private static StaticValueDefinition ReadValueFromParameter(Parameter param, CustomAttribute attr, int index)
-    {
-        var name = StaticAnalysisAttributeSupport.GetNamedArgumentString(attr, "Name") ?? param.Name;
-        var description = StaticAnalysisAttributeSupport.GetNamedArgumentString(attr, "Description");
-        var order = StaticAnalysisAttributeSupport.GetNamedArgumentInt(attr, "Order", index);
-
-        return new StaticValueDefinition(
-            Index: order,
-            Name: name,
-            IsRequired: !(param.ParamDef?.HasConstant ?? false),
-            IsSequence: StaticAnalysisTypeSupport.IsSequenceType(param.Type),
-            ClrType: StaticAnalysisTypeSupport.GetClrTypeName(param.Type),
-            Description: description,
-            DefaultValue: null,
-            AcceptedValues: StaticAnalysisTypeSupport.GetAcceptedValues(param.Type));
-    }
-
-    private static string ConvertToKebabCase(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "value";
-        var result = new System.Text.StringBuilder();
-        for (var i = 0; i < name.Length; i++)
-        {
-            if (char.IsUpper(name[i]) && i > 0) result.Append('-');
-            result.Append(char.ToLowerInvariant(name[i]));
-        }
-
-        return result.ToString();
-    }
-
-    private static bool IsCancellationToken(TypeSig? typeSig)
-        => string.Equals(typeSig?.FullName, "System.Threading.CancellationToken", StringComparison.Ordinal);
-
+    private sealed record CommandCandidate(
+        MethodDef Method,
+        string? ExplicitName,
+        string? Description,
+        bool IsPrimary);
 }

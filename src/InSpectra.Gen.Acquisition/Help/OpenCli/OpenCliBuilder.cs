@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Help.OpenCli;
 
+using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 
 using InSpectra.Gen.Acquisition.Help.Documents;
@@ -34,7 +35,7 @@ internal sealed partial class OpenCliBuilder
             ["x-inspectra"] = new JsonObject
             {
                 ["artifactSource"] = "crawled-from-help",
-                ["generator"] = "InSpectra.Discovery",
+                ["generator"] = InspectraProductInfo.GeneratorName,
                 ["helpDocumentCount"] = expandedHelpDocuments.Count,
             },
             ["commands"] = rootCommands,

@@ -16,7 +16,7 @@ internal static class OpenCliOptionCollisionMergeSupport
             return false;
         }
 
-        if (TryResolveStandaloneAliasCollision(leftEntry.Option, rightOption, rightTokens, out resolvedEntry))
+        if (OpenCliOptionStandaloneAliasCollisionSupport.TryResolve(leftEntry.Option, rightOption, rightTokens, out resolvedEntry))
         {
             return true;
         }
@@ -30,9 +30,14 @@ internal static class OpenCliOptionCollisionMergeSupport
 
         var leftDescription = OpenCliOptionDescriptionSupport.NormalizeDescription(leftEntry.Option["description"]?.GetValue<string>());
         var rightDescription = OpenCliOptionDescriptionSupport.NormalizeDescription(rightOption["description"]?.GetValue<string>());
-        var leftInformational = IsInformationalOption(leftEntry.Option, leftDescription);
-        var rightInformational = IsInformationalOption(rightOption, rightDescription);
-        if (TryResolveInformationalSelfArgumentDuplicate(leftEntry.Option, rightOption, leftInformational, rightInformational, out resolvedEntry))
+        var leftInformational = OpenCliOptionInformationalCollisionSupport.IsInformationalOption(leftEntry.Option, leftDescription);
+        var rightInformational = OpenCliOptionInformationalCollisionSupport.IsInformationalOption(rightOption, rightDescription);
+        if (OpenCliOptionInformationalCollisionSupport.TryResolveSelfArgumentDuplicate(
+                leftEntry.Option,
+                rightOption,
+                leftInformational,
+                rightInformational,
+                out resolvedEntry))
         {
             return true;
         }
@@ -46,7 +51,8 @@ internal static class OpenCliOptionCollisionMergeSupport
 
         if (leftInformational ^ rightInformational)
         {
-            if (IsWellKnownInformationalName(leftName) || IsWellKnownInformationalName(rightName))
+            if (OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(leftName)
+                || OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(rightName))
             {
                 return false;
             }
@@ -57,7 +63,13 @@ internal static class OpenCliOptionCollisionMergeSupport
             }
         }
 
-        if (TryResolveAlternativeValueFormDuplicate(leftEntry.Option, rightOption, leftInformational, rightInformational, out resolvedEntry))
+        if (OpenCliOptionAlternativeValueCollisionSupport.TryResolve(
+                leftEntry.Option,
+                rightOption,
+                leftInformational,
+                rightInformational,
+                ChoosePreferredOption,
+                out resolvedEntry))
         {
             return true;
         }
@@ -77,106 +89,6 @@ internal static class OpenCliOptionCollisionMergeSupport
         resolvedEntry = new OpenCliOptionCollisionEntry(merged, OpenCliOptionSupport.GetOptionTokens(merged));
         return true;
     }
-
-    private static bool TryResolveStandaloneAliasCollision(
-        JsonObject leftOption,
-        JsonObject rightOption,
-        IReadOnlySet<string> rightTokens,
-        out OpenCliOptionCollisionEntry resolvedEntry)
-    {
-        resolvedEntry = new OpenCliOptionCollisionEntry(leftOption, OpenCliOptionSupport.GetOptionTokens(leftOption));
-        if (TryResolveStandaloneAliasCollision(leftOption, rightTokens))
-        {
-            var merged = OpenCliOptionSupport.MergeOptions(rightOption, leftOption);
-            resolvedEntry = new OpenCliOptionCollisionEntry(merged, OpenCliOptionSupport.GetOptionTokens(merged));
-            return true;
-        }
-
-        var leftTokens = OpenCliOptionSupport.GetOptionTokens(leftOption);
-        if (TryResolveStandaloneAliasCollision(rightOption, leftTokens))
-        {
-            var merged = OpenCliOptionSupport.MergeOptions(leftOption, rightOption);
-            resolvedEntry = new OpenCliOptionCollisionEntry(merged, OpenCliOptionSupport.GetOptionTokens(merged));
-            return true;
-        }
-
-        return false;
-    }
-
-    private static bool TryResolveStandaloneAliasCollision(JsonObject standaloneCandidate, IReadOnlySet<string> richerTokens)
-    {
-        var standaloneName = standaloneCandidate["name"]?.GetValue<string>();
-        if (!OpenCliOptionSupport.IsStandaloneAliasOption(standaloneCandidate)
-            || string.IsNullOrWhiteSpace(standaloneName))
-        {
-            return false;
-        }
-
-        return richerTokens.Contains(standaloneName);
-    }
-
-    private static bool TryResolveInformationalSelfArgumentDuplicate(
-        JsonObject leftOption,
-        JsonObject rightOption,
-        bool leftInformational,
-        bool rightInformational,
-        out OpenCliOptionCollisionEntry resolvedEntry)
-    {
-        resolvedEntry = new OpenCliOptionCollisionEntry(leftOption, OpenCliOptionSupport.GetOptionTokens(leftOption));
-        if (TryResolveInformationalSelfArgumentDuplicateCore(leftOption, rightOption, leftInformational, out var merged))
-        {
-            resolvedEntry = new OpenCliOptionCollisionEntry(merged, OpenCliOptionSupport.GetOptionTokens(merged));
-            return true;
-        }
-
-        if (TryResolveInformationalSelfArgumentDuplicateCore(rightOption, leftOption, rightInformational, out merged))
-        {
-            resolvedEntry = new OpenCliOptionCollisionEntry(merged, OpenCliOptionSupport.GetOptionTokens(merged));
-            return true;
-        }
-
-        return false;
-    }
-
-    private static bool TryResolveInformationalSelfArgumentDuplicateCore(
-        JsonObject informationalCandidate,
-        JsonObject selfArgumentCandidate,
-        bool isInformationalCandidate,
-        out JsonObject resolved)
-    {
-        resolved = informationalCandidate;
-        if (!isInformationalCandidate
-            || OpenCliOptionSupport.HasArguments(informationalCandidate)
-            || !LooksLikeSyntheticSelfArgumentOption(selfArgumentCandidate))
-        {
-            return false;
-        }
-
-        resolved = OpenCliOptionSupport.MergeOptions(informationalCandidate, selfArgumentCandidate);
-        resolved.Remove("arguments");
-        return true;
-    }
-
-    private static bool IsInformationalOption(JsonObject option, string normalizedDescription)
-    {
-        if (OpenCliOptionDescriptionSupport.IsInformationalOptionDescription(normalizedDescription))
-        {
-            return true;
-        }
-
-        return OpenCliOptionDescriptionSupport.LooksLikeWellKnownInformationalOptionDescription(
-                option["name"]?.GetValue<string>(),
-                normalizedDescription)
-            && (!OpenCliOptionSupport.HasArguments(option) || HasIgnorableInformationalArguments(option));
-    }
-
-    private static bool IsWellKnownInformationalName(string? optionName)
-        => NormalizeOptionSemanticName(optionName) is "help" or "version";
-
-    private static string NormalizeOptionSemanticName(string? optionName)
-        => string.IsNullOrWhiteSpace(optionName)
-            ? string.Empty
-            : optionName.Trim().TrimStart('-', '/').ToLowerInvariant();
 
     private static JsonObject ChoosePreferredOption(
         JsonObject leftOption,
@@ -220,156 +132,5 @@ internal static class OpenCliOptionCollisionMergeSupport
         }
 
         return score;
-    }
-
-    private static bool LooksLikeSyntheticSelfArgumentOption(JsonObject option)
-    {
-        var normalizedDescription = OpenCliOptionDescriptionSupport.NormalizeDescription(option["description"]?.GetValue<string>());
-        if (!OpenCliOptionDescriptionSupport.LooksLikeWellKnownInformationalOptionDescription(
-                option["name"]?.GetValue<string>(),
-                normalizedDescription))
-        {
-            return false;
-        }
-
-        return HasIgnorableInformationalArguments(option);
-    }
-
-    private static bool HasIgnorableInformationalArguments(JsonObject option)
-    {
-        if (option["arguments"] is not JsonArray arguments || arguments.Count != 1)
-        {
-            return false;
-        }
-
-        var argument = arguments[0] as JsonObject;
-        if (argument is null)
-        {
-            return false;
-        }
-
-        if (argument["required"]?.GetValue<bool>() == true)
-        {
-            return false;
-        }
-
-        if (LooksLikeOptionalBooleanNoise(argument))
-        {
-            return true;
-        }
-
-        var argumentName = argument["name"]?.GetValue<string>();
-        if (string.IsNullOrWhiteSpace(argumentName))
-        {
-            return false;
-        }
-
-        return string.Equals(
-            argumentName,
-            OpenCliOptionSupport.DeriveSyntheticArgumentName(option["name"]?.GetValue<string>()),
-            StringComparison.Ordinal);
-    }
-
-    private static bool LooksLikeOptionalBooleanNoise(JsonObject argument)
-    {
-        if (!string.IsNullOrWhiteSpace(argument["name"]?.GetValue<string>()))
-        {
-            return false;
-        }
-
-        if (!string.Equals(argument["type"]?.GetValue<string>(), "Boolean", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        if (argument["arity"] is not JsonObject arity)
-        {
-            return false;
-        }
-
-        var minimum = arity["minimum"]?.GetValue<int>();
-        var maximum = arity["maximum"]?.GetValue<int>();
-        return minimum == 0 && maximum == 1;
-    }
-
-    private static bool TryResolveAlternativeValueFormDuplicate(
-        JsonObject leftOption,
-        JsonObject rightOption,
-        bool leftInformational,
-        bool rightInformational,
-        out OpenCliOptionCollisionEntry resolvedEntry)
-    {
-        resolvedEntry = new OpenCliOptionCollisionEntry(leftOption, OpenCliOptionSupport.GetOptionTokens(leftOption));
-        if (leftInformational
-            || rightInformational
-            || !OpenCliOptionSupport.HasArguments(leftOption)
-            || !OpenCliOptionSupport.HasArguments(rightOption))
-        {
-            return false;
-        }
-
-        var leftTokens = OpenCliOptionSupport.GetOptionTokens(leftOption);
-        var rightTokens = OpenCliOptionSupport.GetOptionTokens(rightOption);
-        if (!leftTokens.SetEquals(rightTokens))
-        {
-            return false;
-        }
-
-        var leftArgument = GetSingleArgument(leftOption);
-        var rightArgument = GetSingleArgument(rightOption);
-        if (leftArgument is null || rightArgument is null)
-        {
-            return false;
-        }
-
-        var leftDescription = leftOption["description"]?.GetValue<string>();
-        var rightDescription = rightOption["description"]?.GetValue<string>();
-        if (string.IsNullOrWhiteSpace(leftDescription) || string.IsNullOrWhiteSpace(rightDescription))
-        {
-            return false;
-        }
-
-        var preferred = ScoreOption(leftOption) >= ScoreOption(rightOption) ? leftOption : rightOption;
-        var other = ReferenceEquals(preferred, leftOption) ? rightOption : leftOption;
-        var merged = OpenCliOptionSupport.MergeOptions(preferred, other);
-        merged["description"] = MergeAlternativeValueFormDescriptions(leftDescription, rightDescription);
-        merged["arguments"] = new JsonArray
-        {
-            BuildMergedArgument(leftOption["name"]?.GetValue<string>(), leftArgument, rightArgument),
-        };
-        resolvedEntry = new OpenCliOptionCollisionEntry(merged, OpenCliOptionSupport.GetOptionTokens(merged));
-        return true;
-    }
-
-    private static JsonObject? GetSingleArgument(JsonObject option)
-        => option["arguments"] is JsonArray arguments && arguments.Count == 1
-            ? arguments[0] as JsonObject
-            : null;
-
-    private static string MergeAlternativeValueFormDescriptions(string leftDescription, string rightDescription)
-    {
-        var lines = leftDescription
-            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Concat(rightDescription.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-        return string.Join("\n", lines);
-    }
-
-    private static JsonObject BuildMergedArgument(string? optionName, JsonObject leftArgument, JsonObject rightArgument)
-    {
-        var mergedArgument = (JsonObject)leftArgument.DeepClone();
-        mergedArgument["name"] = OpenCliOptionSupport.DeriveSyntheticArgumentName(optionName);
-
-        var leftRequired = leftArgument["required"]?.GetValue<bool>() == true;
-        var rightRequired = rightArgument["required"]?.GetValue<bool>() == true;
-        mergedArgument["required"] = leftRequired && rightRequired;
-
-        if (mergedArgument["arity"] is JsonObject arity)
-        {
-            arity["minimum"] = leftRequired && rightRequired ? 1 : 0;
-        }
-
-        return mergedArgument;
     }
 }

@@ -1,5 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Analysis.Hook;
 
+using InSpectra.Gen.Acquisition.Help.Signatures;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
 using System.Reflection.Metadata;
@@ -9,16 +10,23 @@ using System.Text.Json.Nodes;
 
 internal static class HookToolProcessInvocationResolver
 {
-    public static HookToolProcessInvocationResolution Resolve(string installDirectory, string commandName, string commandPath)
+    public static HookToolProcessInvocationResolution Resolve(
+        string installDirectory,
+        string commandName,
+        string commandPath,
+        string? preferredEntryPointPath = null)
         => TryResolveDotnetRunnerInvocation(installDirectory, commandName)
-            ?? HookToolProcessInvocationResolution.FromInvocation(new HookToolProcessInvocation(commandPath, ["--help"]));
+            ?? HookToolProcessInvocationResolution.FromInvocation(
+                new HookToolProcessInvocation(commandPath, ["--help"], preferredEntryPointPath ?? commandPath));
 
     public static string? TryResolvePreferredAssemblyDirectory(HookToolProcessInvocation invocation)
     {
-        var candidatePath = invocation.ArgumentList.Count > 0
-            && string.Equals(Path.GetFileNameWithoutExtension(invocation.FilePath), "dotnet", StringComparison.OrdinalIgnoreCase)
-            ? invocation.ArgumentList[0]
-            : invocation.FilePath;
+        var candidatePath = !string.IsNullOrWhiteSpace(invocation.PreferredAssemblyPath)
+            ? invocation.PreferredAssemblyPath
+            : invocation.ArgumentList.Count > 0
+                && string.Equals(Path.GetFileNameWithoutExtension(invocation.FilePath), "dotnet", StringComparison.OrdinalIgnoreCase)
+                ? invocation.ArgumentList[0]
+                : invocation.FilePath;
         if (string.IsNullOrWhiteSpace(candidatePath))
         {
             return null;
@@ -38,21 +46,50 @@ internal static class HookToolProcessInvocationResolver
     public static IReadOnlyList<HookToolProcessInvocation> BuildHelpFallbackInvocations(HookToolProcessInvocation invocation)
     {
         if (invocation.ArgumentList.Count == 0
-            || !string.Equals(invocation.ArgumentList[^1], "--help", StringComparison.Ordinal))
+            || !IsHelpSwitch(invocation.ArgumentList[^1]))
         {
             return [];
         }
 
-        var baseArguments = invocation.ArgumentList
-            .Take(invocation.ArgumentList.Count - 1)
+        var prefixLength = IsDotnetHostInvocation(invocation) ? 1 : 0;
+        var prefixArguments = invocation.ArgumentList.Take(prefixLength).ToArray();
+        var commandArguments = invocation.ArgumentList.Skip(prefixLength).ToArray();
+        if (commandArguments.Length == 0 || !IsHelpSwitch(commandArguments[^1]))
+        {
+            return [];
+        }
+
+        var commandSegments = commandArguments[..^1];
+        return InvocationSupport.BuildHelpInvocations(commandSegments)
+            .Where(arguments => arguments.Length > 0)
+            .Where(ContainsExplicitHelpRequest)
+            .Where(arguments => !arguments.SequenceEqual(commandArguments, StringComparer.Ordinal))
+            .Select(arguments =>
+                new HookToolProcessInvocation(
+                    invocation.FilePath,
+                    [.. prefixArguments, .. arguments],
+                    invocation.PreferredAssemblyPath))
             .ToArray();
-        return
-        [
-            new HookToolProcessInvocation(invocation.FilePath, [.. baseArguments, "-h"]),
-            new HookToolProcessInvocation(invocation.FilePath, [.. baseArguments, "-?"]),
-            new HookToolProcessInvocation(invocation.FilePath, [.. baseArguments, "--h"]),
-        ];
     }
+
+    private static bool IsDotnetHostInvocation(HookToolProcessInvocation invocation)
+        => string.Equals(
+            Path.GetFileNameWithoutExtension(invocation.FilePath),
+            "dotnet",
+            StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsHelpSwitch(string argument)
+        => string.Equals(argument, "--help", StringComparison.Ordinal)
+            || string.Equals(argument, "-h", StringComparison.Ordinal)
+            || string.Equals(argument, "-?", StringComparison.Ordinal)
+            || string.Equals(argument, "--h", StringComparison.Ordinal)
+            || string.Equals(argument, "/help", StringComparison.Ordinal)
+            || string.Equals(argument, "/?", StringComparison.Ordinal);
+
+    private static bool ContainsExplicitHelpRequest(IReadOnlyList<string> arguments)
+        => arguments.Any(argument =>
+            IsHelpSwitch(argument)
+            || string.Equals(argument, "help", StringComparison.OrdinalIgnoreCase));
 
     private static HookToolProcessInvocationResolution? TryResolveDotnetRunnerInvocation(string installDirectory, string commandName)
     {
@@ -84,7 +121,7 @@ internal static class HookToolProcessInvocationResolver
         }
 
         return HookToolProcessInvocationResolution.FromInvocation(
-            new HookToolProcessInvocation(ResolveDotnetHostPath(), [entryPointPath, "--help"]));
+            new HookToolProcessInvocation(ResolveDotnetHostPath(), [entryPointPath, "--help"], entryPointPath));
     }
 
     private static bool EnsureRuntimeConfig(string entryPointPath, string settingsPath)
@@ -244,7 +281,8 @@ internal static class HookToolProcessInvocationResolver
 
 internal sealed record HookToolProcessInvocation(
     string FilePath,
-    IReadOnlyList<string> ArgumentList);
+    IReadOnlyList<string> ArgumentList,
+    string? PreferredAssemblyPath);
 
 internal sealed record HookToolProcessInvocationResolution(
     HookToolProcessInvocation? Invocation,

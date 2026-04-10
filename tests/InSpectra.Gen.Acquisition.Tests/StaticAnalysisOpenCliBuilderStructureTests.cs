@@ -162,4 +162,123 @@ public sealed class StaticAnalysisOpenCliBuilderStructureTests
         Assert.Equal(["--help", "--version"], options);
         Assert.Null(document["arguments"]);
     }
+
+    [Fact]
+    public void Build_Keeps_Static_Descendants_When_Help_Graph_Only_Covers_The_Ancestor()
+    {
+        var builder = new StaticAnalysisOpenCliBuilder();
+        var staticCommands = new Dictionary<string, StaticCommandDefinition>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["foo bar"] = new("foo bar", "Run the bar workflow.", false, false, [], []),
+        };
+        var helpDocuments = new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase)
+        {
+            [""] = StaticAnalysisOpenCliBuilderTestSupport.CreateHelpDocument(
+                commands: [new Item("foo", false, "Foo commands")]),
+        };
+
+        var document = builder.Build("demo", "1.0.0", "System.CommandLine", staticCommands, helpDocuments);
+
+        var rootCommands = Assert.IsType<JsonArray>(document["commands"]);
+        var foo = Assert.IsType<JsonObject>(Assert.Single(rootCommands));
+        Assert.Equal("foo", foo["name"]!.GetValue<string>());
+        var fooCommands = Assert.IsType<JsonArray>(foo["commands"]);
+        var bar = Assert.IsType<JsonObject>(Assert.Single(fooCommands));
+        Assert.Equal("bar", bar["name"]!.GetValue<string>());
+        Assert.Equal("Run the bar workflow.", bar["description"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void Build_Preserves_Variadic_Arity_When_Help_Anchors_Static_Arguments()
+    {
+        var builder = new StaticAnalysisOpenCliBuilder();
+        var staticCommands = new Dictionary<string, StaticCommandDefinition>(StringComparer.OrdinalIgnoreCase)
+        {
+            [""] = new(
+                Name: null,
+                Description: "Process paths.",
+                IsDefault: true,
+                IsHidden: false,
+                Values:
+                [
+                    new StaticValueDefinition(0, "paths", true, true, "System.String[]", "Paths to process.", null, []),
+                ],
+                Options: []),
+        };
+        var helpDocuments = new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase)
+        {
+            [""] = StaticAnalysisOpenCliBuilderTestSupport.CreateHelpDocument(
+                arguments: [new Item("paths", true, "Paths to process.")]),
+        };
+
+        var document = builder.Build("demo", "1.0.0", "System.CommandLine", staticCommands, helpDocuments);
+
+        var arguments = Assert.IsType<JsonArray>(document["arguments"]);
+        var argument = Assert.IsType<JsonObject>(Assert.Single(arguments));
+        Assert.Equal("paths", argument["name"]!.GetValue<string>());
+        var arity = Assert.IsType<JsonObject>(argument["arity"]);
+        Assert.Equal(1, arity["minimum"]!.GetValue<int>());
+        Assert.Null(arity["maximum"]);
+    }
+
+    [Fact]
+    public void Build_Help_Anchored_Arguments_Fall_Back_To_Static_Requiredness_And_Description()
+    {
+        var builder = new StaticAnalysisOpenCliBuilder();
+        var staticCommands = new Dictionary<string, StaticCommandDefinition>(StringComparer.OrdinalIgnoreCase)
+        {
+            [""] = new(
+                Name: null,
+                Description: "Process input.",
+                IsDefault: true,
+                IsHidden: false,
+                Values:
+                [
+                    new StaticValueDefinition(0, "input", true, false, "System.String", "Input file.", null, []),
+                ],
+                Options: []),
+        };
+        var helpDocuments = new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase)
+        {
+            [""] = StaticAnalysisOpenCliBuilderTestSupport.CreateHelpDocument(
+                arguments: [new Item("input", false, null)]),
+        };
+
+        var document = builder.Build("demo", "1.0.0", "System.CommandLine", staticCommands, helpDocuments);
+
+        var arguments = Assert.IsType<JsonArray>(document["arguments"]);
+        var argument = Assert.IsType<JsonObject>(Assert.Single(arguments));
+        Assert.Equal("input", argument["name"]!.GetValue<string>());
+        Assert.True(argument["required"]!.GetValue<bool>());
+        Assert.Equal("Input file.", argument["description"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void Build_Emits_Help_Only_Root_Commands_When_Root_Also_Has_Global_Options()
+    {
+        var builder = new StaticAnalysisOpenCliBuilder();
+        var helpDocuments = new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase)
+        {
+            [""] = StaticAnalysisOpenCliBuilderTestSupport.CreateHelpDocument(
+                options:
+                [
+                    new Item("--help", false, "Show help."),
+                    new Item("--version", false, "Show version."),
+                ],
+                commands: [new Item("greet", false, "Greet a user.")]),
+        };
+
+        var document = builder.Build(
+            "demo",
+            "1.0.0",
+            "System.CommandLine",
+            new Dictionary<string, StaticCommandDefinition>(StringComparer.OrdinalIgnoreCase),
+            helpDocuments);
+
+        var rootCommands = Assert.IsType<JsonArray>(document["commands"]);
+        var greet = Assert.IsType<JsonObject>(Assert.Single(rootCommands));
+        Assert.Equal("greet", greet["name"]!.GetValue<string>());
+        var options = Assert.IsType<JsonArray>(document["options"]);
+        Assert.Equal(2, options.Count);
+    }
 }

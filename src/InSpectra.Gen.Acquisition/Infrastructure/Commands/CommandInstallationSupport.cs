@@ -61,7 +61,8 @@ internal static class CommandInstallationSupport
         return new InstalledToolContext(
             Environment: sandbox.Values,
             InstallDirectory: installDirectory,
-            CommandPath: commandPath);
+            CommandPath: commandPath,
+            PreferredEntryPointPath: InstalledDotnetToolCommandSupport.TryResolve(installDirectory, commandName)?.EntryPointPath);
     }
 
     private static void EnsureDirectories(IReadOnlyList<string> directories)
@@ -76,5 +77,6 @@ internal static class CommandInstallationSupport
 internal sealed record InstalledToolContext(
     IReadOnlyDictionary<string, string> Environment,
     string InstallDirectory,
-    string CommandPath);
+    string CommandPath,
+    string? PreferredEntryPointPath = null);
 

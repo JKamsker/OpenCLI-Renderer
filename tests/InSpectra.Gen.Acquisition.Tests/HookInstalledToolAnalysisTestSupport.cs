@@ -44,7 +44,9 @@ internal static class HookInstalledToolAnalysisTestSupport
         return hookPath;
     }
 
-    public static InstalledToolContext CreateInstalledTool(RepositoryRegressionTestSupport.TemporaryDirectory tempDirectory)
+    public static InstalledToolContext CreateInstalledTool(
+        RepositoryRegressionTestSupport.TemporaryDirectory tempDirectory,
+        string? preferredEntryPointPath = null)
     {
         var installDirectory = Path.Combine(tempDirectory.Path, "tool");
         Directory.CreateDirectory(installDirectory);
@@ -54,7 +56,8 @@ internal static class HookInstalledToolAnalysisTestSupport
         return new InstalledToolContext(
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
             installDirectory,
-            commandPath);
+            commandPath,
+            preferredEntryPointPath);
     }
 
     internal sealed class FakeHookCommandRuntime(
@@ -72,7 +75,9 @@ internal static class HookInstalledToolAnalysisTestSupport
             var invocation = new HookInvocation(
                 filePath,
                 argumentList.ToArray(),
-                new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase));
+                new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase),
+                workingDirectory,
+                sandboxRoot);
             return Task.FromResult(hookHandler(invocation));
         }
     }
@@ -80,5 +85,7 @@ internal static class HookInstalledToolAnalysisTestSupport
     internal sealed record HookInvocation(
         string FilePath,
         string[] ArgumentList,
-        IReadOnlyDictionary<string, string> Environment);
+        IReadOnlyDictionary<string, string> Environment,
+        string WorkingDirectory,
+        string? SandboxRoot);
 }

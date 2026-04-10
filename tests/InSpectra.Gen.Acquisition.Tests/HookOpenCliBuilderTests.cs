@@ -1,6 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests;
 
 using InSpectra.Gen.Acquisition.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Infrastructure;
 
 using System.Text.Json.Nodes;
 using Xunit;
@@ -16,6 +17,7 @@ public sealed class HookOpenCliBuilderTests
 
         Assert.Equal("dotnet-iqsharp", document["info"]?["title"]?.GetValue<string>());
         Assert.Equal("/usr/share/dotnet/dotnet", document["x-inspectra"]?["cliParsedTitle"]?.GetValue<string>());
+        Assert.Equal(InspectraProductInfo.GeneratorName, document["x-inspectra"]?["generator"]?.GetValue<string>());
     }
 
     [Fact]
@@ -86,6 +88,58 @@ public sealed class HookOpenCliBuilderTests
             new[] { "connector", "version" },
             commands.Select(command => command["name"]?.GetValue<string>()).ToArray());
         Assert.DoesNotContain(commands, command => command["name"]?.GetValue<string>()?.StartsWith("#", StringComparison.Ordinal) is true);
+    }
+
+    [Fact]
+    public void Build_Does_Not_Emit_Arguments_For_Boolean_Flags()
+    {
+        var capture = CreateCapture(
+            "demo",
+            new HookCapturedOption
+            {
+                Name = "--verbose",
+                ValueType = "Boolean",
+                MinArity = 0,
+                MaxArity = 0,
+            });
+
+        var document = HookOpenCliBuilder.Build("demo", "1.0.0", capture);
+
+        var option = Assert.Single(document["options"]!.AsArray());
+        Assert.Null(option!["arguments"]);
+    }
+
+    [Fact]
+    public void Build_Uses_AcceptedValues_For_Captured_Choices()
+    {
+        var capture = CreateCapture(
+            "demo",
+            new HookCapturedOption
+            {
+                Name = "--mode",
+                ValueType = "String",
+                MinArity = 1,
+                MaxArity = 1,
+                AllowedValues = ["fast", "safe"],
+            });
+        capture.Root!.Arguments.Add(new HookCapturedArgument
+        {
+            Name = "target",
+            MinArity = 1,
+            MaxArity = 1,
+            AllowedValues = ["one", "two"],
+        });
+
+        var document = HookOpenCliBuilder.Build("demo", "1.0.0", capture);
+
+        var option = Assert.Single(document["options"]!.AsArray());
+        var optionArgument = Assert.Single(option!["arguments"]!.AsArray());
+        Assert.Equal(["fast", "safe"], optionArgument!["acceptedValues"]!.AsArray().Select(value => value!.GetValue<string>()).ToArray());
+        Assert.Null(optionArgument["allowedValues"]);
+
+        var argument = Assert.Single(document["arguments"]!.AsArray());
+        Assert.Equal(["one", "two"], argument!["acceptedValues"]!.AsArray().Select(value => value!.GetValue<string>()).ToArray());
+        Assert.Null(argument["allowedValues"]);
     }
 
     private static HookCaptureResult CreateCapture(string rootName, params HookCapturedOption[] options)
