@@ -1,5 +1,9 @@
+using InSpectra.Gen.StartupHook.Capture;
+using InSpectra.Gen.StartupHook.Frameworks;
 using System.Reflection;
 using HarmonyLib;
+
+namespace InSpectra.Gen.StartupHook.SystemCommandLine;
 
 internal static class HarmonyPatchInstaller
 {

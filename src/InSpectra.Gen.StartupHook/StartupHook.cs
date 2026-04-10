@@ -1,3 +1,6 @@
+using InSpectra.Gen.StartupHook.Capture;
+using InSpectra.Gen.StartupHook.Runtime;
+
 // No namespace - required by DOTNET_STARTUP_HOOKS contract.
 
 internal class StartupHook
@@ -17,22 +20,7 @@ internal class StartupHook
         }
         catch (Exception ex)
         {
-            WriteError(capturePath, "initialize-failed", ex.ToString());
+            CaptureFileWriter.WriteError(capturePath, "initialize-failed", ex.ToString());
         }
     }
-
-    private static void WriteError(string path, string status, string error)
-    {
-        try
-        {
-            var dir = Path.GetDirectoryName(path);
-            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-            File.WriteAllText(path,
-                $"{{\"captureVersion\":1,\"status\":\"{status}\",\"error\":\"{EscapeJson(error)}\"}}");
-        }
-        catch { }
-    }
-
-    private static string EscapeJson(string s)
-        => s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n");
 }

@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>InSpectra.Gen.StartupHook</RootNamespace>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>

@@ -1,4 +1,8 @@
+using InSpectra.Gen.StartupHook.Capture;
+using InSpectra.Gen.StartupHook.Frameworks;
 using System.Reflection;
+
+namespace InSpectra.Gen.StartupHook.Runtime;
 
 internal static class AssemblyLoadInterceptor
 {

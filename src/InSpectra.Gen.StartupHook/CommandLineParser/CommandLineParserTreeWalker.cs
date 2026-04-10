@@ -1,4 +1,8 @@
 using System.Reflection;
+using InSpectra.Gen.StartupHook.Capture;
+using InSpectra.Gen.StartupHook.Reflection;
+
+namespace InSpectra.Gen.StartupHook.CommandLineParser;
 
 internal static class CommandLineParserTreeWalker
 {

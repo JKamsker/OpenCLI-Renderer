@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+namespace InSpectra.Gen.StartupHook.Capture;
+
 internal static class CaptureFileWriter
 {
     private static readonly JsonSerializerOptions JsonOptions = new()

@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Reflection;
+using InSpectra.Gen.StartupHook.Capture;
+
+namespace InSpectra.Gen.StartupHook.SystemCommandLine;
 
 internal static class CommandTreeWalker
 {

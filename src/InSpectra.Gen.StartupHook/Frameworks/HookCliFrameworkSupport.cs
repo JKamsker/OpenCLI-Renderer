@@ -1,4 +1,9 @@
+using InSpectra.Gen.StartupHook.CommandLineParser;
+using InSpectra.Gen.StartupHook.CommandLineUtils;
+using InSpectra.Gen.StartupHook.SystemCommandLine;
 using System.Reflection;
+
+namespace InSpectra.Gen.StartupHook.Frameworks;
 
 internal static class HookCliFrameworkSupport
 {

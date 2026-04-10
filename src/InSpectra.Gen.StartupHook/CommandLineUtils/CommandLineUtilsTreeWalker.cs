@@ -1,5 +1,9 @@
 using System.Collections;
 using System.Text.RegularExpressions;
+using InSpectra.Gen.StartupHook.Capture;
+using InSpectra.Gen.StartupHook.Reflection;
+
+namespace InSpectra.Gen.StartupHook.CommandLineUtils;
 
 internal static class CommandLineUtilsTreeWalker
 {

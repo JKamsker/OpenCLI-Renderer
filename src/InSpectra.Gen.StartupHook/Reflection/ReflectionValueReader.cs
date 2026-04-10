@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Reflection;
 
+namespace InSpectra.Gen.StartupHook.Reflection;
+
 internal static class ReflectionValueReader
 {
     public static T? GetMemberValue<T>(object instance, params string[] names)

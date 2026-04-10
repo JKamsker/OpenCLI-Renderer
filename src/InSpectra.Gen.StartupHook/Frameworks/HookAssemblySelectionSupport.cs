@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+namespace InSpectra.Gen.StartupHook.Frameworks;
+
 internal static class HookAssemblySelectionSupport
 {
     public static bool ShouldPatch(Assembly assembly, string cliFramework, string? preferredFrameworkDirectory)

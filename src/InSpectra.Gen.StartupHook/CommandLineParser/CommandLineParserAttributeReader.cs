@@ -1,5 +1,7 @@
 using System.Reflection;
 
+namespace InSpectra.Gen.StartupHook.CommandLineParser;
+
 internal static class CommandLineParserAttributeReader
 {
     public static CustomAttributeData? FindCustomAttribute(MemberInfo member, string fullName)

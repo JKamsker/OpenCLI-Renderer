@@ -1,5 +1,10 @@
+using InSpectra.Gen.StartupHook.Capture;
+using InSpectra.Gen.StartupHook.Frameworks;
+using InSpectra.Gen.StartupHook.Reflection;
 using System.Reflection;
 using HarmonyLib;
+
+namespace InSpectra.Gen.StartupHook.CommandLineUtils;
 
 internal static class CommandLineUtilsPatchInstaller
 {

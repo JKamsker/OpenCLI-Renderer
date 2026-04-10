@@ -1,12 +1,14 @@
 using System.Reflection;
 
+namespace InSpectra.Gen.StartupHook.Runtime;
+
 internal static class HookDependencyLoader
 {
     private static readonly string[] RequiredAssemblyFileNames = ["0Harmony.dll"];
 
     public static void LoadRequiredAssemblies()
     {
-        var hookDirectory = Path.GetDirectoryName(typeof(StartupHook).Assembly.Location);
+        var hookDirectory = Path.GetDirectoryName(typeof(global::StartupHook).Assembly.Location);
         if (string.IsNullOrWhiteSpace(hookDirectory))
             throw new InvalidOperationException("Could not resolve the startup hook directory.");
 

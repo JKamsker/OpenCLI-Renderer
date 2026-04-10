@@ -1,5 +1,7 @@
 using System.Reflection;
 
+namespace InSpectra.Gen.StartupHook.CommandLineParser;
+
 internal static class CommandLineParserTypeSupport
 {
     public static bool LooksLikeHeuristicOptionMember(MemberInfo member, out Type memberType)
