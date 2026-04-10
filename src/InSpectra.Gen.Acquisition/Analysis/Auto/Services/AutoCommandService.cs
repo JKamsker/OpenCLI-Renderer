@@ -126,6 +126,10 @@ internal sealed class AutoCommandService
         {
             descriptor = await _descriptorResolver.ResolveAsync(packageId, version, cancellationToken);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             var failure = AutoResultSupport.CreateFailureResult(packageId, version, batchId, attempt, source, ex.Message);
