@@ -12,21 +12,23 @@ public sealed class DotnetGenerateCommand(IOpenCliGenerationService generationSe
         var outputMode = RenderRequestFactory.ResolveOutputMode(settings);
         var workingDirectory = RenderRequestFactory.ResolveWorkingDirectory(settings.WorkingDirectory);
         var request = new DotnetAcquisitionRequest(
-            DotnetProjectResolver.Resolve(settings.Project, workingDirectory),
-            settings.Configuration,
-            settings.Framework,
-            settings.LaunchProfile,
-            settings.NoBuild,
-            settings.NoRestore,
-            RenderRequestFactory.ResolveOpenCliMode(settings.OpenCliMode, OpenCliMode.Auto),
-            settings.CommandName,
-            settings.CliFramework,
-            settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
-            settings.WithXmlDoc,
-            settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
+            new DotnetBuildSettings(
+                DotnetProjectResolver.Resolve(settings.Project, workingDirectory),
+                settings.Configuration,
+                settings.Framework,
+                settings.LaunchProfile,
+                settings.NoBuild,
+                settings.NoRestore),
             workingDirectory,
-            RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds, defaultSeconds: 120),
-            new OpenCliArtifactOptions(null, settings.CrawlOutputPath, settings.Overwrite));
+            new AcquisitionOptions(
+                RenderRequestFactory.ResolveOpenCliMode(settings.OpenCliMode, OpenCliMode.Auto),
+                settings.CommandName,
+                settings.CliFramework,
+                settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
+                settings.WithXmlDoc,
+                settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
+                RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds, defaultSeconds: 120),
+                new OpenCliArtifactOptions(null, settings.CrawlOutputPath, settings.Overwrite)));
 
         return GenerateOutputHandler.ExecuteAsync(
             outputMode,

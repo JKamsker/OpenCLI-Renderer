@@ -1,3 +1,5 @@
+using InSpectra.Gen.Runtime.Acquisition;
+
 namespace InSpectra.Gen.Tests;
 
 public class DotnetProjectArgsBuilderTests
@@ -6,12 +8,7 @@ public class DotnetProjectArgsBuilderTests
     public void Minimal_arguments_emits_run_project_and_terminator()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "/tmp/MyCli.csproj",
-            configuration: null,
-            framework: null,
-            launchProfile: null,
-            noBuild: false,
-            noRestore: false);
+            new DotnetBuildSettings("/tmp/MyCli.csproj", null, null, null, false, false));
 
         Assert.Equal(new[] { "run", "--project", "/tmp/MyCli.csproj", "--" }, args);
     }
@@ -20,12 +17,7 @@ public class DotnetProjectArgsBuilderTests
     public void Configuration_is_passed_with_short_flag()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "proj.csproj",
-            configuration: "Release",
-            framework: null,
-            launchProfile: null,
-            noBuild: false,
-            noRestore: false);
+            new DotnetBuildSettings("proj.csproj", "Release", null, null, false, false));
 
         Assert.Equal(new[] { "run", "--project", "proj.csproj", "-c", "Release", "--" }, args);
     }
@@ -34,12 +26,7 @@ public class DotnetProjectArgsBuilderTests
     public void Framework_is_passed_with_short_flag()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "proj.csproj",
-            configuration: null,
-            framework: "net10.0",
-            launchProfile: null,
-            noBuild: false,
-            noRestore: false);
+            new DotnetBuildSettings("proj.csproj", null, "net10.0", null, false, false));
 
         Assert.Equal(new[] { "run", "--project", "proj.csproj", "-f", "net10.0", "--" }, args);
     }
@@ -48,12 +35,7 @@ public class DotnetProjectArgsBuilderTests
     public void Launch_profile_is_passed_with_long_flag()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "proj.csproj",
-            configuration: null,
-            framework: null,
-            launchProfile: "dev",
-            noBuild: false,
-            noRestore: false);
+            new DotnetBuildSettings("proj.csproj", null, null, "dev", false, false));
 
         Assert.Equal(new[] { "run", "--project", "proj.csproj", "--launch-profile", "dev", "--" }, args);
     }
@@ -62,12 +44,7 @@ public class DotnetProjectArgsBuilderTests
     public void No_build_and_no_restore_flags_are_appended_before_terminator()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "proj.csproj",
-            configuration: null,
-            framework: null,
-            launchProfile: null,
-            noBuild: true,
-            noRestore: true);
+            new DotnetBuildSettings("proj.csproj", null, null, null, true, true));
 
         Assert.Equal(new[] { "run", "--project", "proj.csproj", "--no-build", "--no-restore", "--" }, args);
     }
@@ -76,12 +53,7 @@ public class DotnetProjectArgsBuilderTests
     public void All_options_together_produce_expected_order()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "proj.csproj",
-            configuration: "Release",
-            framework: "net10.0",
-            launchProfile: "dev",
-            noBuild: true,
-            noRestore: true);
+            new DotnetBuildSettings("proj.csproj", "Release", "net10.0", "dev", true, true));
 
         Assert.Equal(
             new[]
@@ -106,12 +78,7 @@ public class DotnetProjectArgsBuilderTests
     public void Terminator_is_always_last_element()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "proj.csproj",
-            configuration: "Debug",
-            framework: "net10.0",
-            launchProfile: null,
-            noBuild: false,
-            noRestore: false);
+            new DotnetBuildSettings("proj.csproj", "Debug", "net10.0", null, false, false));
 
         Assert.Equal("--", args[^1]);
     }
@@ -120,12 +87,7 @@ public class DotnetProjectArgsBuilderTests
     public void Whitespace_configuration_is_ignored()
     {
         var args = DotnetProjectArgsBuilder.Build(
-            projectPath: "proj.csproj",
-            configuration: "   ",
-            framework: null,
-            launchProfile: null,
-            noBuild: false,
-            noRestore: false);
+            new DotnetBuildSettings("proj.csproj", "   ", null, null, false, false));
 
         Assert.DoesNotContain("-c", args);
     }

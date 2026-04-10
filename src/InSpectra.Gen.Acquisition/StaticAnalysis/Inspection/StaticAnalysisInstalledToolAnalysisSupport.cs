@@ -64,56 +64,44 @@ internal sealed class StaticInstalledToolAnalysisSupport
         }
 
         await AnalyzeInstalledAsync(
-            result,
-            version,
-            commandName,
+            new InstalledToolAnalysisRequest(result, version, commandName, outputDirectory, installedTool, tempRoot, commandTimeoutSeconds),
             cliFramework,
-            outputDirectory,
-            installedTool,
-            tempRoot,
-            commandTimeoutSeconds,
             cancellationToken);
     }
 
     internal async Task AnalyzeInstalledAsync(
-        JsonObject result,
-        string version,
-        string commandName,
+        InstalledToolAnalysisRequest request,
         string cliFramework,
-        string outputDirectory,
-        InstalledToolContext installedTool,
-        string workingDirectory,
-        int commandTimeoutSeconds,
         CancellationToken cancellationToken)
     {
         var crawlStopwatch = Stopwatch.StartNew();
         var preferredEntryPointPath = InstalledDotnetToolCommandSupport.TryResolve(
-            installedTool.InstallDirectory,
-            commandName)?.EntryPointPath;
+            request.InstalledTool.InstallDirectory,
+            request.CommandName)?.EntryPointPath;
         var inspection = _assemblyInspectionSupport.InspectAssemblies(
-            installedTool.InstallDirectory,
+            request.InstalledTool.InstallDirectory,
             cliFramework,
             preferredEntryPointPath);
-        if (ApplyInspectionFailure(result, inspection))
+        if (ApplyInspectionFailure(request.Result, inspection))
         {
             return;
         }
 
         var crawler = new Crawler(_runtime);
-        var crawl = await crawler.CrawlAsync(installedTool.CommandPath, commandName, workingDirectory, installedTool.Environment, commandTimeoutSeconds, cancellationToken);
+        var crawl = await crawler.CrawlAsync(request.InstalledTool.CommandPath, request.CommandName, request.WorkingDirectory, request.InstalledTool.Environment, request.CommandTimeoutSeconds, cancellationToken);
         crawlStopwatch.Stop();
 
         var staticCommands = inspection.Commands;
         var coverage = _coverageClassifier.Classify(staticCommands.Count, crawl.Documents.Count, crawl.Captures);
         var coverageJson = coverage.ToJsonObject();
 
-        result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
-        result["coverage"] = coverageJson;
+        request.Result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
+        request.Result["coverage"] = coverageJson;
 
         if (crawl.Documents.Count == 0 && staticCommands.Count == 0)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "crawl",
                 classification: "static-crawl-empty",
                 "No help documents or static metadata could be captured from the installed tool.");
@@ -121,20 +109,20 @@ internal sealed class StaticInstalledToolAnalysisSupport
         }
 
         var resolvedFramework = ResolveFrameworkName(cliFramework);
-        var openCliDocument = _openCliBuilder.Build(commandName, version, resolvedFramework, staticCommands, crawl.Documents);
-        if (!string.IsNullOrWhiteSpace(result["cliFramework"]?.GetValue<string>()))
+        var openCliDocument = _openCliBuilder.Build(request.CommandName, request.Version, resolvedFramework, staticCommands, crawl.Documents);
+        if (!string.IsNullOrWhiteSpace(request.Result["cliFramework"]?.GetValue<string>()))
         {
-            openCliDocument["x-inspectra"]!.AsObject()["cliFramework"] = result["cliFramework"]!.GetValue<string>();
+            openCliDocument["x-inspectra"]!.AsObject()["cliFramework"] = request.Result["cliFramework"]!.GetValue<string>();
         }
 
         OpenCliDocumentSanitizer.ApplyNuGetMetadata(
             openCliDocument,
-            result["nugetTitle"]?.GetValue<string>(),
-            result["nugetDescription"]?.GetValue<string>());
+            request.Result["nugetTitle"]?.GetValue<string>(),
+            request.Result["nugetDescription"]?.GetValue<string>());
 
         OpenCliAnalysisArtifactValidationSupport.TryWriteValidatedArtifact(
-            result,
-            outputDirectory,
+            request.Result,
+            request.OutputDirectory,
             openCliDocument,
             successClassification: "static-crawl",
             artifactSource: "static-analysis");

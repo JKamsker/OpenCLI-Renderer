@@ -24,19 +24,14 @@ internal sealed class OpenCliAcquisitionService(
             request.SourceArguments,
             request.WorkingDirectory,
             Path.Combine(workspace.RootPath, "shim"),
-            request.CommandName,
-            request.CliFramework);
+            request.Options.CommandName,
+            request.Options.CliFramework);
         return await AcquireFromTargetAsync(
             "exec",
             target.DisplayName,
             resolvedSource,
             target,
-            request.Mode,
-            request.OpenCliArguments,
-            request.IncludeXmlDoc,
-            request.XmlDocArguments,
-            request.TimeoutSeconds,
-            request.Artifacts,
+            request.Options,
             new List<string>(),
             cancellationToken);
     }
@@ -49,22 +44,17 @@ internal sealed class OpenCliAcquisitionService(
         var target = await packageCliTargetFactory.CreateAsync(
             request.PackageId,
             request.Version,
-            request.CommandName,
-            request.CliFramework,
+            request.Options.CommandName,
+            request.Options.CliFramework,
             workspace.RootPath,
-            request.TimeoutSeconds,
+            request.Options.TimeoutSeconds,
             cancellationToken);
         return await AcquireFromTargetAsync(
             "package",
             $"{request.PackageId}@{request.Version}",
             executablePath: null,
             target,
-            request.Mode,
-            request.OpenCliArguments,
-            request.IncludeXmlDoc,
-            request.XmlDocArguments,
-            request.TimeoutSeconds,
-            request.Artifacts,
+            request.Options,
             new List<string>(),
             cancellationToken);
     }
@@ -73,54 +63,42 @@ internal sealed class OpenCliAcquisitionService(
         DotnetAcquisitionRequest request,
         CancellationToken cancellationToken)
     {
+        var options = request.Options;
         var warnings = new List<string>();
-        var nativeArgs = DotnetProjectArgsBuilder.Build(
-            request.ProjectPath,
-            request.Configuration,
-            request.Framework,
-            request.LaunchProfile,
-            request.NoBuild,
-            request.NoRestore);
-        if (request.Mode == OpenCliMode.Native)
+        var nativeArgs = DotnetProjectArgsBuilder.Build(request.Build);
+        var resultContext = new AcquisitionResultContext(
+            "dotnet",
+            request.Build.ProjectPath,
+            null,
+            options.CommandName,
+            options.CliFramework,
+            options.Artifacts);
+        var processOptions = new NativeProcessOptions(
+            "dotnet",
+            nativeArgs,
+            options.OpenCliArguments,
+            options.IncludeXmlDoc,
+            options.XmlDocArguments,
+            request.WorkingDirectory,
+            null,
+            options.TimeoutSeconds);
+
+        if (options.Mode == OpenCliMode.Native)
         {
             return await nativeAcquisitionSupport.AcquireAsync(
-                "dotnet",
-                request.ProjectPath,
-                "dotnet",
-                reportedExecutablePath: null,
-                nativeArgs,
-                request.OpenCliArguments,
-                request.IncludeXmlDoc,
-                request.XmlDocArguments,
-                request.WorkingDirectory,
-                environment: null,
-                request.TimeoutSeconds,
-                request.Artifacts,
-                request.CommandName,
-                request.CliFramework,
+                resultContext,
+                processOptions,
                 warnings,
                 cancellationToken);
         }
 
         List<OpenCliAcquisitionAttempt>? initialAttempts = null;
-        if (request.Mode == OpenCliMode.Auto)
+        if (options.Mode == OpenCliMode.Auto)
         {
             initialAttempts = [];
             var nativeOutcome = await nativeAcquisitionSupport.TryAcquireAsync(
-                "dotnet",
-                request.ProjectPath,
-                "dotnet",
-                reportedExecutablePath: null,
-                nativeArgs,
-                request.OpenCliArguments,
-                request.IncludeXmlDoc,
-                request.XmlDocArguments,
-                request.WorkingDirectory,
-                environment: null,
-                request.TimeoutSeconds,
-                request.Artifacts,
-                request.CommandName,
-                request.CliFramework,
+                resultContext,
+                processOptions,
                 initialAttempts,
                 warnings,
                 cancellationToken);
@@ -132,14 +110,9 @@ internal sealed class OpenCliAcquisitionService(
 
         using var workspace = new TemporaryWorkspace("inspectra-dotnet");
         var buildOutput = await dotnetBuildOutputResolver.ResolveAsync(
-            request.ProjectPath,
-            request.Configuration,
-            request.Framework,
-            request.LaunchProfile,
-            request.NoBuild,
-            request.NoRestore,
+            request.Build,
             request.WorkingDirectory,
-            request.TimeoutSeconds,
+            options.TimeoutSeconds,
             cancellationToken);
         warnings.AddRange(buildOutput.Warnings);
         var target = localTargetFactory.Create(
@@ -147,20 +120,15 @@ internal sealed class OpenCliAcquisitionService(
             [],
             request.WorkingDirectory,
             Path.Combine(workspace.RootPath, "shim"),
-            request.CommandName,
-            request.CliFramework);
+            options.CommandName,
+            options.CliFramework);
 
         return await AcquireFromTargetAsync(
             "dotnet",
-            request.ProjectPath,
+            request.Build.ProjectPath,
             buildOutput.TargetPath,
             target,
-            request.Mode,
-            request.OpenCliArguments,
-            request.IncludeXmlDoc,
-            request.XmlDocArguments,
-            request.TimeoutSeconds,
-            request.Artifacts,
+            options,
             warnings,
             cancellationToken,
             initialAttempts);
@@ -171,55 +139,43 @@ internal sealed class OpenCliAcquisitionService(
         string sourceLabel,
         string? executablePath,
         MaterializedCliTarget target,
-        OpenCliMode mode,
-        IReadOnlyList<string> openCliArguments,
-        bool includeXmlDoc,
-        IReadOnlyList<string> xmlDocArguments,
-        int timeoutSeconds,
-        OpenCliArtifactOptions artifacts,
+        AcquisitionOptions options,
         List<string> warnings,
         CancellationToken cancellationToken,
         List<OpenCliAcquisitionAttempt>? attempts = null)
     {
         attempts ??= [];
-        if (mode == OpenCliMode.Native)
+        var resultContext = new AcquisitionResultContext(
+            kind,
+            sourceLabel,
+            executablePath,
+            target.CommandName,
+            target.CliFramework,
+            options.Artifacts);
+        var processOptions = new NativeProcessOptions(
+            target.CommandPath,
+            [],
+            options.OpenCliArguments,
+            options.IncludeXmlDoc,
+            options.XmlDocArguments,
+            target.WorkingDirectory,
+            target.Environment,
+            options.TimeoutSeconds);
+
+        if (options.Mode == OpenCliMode.Native)
         {
             return await nativeAcquisitionSupport.AcquireAsync(
-                kind,
-                sourceLabel,
-                target.CommandPath,
-                executablePath,
-                [],
-                openCliArguments,
-                includeXmlDoc,
-                xmlDocArguments,
-                target.WorkingDirectory,
-                target.Environment,
-                timeoutSeconds,
-                artifacts,
-                target.CommandName,
-                target.CliFramework,
+                resultContext,
+                processOptions,
                 warnings,
                 cancellationToken);
         }
 
-        if (mode == OpenCliMode.Auto)
+        if (options.Mode == OpenCliMode.Auto)
         {
             var nativeOutcome = await nativeAcquisitionSupport.TryAcquireAsync(
-                kind,
-                sourceLabel,
-                target.CommandPath,
-                executablePath,
-                [],
-                openCliArguments,
-                includeXmlDoc,
-                xmlDocArguments,
-                target.WorkingDirectory,
-                target.Environment,
-                timeoutSeconds,
-                artifacts,
-                target.CommandName,
-                target.CliFramework,
+                resultContext,
+                processOptions,
                 attempts,
                 warnings,
                 cancellationToken);
@@ -229,11 +185,11 @@ internal sealed class OpenCliAcquisitionService(
             }
         }
 
-        var plannedAttempts = mode == OpenCliMode.Auto
+        var plannedAttempts = options.Mode == OpenCliMode.Auto
             ? OpenCliModePlanner.BuildAutoPlan(target.CliFramework, target.HookCliFramework)
             : [new OpenCliAcquisitionAttempt(
-                OpenCliModePlanner.ToModeValue(mode),
-                mode == OpenCliMode.Hook ? target.HookCliFramework ?? target.CliFramework : target.CliFramework,
+                OpenCliModePlanner.ToModeValue(options.Mode),
+                options.Mode == OpenCliMode.Hook ? target.HookCliFramework ?? target.CliFramework : target.CliFramework,
                 AnalysisDisposition.Planned)];
         var failureDetails = new List<string>();
 
@@ -244,7 +200,7 @@ internal sealed class OpenCliAcquisitionService(
                 target,
                 analysisMode,
                 plannedAttempt.Framework,
-                timeoutSeconds,
+                options.TimeoutSeconds,
                 cancellationToken);
             attempts.Add(new OpenCliAcquisitionAttempt(
                 plannedAttempt.Mode,
@@ -257,26 +213,22 @@ internal sealed class OpenCliAcquisitionService(
                 continue;
             }
 
-            var xmlDocument = includeXmlDoc
+            var xmlDocument = options.IncludeXmlDoc
                 ? await nativeAcquisitionSupport.RunXmlDocAsync(
                     target.CommandPath,
-                    xmlDocArguments,
+                    options.XmlDocArguments,
                     target.WorkingDirectory,
                     target.Environment,
-                    timeoutSeconds,
+                    options.TimeoutSeconds,
                     cancellationToken)
                 : null;
             return OpenCliAcquisitionResultFactory.Create(
-                kind,
-                sourceLabel,
-                executablePath,
+                resultContext,
                 outcome.Mode,
-                target.CommandName,
-                outcome.Framework ?? target.CliFramework,
                 outcome.OpenCliJson!,
                 xmlDocument,
                 outcome.CrawlJson,
-                artifacts,
+                outcome.Framework ?? target.CliFramework,
                 attempts,
                 warnings);
         }

@@ -31,20 +31,22 @@ public sealed class OpenCliArtifactWriterTests
         var support = new OpenCliNativeAcquisitionSupport(processRunner);
 
         var result = await support.AcquireAsync(
-            kind: "exec",
-            sourceLabel: "demo",
-            executablePath: "C:\\temp\\inspectra-local-target.cmd",
-            reportedExecutablePath: "C:\\tools\\demo.exe",
-            sourceArguments: [],
-            openCliArguments: [],
-            includeXmlDoc: false,
-            xmlDocArguments: [],
-            workingDirectory: Environment.CurrentDirectory,
-            environment: null,
-            timeoutSeconds: 30,
-            artifacts: new OpenCliArtifactOptions(null, null),
-            commandName: "demo",
-            cliFramework: null,
+            new AcquisitionResultContext(
+                "exec",
+                "demo",
+                "C:\\tools\\demo.exe",
+                "demo",
+                null,
+                new OpenCliArtifactOptions(null, null)),
+            new NativeProcessOptions(
+                "C:\\temp\\inspectra-local-target.cmd",
+                [],
+                [],
+                false,
+                [],
+                Environment.CurrentDirectory,
+                null,
+                30),
             warnings: [],
             cancellationToken: CancellationToken.None);
 

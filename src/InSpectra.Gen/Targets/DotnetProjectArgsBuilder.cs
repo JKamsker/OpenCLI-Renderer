@@ -1,3 +1,5 @@
+using InSpectra.Gen.Runtime.Acquisition;
+
 namespace InSpectra.Gen.Targets;
 
 /// <summary>
@@ -9,45 +11,39 @@ namespace InSpectra.Gen.Targets;
 /// </summary>
 public static class DotnetProjectArgsBuilder
 {
-    public static string[] Build(
-        string projectPath,
-        string? configuration,
-        string? framework,
-        string? launchProfile,
-        bool noBuild,
-        bool noRestore)
+    public static string[] Build(DotnetBuildSettings settings)
     {
         var args = new List<string>
         {
             "run",
             "--project",
-            projectPath,
+            settings.ProjectPath,
         };
 
-        if (!string.IsNullOrWhiteSpace(configuration))
+        if (!string.IsNullOrWhiteSpace(settings.Configuration))
         {
             args.Add("-c");
-            args.Add(configuration);
+            args.Add(settings.Configuration);
         }
 
-        if (!string.IsNullOrWhiteSpace(framework))
+        if (!string.IsNullOrWhiteSpace(settings.Framework))
         {
             args.Add("-f");
-            args.Add(framework);
+            args.Add(settings.Framework);
         }
 
-        if (!string.IsNullOrWhiteSpace(launchProfile))
+        if (!string.IsNullOrWhiteSpace(settings.LaunchProfile))
         {
             args.Add("--launch-profile");
-            args.Add(launchProfile);
+            args.Add(settings.LaunchProfile);
         }
 
-        if (noBuild)
+        if (settings.NoBuild)
         {
             args.Add("--no-build");
         }
 
-        if (noRestore)
+        if (settings.NoRestore)
         {
             args.Add("--no-restore");
         }

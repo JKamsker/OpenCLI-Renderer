@@ -114,52 +114,20 @@ internal sealed class AcquisitionAnalyzerService
         int timeoutSeconds,
         CancellationToken cancellationToken)
     {
+        var request = new InstalledToolAnalysisRequest(result, target.Version, target.CommandName, outputDirectory, installedTool, target.WorkingDirectory, timeoutSeconds);
         switch (mode)
         {
             case OpenCliMode.Help:
-                await _helpAnalyzer.AnalyzeInstalledAsync(
-                    result,
-                    target.Version,
-                    target.CommandName,
-                    outputDirectory,
-                    installedTool,
-                    target.WorkingDirectory,
-                    timeoutSeconds,
-                    cancellationToken);
+                await _helpAnalyzer.AnalyzeInstalledAsync(request, cancellationToken);
                 return;
             case OpenCliMode.CliFx:
-                await _cliFxAnalyzer.AnalyzeInstalledAsync(
-                    result,
-                    target.Version,
-                    target.CommandName,
-                    outputDirectory,
-                    installedTool,
-                    target.WorkingDirectory,
-                    timeoutSeconds,
-                    cancellationToken);
+                await _cliFxAnalyzer.AnalyzeInstalledAsync(request, cancellationToken);
                 return;
             case OpenCliMode.Static:
-                await _staticAnalyzer.AnalyzeInstalledAsync(
-                    result,
-                    target.Version,
-                    target.CommandName,
-                    ResolveFrameworkOrThrow(mode, framework),
-                    outputDirectory,
-                    installedTool,
-                    target.WorkingDirectory,
-                    timeoutSeconds,
-                    cancellationToken);
+                await _staticAnalyzer.AnalyzeInstalledAsync(request, ResolveFrameworkOrThrow(mode, framework), cancellationToken);
                 return;
             case OpenCliMode.Hook:
-                await _hookAnalyzer.AnalyzeInstalledAsync(
-                    result,
-                    target.Version,
-                    target.CommandName,
-                    outputDirectory,
-                    installedTool,
-                    target.WorkingDirectory,
-                    timeoutSeconds,
-                    cancellationToken);
+                await _hookAnalyzer.AnalyzeInstalledAsync(request, cancellationToken);
                 return;
             default:
                 throw new InvalidOperationException($"Mode `{mode}` is not supported by the discovery analyzer bridge.");

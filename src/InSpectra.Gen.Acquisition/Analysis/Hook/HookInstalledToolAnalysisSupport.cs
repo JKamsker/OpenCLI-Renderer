@@ -58,24 +58,12 @@ internal sealed class HookInstalledToolAnalysisSupport
             return;
 
         await AnalyzeInstalledAsync(
-            result,
-            version,
-            commandName,
-            outputDirectory,
-            installedTool,
-            tempRoot,
-            commandTimeoutSeconds,
+            new InstalledToolAnalysisRequest(result, version, commandName, outputDirectory, installedTool, tempRoot, commandTimeoutSeconds),
             cancellationToken);
     }
 
     internal async Task AnalyzeInstalledAsync(
-        JsonObject result,
-        string version,
-        string commandName,
-        string outputDirectory,
-        InstalledToolContext installedTool,
-        string workingDirectory,
-        int commandTimeoutSeconds,
+        InstalledToolAnalysisRequest request,
         CancellationToken cancellationToken)
     {
         // Resolve hook DLL path (deployed alongside the main tool assembly).
@@ -83,7 +71,7 @@ internal sealed class HookInstalledToolAnalysisSupport
         if (hookDllPath is null)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "hook-setup",
                 classification: "hook-dll-missing",
                 "Could not locate InSpectra.Gen.StartupHook.dll.");
@@ -91,14 +79,14 @@ internal sealed class HookInstalledToolAnalysisSupport
         }
 
         // Prepare capture path and hook environment.
-        var capturePath = Path.Combine(outputDirectory, $"inspectra-capture.{Guid.NewGuid():N}.json");
-        var hookEnvironment = new Dictionary<string, string>(installedTool.Environment, StringComparer.OrdinalIgnoreCase)
+        var capturePath = Path.Combine(request.OutputDirectory, $"inspectra-capture.{Guid.NewGuid():N}.json");
+        var hookEnvironment = new Dictionary<string, string>(request.InstalledTool.Environment, StringComparer.OrdinalIgnoreCase)
         {
             ["DOTNET_STARTUP_HOOKS"] = hookDllPath,
             ["INSPECTRA_CAPTURE_PATH"] = capturePath,
         };
         var expectedHookCliFramework = CliFrameworkProviderRegistry.ResolveHookAnalysisFramework(
-            result["cliFramework"]?.GetValue<string>());
+            request.Result["cliFramework"]?.GetValue<string>());
         if (!string.IsNullOrWhiteSpace(expectedHookCliFramework))
         {
             hookEnvironment[ExpectedCliFrameworkEnvironmentVariableName] = expectedHookCliFramework;
@@ -108,14 +96,14 @@ internal sealed class HookInstalledToolAnalysisSupport
         // while the target processes `--help`, then writes a capture file for OpenCLI generation.
         var hookStopwatch = Stopwatch.StartNew();
         var invocationResolution = HookToolProcessInvocationResolver.Resolve(
-            installedTool.InstallDirectory,
-            commandName,
-            installedTool.CommandPath,
-            installedTool.PreferredEntryPointPath);
+            request.InstalledTool.InstallDirectory,
+            request.CommandName,
+            request.InstalledTool.CommandPath,
+            request.InstalledTool.PreferredEntryPointPath);
         if (invocationResolution.TerminalFailureClassification is not null)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "hook-setup",
                 classification: invocationResolution.TerminalFailureClassification,
                 invocationResolution.TerminalFailureMessage);
@@ -135,25 +123,25 @@ internal sealed class HookInstalledToolAnalysisSupport
             capturePath,
             (candidateInvocation, effectiveEnvironment, token) => InvokeHookProcessAsync(
                 candidateInvocation,
-                workingDirectory,
+                request.WorkingDirectory,
                 effectiveEnvironment,
-                commandTimeoutSeconds,
+                request.CommandTimeoutSeconds,
                 token),
             cancellationToken);
         hookStopwatch.Stop();
 
-        result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(hookStopwatch.Elapsed.TotalMilliseconds);
+        request.Result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(hookStopwatch.Elapsed.TotalMilliseconds);
 
         // Read and validate the capture file.
         if (!File.Exists(capturePath))
         {
-            if (TryApplyMissingSharedRuntimeFailure(result, commandName, processResult))
+            if (TryApplyMissingSharedRuntimeFailure(request.Result, request.CommandName, processResult))
             {
                 return;
             }
 
             NonSpectreResultSupport.ApplyRetryableFailure(
-                result,
+                request.Result,
                 phase: "hook-capture",
                 classification: "hook-no-capture-file",
                 HookFailureMessageSupport.BuildMissingCaptureMessage(processResult));
@@ -164,7 +152,7 @@ internal sealed class HookInstalledToolAnalysisSupport
         if (capture is null)
         {
             NonSpectreResultSupport.ApplyRetryableFailure(
-                result,
+                request.Result,
                 phase: "hook-capture",
                 classification: "hook-capture-invalid",
                 "Capture file could not be deserialized.");
@@ -178,7 +166,7 @@ internal sealed class HookInstalledToolAnalysisSupport
             if (string.Equals(capture.Status, "capture-version-mismatch", StringComparison.Ordinal))
             {
                 NonSpectreResultSupport.ApplyTerminalFailure(
-                    result,
+                    request.Result,
                     phase: "hook-capture",
                     classification: classification,
                     failureMessage);
@@ -186,7 +174,7 @@ internal sealed class HookInstalledToolAnalysisSupport
             else
             {
                 NonSpectreResultSupport.ApplyRetryableFailure(
-                    result,
+                    request.Result,
                     phase: "hook-capture",
                     classification: classification,
                     failureMessage);
@@ -196,17 +184,17 @@ internal sealed class HookInstalledToolAnalysisSupport
         }
 
         // Build OpenCLI document from captured command tree.
-        var openCliDocument = HookOpenCliBuilder.Build(commandName, version, capture);
+        var openCliDocument = HookOpenCliBuilder.Build(request.CommandName, request.Version, capture);
 
-        if (!string.IsNullOrWhiteSpace(result["cliFramework"]?.GetValue<string>()))
-            openCliDocument["x-inspectra"]!.AsObject()["cliFramework"] = result["cliFramework"]!.GetValue<string>();
+        if (!string.IsNullOrWhiteSpace(request.Result["cliFramework"]?.GetValue<string>()))
+            openCliDocument["x-inspectra"]!.AsObject()["cliFramework"] = request.Result["cliFramework"]!.GetValue<string>();
 
         OpenCliDocumentSanitizer.ApplyNuGetMetadata(
             openCliDocument,
-            result["nugetTitle"]?.GetValue<string>(),
-            result["nugetDescription"]?.GetValue<string>());
+            request.Result["nugetTitle"]?.GetValue<string>(),
+            request.Result["nugetDescription"]?.GetValue<string>());
 
-        HookOpenCliValidationSupport.TryWriteValidatedArtifact(result, outputDirectory, openCliDocument);
+        HookOpenCliValidationSupport.TryWriteValidatedArtifact(request.Result, request.OutputDirectory, openCliDocument);
     }
 
     private static string? ResolveHookDllPath()

@@ -64,30 +64,18 @@ internal sealed class CliFxInstalledToolAnalysisSupport
         }
 
         await AnalyzeInstalledAsync(
-            result,
-            version,
-            commandName,
-            outputDirectory,
-            installedTool,
-            tempRoot,
-            commandTimeoutSeconds,
+            new InstalledToolAnalysisRequest(result, version, commandName, outputDirectory, installedTool, tempRoot, commandTimeoutSeconds),
             cancellationToken);
     }
 
     internal async Task AnalyzeInstalledAsync(
-        JsonObject result,
-        string version,
-        string commandName,
-        string outputDirectory,
-        InstalledToolContext installedTool,
-        string workingDirectory,
-        int commandTimeoutSeconds,
+        InstalledToolAnalysisRequest request,
         CancellationToken cancellationToken)
     {
         var crawlStopwatch = Stopwatch.StartNew();
-        var staticCommands = NormalizeCommandLookup(_metadataInspector.Inspect(installedTool.InstallDirectory));
+        var staticCommands = NormalizeCommandLookup(_metadataInspector.Inspect(request.InstalledTool.InstallDirectory));
         var crawler = new CliFxHelpCrawler(_runtime);
-        var crawl = await crawler.CrawlAsync(installedTool.CommandPath, workingDirectory, installedTool.Environment, commandTimeoutSeconds, cancellationToken);
+        var crawl = await crawler.CrawlAsync(request.InstalledTool.CommandPath, request.WorkingDirectory, request.InstalledTool.Environment, request.CommandTimeoutSeconds, cancellationToken);
         crawlStopwatch.Stop();
         var coverage = _coverageClassifier.Classify(staticCommands.Count, crawl);
         var coverageJson = coverage.ToJsonObject();
@@ -104,12 +92,12 @@ internal sealed class CliFxInstalledToolAnalysisSupport
             .Cast<string>()
             .ToArray();
 
-        result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
-        result["coverage"] = coverageJson;
+        request.Result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
+        request.Result["coverage"] = coverageJson;
         if (outputLimitExceededCommands.Length > 0)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "crawl",
                 classification: "clifx-output-too-large",
                 $"{ProcessOutputCaptureSupport.BuildOutputLimitExceededMessage()} Affected commands: {string.Join(", ", outputLimitExceededCommands)}.");
@@ -119,7 +107,7 @@ internal sealed class CliFxInstalledToolAnalysisSupport
         if (guardrailFailureMessages.Length > 0)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "crawl",
                 classification: "clifx-crawl-budget-exceeded",
                 string.Join(" ", guardrailFailureMessages));
@@ -131,7 +119,7 @@ internal sealed class CliFxInstalledToolAnalysisSupport
             if (string.Equals(coverage.RuntimeCompatibilityMode, "missing-framework", StringComparison.Ordinal))
             {
                 NonSpectreResultSupport.ApplyTerminalFailure(
-                    result,
+                    request.Result,
                     phase: "crawl",
                     classification: "clifx-runtime-blocked",
                     DotnetRuntimeCompatibilitySupport.BuildMissingFrameworkFailureMessage(
@@ -141,27 +129,27 @@ internal sealed class CliFxInstalledToolAnalysisSupport
             }
 
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "crawl",
                 classification: "clifx-crawl-empty",
                 "No CliFx help documents or metadata commands could be captured from the installed tool.");
             return;
         }
 
-        var openCliDocument = _openCliBuilder.Build(commandName, version, staticCommands, crawl.Documents);
-        if (!string.IsNullOrWhiteSpace(result["cliFramework"]?.GetValue<string>()))
+        var openCliDocument = _openCliBuilder.Build(request.CommandName, request.Version, staticCommands, crawl.Documents);
+        if (!string.IsNullOrWhiteSpace(request.Result["cliFramework"]?.GetValue<string>()))
         {
-            openCliDocument["x-inspectra"]!.AsObject()["cliFramework"] = result["cliFramework"]!.GetValue<string>();
+            openCliDocument["x-inspectra"]!.AsObject()["cliFramework"] = request.Result["cliFramework"]!.GetValue<string>();
         }
 
         OpenCliDocumentSanitizer.ApplyNuGetMetadata(
             openCliDocument,
-            result["nugetTitle"]?.GetValue<string>(),
-            result["nugetDescription"]?.GetValue<string>());
+            request.Result["nugetTitle"]?.GetValue<string>(),
+            request.Result["nugetDescription"]?.GetValue<string>());
 
         OpenCliAnalysisArtifactValidationSupport.TryWriteValidatedArtifact(
-            result,
-            outputDirectory,
+            request.Result,
+            request.OutputDirectory,
             openCliDocument,
             successClassification: "clifx-crawl",
             artifactSource: "crawled-from-clifx-help");

@@ -13,14 +13,15 @@ public sealed class PackageGenerateCommand(IOpenCliGenerationService generationS
         var request = new PackageAcquisitionRequest(
             settings.PackageId,
             settings.Version,
-            RenderRequestFactory.ResolveOpenCliMode(settings.OpenCliMode, OpenCliMode.Auto),
-            settings.CommandName,
-            settings.CliFramework,
-            settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
-            settings.WithXmlDoc,
-            settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
-            RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds, defaultSeconds: 120),
-            new OpenCliArtifactOptions(null, settings.CrawlOutputPath, settings.Overwrite));
+            new AcquisitionOptions(
+                RenderRequestFactory.ResolveOpenCliMode(settings.OpenCliMode, OpenCliMode.Auto),
+                settings.CommandName,
+                settings.CliFramework,
+                settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
+                settings.WithXmlDoc,
+                settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
+                RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds, defaultSeconds: 120),
+                new OpenCliArtifactOptions(null, settings.CrawlOutputPath, settings.Overwrite)));
 
         return GenerateOutputHandler.ExecuteAsync(
             outputMode,

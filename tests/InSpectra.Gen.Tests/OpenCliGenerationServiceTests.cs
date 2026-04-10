@@ -50,7 +50,10 @@ public class OpenCliGenerationServiceTests
         var service = CreateService(acquisitionService);
         var request = CreateExecRequest(temp.Path) with
         {
-            Artifacts = new OpenCliArtifactOptions(null, outputPath),
+            Options = CreateExecRequest(temp.Path).Options with
+            {
+                Artifacts = new OpenCliArtifactOptions(null, outputPath),
+            },
         };
 
         var exception = await Assert.ThrowsAsync<CliUsageException>(() =>
@@ -74,15 +77,16 @@ public class OpenCliGenerationServiceTests
         return new ExecAcquisitionRequest(
             Source: "demo",
             SourceArguments: [],
-            Mode: OpenCliMode.Auto,
-            CommandName: "demo",
-            CliFramework: null,
-            OpenCliArguments: ["cli", "opencli"],
-            IncludeXmlDoc: false,
-            XmlDocArguments: ["cli", "xmldoc"],
             WorkingDirectory: workingDirectory,
-            TimeoutSeconds: 30,
-            Artifacts: new OpenCliArtifactOptions(null, null));
+            Options: new AcquisitionOptions(
+                OpenCliMode.Auto,
+                "demo",
+                null,
+                ["cli", "opencli"],
+                false,
+                ["cli", "xmldoc"],
+                30,
+                new OpenCliArtifactOptions(null, null)));
     }
 
     private sealed class FakeAcquisitionService : IOpenCliAcquisitionService

@@ -16,7 +16,7 @@ public sealed class OpenCliGenerationService(
         => GenerateAsync(
             () => acquisitionService.AcquireFromExecAsync(request, cancellationToken),
             outputFile,
-            request.Artifacts,
+            request.Options.Artifacts,
             overwrite,
             cancellationToken);
 
@@ -24,7 +24,7 @@ public sealed class OpenCliGenerationService(
         => GenerateAsync(
             () => acquisitionService.AcquireFromDotnetAsync(request, cancellationToken),
             outputFile,
-            request.Artifacts,
+            request.Options.Artifacts,
             overwrite,
             cancellationToken);
 
@@ -32,7 +32,7 @@ public sealed class OpenCliGenerationService(
         => GenerateAsync(
             () => acquisitionService.AcquireFromPackageAsync(request, cancellationToken),
             outputFile,
-            request.Artifacts,
+            request.Options.Artifacts,
             overwrite,
             cancellationToken);
 

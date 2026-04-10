@@ -1,4 +1,5 @@
 using InSpectra.Gen.Acquisition.Runtime;
+using InSpectra.Gen.Runtime.Acquisition;
 
 namespace InSpectra.Gen.Targets;
 
@@ -9,38 +10,33 @@ internal sealed record DotnetBuildOutput(
 public sealed class DotnetBuildOutputResolver(IProcessRunner processRunner)
 {
     internal async Task<DotnetBuildOutput> ResolveAsync(
-        string projectPath,
-        string? configuration,
-        string? framework,
-        string? launchProfile,
-        bool noBuild,
-        bool noRestore,
+        DotnetBuildSettings settings,
         string workingDirectory,
         int timeoutSeconds,
         CancellationToken cancellationToken)
     {
         var warnings = new List<string>();
-        if (!string.IsNullOrWhiteSpace(launchProfile))
+        if (!string.IsNullOrWhiteSpace(settings.LaunchProfile))
         {
             warnings.Add("`--launch-profile` only affects `dotnet run`; non-native analysis uses the built output instead.");
         }
 
-        if (!noBuild)
+        if (!settings.NoBuild)
         {
             var buildArguments = new List<string>
             {
                 "build",
-                projectPath,
+                settings.ProjectPath,
                 "-nologo",
             };
-            AddCommonArguments(buildArguments, configuration, framework, noRestore);
+            AddCommonArguments(buildArguments, settings.Configuration, settings.Framework, settings.NoRestore);
             await processRunner.RunAsync("dotnet", workingDirectory, buildArguments, timeoutSeconds, cancellationToken);
         }
 
         var targetPath = await ResolveTargetPathAsync(
-            projectPath,
-            configuration,
-            framework,
+            settings.ProjectPath,
+            settings.Configuration,
+            settings.Framework,
             workingDirectory,
             timeoutSeconds,
             cancellationToken);

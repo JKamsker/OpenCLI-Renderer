@@ -7,101 +7,51 @@ namespace InSpectra.Gen.OpenCli.Acquisition;
 internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunner)
 {
     public async Task<OpenCliAcquisitionResult?> TryAcquireAsync(
-        string kind,
-        string sourceLabel,
-        string executablePath,
-        string? reportedExecutablePath,
-        IReadOnlyList<string> sourceArguments,
-        IReadOnlyList<string> openCliArguments,
-        bool includeXmlDoc,
-        IReadOnlyList<string> xmlDocArguments,
-        string workingDirectory,
-        IReadOnlyDictionary<string, string>? environment,
-        int timeoutSeconds,
-        OpenCliArtifactOptions artifacts,
-        string? commandName,
-        string? cliFramework,
+        AcquisitionResultContext context,
+        NativeProcessOptions process,
         List<OpenCliAcquisitionAttempt> attempts,
         IReadOnlyList<string> warnings,
         CancellationToken cancellationToken)
     {
         try
         {
-            var nativeResult = await RunAsync(
-                executablePath,
-                sourceArguments,
-                openCliArguments,
-                includeXmlDoc,
-                xmlDocArguments,
-                workingDirectory,
-                environment,
-                timeoutSeconds,
-                cancellationToken);
+            var nativeResult = await RunAsync(process, cancellationToken);
             var completedAttempts = attempts
-                .Concat([new OpenCliAcquisitionAttempt(AnalysisMode.Native, cliFramework, AnalysisDisposition.Success)])
+                .Concat([new OpenCliAcquisitionAttempt(AnalysisMode.Native, context.CliFramework, AnalysisDisposition.Success)])
                 .ToArray();
             return OpenCliAcquisitionResultFactory.Create(
-                kind,
-                sourceLabel,
-                reportedExecutablePath,
+                context,
                 AnalysisMode.Native,
-                commandName,
-                cliFramework,
                 nativeResult.OpenCliJson,
                 nativeResult.XmlDocument,
                 crawlJson: null,
-                artifacts,
+                context.CliFramework,
                 completedAttempts,
                 warnings);
         }
         catch (CliException exception)
         {
-            attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Native, cliFramework, AnalysisDisposition.Failed, exception.Message));
+            attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Native, context.CliFramework, AnalysisDisposition.Failed, exception.Message));
             return null;
         }
     }
 
     public async Task<OpenCliAcquisitionResult> AcquireAsync(
-        string kind,
-        string sourceLabel,
-        string executablePath,
-        string? reportedExecutablePath,
-        IReadOnlyList<string> sourceArguments,
-        IReadOnlyList<string> openCliArguments,
-        bool includeXmlDoc,
-        IReadOnlyList<string> xmlDocArguments,
-        string workingDirectory,
-        IReadOnlyDictionary<string, string>? environment,
-        int timeoutSeconds,
-        OpenCliArtifactOptions artifacts,
-        string? commandName,
-        string? cliFramework,
+        AcquisitionResultContext context,
+        NativeProcessOptions process,
         IReadOnlyList<string> warnings,
         CancellationToken cancellationToken)
     {
-        var nativeResult = await RunAsync(
-            executablePath,
-            sourceArguments,
-            openCliArguments,
-            includeXmlDoc,
-            xmlDocArguments,
-            workingDirectory,
-            environment,
-            timeoutSeconds,
-            cancellationToken);
+        var nativeResult = await RunAsync(process, cancellationToken);
 
         return OpenCliAcquisitionResultFactory.Create(
-            kind,
-            sourceLabel,
-            reportedExecutablePath,
+            context,
             AnalysisMode.Native,
-            commandName,
-            cliFramework,
             nativeResult.OpenCliJson,
             nativeResult.XmlDocument,
             crawlJson: null,
-            artifacts,
-            [new OpenCliAcquisitionAttempt(AnalysisMode.Native, cliFramework, AnalysisDisposition.Success)],
+            context.CliFramework,
+            [new OpenCliAcquisitionAttempt(AnalysisMode.Native, context.CliFramework, AnalysisDisposition.Success)],
             warnings);
     }
 
@@ -124,30 +74,23 @@ internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunn
     }
 
     private async Task<(string OpenCliJson, string? XmlDocument)> RunAsync(
-        string executablePath,
-        IReadOnlyList<string> sourceArguments,
-        IReadOnlyList<string> openCliArguments,
-        bool includeXmlDoc,
-        IReadOnlyList<string> xmlDocArguments,
-        string workingDirectory,
-        IReadOnlyDictionary<string, string>? environment,
-        int timeoutSeconds,
+        NativeProcessOptions process,
         CancellationToken cancellationToken)
     {
         var openCliResult = await processRunner.RunAsync(
-            executablePath,
-            workingDirectory,
-            sourceArguments.Concat(openCliArguments).ToArray(),
-            timeoutSeconds,
-            environment,
+            process.ExecutablePath,
+            process.WorkingDirectory,
+            process.SourceArguments.Concat(process.OpenCliArguments).ToArray(),
+            process.TimeoutSeconds,
+            process.Environment,
             cancellationToken);
-        var xmlDocument = includeXmlDoc
+        var xmlDocument = process.IncludeXmlDoc
             ? await RunXmlDocAsync(
-                executablePath,
-                sourceArguments.Concat(xmlDocArguments).ToArray(),
-                workingDirectory,
-                environment,
-                timeoutSeconds,
+                process.ExecutablePath,
+                process.SourceArguments.Concat(process.XmlDocArguments).ToArray(),
+                process.WorkingDirectory,
+                process.Environment,
+                process.TimeoutSeconds,
                 cancellationToken)
             : null;
         return (OpenCliJsonSanitizer.Sanitize(openCliResult.StandardOutput), xmlDocument);

@@ -53,29 +53,17 @@ internal sealed class InstalledToolAnalyzer
         }
 
         await AnalyzeInstalledAsync(
-            result,
-            version,
-            commandName,
-            outputDirectory,
-            installedTool,
-            tempRoot,
-            commandTimeoutSeconds,
+            new InstalledToolAnalysisRequest(result, version, commandName, outputDirectory, installedTool, tempRoot, commandTimeoutSeconds),
             cancellationToken);
     }
 
     internal async Task AnalyzeInstalledAsync(
-        JsonObject result,
-        string version,
-        string commandName,
-        string outputDirectory,
-        InstalledToolContext installedTool,
-        string workingDirectory,
-        int commandTimeoutSeconds,
+        InstalledToolAnalysisRequest request,
         CancellationToken cancellationToken)
     {
         var crawlStopwatch = Stopwatch.StartNew();
         var crawler = new Crawler(_runtime);
-        var crawl = await crawler.CrawlAsync(installedTool.CommandPath, commandName, workingDirectory, installedTool.Environment, commandTimeoutSeconds, cancellationToken);
+        var crawl = await crawler.CrawlAsync(request.InstalledTool.CommandPath, request.CommandName, request.WorkingDirectory, request.InstalledTool.Environment, request.CommandTimeoutSeconds, cancellationToken);
         crawlStopwatch.Stop();
         var outputLimitExceededCommands = crawl.CaptureSummaries.Values
             .Where(summary => summary.OutputLimitExceeded)
@@ -90,11 +78,11 @@ internal sealed class InstalledToolAnalyzer
             .Cast<string>()
             .ToArray();
 
-        result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
+        request.Result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
         if (outputLimitExceededCommands.Length > 0)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "crawl",
                 classification: "help-crawl-output-too-large",
                 $"{ProcessOutputCaptureSupport.BuildOutputLimitExceededMessage()} Affected commands: {string.Join(", ", outputLimitExceededCommands)}.");
@@ -104,7 +92,7 @@ internal sealed class InstalledToolAnalyzer
         if (guardrailFailureMessages.Length > 0)
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "crawl",
                 classification: "help-crawl-budget-exceeded",
                 string.Join(" ", guardrailFailureMessages));
@@ -124,7 +112,7 @@ internal sealed class InstalledToolAnalyzer
             if (runtimeIssues.Length > 0)
             {
                 NonSpectreResultSupport.ApplyTerminalFailure(
-                    result,
+                    request.Result,
                     phase: "crawl",
                     classification: "help-crawl-runtime-blocked",
                     DotnetRuntimeCompatibilitySupport.BuildMissingFrameworkFailureMessage(
@@ -143,7 +131,7 @@ internal sealed class InstalledToolAnalyzer
             if (!string.IsNullOrWhiteSpace(platformBlockedMessage))
             {
                 NonSpectreResultSupport.ApplyTerminalFailure(
-                    result,
+                    request.Result,
                     phase: "crawl",
                     classification: "help-crawl-platform-blocked",
                     platformBlockedMessage);
@@ -151,27 +139,27 @@ internal sealed class InstalledToolAnalyzer
             }
 
             NonSpectreResultSupport.ApplyTerminalFailure(
-                result,
+                request.Result,
                 phase: "crawl",
                 classification: "help-crawl-empty",
                 "No help documents could be captured from the installed tool.");
             return;
         }
 
-        var openCliDocument = _openCliBuilder.Build(commandName, version, crawl.Documents);
-        if (!string.IsNullOrWhiteSpace(result["cliFramework"]?.GetValue<string>()))
+        var openCliDocument = _openCliBuilder.Build(request.CommandName, request.Version, crawl.Documents);
+        if (!string.IsNullOrWhiteSpace(request.Result["cliFramework"]?.GetValue<string>()))
         {
-            openCliDocument["x-inspectra"]!["cliFramework"] = result["cliFramework"]!.GetValue<string>();
+            openCliDocument["x-inspectra"]!["cliFramework"] = request.Result["cliFramework"]!.GetValue<string>();
         }
 
         OpenCliDocumentSanitizer.ApplyNuGetMetadata(
             openCliDocument,
-            result["nugetTitle"]?.GetValue<string>(),
-            result["nugetDescription"]?.GetValue<string>());
+            request.Result["nugetTitle"]?.GetValue<string>(),
+            request.Result["nugetDescription"]?.GetValue<string>());
 
         OpenCliAnalysisArtifactValidationSupport.TryWriteValidatedArtifact(
-            result,
-            outputDirectory,
+            request.Result,
+            request.OutputDirectory,
             openCliDocument,
             successClassification: "help-crawl",
             artifactSource: "crawled-from-help");
