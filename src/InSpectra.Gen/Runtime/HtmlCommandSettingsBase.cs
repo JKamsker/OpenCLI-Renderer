@@ -3,7 +3,7 @@ using System.ComponentModel;
 namespace InSpectra.Gen.Runtime;
 
 /// <summary>
-/// Shared HTML-output settings for file and exec render commands.
+/// Shared HTML-output settings for file render commands.
 /// </summary>
 public abstract class HtmlCommandSettingsBase : CommonCommandSettings
 {

@@ -3,14 +3,13 @@ using InSpectra.Gen.Commands.Generate;
 using InSpectra.Gen.Commands.Render;
 using InSpectra.Gen.Common;
 using InSpectra.Gen.Services;
-using Spectre.Console;
 using Spectre.Console.Cli;
 
 var services = new ServiceCollection();
-services.AddSingleton(AnsiConsole.Console);
 services.AddSingleton<OpenCliSchemaProvider>();
 services.AddSingleton<OpenCliDocumentLoader>();
 services.AddSingleton<OpenCliDocumentCloner>();
+services.AddSingleton<OpenCliDocumentSerializer>();
 services.AddSingleton<OpenCliXmlEnricher>();
 services.AddSingleton<OpenCliNormalizer>();
 services.AddSingleton<ExecutableResolver>();
@@ -55,36 +54,6 @@ app.Configure(config =>
             file.AddCommand<FileHtmlCommand>("html")
                 .WithDescription("Render an HTML app bundle from an OpenCLI JSON file and optional XML enrichment file.");
         });
-
-        render.AddBranch("exec", exec =>
-        {
-            exec.SetDescription("Render docs by executing a CLI that exposes `cli opencli`.");
-            exec.AddCommand<ExecMarkdownCommand>("markdown")
-                .WithDescription("Render Markdown from a live CLI process and optional `cli xmldoc` enrichment.");
-            exec.AddCommand<ExecHtmlCommand>("html")
-                .WithDescription("Render an HTML app bundle from a live CLI process and optional `cli xmldoc` enrichment.");
-        });
-
-        render.AddBranch("dotnet", dotnet =>
-        {
-            dotnet.SetDescription("Render docs by running a .NET project (csproj) that exposes `cli opencli`.");
-            dotnet.AddCommand<DotnetMarkdownCommand>("markdown")
-                .WithDescription("Render Markdown by invoking `dotnet run --project <csproj> -- cli opencli`.");
-            dotnet.AddCommand<DotnetHtmlCommand>("html")
-                .WithDescription("Render an HTML app bundle by invoking `dotnet run --project <csproj> -- cli opencli`.");
-        });
-
-        render.AddBranch("package", package =>
-        {
-            package.SetDescription("Render docs by installing and analyzing a .NET tool package from NuGet.");
-            package.AddCommand<PackageMarkdownCommand>("markdown")
-                .WithDescription("Render Markdown from an analyzed .NET tool package.");
-            package.AddCommand<PackageHtmlCommand>("html")
-                .WithDescription("Render an HTML app bundle from an analyzed .NET tool package.");
-        });
-
-        render.AddCommand<SelfDocCommand>("self")
-            .WithDescription("Render documentation for InSpectra itself. Exports opencli.json, xmldoc.xml, Markdown tree, and HTML bundle.");
     });
 
     config.AddBranch("generate", generate =>

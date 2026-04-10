@@ -21,8 +21,7 @@ public sealed class AcquiredRenderDocument
 public sealed class DocumentRenderService(
     OpenCliDocumentLoader documentLoader,
     OpenCliDocumentCloner documentCloner,
-    OpenCliXmlEnricher xmlEnricher,
-    OpenCliAcquisitionService acquisitionService)
+    OpenCliXmlEnricher xmlEnricher)
 {
     public async Task<AcquiredRenderDocument> LoadFromFileAsync(
         FileRenderRequest request,
@@ -39,93 +38,6 @@ public sealed class DocumentRenderService(
                 Path.GetFullPath(request.OpenCliJsonPath),
                 request.XmlDocPath is null ? null : Path.GetFullPath(request.XmlDocPath),
                 null));
-    }
-
-    public async Task<AcquiredRenderDocument> LoadFromExecAsync(
-        ExecRenderRequest request,
-        CancellationToken cancellationToken)
-    {
-        var acquisition = await acquisitionService.AcquireFromExecAsync(
-            new ExecAcquisitionRequest(
-                request.Source,
-                request.SourceArguments,
-                request.Mode,
-                request.CommandName,
-                request.CliFramework,
-                request.OpenCliArguments,
-                request.IncludeXmlDoc,
-                request.XmlDocArguments,
-                request.WorkingDirectory,
-                request.TimeoutSeconds,
-                request.Artifacts),
-            cancellationToken);
-        var rawDocument = documentLoader.LoadFromJson(acquisition.OpenCliJson, acquisition.Source.OpenCliOrigin);
-
-        return CreatePreparedDocument(
-            rawDocument,
-            acquisition.XmlDocument,
-            acquisition.Source,
-            acquisition.Metadata,
-            acquisition.Warnings);
-    }
-
-    public async Task<AcquiredRenderDocument> LoadFromDotnetAsync(
-        DotnetRenderRequest request,
-        CancellationToken cancellationToken)
-    {
-        var acquisition = await acquisitionService.AcquireFromDotnetAsync(
-            new DotnetAcquisitionRequest(
-                request.ProjectPath,
-                request.Configuration,
-                request.Framework,
-                request.LaunchProfile,
-                request.NoBuild,
-                request.NoRestore,
-                request.Mode,
-                request.CommandName,
-                request.CliFramework,
-                request.OpenCliArguments,
-                request.IncludeXmlDoc,
-                request.XmlDocArguments,
-                request.WorkingDirectory,
-                request.TimeoutSeconds,
-                request.Artifacts),
-            cancellationToken);
-        var rawDocument = documentLoader.LoadFromJson(acquisition.OpenCliJson, acquisition.Source.OpenCliOrigin);
-
-        return CreatePreparedDocument(
-            rawDocument,
-            acquisition.XmlDocument,
-            acquisition.Source,
-            acquisition.Metadata,
-            acquisition.Warnings);
-    }
-
-    public async Task<AcquiredRenderDocument> LoadFromPackageAsync(
-        PackageRenderRequest request,
-        CancellationToken cancellationToken)
-    {
-        var acquisition = await acquisitionService.AcquireFromPackageAsync(
-            new PackageAcquisitionRequest(
-                request.PackageId,
-                request.Version,
-                request.Mode,
-                request.CommandName,
-                request.CliFramework,
-                request.OpenCliArguments,
-                request.IncludeXmlDoc,
-                request.XmlDocArguments,
-                request.TimeoutSeconds,
-                request.Artifacts),
-            cancellationToken);
-        var rawDocument = documentLoader.LoadFromJson(acquisition.OpenCliJson, acquisition.Source.OpenCliOrigin);
-
-        return CreatePreparedDocument(
-            rawDocument,
-            acquisition.XmlDocument,
-            acquisition.Source,
-            acquisition.Metadata,
-            acquisition.Warnings);
     }
 
     private AcquiredRenderDocument CreatePreparedDocument(

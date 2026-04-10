@@ -65,54 +65,6 @@ public sealed record FileRenderRequest(
     RenderExecutionOptions Options,
     MarkdownRenderOptions? MarkdownOptions = null);
 
-public sealed record ExecRenderRequest(
-    string Source,
-    IReadOnlyList<string> SourceArguments,
-    OpenCliMode Mode,
-    string? CommandName,
-    string? CliFramework,
-    IReadOnlyList<string> OpenCliArguments,
-    bool IncludeXmlDoc,
-    IReadOnlyList<string> XmlDocArguments,
-    string WorkingDirectory,
-    int TimeoutSeconds,
-    OpenCliArtifactOptions Artifacts,
-    RenderExecutionOptions Options,
-    MarkdownRenderOptions? MarkdownOptions = null);
-
-public sealed record DotnetRenderRequest(
-    string ProjectPath,
-    string? Configuration,
-    string? Framework,
-    string? LaunchProfile,
-    bool NoBuild,
-    bool NoRestore,
-    OpenCliMode Mode,
-    string? CommandName,
-    string? CliFramework,
-    IReadOnlyList<string> OpenCliArguments,
-    bool IncludeXmlDoc,
-    IReadOnlyList<string> XmlDocArguments,
-    string WorkingDirectory,
-    int TimeoutSeconds,
-    OpenCliArtifactOptions Artifacts,
-    RenderExecutionOptions Options,
-    MarkdownRenderOptions? MarkdownOptions = null);
-
-public sealed record PackageRenderRequest(
-    string PackageId,
-    string Version,
-    OpenCliMode Mode,
-    string? CommandName,
-    string? CliFramework,
-    IReadOnlyList<string> OpenCliArguments,
-    bool IncludeXmlDoc,
-    IReadOnlyList<string> XmlDocArguments,
-    int TimeoutSeconds,
-    OpenCliArtifactOptions Artifacts,
-    RenderExecutionOptions Options,
-    MarkdownRenderOptions? MarkdownOptions = null);
-
 public sealed record RenderSourceInfo(
     string Kind,
     string OpenCliOrigin,

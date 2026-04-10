@@ -24,45 +24,6 @@ public sealed class HtmlRenderService(
         return await RenderAsync(prepared, request.Options, features, label, title, commandPrefix, themeOptions, cancellationToken);
     }
 
-    public async Task<RenderExecutionResult> RenderFromExecAsync(
-        ExecRenderRequest request,
-        HtmlFeatureFlags features,
-        CancellationToken cancellationToken,
-        string? label = null,
-        string? title = null,
-        string? commandPrefix = null,
-        HtmlThemeOptions? themeOptions = null)
-    {
-        var prepared = await documentService.LoadFromExecAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, features, label, title, commandPrefix, themeOptions, cancellationToken);
-    }
-
-    public async Task<RenderExecutionResult> RenderFromDotnetAsync(
-        DotnetRenderRequest request,
-        HtmlFeatureFlags features,
-        CancellationToken cancellationToken,
-        string? label = null,
-        string? title = null,
-        string? commandPrefix = null,
-        HtmlThemeOptions? themeOptions = null)
-    {
-        var prepared = await documentService.LoadFromDotnetAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, features, label, title, commandPrefix, themeOptions, cancellationToken);
-    }
-
-    public async Task<RenderExecutionResult> RenderFromPackageAsync(
-        PackageRenderRequest request,
-        HtmlFeatureFlags features,
-        CancellationToken cancellationToken,
-        string? label = null,
-        string? title = null,
-        string? commandPrefix = null,
-        HtmlThemeOptions? themeOptions = null)
-    {
-        var prepared = await documentService.LoadFromPackageAsync(request, cancellationToken);
-        return await RenderAsync(prepared, request.Options, features, label, title, commandPrefix, themeOptions, cancellationToken);
-    }
-
     private async Task<RenderExecutionResult> RenderAsync(
         AcquiredRenderDocument prepared,
         RenderExecutionOptions options,

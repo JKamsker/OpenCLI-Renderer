@@ -17,8 +17,8 @@ public sealed class ExecGenerateCommand(OpenCliGenerationService generationServi
             settings.CommandName,
             settings.CliFramework,
             settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
-            IncludeXmlDoc: false,
-            XmlDocArguments: [],
+            settings.WithXmlDoc,
+            settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
             RenderRequestFactory.ResolveWorkingDirectory(settings.WorkingDirectory),
             RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds),
             new OpenCliArtifactOptions(null, settings.CrawlOutputPath));

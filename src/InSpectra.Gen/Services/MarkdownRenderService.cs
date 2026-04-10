@@ -17,30 +17,6 @@ public sealed class MarkdownRenderService(
         return Render(prepared, request.Options, request.MarkdownOptions);
     }
 
-    public async Task<RenderExecutionResult> RenderFromExecAsync(
-        ExecRenderRequest request,
-        CancellationToken cancellationToken)
-    {
-        var prepared = await documentService.LoadFromExecAsync(request, cancellationToken);
-        return Render(prepared, request.Options, request.MarkdownOptions);
-    }
-
-    public async Task<RenderExecutionResult> RenderFromDotnetAsync(
-        DotnetRenderRequest request,
-        CancellationToken cancellationToken)
-    {
-        var prepared = await documentService.LoadFromDotnetAsync(request, cancellationToken);
-        return Render(prepared, request.Options, request.MarkdownOptions);
-    }
-
-    public async Task<RenderExecutionResult> RenderFromPackageAsync(
-        PackageRenderRequest request,
-        CancellationToken cancellationToken)
-    {
-        var prepared = await documentService.LoadFromPackageAsync(request, cancellationToken);
-        return Render(prepared, request.Options, request.MarkdownOptions);
-    }
-
     private RenderExecutionResult Render(
         AcquiredRenderDocument prepared,
         RenderExecutionOptions options,

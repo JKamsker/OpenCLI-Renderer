@@ -8,19 +8,10 @@ public static class RendererFactory
     {
         var schemaProvider = new OpenCliSchemaProvider();
         var documentLoader = new OpenCliDocumentLoader(schemaProvider);
-        var processRunner = new ProcessRunner();
-        var acquisitionService = new OpenCliAcquisitionService(
-            new ExecutableResolver(),
-            processRunner,
-            new LocalCliTargetFactory(new LocalCliFrameworkDetector()),
-            new PackageCliTargetFactory(),
-            new DotnetBuildOutputResolver(processRunner),
-            new AcquisitionAnalyzerService());
         return new DocumentRenderService(
             documentLoader,
             new OpenCliDocumentCloner(),
-            new OpenCliXmlEnricher(),
-            acquisitionService);
+            new OpenCliXmlEnricher());
     }
 
     public static MarkdownRenderer CreateMarkdownRenderer()

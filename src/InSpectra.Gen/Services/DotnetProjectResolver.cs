@@ -3,7 +3,7 @@ using InSpectra.Gen.Runtime;
 namespace InSpectra.Gen.Services;
 
 /// <summary>
-/// Resolves the &lt;PROJECT&gt; argument for `render dotnet` commands to an
+/// Resolves the &lt;PROJECT&gt; argument for `generate dotnet` commands to an
 /// absolute path to a .NET project file that can be passed to
 /// <c>dotnet run --project</c>.
 /// </summary>

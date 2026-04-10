@@ -37,6 +37,14 @@ public abstract class GenerateCommandSettingsBase : CommandSettings
     [CommandOption("--cli-framework <NAME>")]
     public string? CliFramework { get; init; }
 
+    [Description("Enrich the generated OpenCLI document with XML documentation when the source CLI exposes it.")]
+    [CommandOption("--with-xmldoc")]
+    public bool WithXmlDoc { get; init; }
+
+    [Description("Override the arguments used to invoke the source CLI's XML documentation export command.")]
+    [CommandOption("--xmldoc-arg <ARG>")]
+    public string[] XmlDocArguments { get; init; } = [];
+
     [Description("Write the generated OpenCLI JSON to this file instead of stdout.")]
     [CommandOption("--out <FILE>")]
     public string? OutputFile { get; init; }

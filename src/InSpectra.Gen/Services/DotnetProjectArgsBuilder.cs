@@ -2,7 +2,7 @@ namespace InSpectra.Gen.Services;
 
 /// <summary>
 /// Builds the argument array passed to <c>dotnet</c> for the
-/// <c>render dotnet</c> commands. The final sequence is:
+/// <c>generate dotnet</c> commands. The final sequence is:
 /// <code>run --project &lt;project&gt; [build flags] --</code>
 /// so the renderer can append the CLI's export command (e.g. <c>cli opencli</c>)
 /// without dotnet intercepting its flags.

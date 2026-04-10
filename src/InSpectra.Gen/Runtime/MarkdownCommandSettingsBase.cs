@@ -4,7 +4,7 @@ using Spectre.Console.Cli;
 namespace InSpectra.Gen.Runtime;
 
 /// <summary>
-/// Shared Markdown-output settings for file and exec render commands.
+/// Shared Markdown-output settings for file render commands.
 /// </summary>
 public abstract class MarkdownCommandSettingsBase : CommonCommandSettings
 {

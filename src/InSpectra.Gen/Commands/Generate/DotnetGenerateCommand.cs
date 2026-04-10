@@ -22,8 +22,8 @@ public sealed class DotnetGenerateCommand(OpenCliGenerationService generationSer
             settings.CommandName,
             settings.CliFramework,
             settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
-            IncludeXmlDoc: false,
-            XmlDocArguments: [],
+            settings.WithXmlDoc,
+            settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
             workingDirectory,
             RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds, defaultSeconds: 120),
             new OpenCliArtifactOptions(null, settings.CrawlOutputPath));

@@ -100,25 +100,7 @@ public static class RenderRequestFactory
             settings.NoThemePicker);
     }
 
-    public static HtmlFeatureFlags CreateHtmlFeatureFlags(SelfDocHtmlCommandSettingsBase settings)
-    {
-        return CreateHtmlFeatureFlags(
-            settings.ShowHome,
-            settings.NoComposer,
-            settings.NoDark,
-            settings.NoLight,
-            settings.EnableUrl,
-            settings.EnableNugetBrowser,
-            settings.EnablePackageUpload,
-            settings.NoThemePicker);
-    }
-
     public static HtmlThemeOptions CreateHtmlThemeOptions(HtmlCommandSettingsBase settings)
-    {
-        return CreateHtmlThemeOptions(settings.Theme, settings.ColorTheme, settings.Accent, settings.AccentDark);
-    }
-
-    public static HtmlThemeOptions CreateHtmlThemeOptions(SelfDocHtmlCommandSettingsBase settings)
     {
         return CreateHtmlThemeOptions(settings.Theme, settings.ColorTheme, settings.Accent, settings.AccentDark);
     }
