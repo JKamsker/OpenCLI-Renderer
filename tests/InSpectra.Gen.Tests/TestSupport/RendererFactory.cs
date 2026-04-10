@@ -6,12 +6,21 @@ public static class RendererFactory
 {
     public static DocumentRenderService CreateDocumentRenderService()
     {
+        var schemaProvider = new OpenCliSchemaProvider();
+        var documentLoader = new OpenCliDocumentLoader(schemaProvider);
+        var processRunner = new ProcessRunner();
+        var acquisitionService = new OpenCliAcquisitionService(
+            new ExecutableResolver(),
+            processRunner,
+            new LocalCliTargetFactory(new LocalCliFrameworkDetector()),
+            new PackageCliTargetFactory(),
+            new DotnetBuildOutputResolver(processRunner),
+            new DiscoveryAnalyzerBridge());
         return new DocumentRenderService(
-            new OpenCliDocumentLoader(new OpenCliSchemaProvider()),
+            documentLoader,
             new OpenCliDocumentCloner(),
             new OpenCliXmlEnricher(),
-            new ExecutableResolver(),
-            new ProcessRunner());
+            acquisitionService);
     }
 
     public static MarkdownRenderer CreateMarkdownRenderer()

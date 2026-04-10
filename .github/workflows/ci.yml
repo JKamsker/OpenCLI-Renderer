@@ -63,6 +63,8 @@ jobs:
           set -euo pipefail
           test -f artifacts/publish/InSpectra.UI/dist/index.html
           test -f artifacts/publish/InSpectra.UI/dist/static.html
+          test -f artifacts/publish/hooks/InSpectra.Discovery.StartupHook.dll
+          test -f artifacts/publish/hooks/0Harmony.dll
           compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.css' > /dev/null
           compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.js' > /dev/null
 
@@ -103,6 +105,18 @@ jobs:
             --configuration Release --no-build --with-xmldoc \
             --out-dir "$out" --overwrite
           test -f "$out/index.html"
+
+      - name: Smoke generate dotnet mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp_dir="$(mktemp -d)"
+          out="$tmp_dir/opencli.json"
+          dotnet run --project src/InSpectra.Gen --configuration Release --no-build -- \
+            generate dotnet src/InSpectra.Gen \
+            --configuration Release --no-build \
+            --out "$out"
+          test -f "$out"
 
       - name: Validate nupkg
         shell: bash

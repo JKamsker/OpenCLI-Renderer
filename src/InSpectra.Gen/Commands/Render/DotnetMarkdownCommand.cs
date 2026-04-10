@@ -13,35 +13,36 @@ public sealed class DotnetMarkdownCommand(MarkdownRenderService renderService) :
         var markdownOptions = RenderRequestFactory.CreateMarkdownRenderOptions(settings, options.Layout, settings.SplitDepth);
         var workingDirectory = RenderRequestFactory.ResolveWorkingDirectory(settings.WorkingDirectory);
         var resolvedProject = DotnetProjectResolver.Resolve(settings.Project, workingDirectory);
-        var sourceArguments = DotnetProjectArgsBuilder.Build(
+        var request = new DotnetRenderRequest(
             resolvedProject,
             settings.Configuration,
             settings.Framework,
             settings.LaunchProfile,
             settings.NoBuild,
-            settings.NoRestore);
-        var request = new ExecRenderRequest(
-            "dotnet",
-            sourceArguments,
+            settings.NoRestore,
+            RenderRequestFactory.ResolveOpenCliMode(settings.OpenCliMode, OpenCliMode.Native),
+            settings.CommandName,
+            settings.CliFramework,
             settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
             settings.IncludeXmlDoc || settings.XmlDocArguments.Length > 0,
             settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
             workingDirectory,
             RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds, defaultSeconds: 120),
+            RenderRequestFactory.CreateArtifactOptions(settings.OpenCliOutputPath, settings.CrawlOutputPath),
             options,
             markdownOptions);
 
         return CommandOutputHandler.ExecuteAsync(
             options.OutputMode,
             options.Verbose,
-            () => renderService.RenderFromExecAsync(request, cancellationToken));
+            () => renderService.RenderFromDotnetAsync(request, cancellationToken));
     }
 }
 
 /// <summary>
 /// Settings for rendering Markdown by running a .NET project via <c>dotnet run</c>.
 /// </summary>
-public sealed class DotnetMarkdownSettings : MarkdownCommandSettingsBase
+public sealed class DotnetMarkdownSettings : AcquisitionMarkdownCommandSettingsBase
 {
     /// <summary>
     /// Path to a .NET project file (.csproj / .fsproj / .vbproj) or a directory containing one.

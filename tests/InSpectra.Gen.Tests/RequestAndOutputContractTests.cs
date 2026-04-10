@@ -139,6 +139,7 @@ public class RequestAndOutputContractTests
     {
         var fileProperties = typeof(FileHtmlSettings).GetProperties().Select(property => property.Name).ToArray();
         var execProperties = typeof(ExecHtmlSettings).GetProperties().Select(property => property.Name).ToArray();
+        var packageProperties = typeof(PackageHtmlSettings).GetProperties().Select(property => property.Name).ToArray();
 
         Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.Layout), fileProperties);
         Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.OutputFile), fileProperties);
@@ -147,6 +148,23 @@ public class RequestAndOutputContractTests
         Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.Layout), execProperties);
         Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.OutputFile), execProperties);
         Assert.Contains(nameof(HtmlCommandSettingsBase.OutputDirectory), execProperties);
+
+        Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.Layout), packageProperties);
+        Assert.DoesNotContain(nameof(MarkdownCommandSettingsBase.OutputFile), packageProperties);
+        Assert.Contains(nameof(HtmlCommandSettingsBase.OutputDirectory), packageProperties);
+    }
+
+    [Theory]
+    [InlineData("native", OpenCliMode.Native)]
+    [InlineData("auto", OpenCliMode.Auto)]
+    [InlineData("help", OpenCliMode.Help)]
+    [InlineData("clifx", OpenCliMode.CliFx)]
+    [InlineData("static", OpenCliMode.Static)]
+    [InlineData("hook", OpenCliMode.Hook)]
+    public void OpenCli_mode_parsing_supports_all_public_values(string value, OpenCliMode expected)
+    {
+        var mode = RenderRequestFactory.ResolveOpenCliMode(value, OpenCliMode.Native);
+        Assert.Equal(expected, mode);
     }
 
     [Fact]
@@ -181,6 +199,13 @@ public class RequestAndOutputContractTests
                 Format = DocumentFormat.Html,
                 Layout = RenderLayout.App,
                 Source = new RenderSourceInfo("file", "sample.json", null, null),
+                Acquisition = new OpenCliAcquisitionMetadata(
+                    "help",
+                    "tool",
+                    "CliFx",
+                    [new OpenCliAcquisitionAttempt("native", null, "failed", "native unavailable"), new OpenCliAcquisitionAttempt("help", null, "success")],
+                    "sample-opencli.json",
+                    "sample-crawl.json"),
                 Stats = new RenderStats(1, 2, 3, 1),
                 Warnings = [],
                 IsDryRun = false,
@@ -200,9 +225,57 @@ public class RequestAndOutputContractTests
             Assert.True(json!["ok"]!.GetValue<bool>());
             Assert.Equal("html", json["data"]!["format"]!.GetValue<string>());
             Assert.Equal("app", json["data"]!["layout"]!.GetValue<string>());
+            Assert.Equal("help", json["data"]!["acquisition"]!["selectedMode"]!.GetValue<string>());
+            Assert.Equal("sample-crawl.json", json["data"]!["acquisition"]!["artifacts"]!["crawl"]!.GetValue<string>());
             var files = json["data"]!["output"]!["files"]!.AsArray();
             var file = Assert.Single(files);
             Assert.Equal("index.html", file!["relativePath"]!.GetValue<string>());
+            Assert.Equal(1, json["meta"]!["schemaVersion"]!.GetValue<int>());
+        }
+        finally
+        {
+            Console.SetOut(original);
+        }
+    }
+
+    [Fact]
+    public async Task Generate_json_output_writer_emits_acquisition_metadata()
+    {
+        var original = Console.Out;
+        await using var writer = new StringWriter();
+        Console.SetOut(writer);
+
+        try
+        {
+            var result = new GenerateExecutionResult(
+                new RenderSourceInfo("dotnet", "src/InSpectra.Gen", "C:\\temp\\inspectra.exe", null),
+                new OpenCliAcquisitionMetadata(
+                    "native",
+                    "inspectra",
+                    "Spectre.Console.Cli",
+                    [new OpenCliAcquisitionAttempt("native", "Spectre.Console.Cli", "success")],
+                    "generated-opencli.json",
+                    null),
+                [],
+                "{}",
+                "generated-opencli.json");
+
+            var exitCode = await GenerateOutputHandler.ExecuteAsync(
+                ResolvedOutputMode.Json,
+                verbose: false,
+                () => Task.FromResult(result));
+
+            var json = JsonNode.Parse(writer.ToString());
+
+            Assert.Equal(0, exitCode);
+            Assert.NotNull(json);
+            Assert.True(json!["ok"]!.GetValue<bool>());
+            Assert.Equal("dotnet", json["data"]!["source"]!["kind"]!.GetValue<string>());
+            Assert.Equal("native", json["data"]!["acquisition"]!["selectedMode"]!.GetValue<string>());
+            Assert.Equal("generated-opencli.json", json["data"]!["acquisition"]!["artifacts"]!["openCli"]!.GetValue<string>());
+            var attempts = json["data"]!["acquisition"]!["attempts"]!.AsArray();
+            var attempt = Assert.Single(attempts);
+            Assert.Equal("success", attempt!["outcome"]!.GetValue<string>());
             Assert.Equal(1, json["meta"]!["schemaVersion"]!.GetValue<int>());
         }
         finally

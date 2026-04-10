@@ -79,11 +79,15 @@ public class HtmlRenderServiceTests
         var request = new ExecRenderRequest(
             "pwsh",
             ["-NoProfile", "-File", scriptPath],
+            OpenCliMode.Native,
+            null,
+            null,
             ["cli", "opencli"],
-            IncludeXmlDoc: true,
+            true,
             ["cli", "xmldoc"],
             temp.Path,
-            TimeoutSeconds: 30,
+            30,
+            new OpenCliArtifactOptions(null, null),
             new RenderExecutionOptions(
                 RenderLayout.App,
                 ResolvedOutputMode.Human,

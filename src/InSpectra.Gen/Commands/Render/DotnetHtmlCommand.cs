@@ -14,34 +14,35 @@ public sealed class DotnetHtmlCommand(HtmlRenderService renderService) : AsyncCo
         var themeOptions = RenderRequestFactory.CreateHtmlThemeOptions(settings);
         var workingDirectory = RenderRequestFactory.ResolveWorkingDirectory(settings.WorkingDirectory);
         var resolvedProject = DotnetProjectResolver.Resolve(settings.Project, workingDirectory);
-        var sourceArguments = DotnetProjectArgsBuilder.Build(
+        var request = new DotnetRenderRequest(
             resolvedProject,
             settings.Configuration,
             settings.Framework,
             settings.LaunchProfile,
             settings.NoBuild,
-            settings.NoRestore);
-        var request = new ExecRenderRequest(
-            "dotnet",
-            sourceArguments,
+            settings.NoRestore,
+            RenderRequestFactory.ResolveOpenCliMode(settings.OpenCliMode, OpenCliMode.Native),
+            settings.CommandName,
+            settings.CliFramework,
             settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
             settings.IncludeXmlDoc || settings.XmlDocArguments.Length > 0,
             settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
             workingDirectory,
             RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds, defaultSeconds: 120),
+            RenderRequestFactory.CreateArtifactOptions(settings.OpenCliOutputPath, settings.CrawlOutputPath),
             options);
 
         return CommandOutputHandler.ExecuteAsync(
             options.OutputMode,
             options.Verbose,
-            () => renderService.RenderFromExecAsync(request, features, cancellationToken, settings.Label, settings.Title, settings.CommandPrefix, themeOptions));
+            () => renderService.RenderFromDotnetAsync(request, features, cancellationToken, settings.Label, settings.Title, settings.CommandPrefix, themeOptions));
     }
 }
 
 /// <summary>
 /// Settings for rendering an HTML app bundle by running a .NET project via <c>dotnet run</c>.
 /// </summary>
-public sealed class DotnetHtmlSettings : HtmlCommandSettingsBase
+public sealed class DotnetHtmlSettings : AcquisitionHtmlCommandSettingsBase
 {
     /// <summary>
     /// Path to a .NET project file (.csproj / .fsproj / .vbproj) or a directory containing one.

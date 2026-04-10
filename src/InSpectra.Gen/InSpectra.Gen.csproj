@@ -13,6 +13,7 @@
     <PackageId>InSpectra.Gen</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Version>0.0.0</Version>
+    <StartupHookTargetFramework>netcoreapp3.1</StartupHookTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,14 +28,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InSpectra.Discovery.Tool\InSpectra.Discovery.Tool.csproj" />
+    <ProjectReference Include="..\InSpectra.Discovery.StartupHook\InSpectra.Discovery.StartupHook.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\InSpectra.UI\dist\**\*"
           CopyToOutputDirectory="PreserveNewest"
           CopyToPublishDirectory="PreserveNewest"
           Link="InSpectra.UI\dist\%(RecursiveDir)%(Filename)%(Extension)" />
     <None Include="..\..\README.md"
           Pack="true"
-          PackagePath="\"
+          PackagePath="\" 
           Link="README.md" />
+    <Content Include="..\InSpectra.Discovery.StartupHook\bin\$(Configuration)\$(StartupHookTargetFramework)\InSpectra.Discovery.StartupHook.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest"
+             Link="hooks\InSpectra.Discovery.StartupHook.dll" />
+    <Content Include="..\InSpectra.Discovery.StartupHook\bin\$(Configuration)\$(StartupHookTargetFramework)\0Harmony.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest"
+             Link="hooks\0Harmony.dll" />
   </ItemGroup>
 
   <Target Name="EnsureInSpectraUiDistForPackOrPublish" BeforeTargets="Pack;Publish">

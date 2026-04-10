@@ -25,6 +25,22 @@ public sealed class MarkdownRenderService(
         return Render(prepared, request.Options, request.MarkdownOptions);
     }
 
+    public async Task<RenderExecutionResult> RenderFromDotnetAsync(
+        DotnetRenderRequest request,
+        CancellationToken cancellationToken)
+    {
+        var prepared = await documentService.LoadFromDotnetAsync(request, cancellationToken);
+        return Render(prepared, request.Options, request.MarkdownOptions);
+    }
+
+    public async Task<RenderExecutionResult> RenderFromPackageAsync(
+        PackageRenderRequest request,
+        CancellationToken cancellationToken)
+    {
+        var prepared = await documentService.LoadFromPackageAsync(request, cancellationToken);
+        return Render(prepared, request.Options, request.MarkdownOptions);
+    }
+
     private RenderExecutionResult Render(
         AcquiredRenderDocument prepared,
         RenderExecutionOptions options,
@@ -186,6 +202,7 @@ public sealed class MarkdownRenderService(
             Format = DocumentFormat.Markdown,
             Layout = options.Layout,
             Source = prepared.Source,
+            Acquisition = prepared.Acquisition,
             Warnings = prepared.Warnings,
             IsDryRun = options.DryRun,
             StdoutDocument = stdoutDocument,

@@ -22,7 +22,7 @@ on:
       mode:
         type: string
         default: 'exec'
-        description: 'exec (invoke a live CLI), file (from saved opencli.json), or dotnet (run a .NET project from source)'
+        description: 'exec, file, dotnet, or package'
 
       format:
         type: string
@@ -37,6 +37,14 @@ on:
       cli-name:
         type: string
         description: 'CLI executable name or path'
+
+      package-id:
+        type: string
+        description: 'NuGet package id for mode: package'
+
+      package-version:
+        type: string
+        description: 'NuGet package version for mode: package'
 
       dotnet-tool:
         type: string
@@ -61,6 +69,18 @@ on:
       timeout:
         type: string
         description: 'Timeout in seconds for each CLI export command'
+
+      opencli-mode:
+        type: string
+        description: 'OpenCLI acquisition mode: native, auto, help, clifx, static, or hook'
+
+      command:
+        type: string
+        description: 'Override the generated root command name'
+
+      cli-framework:
+        type: string
+        description: 'Hint or override the detected CLI framework'
 
       # ── file mode ────────────────────────────────────────────────
       opencli-json:
@@ -213,10 +233,15 @@ jobs:
           format: ${{ inputs.format }}
           split-depth: ${{ inputs.split-depth }}
           cli-name: ${{ inputs.cli-name }}
+          package-id: ${{ inputs.package-id }}
+          package-version: ${{ inputs.package-version }}
           label: ${{ inputs.label }}
           opencli-args: ${{ inputs.opencli-args }}
           xmldoc-args: ${{ inputs.xmldoc-args }}
           timeout: ${{ inputs.timeout }}
+          opencli-mode: ${{ inputs.opencli-mode }}
+          command: ${{ inputs.command }}
+          cli-framework: ${{ inputs.cli-framework }}
           opencli-json: ${{ inputs.opencli-json }}
           xmldoc: ${{ inputs.xmldoc }}
           project: ${{ inputs.project }}

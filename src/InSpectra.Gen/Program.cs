@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using InSpectra.Gen.Commands.Generate;
 using InSpectra.Gen.Commands.Render;
 using InSpectra.Gen.Common;
 using InSpectra.Gen.Services;
@@ -14,6 +15,13 @@ services.AddSingleton<OpenCliXmlEnricher>();
 services.AddSingleton<OpenCliNormalizer>();
 services.AddSingleton<ExecutableResolver>();
 services.AddSingleton<ProcessRunner>();
+services.AddSingleton<LocalCliFrameworkDetector>();
+services.AddSingleton<LocalCliTargetFactory>();
+services.AddSingleton<PackageCliTargetFactory>();
+services.AddSingleton<DotnetBuildOutputResolver>();
+services.AddSingleton<DiscoveryAnalyzerBridge>();
+services.AddSingleton<OpenCliAcquisitionService>();
+services.AddSingleton<OpenCliGenerationService>();
 services.AddSingleton(new ViewerBundleLocatorOptions());
 services.AddSingleton<RenderStatsFactory>();
 services.AddSingleton<RenderModelFormatter>();
@@ -66,8 +74,28 @@ app.Configure(config =>
                 .WithDescription("Render an HTML app bundle by invoking `dotnet run --project <csproj> -- cli opencli`.");
         });
 
+        render.AddBranch("package", package =>
+        {
+            package.SetDescription("Render docs by installing and analyzing a .NET tool package from NuGet.");
+            package.AddCommand<PackageMarkdownCommand>("markdown")
+                .WithDescription("Render Markdown from an analyzed .NET tool package.");
+            package.AddCommand<PackageHtmlCommand>("html")
+                .WithDescription("Render an HTML app bundle from an analyzed .NET tool package.");
+        });
+
         render.AddCommand<SelfDocCommand>("self")
             .WithDescription("Render documentation for InSpectra itself. Exports opencli.json, xmldoc.xml, Markdown tree, and HTML bundle.");
+    });
+
+    config.AddBranch("generate", generate =>
+    {
+        generate.SetDescription("Generate raw OpenCLI JSON from a package, executable, or .NET project.");
+        generate.AddCommand<PackageGenerateCommand>("package")
+            .WithDescription("Generate opencli.json by installing and analyzing a .NET tool package.");
+        generate.AddCommand<ExecGenerateCommand>("exec")
+            .WithDescription("Generate opencli.json from a local executable or script.");
+        generate.AddCommand<DotnetGenerateCommand>("dotnet")
+            .WithDescription("Generate opencli.json from a .NET project.");
     });
 });
 

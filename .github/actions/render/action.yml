@@ -11,6 +11,7 @@ inputs:
         exec    - invoke a live CLI (requires cli-name)
         file    - render from a saved opencli.json (requires opencli-json)
         dotnet  - run a .NET project from source (requires project)
+        package - install and analyze a .NET tool package (requires package-id and package-version)
     required: false
     default: 'exec'
 
@@ -33,6 +34,15 @@ inputs:
   # ── exec mode ──────────────────────────────────────────────────────
   cli-name:
     description: 'CLI executable name or path (exec mode)'
+    required: false
+
+  # ── package mode ───────────────────────────────────────────────────
+  package-id:
+    description: 'NuGet package id for mode: package'
+    required: false
+
+  package-version:
+    description: 'NuGet package version for mode: package'
     required: false
 
   dotnet-tool:
@@ -107,6 +117,18 @@ inputs:
 
   command-prefix:
     description: 'Override the CLI command prefix used in generated examples and the composer'
+    required: false
+
+  opencli-mode:
+    description: 'OpenCLI acquisition mode: native, auto, help, clifx, static, or hook'
+    required: false
+
+  command:
+    description: 'Override the root command name used for generated OpenCLI documents'
+    required: false
+
+  cli-framework:
+    description: 'Hint or override the detected CLI framework for non-native analysis'
     required: false
 
   single-file:
@@ -190,6 +212,8 @@ runs:
       env:
         MODE: ${{ inputs.mode }}
         CLI_NAME: ${{ inputs.cli-name }}
+        PACKAGE_ID: ${{ inputs.package-id }}
+        PACKAGE_VERSION: ${{ inputs.package-version }}
         DOTNET_TOOL: ${{ inputs.dotnet-tool }}
         OPENCLI_JSON: ${{ inputs.opencli-json }}
         PROJECT: ${{ inputs.project }}
@@ -209,6 +233,14 @@ runs:
         fi
         if [ "$MODE" = "file" ] && [ -n "$DOTNET_TOOL" ]; then
           echo "::error::dotnet-tool is not used in file mode"
+          exit 1
+        fi
+        if [ "$MODE" = "package" ] && [ -z "$PACKAGE_ID" -o -z "$PACKAGE_VERSION" ]; then
+          echo "::error::package mode requires package-id and package-version"
+          exit 1
+        fi
+        if [ "$MODE" = "package" ] && [ -n "$DOTNET_TOOL" ]; then
+          echo "::error::dotnet-tool is not used in package mode"
           exit 1
         fi
         if [ "$MODE" = "dotnet" ] && [ -z "$PROJECT" ]; then
@@ -308,7 +340,7 @@ runs:
         inspectra --version
 
     - name: Auto-add InSpectra.Cli to target project
-      if: inputs.mode == 'dotnet' && inputs.skip-inspectra-cli != 'true'
+      if: inputs.mode == 'dotnet' && inputs.skip-inspectra-cli != 'true' && (inputs.opencli-mode == '' || inputs.opencli-mode == 'native')
       shell: bash
       env:
         PROJECT: ${{ inputs.project }}
@@ -369,6 +401,11 @@ runs:
         OPENCLI_ARGS: ${{ inputs.opencli-args }}
         XMLDOC_ARGS: ${{ inputs.xmldoc-args }}
         TIMEOUT: ${{ inputs.timeout }}
+        OPENCLI_MODE: ${{ inputs.opencli-mode }}
+        COMMAND_NAME: ${{ inputs.command }}
+        CLI_FRAMEWORK: ${{ inputs.cli-framework }}
+        PACKAGE_ID: ${{ inputs.package-id }}
+        PACKAGE_VERSION: ${{ inputs.package-version }}
         LABEL: ${{ inputs.label }}
         TITLE: ${{ inputs.title }}
         COMMAND_PREFIX: ${{ inputs.command-prefix }}
@@ -452,6 +489,22 @@ runs:
             args+=(--xmldoc "$XMLDOC")
           fi
 
+        elif [ "$MODE" = "package" ]; then
+          args=(render package "$subcmd" "$PACKAGE_ID" --version "$PACKAGE_VERSION" --overwrite)
+
+          if [ -n "$OPENCLI_ARGS" ]; then
+            for a in $OPENCLI_ARGS; do args+=(--opencli-arg "$a"); done
+          fi
+
+          if [ -n "$XMLDOC_ARGS" ]; then
+            args+=(--with-xmldoc)
+            for a in $XMLDOC_ARGS; do args+=(--xmldoc-arg "$a"); done
+          fi
+
+          if [ -n "$TIMEOUT" ]; then
+            args+=(--timeout "$TIMEOUT")
+          fi
+
         elif [ "$MODE" = "dotnet" ]; then
           args=(render dotnet "$subcmd" "$PROJECT" --overwrite)
 
@@ -491,6 +544,18 @@ runs:
         else
           echo "::error::Unknown mode: $MODE"
           exit 1
+        fi
+
+        if [ -n "$OPENCLI_MODE" ]; then
+          args+=(--opencli-mode "$OPENCLI_MODE")
+        fi
+
+        if [ -n "$COMMAND_NAME" ]; then
+          args+=(--command "$COMMAND_NAME")
+        fi
+
+        if [ -n "$CLI_FRAMEWORK" ]; then
+          args+=(--cli-framework "$CLI_FRAMEWORK")
         fi
 
         args+=("${format_args[@]}")

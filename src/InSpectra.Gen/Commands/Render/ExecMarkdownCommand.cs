@@ -15,11 +15,15 @@ public sealed class ExecMarkdownCommand(MarkdownRenderService renderService) : A
         var request = new ExecRenderRequest(
             settings.Source,
             settings.SourceArguments,
+            RenderRequestFactory.ResolveOpenCliMode(settings.OpenCliMode, OpenCliMode.Native),
+            settings.CommandName,
+            settings.CliFramework,
             settings.OpenCliArguments.Length > 0 ? settings.OpenCliArguments : ["cli", "opencli"],
             settings.IncludeXmlDoc || settings.XmlDocArguments.Length > 0,
             settings.XmlDocArguments.Length > 0 ? settings.XmlDocArguments : ["cli", "xmldoc"],
             workingDirectory,
             RenderRequestFactory.ResolveTimeoutSeconds(settings.TimeoutSeconds),
+            RenderRequestFactory.CreateArtifactOptions(settings.OpenCliOutputPath, settings.CrawlOutputPath),
             options,
             markdownOptions);
 
@@ -33,7 +37,7 @@ public sealed class ExecMarkdownCommand(MarkdownRenderService renderService) : A
 /// <summary>
 /// Settings for rendering Markdown by executing a live CLI.
 /// </summary>
-public sealed class ExecRenderSettings : MarkdownCommandSettingsBase
+public sealed class ExecRenderSettings : AcquisitionMarkdownCommandSettingsBase
 {
     /// <summary>
     /// CLI executable or script to invoke for <c>cli opencli</c> exports.

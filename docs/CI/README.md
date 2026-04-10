@@ -70,6 +70,7 @@ to your project by hand.
 | Mode | Use when | Required input |
 |---|---|---|
 | `dotnet` | The CLI source lives in the same repo and you want every commit to produce fresh docs | `project` |
+| `package` | You want docs generated from a published .NET tool package without installing it globally first | `package-id`, `package-version` |
 | `exec` | You have a pre-built binary, a globally installed .NET tool, or any executable on PATH | `cli-name` |
 | `file` | You've already exported `opencli.json` (e.g. checked into the repo) and just want to render it | `opencli-json` |
 

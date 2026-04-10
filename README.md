@@ -35,6 +35,8 @@
 - **NuGet browser** — search and explore indexed .NET CLI tool packages
 - **XML enrichment** — additive metadata from XML docs, only fills missing descriptions
 - **Validation first** — broken specs fail early, before any rendering
+- **Acquisition modes** — native OpenCLI export, help crawling, CliFx analysis, static analysis, and startup-hook capture
+- **Raw OpenCLI generation** — emit `opencli.json` directly from a package, executable, or .NET project
 - **Self-documentation** — InSpectra can generate its own docs
 - **GitHub Action** — one-step CI integration for any .NET CLI tool
 - **Secure by default** — generated pages expose only the features you explicitly enable
@@ -118,6 +120,13 @@ no manual export, no published tool, no pre-built binary.
 # Install the target CLI and generate docs
 dotnet tool install -g JellyfinCli
 inspectra render exec html jf --with-xmldoc --out-dir ./jellyfin-docs
+```
+
+### Analyze a published .NET tool package
+
+```bash
+inspectra render package html JellyfinCli --version 1.1.0 --out-dir ./jellyfin-docs
+inspectra generate package JellyfinCli --version 1.1.0 --out ./opencli.json
 ```
 
 Open `./jellyfin-docs/index.html` in a browser. The bundle is relocatable because the viewer is built with `base: "./"`.
@@ -215,7 +224,7 @@ steps:
 
 | Input | Default | Description |
 | --- | --- | --- |
-| `mode` | `exec` | `exec` (invoke a live CLI), `file` (from saved opencli.json), or `dotnet` (run a .NET project from source) |
+| `mode` | `exec` | `exec`, `file`, `dotnet`, or `package` |
 | `format` | `html` | `html`, `markdown` (tree), or `markdown-monolith` (single file) |
 | `cli-name` | | CLI executable name or path (exec mode) |
 | `dotnet-tool` | | NuGet package to `dotnet tool install -g` (exec mode) |
@@ -223,6 +232,8 @@ steps:
 | `opencli-json` | | Path to opencli.json (file mode) |
 | `xmldoc` | | Path to xmldoc.xml (file mode) |
 | `project` | | Path to a `.csproj` / `.fsproj` / `.vbproj` (or directory containing one) for dotnet mode |
+| `package-id` | | NuGet package id for package mode |
+| `package-version` | | NuGet package version for package mode |
 | `configuration` | | Build configuration for `dotnet run` (e.g. `Release`) |
 | `framework` | | Target framework for `dotnet run` (e.g. `net10.0`) |
 | `launch-profile` | | Launch profile for `dotnet run` |
@@ -242,6 +253,9 @@ steps:
 | `opencli-args` | | Override the OpenCLI export arguments |
 | `xmldoc-args` | | Override the xmldoc export arguments |
 | `timeout` | | Timeout in seconds for each export command (exec / dotnet mode) |
+| `opencli-mode` | | `native`, `auto`, `help`, `clifx`, `static`, or `hook` |
+| `command` | | Override the generated root command name |
+| `cli-framework` | | Hint or override the detected CLI framework for non-native analysis |
 
 ### Action output
 

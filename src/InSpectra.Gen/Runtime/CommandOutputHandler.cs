@@ -57,6 +57,26 @@ public static class CommandOutputHandler
                         xmlDoc = result.Source.XmlDocOrigin,
                         executablePath = result.Source.ExecutablePath,
                     },
+                    acquisition = result.Acquisition is null
+                        ? null
+                        : new
+                        {
+                            selectedMode = result.Acquisition.SelectedMode,
+                            commandName = result.Acquisition.CommandName,
+                            cliFramework = result.Acquisition.CliFramework,
+                            attempts = result.Acquisition.Attempts.Select(attempt => new
+                            {
+                                mode = attempt.Mode,
+                                framework = attempt.Framework,
+                                outcome = attempt.Outcome,
+                                detail = attempt.Detail,
+                            }),
+                            artifacts = new
+                            {
+                                openCli = result.Acquisition.OpenCliOutputPath,
+                                crawl = result.Acquisition.CrawlOutputPath,
+                            },
+                        },
                     output = new
                     {
                         mode = result.StdoutDocument is not null ? "stdout" : "files",

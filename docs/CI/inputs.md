@@ -8,7 +8,7 @@ on the reusable workflow at
 
 | Input | Default | Description |
 |---|---|---|
-| `mode` | `exec` | `exec` (invoke a live CLI), `file` (from saved opencli.json), or `dotnet` (run a .NET project from source) |
+| `mode` | `exec` | `exec` (invoke a live CLI), `file` (from saved opencli.json), `dotnet` (run a .NET project from source), or `package` (analyze a published .NET tool package) |
 | `format` | `html` | `html` (interactive SPA), `markdown` (tree layout), or `markdown-monolith` (single file) |
 | `output-dir` | `inspectra-output` | Directory where the rendered output is written |
 | `label` | | Custom label shown in the viewer header (e.g. `v1.2.3`) |
@@ -39,12 +39,20 @@ on the reusable workflow at
 | `no-build` | `false` | Pass `--no-build` to `dotnet run` (use after a separate build step) |
 | `no-restore` | `false` | Pass `--no-restore` to `dotnet run` |
 
+## `package` mode
+
+| Input | Default | Description |
+|---|---|---|
+| `package-id` | _required_ | NuGet package id for the .NET tool package to analyze |
+| `package-version` | _required_ | NuGet package version to install and analyze |
+
 ### Auto-installed `InSpectra.Cli` package
 
 In `dotnet` mode the action automatically adds an `<PackageReference>` for the
 package that provides `cli opencli` / `cli xmldoc`. The csproj is restored to
 its original state by the underlying CI checkout being throwaway, so this
-mutation never reaches your repo.
+mutation never reaches your repo. This auto-add only runs when `opencli-mode`
+is `native` (or left empty so the CLI default remains native).
 
 | Input | Default | Description |
 |---|---|---|
@@ -62,6 +70,14 @@ no-op (your existing pin is preserved).
 | `opencli-args` | `cli opencli` | Override the OpenCLI export arguments. Useful if your CLI uses a different command (e.g. `export spec`) |
 | `xmldoc-args` | `cli xmldoc` | Override the XML documentation export arguments |
 | `timeout` | `30` (`exec`) / `120` (`dotnet`) | Per-invocation timeout in seconds |
+
+## Analysis options (`exec` / `dotnet` / `package`)
+
+| Input | Default | Description |
+|---|---|---|
+| `opencli-mode` | CLI default | `native`, `auto`, `help`, `clifx`, `static`, or `hook` |
+| `command` | detected | Override the generated root command name |
+| `cli-framework` | detected | Hint or override the CLI framework used by non-native analysis |
 
 ## .NET SDK setup
 

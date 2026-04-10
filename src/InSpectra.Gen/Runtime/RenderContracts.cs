@@ -68,11 +68,48 @@ public sealed record FileRenderRequest(
 public sealed record ExecRenderRequest(
     string Source,
     IReadOnlyList<string> SourceArguments,
+    OpenCliMode Mode,
+    string? CommandName,
+    string? CliFramework,
     IReadOnlyList<string> OpenCliArguments,
     bool IncludeXmlDoc,
     IReadOnlyList<string> XmlDocArguments,
     string WorkingDirectory,
     int TimeoutSeconds,
+    OpenCliArtifactOptions Artifacts,
+    RenderExecutionOptions Options,
+    MarkdownRenderOptions? MarkdownOptions = null);
+
+public sealed record DotnetRenderRequest(
+    string ProjectPath,
+    string? Configuration,
+    string? Framework,
+    string? LaunchProfile,
+    bool NoBuild,
+    bool NoRestore,
+    OpenCliMode Mode,
+    string? CommandName,
+    string? CliFramework,
+    IReadOnlyList<string> OpenCliArguments,
+    bool IncludeXmlDoc,
+    IReadOnlyList<string> XmlDocArguments,
+    string WorkingDirectory,
+    int TimeoutSeconds,
+    OpenCliArtifactOptions Artifacts,
+    RenderExecutionOptions Options,
+    MarkdownRenderOptions? MarkdownOptions = null);
+
+public sealed record PackageRenderRequest(
+    string PackageId,
+    string Version,
+    OpenCliMode Mode,
+    string? CommandName,
+    string? CliFramework,
+    IReadOnlyList<string> OpenCliArguments,
+    bool IncludeXmlDoc,
+    IReadOnlyList<string> XmlDocArguments,
+    int TimeoutSeconds,
+    OpenCliArtifactOptions Artifacts,
     RenderExecutionOptions Options,
     MarkdownRenderOptions? MarkdownOptions = null);
 
@@ -100,6 +137,8 @@ public sealed class RenderExecutionResult
     public required RenderLayout Layout { get; init; }
 
     public required RenderSourceInfo Source { get; init; }
+
+    public OpenCliAcquisitionMetadata? Acquisition { get; init; }
 
     public required RenderStats Stats { get; init; }
 

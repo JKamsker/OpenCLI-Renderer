@@ -10,6 +10,7 @@ public class CliHelpSurfaceTests
     [InlineData("file")]
     [InlineData("exec")]
     [InlineData("dotnet")]
+    [InlineData("package")]
     public async Task Html_help_only_exposes_bundle_output_option(string mode)
     {
         var result = await RunRendererAsync(["render", mode, "html", "--help"]);
@@ -25,6 +26,7 @@ public class CliHelpSurfaceTests
     [InlineData("file")]
     [InlineData("exec")]
     [InlineData("dotnet")]
+    [InlineData("package")]
     public async Task Markdown_help_keeps_single_and_tree_output_options(string mode)
     {
         var result = await RunRendererAsync(["render", mode, "markdown", "--help"]);
@@ -34,6 +36,23 @@ public class CliHelpSurfaceTests
         AssertOption(helpText, "--layout", "<LAYOUT>");
         AssertOption(helpText, "--out", "<FILE>");
         AssertOption(helpText, "--out-dir", "<DIR>");
+    }
+
+    [Theory]
+    [InlineData("exec")]
+    [InlineData("dotnet")]
+    [InlineData("package")]
+    public async Task Generate_help_exposes_generate_output_options_only(string mode)
+    {
+        var result = await RunRendererAsync(["generate", mode, "--help"]);
+        var helpText = NormalizeHelpOutput(result.StandardOutput);
+
+        Assert.Equal(0, result.ExitCode);
+        AssertOption(helpText, "--out", "<FILE>");
+        AssertNoOption(helpText, "--out-dir", "<DIR>");
+        AssertNoOption(helpText, "--layout", "<LAYOUT>");
+        AssertOption(helpText, "--opencli-mode", "<MODE>");
+        AssertOption(helpText, "--crawl-out", "<PATH>");
     }
 
     private static async Task<ProcessResult> RunRendererAsync(IReadOnlyList<string> arguments)

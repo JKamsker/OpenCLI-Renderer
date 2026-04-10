@@ -11,6 +11,15 @@ public sealed class ProcessRunner
         IReadOnlyList<string> arguments,
         int timeoutSeconds,
         CancellationToken cancellationToken)
+        => await RunAsync(executablePath, workingDirectory, arguments, timeoutSeconds, environment: null, cancellationToken);
+
+    public async Task<ProcessResult> RunAsync(
+        string executablePath,
+        string workingDirectory,
+        IReadOnlyList<string> arguments,
+        int timeoutSeconds,
+        IReadOnlyDictionary<string, string>? environment,
+        CancellationToken cancellationToken)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -25,6 +34,14 @@ public sealed class ProcessRunner
         foreach (var argument in arguments)
         {
             startInfo.ArgumentList.Add(argument);
+        }
+
+        if (environment is not null)
+        {
+            foreach (var pair in environment)
+            {
+                startInfo.Environment[pair.Key] = pair.Value;
+            }
         }
 
         using var process = new Process { StartInfo = startInfo };

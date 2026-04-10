@@ -228,12 +228,43 @@ public static class RenderRequestFactory
         return defaultSeconds;
     }
 
-    private static ResolvedOutputMode ResolveOutputMode(CommonCommandSettings settings)
+    public static ResolvedOutputMode ResolveOutputMode(GenerateCommandSettingsBase settings)
+        => ResolveOutputMode(settings.Json, settings.Output);
+
+    public static OpenCliMode ResolveOpenCliMode(string? value, OpenCliMode defaultMode)
     {
-        var explicitOutput = settings.Output?.Trim().ToLowerInvariant();
+        var normalized = value?.Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return defaultMode;
+        }
+
+        return normalized switch
+        {
+            "native" => OpenCliMode.Native,
+            "auto" => OpenCliMode.Auto,
+            "help" => OpenCliMode.Help,
+            "clifx" => OpenCliMode.CliFx,
+            "static" => OpenCliMode.Static,
+            "hook" => OpenCliMode.Hook,
+            _ => throw new CliUsageException("`--opencli-mode` must be `native`, `auto`, `help`, `clifx`, `static`, or `hook`."),
+        };
+    }
+
+    public static OpenCliArtifactOptions CreateArtifactOptions(string? openCliOutputPath, string? crawlOutputPath)
+        => new(
+            NormalizePath(openCliOutputPath),
+            NormalizePath(crawlOutputPath));
+
+    private static ResolvedOutputMode ResolveOutputMode(CommonCommandSettings settings)
+        => ResolveOutputMode(settings.Json, settings.Output);
+
+    private static ResolvedOutputMode ResolveOutputMode(bool json, string? output)
+    {
+        var explicitOutput = output?.Trim().ToLowerInvariant();
         var envOutput = Environment.GetEnvironmentVariable("INSPECTRA_GEN_OUTPUT")?.Trim().ToLowerInvariant();
 
-        if (settings.Json && explicitOutput is "human")
+        if (json && explicitOutput is "human")
         {
             throw new CliUsageException("`--json` cannot be combined with `--output human`.");
         }
@@ -248,7 +279,7 @@ public static class RenderRequestFactory
             throw new CliUsageException("`INSPECTRA_GEN_OUTPUT` must be `human` or `json`.");
         }
 
-        if (explicitOutput is "json" || settings.Json)
+        if (explicitOutput is "json" || json)
         {
             return ResolvedOutputMode.Json;
         }
