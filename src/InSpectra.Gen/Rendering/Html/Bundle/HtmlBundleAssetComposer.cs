@@ -132,19 +132,6 @@ internal static class HtmlBundleAssetComposer
         return await InlineScriptsAsync(html, bundleRoot, cancellationToken);
     }
 
-    public static HashSet<string> CollectReferencedAssets(string bundleRoot)
-    {
-        var referenced = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "static.html" };
-        var staticHtmlPath = Path.Combine(bundleRoot, "static.html");
-        if (!File.Exists(staticHtmlPath))
-        {
-            return referenced;
-        }
-
-        AddReferencedAssets(referenced, File.ReadAllText(staticHtmlPath));
-        return referenced;
-    }
-
     public static async Task<HashSet<string>> CollectReferencedAssetsAsync(
         string bundleRoot,
         CancellationToken cancellationToken)

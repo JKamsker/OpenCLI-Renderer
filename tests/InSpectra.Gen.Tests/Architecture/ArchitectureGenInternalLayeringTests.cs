@@ -7,7 +7,6 @@ namespace InSpectra.Gen.Tests.Architecture;
 /// the capability layers inside <c>InSpectra.Gen</c> flow in one direction:
 /// <c>Commands -&gt; UseCases -&gt; Rendering -&gt; OpenCli -&gt; Core</c>.
 /// Backward edges form cycles and invert the architecture, so they must not exist.
-///
 /// The 4 invariants below codify the cycles that phase f2 (commit c9fc3b6) broke
 /// by hand via ad-hoc greps. Keeping them as tests prevents silent regression the
 /// next time files move between subtrees.

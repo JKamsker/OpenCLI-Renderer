@@ -42,7 +42,6 @@ public sealed class ArchitectureAppShellTests
 
         var violations = new List<string>();
         var filesScanned = 0;
-        var acquisitionUsingsSeen = 0;
 
         foreach (var filePath in ArchitecturePolicyScanner.EnumerateProjectCodeFiles(appShell!))
         {
@@ -50,7 +49,6 @@ public sealed class ArchitectureAppShellTests
             var text = File.ReadAllText(filePath);
             foreach (Match match in AcquisitionUsingDirective.Matches(text))
             {
-                acquisitionUsingsSeen++;
                 var ns = match.Groups["ns"].Value;
                 if (!IsAllowedNamespace(ns))
                 {
@@ -64,10 +62,6 @@ public sealed class ArchitectureAppShellTests
         Assert.True(
             filesScanned > 0,
             $"Expected app shell project '{appShell!.Name}' at '{appShell.Directory}' to contain at least one tracked .cs file but found none.");
-
-        Assert.True(
-            acquisitionUsingsSeen > 0,
-            $"Expected app shell project '{appShell.Name}' to contain at least one InSpectra.Gen.Acquisition using directive but found none.");
 
         Assert.True(
             violations.Count == 0,

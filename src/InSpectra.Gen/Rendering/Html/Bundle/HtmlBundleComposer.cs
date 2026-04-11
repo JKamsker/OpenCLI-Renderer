@@ -58,7 +58,4 @@ internal static class HtmlBundleComposer
         html = System.Text.RegularExpressions.Regex.Replace(html, @"\n{2,}", "\n");
         return html.Trim();
     }
-
-    public static HashSet<string> CollectReferencedAssets(string bundleRoot)
-        => HtmlBundleAssetComposer.CollectReferencedAssets(bundleRoot);
 }
