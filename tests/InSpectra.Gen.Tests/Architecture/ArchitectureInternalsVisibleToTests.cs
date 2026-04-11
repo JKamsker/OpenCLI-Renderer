@@ -5,10 +5,6 @@ namespace InSpectra.Gen.Tests.Architecture;
 /// <summary>
 /// Charter rule: "Non-test <c>InternalsVisibleTo</c> is not part of the target architecture."
 /// (docs/architecture/ARCHITECTURE.md, "Dependency charter").
-///
-/// Currently skipped: <c>src/InSpectra.Gen.Acquisition/Properties/AssemblyInfo.cs</c> still
-/// exposes internals to <c>inspectra</c> (Task.md line 569). Step 2 removes that line by
-/// replacing the reach-in with a public composition entry point.
 /// </summary>
 public sealed class ArchitectureInternalsVisibleToTests
 {

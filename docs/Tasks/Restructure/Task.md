@@ -1,3 +1,5 @@
+> **HISTORICAL.** This document captured the planning state before the Step 1–11 refactor. The target state described here has been implemented and is enforced by architecture policy tests in tests/InSpectra.Gen.Tests/Architecture/. See docs/architecture/ARCHITECTURE.md for the current charter.
+
 Yes. The repo needs an **architecture charter**, not just folder cleanup.
 
 The shortest version is:
@@ -550,6 +552,8 @@ The next useful step is turning this into a concrete move-map for the current fo
 ---
 
 ## Current State (verified 2026-04-10)
+
+> **Note (post-refactor): the tree has since been restructured through steps 1–11 plus phases F1–F4. The counts and paths in this section reflect the pre-refactor state. Do not use for navigation — use ARCHITECTURE.md and the repo tree itself.**
 
 Repo was scanned with 8 overlapping subagents. The charter above still holds. Below is the delta between the charter and what is actually in the tree today, plus a precise move-map.
 

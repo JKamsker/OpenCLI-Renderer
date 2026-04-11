@@ -11,10 +11,6 @@ namespace InSpectra.Gen.Tests.Architecture;
 ///   <item>"In this repo, mode-specific conversion into OpenCLI lives under that mode as
 ///         <c>Projection/</c>, not as another <c>OpenCli</c> root."</item>
 /// </list>
-///
-/// Both tests are skipped until <c>src/InSpectra.Gen.Acquisition/Modes/</c> exists
-/// (introduced by Step 4) and until mode-specific <c>OpenCli</c> folders have been renamed
-/// to <c>Projection</c> (Step 5).
 /// </summary>
 public sealed class ArchitectureModeTests
 {

@@ -5,7 +5,7 @@ namespace InSpectra.Gen.Tests.Architecture;
 /// <c>docs/architecture/ARCHITECTURE.md</c>. This suite parses each <c>.csproj</c> under
 /// <c>src/</c> and verifies allowed <c>&lt;ProjectReference&gt;</c> edges.
 ///
-/// The active rule after Phase 3 (see Task.md line 589):
+/// Active rule set:
 /// <list type="bullet">
 ///   <item><c>InSpectra.Gen</c> may reference <c>InSpectra.Gen.Acquisition</c>,
 ///         <c>InSpectra.Gen.StartupHook</c>, and <c>InSpectra.Gen.Core</c>.</item>
