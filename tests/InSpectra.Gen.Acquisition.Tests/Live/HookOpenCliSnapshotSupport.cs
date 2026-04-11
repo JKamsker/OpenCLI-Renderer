@@ -37,9 +37,6 @@ internal static class HookOpenCliSnapshotSupport
         Assert.Equal(Serialize(expected), Serialize(actual));
     }
 
-    internal static string SerializeForComparison(JsonNode? openCli)
-        => Serialize(Normalize(openCli));
-
     private static JsonObject Normalize(JsonNode? openCli)
     {
         if (openCli is not JsonObject document)
