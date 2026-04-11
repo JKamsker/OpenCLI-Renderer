@@ -24,15 +24,23 @@ public sealed class ArchitectureInternalsVisibleToTests
     public void No_non_test_InternalsVisibleTo()
     {
         var projects = ArchitecturePolicyScanner.EnumerateBackendProjects();
+        Assert.NotEmpty(projects);
+
         var violations = new List<string>();
+        var filesScanned = 0;
 
         foreach (var project in projects)
         {
             foreach (var filePath in ArchitecturePolicyScanner.EnumerateProjectCodeFiles(project))
             {
+                filesScanned++;
                 ScanFileForViolations(filePath, violations);
             }
         }
+
+        Assert.True(
+            filesScanned > 0,
+            "Expected InternalsVisibleTo scan to examine at least one tracked .cs file but found none.");
 
         Assert.True(
             violations.Count == 0,

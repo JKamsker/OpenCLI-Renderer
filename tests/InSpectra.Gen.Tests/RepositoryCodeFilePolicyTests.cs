@@ -18,7 +18,12 @@ public sealed class RepositoryCodeFilePolicyTests
 
     private static void AssertNoViolations(int maximumLines, string message)
     {
-        var violations = EnumerateTrackedCodeFiles()
+        var trackedFiles = EnumerateTrackedCodeFiles().ToArray();
+        Assert.True(
+            trackedFiles.Length > 0,
+            "Expected to scan at least one tracked non-generated C# file under 'src' or 'tests', but found none.");
+
+        var violations = trackedFiles
             .Select(path => new CodeFileLength(
                 RelativePath: Path.GetRelativePath(FixturePaths.RepoRoot, path).Replace('\\', '/'),
                 LineCount: File.ReadLines(path).Count()))

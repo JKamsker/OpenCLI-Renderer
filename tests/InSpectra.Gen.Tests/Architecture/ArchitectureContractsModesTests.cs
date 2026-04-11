@@ -36,12 +36,23 @@ public sealed class ArchitectureContractsModesTests
         @"\bInSpectra\.Gen\.Acquisition\.Modes\b",
         RegexOptions.Compiled);
 
+    /// <summary>
+    /// Positive anchor for the Contracts scan: at least one file under <c>Contracts/</c>
+    /// should declare a Contracts namespace, otherwise the test likely scanned the wrong
+    /// surface and would pass vacuously.
+    /// </summary>
+    private static readonly Regex ContractsNamespaceDeclaration = new(
+        @"^\s*namespace\s+InSpectra\.Gen\.Acquisition\.Contracts(?:\.[A-Za-z_][A-Za-z0-9_]*)*\s*[;{]",
+        RegexOptions.Multiline | RegexOptions.Compiled);
+
     [Fact]
     public void No_contracts_depends_on_modes()
     {
         Assert.True(Directory.Exists(ContractsRoot), $"Expected Contracts root at '{ContractsRoot}' to exist.");
 
         var violations = new List<string>();
+        var filesScanned = 0;
+        var contractsNamespacesSeen = 0;
 
         foreach (var filePath in Directory.EnumerateFiles(ContractsRoot, "*.cs", SearchOption.AllDirectories))
         {
@@ -50,7 +61,13 @@ public sealed class ArchitectureContractsModesTests
                 continue;
             }
 
+            filesScanned++;
             var text = File.ReadAllText(filePath);
+            if (ContractsNamespaceDeclaration.IsMatch(text))
+            {
+                contractsNamespacesSeen++;
+            }
+
             if (!ModesNamespaceReference.IsMatch(text))
             {
                 continue;
@@ -69,6 +86,14 @@ public sealed class ArchitectureContractsModesTests
                 }
             }
         }
+
+        Assert.True(
+            filesScanned > 0,
+            $"Expected Contracts root at '{ContractsRoot}' to contain at least one tracked .cs file but found none.");
+
+        Assert.True(
+            contractsNamespacesSeen > 0,
+            $"Expected Contracts scan under '{ContractsRoot}' to encounter at least one InSpectra.Gen.Acquisition.Contracts namespace declaration but found none.");
 
         Assert.True(
             violations.Count == 0,

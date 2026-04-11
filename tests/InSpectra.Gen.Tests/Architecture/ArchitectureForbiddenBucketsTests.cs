@@ -26,6 +26,8 @@ public sealed class ArchitectureForbiddenBucketsTests
     public void No_forbidden_top_level_buckets()
     {
         var projects = ArchitecturePolicyScanner.EnumerateBackendProjects();
+        Assert.NotEmpty(projects);
+
         var violations = new List<string>();
 
         foreach (var project in projects)

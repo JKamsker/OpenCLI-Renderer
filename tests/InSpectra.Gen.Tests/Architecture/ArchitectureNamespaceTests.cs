@@ -26,8 +26,15 @@ public sealed class ArchitectureNamespaceTests
     {
         "GlobalUsings.cs",
         "Program.cs",
-        // StartupHook.cs has "// No namespace - required by DOTNET_STARTUP_HOOKS contract."
-        "StartupHook.cs",
+    };
+
+    /// <summary>
+    /// Path-specific namespace exceptions. Keep this narrow so unrelated files with the
+    /// same name do not silently bypass the namespace policy.
+    /// </summary>
+    private static readonly IReadOnlySet<string> AllowlistedRelativePaths = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "src/InSpectra.Gen.StartupHook/StartupHook.cs",
     };
 
     [Fact]
@@ -86,6 +93,12 @@ public sealed class ArchitectureNamespaceTests
     {
         var fileName = Path.GetFileName(filePath);
         if (AllowlistedFileNames.Contains(fileName))
+        {
+            return true;
+        }
+
+        var relativePath = ArchitecturePolicyScanner.GetRelativeRepoPath(filePath);
+        if (AllowlistedRelativePaths.Contains(relativePath))
         {
             return true;
         }

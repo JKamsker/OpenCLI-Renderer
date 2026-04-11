@@ -25,12 +25,23 @@ public sealed class ArchitectureToolingTests
         @"^\s*using\s+InSpectra\.Gen\.Acquisition\.Modes\.(?<mode>[A-Za-z_][A-Za-z0-9_]*)",
         RegexOptions.Multiline | RegexOptions.Compiled);
 
+    /// <summary>
+    /// Positive anchor for the Tooling scan: at least one file under <c>Tooling/</c>
+    /// should declare a Tooling namespace, otherwise the test likely scanned the wrong
+    /// surface and would pass vacuously.
+    /// </summary>
+    private static readonly Regex ToolingNamespaceDeclaration = new(
+        @"^\s*namespace\s+InSpectra\.Gen\.Acquisition\.Tooling(?:\.[A-Za-z_][A-Za-z0-9_]*)*\s*[;{]",
+        RegexOptions.Multiline | RegexOptions.Compiled);
+
     [Fact]
     public void No_tooling_depends_on_modes()
     {
         Assert.True(Directory.Exists(ToolingRoot), $"Expected Tooling root at '{ToolingRoot}' to exist.");
 
         var violations = new List<string>();
+        var filesScanned = 0;
+        var toolingNamespacesSeen = 0;
 
         foreach (var filePath in Directory.EnumerateFiles(ToolingRoot, "*.cs", SearchOption.AllDirectories))
         {
@@ -39,7 +50,13 @@ public sealed class ArchitectureToolingTests
                 continue;
             }
 
+            filesScanned++;
             var text = File.ReadAllText(filePath);
+            if (ToolingNamespaceDeclaration.IsMatch(text))
+            {
+                toolingNamespacesSeen++;
+            }
+
             foreach (Match match in ModeUsingDirective.Matches(text))
             {
                 var referencedMode = match.Groups["mode"].Value;
@@ -48,6 +65,14 @@ public sealed class ArchitectureToolingTests
                     + $" imports 'InSpectra.Gen.Acquisition.Modes.{referencedMode}'");
             }
         }
+
+        Assert.True(
+            filesScanned > 0,
+            $"Expected Tooling root at '{ToolingRoot}' to contain at least one tracked .cs file but found none.");
+
+        Assert.True(
+            toolingNamespacesSeen > 0,
+            $"Expected Tooling scan under '{ToolingRoot}' to encounter at least one InSpectra.Gen.Acquisition.Tooling namespace declaration but found none.");
 
         Assert.True(
             violations.Count == 0,
