@@ -5,17 +5,53 @@ namespace InSpectra.Gen.UseCases.Generate;
 
 internal static class OpenCliArtifactWriter
 {
-    public static OpenCliArtifactOptions WriteArtifacts(
+    public static async Task<OpenCliArtifactOptions> WriteArtifactsAsync(
         OpenCliArtifactOptions requested,
         string openCliJson,
-        string? crawlJson)
+        string? crawlJson,
+        CancellationToken cancellationToken)
     {
-        var openCliPath = WriteArtifact(requested.OpenCliOutputPath, openCliJson, requested.Overwrite);
-        var crawlPath = WriteArtifact(requested.CrawlOutputPath, crawlJson, requested.Overwrite);
-        return new OpenCliArtifactOptions(openCliPath, crawlPath);
+        var openCliArtifact = PrepareArtifact(requested.OpenCliOutputPath, openCliJson, requested.Overwrite);
+        var crawlArtifact = PrepareArtifact(requested.CrawlOutputPath, crawlJson, requested.Overwrite);
+
+        StagedArtifact? stagedOpenCli = null;
+        StagedArtifact? stagedCrawl = null;
+        CommittedArtifact? committedOpenCli = null;
+        CommittedArtifact? committedCrawl = null;
+        try
+        {
+            stagedOpenCli = await StageArtifactAsync(openCliArtifact, cancellationToken);
+            stagedCrawl = await StageArtifactAsync(crawlArtifact, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            committedOpenCli = CommitStagedArtifact(stagedOpenCli);
+            stagedOpenCli = null;
+            committedCrawl = CommitStagedArtifact(stagedCrawl);
+            stagedCrawl = null;
+
+            var openCliPath = committedOpenCli?.Path;
+            var crawlPath = committedCrawl?.Path;
+            DeleteBackupArtifact(committedOpenCli);
+            DeleteBackupArtifact(committedCrawl);
+            return new OpenCliArtifactOptions(openCliPath, crawlPath);
+        }
+        catch
+        {
+            RollBackCommittedArtifact(committedCrawl);
+            RollBackCommittedArtifact(committedOpenCli);
+            throw;
+        }
+        finally
+        {
+            DeleteStagedArtifact(stagedOpenCli);
+            DeleteStagedArtifact(stagedCrawl);
+        }
     }
 
-    private static string? WriteArtifact(string? path, string? content, bool overwrite)
+    private static PreparedArtifact? PrepareArtifact(
+        string? path,
+        string? content,
+        bool overwrite)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -35,7 +71,103 @@ internal static class OpenCliArtifactWriter
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(fullPath, content);
-        return fullPath;
+        return new PreparedArtifact(fullPath, content, overwrite);
     }
+
+    private static async Task<StagedArtifact?> StageArtifactAsync(PreparedArtifact? artifact, CancellationToken cancellationToken)
+    {
+        if (artifact is null)
+        {
+            return null;
+        }
+
+        var stagedArtifact = new StagedArtifact(artifact.Path, artifact.Path + $".{Guid.NewGuid():N}.tmp", artifact.Overwrite);
+        try
+        {
+            await File.WriteAllTextAsync(stagedArtifact.TempPath, artifact.Content, cancellationToken);
+            return stagedArtifact;
+        }
+        catch
+        {
+            DeleteStagedArtifact(stagedArtifact);
+            throw;
+        }
+    }
+
+    private sealed record PreparedArtifact(string Path, string Content, bool Overwrite);
+
+    private static CommittedArtifact? CommitStagedArtifact(StagedArtifact? artifact)
+    {
+        if (artifact is null)
+        {
+            return null;
+        }
+
+        string? backupPath = null;
+        if (artifact.Overwrite && File.Exists(artifact.Path))
+        {
+            backupPath = artifact.Path + $".{Guid.NewGuid():N}.bak";
+            File.Move(artifact.Path, backupPath, overwrite: false);
+        }
+
+        try
+        {
+            File.Move(artifact.TempPath, artifact.Path, overwrite: false);
+            return new CommittedArtifact(artifact.Path, backupPath);
+        }
+        catch
+        {
+            RestoreBackupArtifact(artifact.Path, backupPath);
+            throw;
+        }
+    }
+
+    private static void DeleteStagedArtifact(StagedArtifact? artifact)
+    {
+        if (artifact is null || !File.Exists(artifact.TempPath))
+        {
+            return;
+        }
+
+        File.Delete(artifact.TempPath);
+    }
+
+    private static void RollBackCommittedArtifact(CommittedArtifact? artifact)
+    {
+        if (artifact is null)
+        {
+            return;
+        }
+
+        if (File.Exists(artifact.Path))
+        {
+            File.Delete(artifact.Path);
+        }
+
+        RestoreBackupArtifact(artifact.Path, artifact.BackupPath);
+    }
+
+    private static void DeleteBackupArtifact(CommittedArtifact? artifact)
+    {
+        if (artifact is null || string.IsNullOrWhiteSpace(artifact.BackupPath) || !File.Exists(artifact.BackupPath))
+        {
+            return;
+        }
+
+        File.Delete(artifact.BackupPath);
+    }
+
+    private static void RestoreBackupArtifact(string path, string? backupPath)
+    {
+        if (string.IsNullOrWhiteSpace(backupPath) || !File.Exists(backupPath))
+        {
+            return;
+        }
+
+        File.Move(backupPath, path, overwrite: false);
+    }
+
+    private sealed record StagedArtifact(string Path, string TempPath, bool Overwrite);
+
+    private sealed record CommittedArtifact(string Path, string? BackupPath);
 }

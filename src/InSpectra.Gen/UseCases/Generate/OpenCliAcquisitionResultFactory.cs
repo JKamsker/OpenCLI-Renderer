@@ -5,7 +5,7 @@ namespace InSpectra.Gen.UseCases.Generate;
 
 internal static class OpenCliAcquisitionResultFactory
 {
-    public static OpenCliAcquisitionResult Create(
+    public static async Task<OpenCliAcquisitionResult> CreateAsync(
         AcquisitionResultContext context,
         string selectedMode,
         string openCliJson,
@@ -13,7 +13,8 @@ internal static class OpenCliAcquisitionResultFactory
         string? crawlJson,
         string? resolvedCliFramework,
         IReadOnlyList<OpenCliAcquisitionAttempt> attempts,
-        IReadOnlyList<string> warnings)
+        IReadOnlyList<string> warnings,
+        CancellationToken cancellationToken)
     {
         var allWarnings = warnings.ToList();
         if (!string.IsNullOrWhiteSpace(context.Artifacts.CrawlOutputPath) && string.IsNullOrWhiteSpace(crawlJson))
@@ -21,7 +22,11 @@ internal static class OpenCliAcquisitionResultFactory
             allWarnings.Add("`--crawl-out` was requested, but the selected acquisition mode did not produce crawl data.");
         }
 
-        var writtenArtifacts = OpenCliArtifactWriter.WriteArtifacts(context.Artifacts, openCliJson, crawlJson);
+        var writtenArtifacts = await OpenCliArtifactWriter.WriteArtifactsAsync(
+            context.Artifacts,
+            openCliJson,
+            crawlJson,
+            cancellationToken);
         return new OpenCliAcquisitionResult(
             openCliJson,
             xmlDocument,

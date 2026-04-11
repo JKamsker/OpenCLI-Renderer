@@ -19,7 +19,7 @@ internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunn
             var completedAttempts = attempts
                 .Concat([new OpenCliAcquisitionAttempt(AnalysisMode.Native, context.CliFramework, AnalysisDisposition.Success)])
                 .ToArray();
-            return OpenCliAcquisitionResultFactory.Create(
+            return await OpenCliAcquisitionResultFactory.CreateAsync(
                 context,
                 AnalysisMode.Native,
                 nativeResult.OpenCliJson,
@@ -27,7 +27,8 @@ internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunn
                 crawlJson: null,
                 context.CliFramework,
                 completedAttempts,
-                warnings);
+                warnings,
+                cancellationToken);
         }
         catch (CliException exception)
         {
@@ -44,7 +45,7 @@ internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunn
     {
         var nativeResult = await RunAsync(process, cancellationToken);
 
-        return OpenCliAcquisitionResultFactory.Create(
+        return await OpenCliAcquisitionResultFactory.CreateAsync(
             context,
             AnalysisMode.Native,
             nativeResult.OpenCliJson,
@@ -52,7 +53,8 @@ internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunn
             crawlJson: null,
             context.CliFramework,
             [new OpenCliAcquisitionAttempt(AnalysisMode.Native, context.CliFramework, AnalysisDisposition.Success)],
-            warnings);
+            warnings,
+            cancellationToken);
     }
 
     public async Task<string> RunXmlDocAsync(

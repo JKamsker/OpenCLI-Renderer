@@ -224,7 +224,7 @@ internal sealed class OpenCliAcquisitionService(
                     options.TimeoutSeconds,
                     cancellationToken)
                 : null;
-            return OpenCliAcquisitionResultFactory.Create(
+            return await OpenCliAcquisitionResultFactory.CreateAsync(
                 resultContext,
                 outcome.Mode,
                 outcome.OpenCliJson!,
@@ -232,7 +232,8 @@ internal sealed class OpenCliAcquisitionService(
                 outcome.CrawlJson,
                 outcome.Framework ?? target.CliFramework,
                 attempts,
-                warnings);
+                warnings,
+                cancellationToken);
         }
 
         throw new CliSourceExecutionException(
