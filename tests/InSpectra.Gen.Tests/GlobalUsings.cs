@@ -1,10 +1,12 @@
 global using InSpectra.Gen.Execution;
-global using InSpectra.Gen.Models.OpenCli;
-global using InSpectra.Gen.OpenCli.Acquisition;
-global using InSpectra.Gen.OpenCli.Documents;
-global using InSpectra.Gen.OpenCli.Processing;
+global using InSpectra.Gen.OpenCli.Enrichment;
+global using InSpectra.Gen.OpenCli.Model;
+global using InSpectra.Gen.OpenCli.Schema;
+global using InSpectra.Gen.OpenCli.Serialization;
+global using InSpectra.Gen.OpenCli.Validation;
 global using InSpectra.Gen.Rendering;
 global using InSpectra.Gen.Rendering.Html;
 global using InSpectra.Gen.Rendering.Markdown;
 global using InSpectra.Gen.Targets;
+global using InSpectra.Gen.UseCases.Generate;
 global using InSpectra.Gen.Viewer;

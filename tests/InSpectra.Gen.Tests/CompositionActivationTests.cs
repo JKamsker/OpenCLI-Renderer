@@ -1,5 +1,5 @@
 using InSpectra.Gen.Composition;
-using InSpectra.Gen.OpenCli.Acquisition;
+using InSpectra.Gen.UseCases.Generate;
 using InSpectra.Gen.Targets;
 using Microsoft.Extensions.DependencyInjection;
 

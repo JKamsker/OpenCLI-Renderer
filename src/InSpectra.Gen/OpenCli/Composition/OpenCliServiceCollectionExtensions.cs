@@ -1,6 +1,7 @@
-using InSpectra.Gen.OpenCli.Acquisition;
-using InSpectra.Gen.OpenCli.Documents;
-using InSpectra.Gen.OpenCli.Processing;
+using InSpectra.Gen.OpenCli.Enrichment;
+using InSpectra.Gen.OpenCli.Schema;
+using InSpectra.Gen.OpenCli.Serialization;
+using InSpectra.Gen.UseCases.Generate;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace InSpectra.Gen.OpenCli.Composition;
