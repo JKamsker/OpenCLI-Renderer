@@ -1,17 +1,23 @@
 # Follow-up: hunt and fix similar code smells
 
-> **Status (2026-04-11): 6 PHASES SHIPPED, LOOP NOT YET AT STOP CONDITION
-> UNDER THE NEW THRESHOLD.** Three outer iterations ran and shipped phases
-> `g1`–`g6`. At the time of the run, the stop condition was "zero
-> HIGH/BLOCKER" (capped at 3 iterations), which was satisfied — but the
-> spec has since been tightened to "zero BLOCKER + zero HIGH + zero
-> MEDIUM" with no iteration cap. Under the new threshold, the run is
-> incomplete: iteration 3 explicitly deferred MEDIUM-severity
-> sync-I/O-on-async-path findings in `MarkdownRenderService.cs`,
-> `HtmlBundleComposer.cs`, and `HtmlRenderService.cs`. A future
-> iteration must either fix them or justify the deferral under the
-> tightened rules.
-> and produced phases `g1`–`g6` on `feat/merge-tool`:
+> **Status (2026-04-11): 10 CODE/TEST PHASES SHIPPED, LEDGER REFRESHED TO
+> THE POST-`g10` TREE, FINAL STOP-CONDITION SWARM + CI STILL PENDING.**
+> Four outer iterations have now run and shipped code/test phases `g1`–`g10`
+> on `feat/merge-tool`. Iteration 4 fixed the previously deferred
+> render-path async-I/O findings from iteration 3, pruned dead live-test
+> snapshot fixtures, hardened additional architecture scans, and removed a
+> dead synchronous HTML asset-catalog helper orphaned by the async refactor.
+> A fresh post-`g10` swarm no longer re-raised the old render-path
+> MEDIUMs; the remaining accepted MEDIUM was that this follow-up ledger
+> itself had become stale. This refresh updates the retrospective and open
+> item list to match the current tree.
+>
+> The stop condition is therefore now: one more fresh investigation swarm
+> on the post-ledger tree must find **zero BLOCKER + zero HIGH + zero
+> MEDIUM**, and the final pushed tip must have green `pull_request` +
+> `workflow_dispatch` CI (including `live-tests`).
+>
+> Previously shipped phases `g1`–`g6`:
 >
 > | SHA | Phase | Scope |
 > |---|---|---|
@@ -22,13 +28,12 @@
 > | `450e808` | g5 | Split the 2 cross-cutting service+DTO pairs where the DTO is used far from its declaration (`ProcessResult`, `StaticAnalysisFrameworkAdapter`). Remaining 22 service+DTO pairs left inline under the tight-coupling exception. |
 > | `59ba4a2` | g6 | Synced `README.md` Project Layout with the 5 source + 2 test projects. |
 >
-> Final state: **284 unit tests / 0 failed / 0 skipped**, **14 architecture
-> policy tests** (10 pre-existing + 4 from g3), **35 live tests / 0 failed**.
-> CI validated by `pull_request` run `24290363150` and `workflow_dispatch`
-> run `24290372107` — both green including the `live-tests` job. Iteration 3
-> investigation found zero remaining HIGH/BLOCKER smells. See the
-> "Retrospective" section at the bottom of this document for lessons learned
-> and new smell categories discovered during execution.
+> Current local validation after `g10`: **286 unit tests / 0 failed / 0
+> skipped**, **14 architecture policy tests**, **35 live tests / 0 failed**
+> at the last green baseline. The iteration-3 CI runs (`pull_request`
+> `24290363150`, `workflow_dispatch` `24290372107`) remain the latest fully
+> green published runs in this ledger; iteration-4 CI revalidation is still
+> pending on the final pushed tip.
 >
 > The rest of this document is preserved as the original mission brief in
 > case another iteration is warranted later.
@@ -701,6 +706,76 @@ identical.
   requires threading `CancellationToken` through the helper chain and
   would change thread-scheduling behavior.
 
+#### Iteration 4
+
+Spawned a fresh 6-agent swarm on top of the post-`g9` tree (structural,
+dependency/layering, async-I/O/API, docs/test hygiene, dead code/fixtures,
+StartupHook/special cases). The user also clarified the reporting rule:
+LOW findings must still be aggregated even though only BLOCKER/HIGH/MEDIUM
+gate the stop condition.
+
+**Accepted HIGH/MEDIUM findings acted on or queued into the ledger refresh:**
+
+- **HIGH: dead sync asset-catalog helpers left behind by g7.**
+  `src/InSpectra.Gen/Rendering/Html/Bundle/HtmlBundleComposer.cs` still
+  exposed `CollectReferencedAssets(...)`, forwarding to the synchronous
+  helper in `HtmlBundleAssetComposer.cs`, but the current tree only called
+  the async collector from `HtmlRenderService`. The sync pair had become
+  orphaned dead code during the render async-boundary refactor.
+- **MEDIUM: `ArchitectureModeTests.cs` still had a vacuous-green hole and a
+  shallow `OpenCli` folder scan.** `No_cross_mode_dependencies()` only
+  asserted that `Modes/` existed; it did not assert that any source files
+  were scanned or that the scanned surface still contained
+  `InSpectra.Gen.Acquisition.Modes.*` namespaces. The sibling
+  `Mode_specific_OpenCli_folders_are_renamed_to_Projection()` only
+  enumerated immediate child directories under each mode, so a deeper
+  `Modes/<Mode>/**/OpenCli/` regression would have slipped through.
+- **MEDIUM: this file (`Followup.md`) was stale after g7–g10.** The status
+  banner, phase summary, deferred-findings list, and final test counts still
+  described the pre-g7 tree and re-listed render-path async-I/O debt that
+  g7 had already fixed.
+
+**Fresh swarm findings explicitly rejected (do not re-raise without stronger
+evidence):**
+
+- **Broad `Output.Json` / `Targets/*` layering claims from the dependency
+  swarm.** Rejected for this follow-up run. Those reports leaned on the
+  historical target-state in `docs/Tasks/Restructure/Task.md` rather than the
+  self-contained smell categories in this file and did not demonstrate a
+  current stop-condition violation inside the accepted follow-up surfaces.
+- **"Add a StartupHook boundary scanner to `ArchitectureAppShellTests` right
+  now."** Rejected for iteration 4. A quick verifier pass showed that the
+  obvious regex-based version was both over-broad relative to the charter's
+  "startup-hook integration" allowance and still trivially bypassable. It was
+  reverted rather than landing a half-correct enforcement rule.
+- **"Add `Output ⊄ UseCases` / `Execution ⊄ Rendering` facts to
+  `ArchitectureGenInternalLayeringTests` right now."** Rejected for iteration
+  4. The existing scanner only understands local `using` directives, while
+  the repo already exposes these surfaces via `GlobalUsings.cs`; the naive
+  addition would therefore pass green without seeing real uses. These edges
+  remain grep-only future work exactly as documented below.
+
+**LOW findings aggregated and left open:**
+
+- **Filename/type drift** remains in four current files:
+  `Modes/CliFx/Execution/CliFxToolRuntime.cs` (`CliFxRuntime`),
+  `Modes/Static/Inspection/StaticAnalysisToolRuntime.cs`
+  (`StaticAnalysisRuntime`),
+  `Modes/Static/Inspection/StaticAnalysisInstalledToolAnalysisSupport.cs`
+  (`StaticInstalledToolAnalysisSupport`), and
+  `tests/InSpectra.Gen.Acquisition.Tests/SystemCommandLine/SystemCommandLineConstructorTestModuleBuilder.cs`
+  (`ConstructorReaderTestModuleBuilder`).
+- **StartupHook thread-safety publication** remains LOW-only and
+  pre-existing in the 4 patch installers / interceptors already documented in
+  the false-positive notes and defers below.
+- **`CaptureFileWriter.TryReadStatusCore` still has a bare catch that returns
+  null**, which hides malformed capture files instead of surfacing a
+  structured diagnostic.
+- **Comment-only live-test skip catalogs** remain in
+  `ValidatedGenericHelpFrameworkCases.cs` and
+  `CommandLineUtilsHookLiveTests.cs`; the skipped cases are intentional today
+  but still lack a concrete tracker reference.
+
 ### Phases shipped — full inline summary
 
 | Phase | SHA | Files | Lines | What it actually does |
@@ -711,16 +786,20 @@ identical.
 | **g4** | `fde9490` | 15 | +80 / −59 | Splits the 5 service+DTO pair files listed in iteration 2 above. Each split produces 1 service-class file + 2 DTO files, totalling 10 new files + 5 modified files. Preserves `static partial` on `DotnetRuntimeCompatibilitySupport` (required by its `[GeneratedRegex]` source generator). Preserves `HookToolProcessInvocationResolution.FromInvocation` / `.TerminalFailure` factory methods. Preserves `OpenCliCommandTreeNode.Children` init-only property (used via `with` in the recursive tree builder). Zero csproj or namespace changes. |
 | **g5** | `450e808` | 4 | +32 / −30 | Splits the 2 cross-boundary service+DTO pairs: `ProcessRunner.cs` → `ProcessRunner.cs` + `ProcessResult.cs` (ProcessResult is referenced from 6 consumer files across Gen+Acquisition); `CliFrameworkProvider.cs` → `CliFrameworkProvider.cs` + `StaticAnalysisFrameworkAdapter.cs` (adapter carries the multi-paragraph type-erasure doc comment from phase 2a, which travels with the type into its own file). The g5 commit body enumerates the 22 remaining 2-type files intentionally left inline under the tight-coupling exception — this retrospective inlines the same list above under "Iteration 2". |
 | **g6** | `59ba4a2` | 1 | +11 / −7 | Updates `README.md:542–555` "Project Layout" section from 2 source + 1 test project to 5 source + 2 test projects. New entries: `InSpectra.Gen.Acquisition` (292-file acquisition class library split out in commit `3c10dad`), `InSpectra.Gen.Core` (cross-module primitives — 4 `Cli*Exception` types — landed in phase 3 commit `f558de5`), `InSpectra.Gen.StartupHook` (the `DOTNET_STARTUP_HOOKS` assembly for live `System.CommandLine`/`CommandLineParser`/`CommandLineUtils` capture), `tests/InSpectra.Gen.Acquisition.Tests/` (157-test acquisition suite). Also annotates `tests/InSpectra.Gen.Tests/` with "+ 14 architecture policy tests" (10 pre-existing + 4 from g3). Pure docs — zero code, zero tests, zero csproj. |
+| **g7** | `4cae9d4` | 11 | +721 / −283 | Fixes the iteration-1/3 render-path async-I/O deferrals. `MarkdownRenderService` now threads `CancellationToken` through the private layout handlers and uses `File.WriteAllTextAsync` for single/tree/hybrid writes. `HtmlRenderService` no longer copies a bundle just to delete it for `--single-file`; it builds `index.html` directly from the bundle source, uses async file streams for bundle copies, and delegates asset loading / compression to the new `HtmlBundleAssetComposer.cs` (+295) and `HtmlBundleCompression.cs`. Composition ownership is tightened by moving the `ViewerBundleLocatorOptions` configuration from the app shell into `AddInSpectraRendering`. Adds 2 regression tests (`Single_file_render_writes_only_index_html_with_inlined_assets`, `Single_render_writes_output_file`) plus `MarkdownRenderServiceTestSupport.cs`. |
+| **g8** | `7cb1ff6` | 8 | +120 / −3 | Hardens the architecture/policy scans that were still vulnerable to empty-surface or wrong-surface greens. `ArchitectureContractsTests`, `ArchitectureContractsModesTests`, and `ArchitectureToolingTests` now assert both non-empty scans and positive namespace anchors; `ArchitectureForbiddenBucketsTests`, `ArchitectureInternalsVisibleToTests`, and `RepositoryCodeFilePolicyTests` assert that they actually scanned something; `ArchitectureNamespaceTests` narrows the namespace exception from a filename-wide `StartupHook.cs` carve-out to the specific `src/InSpectra.Gen.StartupHook/StartupHook.cs` path. |
+| **g9** | `45a1fcc` | 15 | −1590 | Removes the dead live-result snapshot path entirely: deletes `HookResultSnapshotSupport.cs`, deletes the 2 unreferenced `HookResultSnapshots/*.json` fixtures, prunes 11 orphan `HookOpenCliSnapshots/*.json` artifacts that no active case catalog consumes, and removes the now-unused `SerializeForComparison` helper from `HookOpenCliSnapshotSupport.cs`. The active hook/live snapshot set now matches the current `HookServiceLiveTests` and `CommandLineUtilsHookLiveTests` catalogs exactly. |
+| **g10** | `50a466f` | 5 | +83 / −28 | Closes the accepted code/test findings from the fresh iteration-4 swarm. Removes the orphaned synchronous `CollectReferencedAssets(...)` helper pair from `HtmlBundleComposer.cs` / `HtmlBundleAssetComposer.cs`, relaxes `ArchitectureAppShellTests` by dropping the brittle "must contain at least one Acquisition using" anchor, and hardens `ArchitectureModeTests` so it now (a) scans recursively for forbidden descendant `OpenCli` folders, (b) proves the scanned `Modes/` surface still contains source files plus `InSpectra.Gen.Acquisition.Modes.*` namespaces, and (c) skips `bin/obj` output while doing so. A verifier pass rejected broader `StartupHook` / `Output` / `Execution` test additions as over-broad or still-vacuous, so they were deliberately not shipped in this phase. |
 
 ### Final test counts
 
-| Suite | Baseline (before g1) | After g1+g2 | After g3 | After g4+g5 | After g6 |
+| Suite | Baseline (before g1) | After g1+g2 | After g3 | After g4+g6 | After g7+g10 |
 |---|---|---|---|---|---|
 | `InSpectra.Gen.Acquisition.Tests` (unit) | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 |
-| `InSpectra.Gen.Tests` (unit) | 123 / 0 / 0 | 123 / 0 / 0 | 127 / 0 / 0 | 127 / 0 / 0 | 127 / 0 / 0 |
-| **Total unit** | **280 / 0 / 0** | **280 / 0 / 0** | **284 / 0 / 0** | **284 / 0 / 0** | **284 / 0 / 0** |
+| `InSpectra.Gen.Tests` (unit) | 123 / 0 / 0 | 123 / 0 / 0 | 127 / 0 / 0 | 127 / 0 / 0 | 129 / 0 / 0 |
+| **Total unit** | **280 / 0 / 0** | **280 / 0 / 0** | **284 / 0 / 0** | **284 / 0 / 0** | **286 / 0 / 0** |
 | Architecture policy tests | 10 | 10 | 14 | 14 | 14 |
-| Live tests (`workflow_dispatch`, `INSPECTRA_GEN_LIVE_TESTS=1`) | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | **35 / 0 / 0** |
+| Live tests (`workflow_dispatch`, `INSPECTRA_GEN_LIVE_TESTS=1`) | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | **35 / 0 / 0** baseline retained; iteration-4 rerun pending |
 
 ### CI validation
 
@@ -734,6 +813,10 @@ identical.
   real NuGet.org — the 3 NuGet API tests, 13 System.CommandLine hook
   tests, 11 Microsoft.Extensions.CommandLineUtils hook tests, and 8
   generic help-parser tests all pass).
+- **Iteration-4 / post-`g10` CI status:** not yet rerun at the time of this
+  ledger refresh. The final stop-condition check still requires a green
+  `pull_request` run and a green `workflow_dispatch` run on the final pushed
+  tip after this document update lands.
 
 ### New smell categories / lessons learned
 
@@ -807,27 +890,40 @@ identical.
    they propose to move** — especially files in `Rendering/` or
    `OpenCli/`.
 
-### Intentionally deferred (still open after iteration 3)
+7. **Async refactors often leave dead sync helper tails behind.** Phase g7
+   correctly moved the live render path onto async file I/O, but it left the
+   synchronous `CollectReferencedAssets(...)` wrapper pair in
+   `HtmlBundleComposer.cs` / `HtmlBundleAssetComposer.cs`. They had no
+   remaining call sites and only survived because the refactor preserved the
+   old helper surface while switching callers to the async path. **Rule: when
+   converting a helper chain from sync to async, grep both definitions and
+   call sites before declaring the old sync half intentionally retained.**
 
-The following findings were flagged as valid smells but deferred because
-they fall outside the "no feature work" scope of this structural-cleanup
-followup. A future async-I/O pass can batch them together.
+8. **Positive anchors should prove the scanned surface, not freeze an entire
+   tree shape.** The first iteration-4 hardening attempt for
+   `ArchitectureModeTests` overfit the current repo by requiring every mode to
+   carry `Projection/` plus matching namespaces. Verifier swarms showed that
+   this solved the vacuous-green problem by accidentally turning a dependency
+   rule into a completeness rule. The final shape is intentionally narrower:
+   prove that the scan hit real `Modes/*` source files and at least one real
+   `Modes.*` namespace, then enforce only the specific forbidden condition.
 
-- **`MarkdownRenderService.cs:74,118,161`** — `File.WriteAllText` inside
-  the 3 private layout handlers called from `public async
-  Task<RenderExecutionResult> RenderFromFileAsync(...)`. Fix requires
-  threading a `CancellationToken` through `HandleSingleLayout` /
-  `HandleTreeLayout` / `HandleHybridLayout` and converting them to
-  `async Task<RenderExecutionResult>`.
-- **`HtmlBundleComposer.cs:48,54,92,127,163`** — 5 `File.ReadAllText` /
-  `File.Exists` calls in the static helper chain
-  (`BuildSelfExtractingHtml`, `InlineAssets`, `CollectReferencedAssets`,
-  `BuildInlineScript`) invoked from `HtmlRenderService.RenderAsync`.
-- **`HtmlRenderService.cs:103–106,137–139`** — sync
-  `Directory.CreateDirectory`, `File.Copy`, `Directory.Delete`,
-  `Directory.EnumerateFileSystemEntries`, `File.Delete` inside
-  `RenderAsync`. (Lines 87, 94, 143 already use async variants, so
-  only the listed sites need conversion.)
+9. **Do not treat `Task.md` target-state aspirations as current stop-condition
+   defects during follow-up sweeps.** The iteration-4 dependency agent raised
+   broad `Output.Json` / `Targets/*` ownership claims by leaning on the older
+   restructure task document. For this follow-up, the self-contained source of
+   truth is `Followup.md` plus the live charter, not every historical
+   migration desideratum in `Task.md`. **Rule: if a finding depends on the
+   older task doc instead of the smell categories and explicit exceptions in
+   this file, it needs extra proof before it can block the stop condition.**
+
+### Intentionally deferred / low-only open items (still open after iteration 4)
+
+The render-path async-I/O findings deferred after iteration 3 are now
+resolved by g7 and should **not** be re-raised as current-tree open items.
+What remains open after iteration 4 is either explicitly low-severity or a
+documented intentional exception to the structural rules.
+
 - **`StartupHook/SystemCommandLine/HarmonyPatchInstaller.cs:12–13`**
   (and the sibling files
   `CommandLineParser/CommandLineParserPatchInstaller.cs`,
@@ -842,6 +938,20 @@ followup. A future async-I/O pass can batch them together.
   fixing it cleanly requires either adding a `Volatile` helper or
   switching to properties, which is a style churn beyond the Followup
   scope.
+- **`StartupHook/Capture/CaptureFileWriter.cs:103`** — bare
+  `catch { return null; }` in `TryReadStatusCore`. Valid LOW: it hides
+  malformed capture-file state instead of surfacing a structured
+  diagnostic, but it is neither new nor stop-condition-blocking.
+- **Filename/type drift** remains LOW-only in
+  `Modes/CliFx/Execution/CliFxToolRuntime.cs`,
+  `Modes/Static/Inspection/StaticAnalysisToolRuntime.cs`,
+  `Modes/Static/Inspection/StaticAnalysisInstalledToolAnalysisSupport.cs`,
+  and
+  `tests/InSpectra.Gen.Acquisition.Tests/SystemCommandLine/SystemCommandLineConstructorTestModuleBuilder.cs`.
+- **Live-test skip catalogs with comment-only rationale** remain LOW-only in
+  `ValidatedGenericHelpFrameworkCases.cs` and
+  `CommandLineUtilsHookLiveTests.cs`. The excluded cases are intentional, but
+  future cleanup would be easier if each skip pointed at a concrete tracker.
 - **`Contracts/Providers/ICliFrameworkCatalog.cs`,
   `ILocalCliFrameworkDetector.cs`, `IPackageCliToolInstaller.cs`,
   `IAcquisitionAnalysisDispatcher.cs`** — each file contains an
@@ -858,18 +968,17 @@ followup. A future async-I/O pass can batch them together.
 
 ### If another iteration is warranted
 
-The logical next scope is an **async-I/O pass**: batch-fix the 3 deferred
-rendering-path sync-I/O findings (`MarkdownRenderService`,
-`HtmlBundleComposer`, `HtmlRenderService`) in one phase with carefully
-threaded `CancellationToken` propagation. That work crosses into
-"feature-adjacent" territory (changes cancellation semantics and
-thread-scheduling behaviour), so it should be scoped as its own task with
-explicit user buy-in rather than folded into a structural-cleanup
-follow-up.
+Assuming the fresh post-ledger swarm and final CI rerun both come back green,
+any further iteration would be **low-only cleanup**, not stop-condition work.
+The most sensible remaining scopes are:
 
-A second possible phase is an **`Output`/`Execution` layering test pair**
-— category 10 is now test-enforced for 4 of the 5 interesting pairs, but
-`Output ⊄ UseCases` and `Execution ⊄ Rendering` are still grep-only.
-Adding them is a ≤ 20-line change in
-`ArchitectureGenInternalLayeringTests.cs` following the template already
-established there.
+- **Filename/type drift cleanup** for the 4 residual LOW mismatches listed
+  above.
+- **StartupHook publication + diagnostics hardening** if the user wants to
+  spend effort on pre-existing LOWs (`Volatile` publication and the
+  `CaptureFileWriter` silent catch).
+- **`Output` / `Execution` layering enforcement** as a separate, explicit
+  follow-up if someone wants to move those edges from grep-only to
+  test-enforced. That work should start by deciding how to account for
+  `GlobalUsings.cs`, otherwise a naive `using`-directive scanner will keep
+  missing real dependencies.

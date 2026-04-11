@@ -29,9 +29,10 @@ public sealed class ArchitectureModeTests
         RegexOptions.Multiline | RegexOptions.Compiled);
 
     /// <summary>
-    /// Positive anchor for the modes scan: at least one file in each mode subtree should
-    /// declare a matching <c>InSpectra.Gen.Acquisition.Modes.&lt;Mode&gt;...</c> namespace.
-    /// Without that anchor, the test could scan the wrong surface and still pass.
+    /// Positive anchor for the modes scan: the scanned <c>Modes/</c> surface should contain
+    /// at least one matching <c>InSpectra.Gen.Acquisition.Modes.&lt;Mode&gt;...</c>
+    /// namespace declaration. Without that anchor, the test could scan the wrong surface
+    /// and still pass on zero meaningful matches.
     /// </summary>
     private static readonly Regex ModeNamespaceDeclaration = new(
         @"^\s*namespace\s+InSpectra\.Gen\.Acquisition\.Modes\.(?<mode>[A-Za-z_][A-Za-z0-9_]*)(?:\.[A-Za-z_][A-Za-z0-9_]*)*\s*[;{]",
@@ -45,14 +46,12 @@ public sealed class ArchitectureModeTests
         Assert.NotEmpty(modeDirectories);
 
         var violations = new List<string>();
-        var filesScannedByMode = new Dictionary<string, int>(StringComparer.Ordinal);
-        var matchingNamespacesByMode = new Dictionary<string, int>(StringComparer.Ordinal);
+        var filesScanned = 0;
+        var matchingNamespacesSeen = 0;
 
         foreach (var modeDirectory in modeDirectories)
         {
             var modeName = Path.GetFileName(modeDirectory);
-            filesScannedByMode[modeName] = 0;
-            matchingNamespacesByMode[modeName] = 0;
 
             foreach (var filePath in Directory.EnumerateFiles(modeDirectory, "*.cs", SearchOption.AllDirectories))
             {
@@ -61,13 +60,13 @@ public sealed class ArchitectureModeTests
                     continue;
                 }
 
-                filesScannedByMode[modeName]++;
+                filesScanned++;
                 var text = File.ReadAllText(filePath);
                 foreach (Match namespaceMatch in ModeNamespaceDeclaration.Matches(text))
                 {
-                    if (string.Equals(namespaceMatch.Groups["mode"].Value, modeName, StringComparison.Ordinal))
+                    if (!string.IsNullOrWhiteSpace(namespaceMatch.Groups["mode"].Value))
                     {
-                        matchingNamespacesByMode[modeName]++;
+                        matchingNamespacesSeen++;
                     }
                 }
 
@@ -84,27 +83,13 @@ public sealed class ArchitectureModeTests
             }
         }
 
-        var modesWithoutFiles = filesScannedByMode
-            .Where(entry => entry.Value == 0)
-            .Select(entry => entry.Key)
-            .ToArray();
         Assert.True(
-            modesWithoutFiles.Length == 0,
-            modesWithoutFiles.Length == 0
-                ? null
-                : "Expected every mode subtree to contain at least one tracked .cs file, but found none for: "
-                  + string.Join(", ", modesWithoutFiles));
+            filesScanned > 0,
+            $"Expected Modes root at '{ModesRoot}' to contain at least one tracked .cs file but found none.");
 
-        var modesWithoutMatchingNamespace = matchingNamespacesByMode
-            .Where(entry => entry.Value == 0)
-            .Select(entry => entry.Key)
-            .ToArray();
         Assert.True(
-            modesWithoutMatchingNamespace.Length == 0,
-            modesWithoutMatchingNamespace.Length == 0
-                ? null
-                : "Expected every mode subtree to encounter at least one matching namespace declaration, but found none for: "
-                  + string.Join(", ", modesWithoutMatchingNamespace));
+            matchingNamespacesSeen > 0,
+            $"Expected Modes scan under '{ModesRoot}' to encounter at least one InSpectra.Gen.Acquisition.Modes.<Mode> namespace declaration but found none.");
 
         Assert.True(
             violations.Count == 0,
@@ -123,10 +108,8 @@ public sealed class ArchitectureModeTests
         Assert.NotEmpty(modeDirectories);
 
         var violations = new List<string>();
-        var modesWithoutProjection = modeDirectories
-            .Where(modeDirectory => !Directory.Exists(Path.Combine(modeDirectory, "Projection")))
-            .Select(Path.GetFileName)
-            .ToArray();
+        var projectionDirectoriesSeen = modeDirectories.Count(modeDirectory =>
+            Directory.Exists(Path.Combine(modeDirectory, "Projection")));
 
         foreach (var modeDirectory in modeDirectories)
         {
@@ -146,11 +129,8 @@ public sealed class ArchitectureModeTests
         }
 
         Assert.True(
-            modesWithoutProjection.Length == 0,
-            modesWithoutProjection.Length == 0
-                ? null
-                : "Expected every mode subtree to contain at least one Projection directory, but found none for: "
-                  + string.Join(", ", modesWithoutProjection));
+            projectionDirectoriesSeen > 0,
+            $"Expected at least one mode subtree under '{ModesRoot}' to contain a Projection directory, but found none.");
 
         Assert.True(
             violations.Count == 0,
