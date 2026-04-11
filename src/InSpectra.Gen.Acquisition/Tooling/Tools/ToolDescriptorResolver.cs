@@ -9,7 +9,7 @@ using InSpectra.Gen.Acquisition.Contracts;
 using InSpectra.Gen.Acquisition.Tooling.Paths;
 
 using InSpectra.Gen.Acquisition.Tooling.NuGet;
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 
 internal interface IToolDescriptorResolver
 {

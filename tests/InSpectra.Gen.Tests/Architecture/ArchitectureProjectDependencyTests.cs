@@ -5,12 +5,13 @@ namespace InSpectra.Gen.Tests.Architecture;
 /// <c>docs/architecture/ARCHITECTURE.md</c>. This suite parses each <c>.csproj</c> under
 /// <c>src/</c> and verifies allowed <c>&lt;ProjectReference&gt;</c> edges.
 ///
-/// The active rule in Phase 1 is the subset the tree already satisfies (see Task.md line 589):
+/// The active rule after Phase 3 (see Task.md line 589):
 /// <list type="bullet">
-///   <item><c>InSpectra.Gen</c> may reference <c>InSpectra.Gen.Acquisition</c> and
-///         <c>InSpectra.Gen.StartupHook</c>.</item>
-///   <item><c>InSpectra.Gen.Acquisition</c> must have zero project references.</item>
+///   <item><c>InSpectra.Gen</c> may reference <c>InSpectra.Gen.Acquisition</c>,
+///         <c>InSpectra.Gen.StartupHook</c>, and <c>InSpectra.Gen.Core</c>.</item>
+///   <item><c>InSpectra.Gen.Acquisition</c> may reference <c>InSpectra.Gen.Core</c>.</item>
 ///   <item><c>InSpectra.Gen.StartupHook</c> must have zero project references.</item>
+///   <item><c>InSpectra.Gen.Core</c> must have zero project references.</item>
 /// </list>
 /// </summary>
 public sealed class ArchitectureProjectDependencyTests
@@ -26,9 +27,14 @@ public sealed class ArchitectureProjectDependencyTests
             {
                 ArchitecturePolicyScanner.AcquisitionProjectName,
                 ArchitecturePolicyScanner.StartupHookProjectName,
+                ArchitecturePolicyScanner.CoreProjectName,
             },
-            [ArchitecturePolicyScanner.AcquisitionProjectName] = new HashSet<string>(StringComparer.Ordinal),
+            [ArchitecturePolicyScanner.AcquisitionProjectName] = new HashSet<string>(StringComparer.Ordinal)
+            {
+                ArchitecturePolicyScanner.CoreProjectName,
+            },
             [ArchitecturePolicyScanner.StartupHookProjectName] = new HashSet<string>(StringComparer.Ordinal),
+            [ArchitecturePolicyScanner.CoreProjectName] = new HashSet<string>(StringComparer.Ordinal),
         };
 
     [Fact]

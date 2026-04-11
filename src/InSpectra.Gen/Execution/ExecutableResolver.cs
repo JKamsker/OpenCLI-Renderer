@@ -1,4 +1,4 @@
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 
 namespace InSpectra.Gen.Execution;
 

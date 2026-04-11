@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 using InSpectra.Gen.Acquisition.Contracts;
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 using InSpectra.Gen.Acquisition.Contracts.Providers;
 using InSpectra.Gen.Acquisition.Modes.CliFx.Execution;
 using InSpectra.Gen.Acquisition.Modes.Help.Crawling;

@@ -1,6 +1,6 @@
 using InSpectra.Gen.Acquisition.Contracts;
 
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 using InSpectra.Gen.UseCases.Generate.Requests;
 using InSpectra.Gen.Rendering.Contracts;
 using InSpectra.Gen.Commands.Common;

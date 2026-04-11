@@ -1,4 +1,4 @@
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 using InSpectra.Gen.Execution;
 using InSpectra.Gen.UseCases.Generate;
 using InSpectra.Gen.UseCases.Generate.Requests;

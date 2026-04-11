@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Json.Schema;
 using InSpectra.Gen.Rendering.Pipeline.Model;
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 
 namespace InSpectra.Gen.OpenCli.Serialization;
 

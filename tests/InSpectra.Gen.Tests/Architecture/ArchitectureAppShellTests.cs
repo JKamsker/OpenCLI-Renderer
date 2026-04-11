@@ -10,9 +10,10 @@ namespace InSpectra.Gen.Tests.Architecture;
 /// interfaces" (docs/architecture/ARCHITECTURE.md).
 ///
 /// Currently skipped: <c>src/InSpectra.Gen/Composition/ServiceCollectionExtensions.cs</c>
-/// still reaches into <c>InSpectra.Gen.Acquisition.Contracts.*</c>,
-/// <c>InSpectra.Gen.Acquisition.Contracts.Exceptions</c>, etc. (Task.md line 570). Step 11 lands the
-/// public composition entry points and removes the deep <c>using</c> statements.
+/// still reaches into <c>InSpectra.Gen.Acquisition.Contracts.*</c>, etc. (Task.md line 570).
+/// Step 11 lands the public composition entry points and removes the deep <c>using</c>
+/// statements. Phase 3 moved the four <c>Cli*Exception</c> types out of the Acquisition
+/// contracts surface into <c>InSpectra.Gen.Core</c>.
 /// </summary>
 public sealed class ArchitectureAppShellTests
 {

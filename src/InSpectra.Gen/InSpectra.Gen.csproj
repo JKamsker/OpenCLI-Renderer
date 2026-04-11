@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InSpectra.Gen.Core\InSpectra.Gen.Core.csproj" />
     <ProjectReference Include="..\InSpectra.Gen.Acquisition\InSpectra.Gen.Acquisition.csproj" />
   </ItemGroup>
 

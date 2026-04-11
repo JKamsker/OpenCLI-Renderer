@@ -1,5 +1,5 @@
 using InSpectra.Gen.Rendering.Pipeline.Model;
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 using InSpectra.Gen.Rendering.Contracts;
 
 namespace InSpectra.Gen.Rendering.Html;

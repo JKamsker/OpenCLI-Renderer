@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.Json;
 
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 
 internal sealed class NuGetApiClient
 {

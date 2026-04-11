@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 using InSpectra.Gen.Acquisition.Contracts.Providers;
 
 namespace InSpectra.Gen.Targets;

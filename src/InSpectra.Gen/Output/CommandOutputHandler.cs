@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 using InSpectra.Gen.Output.Json;
 using InSpectra.Gen.Rendering.Contracts;
 

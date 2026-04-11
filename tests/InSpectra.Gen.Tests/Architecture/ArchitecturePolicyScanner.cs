@@ -20,13 +20,17 @@ internal static class ArchitecturePolicyScanner
     /// <summary>Name of the startup-hook project.</summary>
     public const string StartupHookProjectName = "InSpectra.Gen.StartupHook";
 
+    /// <summary>Name of the cross-module foundational primitives project.</summary>
+    public const string CoreProjectName = "InSpectra.Gen.Core";
+
     /// <summary>Absolute path to <c>src/</c> in the repo.</summary>
     public static string SrcRoot { get; } = Path.Combine(FixturePaths.RepoRoot, "src");
 
     /// <summary>
     /// Returns all backend C# projects that own the architecture charter:
-    /// <c>InSpectra.Gen</c>, <c>InSpectra.Gen.Acquisition</c>, <c>InSpectra.Gen.StartupHook</c>.
-    /// <c>InSpectra.UI</c> is a Vite/TypeScript frontend and is intentionally excluded.
+    /// <c>InSpectra.Gen</c>, <c>InSpectra.Gen.Acquisition</c>, <c>InSpectra.Gen.StartupHook</c>,
+    /// <c>InSpectra.Gen.Core</c>. <c>InSpectra.UI</c> is a Vite/TypeScript frontend and is
+    /// intentionally excluded.
     /// </summary>
     public static IReadOnlyList<CsProject> EnumerateBackendProjects()
     {

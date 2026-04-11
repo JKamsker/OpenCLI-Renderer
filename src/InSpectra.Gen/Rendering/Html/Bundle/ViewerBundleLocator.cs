@@ -1,4 +1,4 @@
-using InSpectra.Gen.Acquisition.Contracts.Exceptions;
+using InSpectra.Gen.Core;
 using Microsoft.Extensions.Options;
 
 namespace InSpectra.Gen.Rendering.Html.Bundle;
