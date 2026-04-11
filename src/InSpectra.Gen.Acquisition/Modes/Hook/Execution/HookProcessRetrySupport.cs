@@ -5,6 +5,8 @@ using InSpectra.Gen.Acquisition.Tooling.Process;
 
 internal static class HookProcessRetrySupport
 {
+    private const string CapturePathEnvironmentVariableName = "INSPECTRA_CAPTURE_PATH";
+
     public static async Task<CommandRuntime.ProcessResult> InvokeWithHelpFallbackAsync(
         HookToolProcessInvocation invocation,
         IReadOnlyDictionary<string, string> environment,
@@ -12,18 +14,19 @@ internal static class HookProcessRetrySupport
         Func<HookToolProcessInvocation, IReadOnlyDictionary<string, string>, CancellationToken, Task<CommandRuntime.ProcessResult>> invokeAsync,
         CancellationToken cancellationToken)
     {
+        var capturePublisher = new RetryCapturePublisher(capturePath);
         var attemptedHelpInvocations = new HashSet<string>(StringComparer.Ordinal);
         attemptedHelpInvocations.Add(BuildInvocationKey(invocation));
-        var processResult = await InvokeWithCompatibilityRetriesAsync(
+        var retryResult = await InvokeWithCompatibilityRetriesAsync(
             invocation,
             environment,
-            capturePath,
+            capturePublisher,
             attemptedHelpInvocations,
             invokeAsync,
             cancellationToken);
-        if (!ShouldRetryWithAlternateHelp(processResult, capturePath))
+        if (!ShouldRetryWithAlternateHelp(retryResult))
         {
-            return processResult;
+            return capturePublisher.Publish(retryResult);
         }
 
         foreach (var fallbackInvocation in HookToolProcessInvocationResolver.BuildHelpFallbackInvocations(invocation))
@@ -33,35 +36,40 @@ internal static class HookProcessRetrySupport
                 continue;
             }
 
-            TryDeleteCaptureFile(capturePath);
-            processResult = await InvokeWithCompatibilityRetriesAsync(
+            capturePublisher.DeleteAttemptCapture(retryResult);
+            retryResult = await InvokeWithCompatibilityRetriesAsync(
                 fallbackInvocation,
                 environment,
-                capturePath,
+                capturePublisher,
                 attemptedHelpInvocations,
                 invokeAsync,
                 cancellationToken);
-            if (!ShouldRetryWithAlternateHelp(processResult, capturePath))
+            if (!ShouldRetryWithAlternateHelp(retryResult))
             {
-                return processResult;
+                return capturePublisher.Publish(retryResult);
             }
         }
 
-        return processResult;
+        return capturePublisher.Publish(retryResult);
     }
 
-    private static async Task<CommandRuntime.ProcessResult> InvokeWithCompatibilityRetriesAsync(
+    private static async Task<RetryInvocationResult> InvokeWithCompatibilityRetriesAsync(
         HookToolProcessInvocation invocation,
         IReadOnlyDictionary<string, string> environment,
-        string capturePath,
+        RetryCapturePublisher capturePublisher,
         ISet<string> attemptedHelpInvocations,
         Func<HookToolProcessInvocation, IReadOnlyDictionary<string, string>, CancellationToken, Task<CommandRuntime.ProcessResult>> invokeAsync,
         CancellationToken cancellationToken)
     {
         var effectiveEnvironment = environment;
-        var processResult = await invokeAsync(invocation, effectiveEnvironment, cancellationToken);
-        if (!File.Exists(capturePath)
-            && DotnetRuntimeCompatibilitySupport.LooksLikeMissingIcu(processResult)
+        var retryResult = await InvokeAttemptAsync(
+            invocation,
+            effectiveEnvironment,
+            capturePublisher,
+            invokeAsync,
+            cancellationToken);
+        if (!retryResult.HasCapture
+            && DotnetRuntimeCompatibilitySupport.LooksLikeMissingIcu(retryResult.ProcessResult)
             && !effectiveEnvironment.ContainsKey(DotnetRuntimeCompatibilitySupport.GlobalizationInvariantEnvironmentVariableName))
         {
             effectiveEnvironment = new Dictionary<string, string>(effectiveEnvironment, StringComparer.OrdinalIgnoreCase)
@@ -69,11 +77,15 @@ internal static class HookProcessRetrySupport
                 [DotnetRuntimeCompatibilitySupport.GlobalizationInvariantEnvironmentVariableName] = "1",
             };
 
-            TryDeleteCaptureFile(capturePath);
-            processResult = await invokeAsync(invocation, effectiveEnvironment, cancellationToken);
-            if (File.Exists(capturePath) || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(processResult))
+            retryResult = await InvokeAttemptAsync(
+                invocation,
+                effectiveEnvironment,
+                capturePublisher,
+                invokeAsync,
+                cancellationToken);
+            if (retryResult.HasCapture || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(retryResult.ProcessResult))
             {
-                return processResult;
+                return retryResult;
             }
 
             foreach (var fallbackInvocation in HookToolProcessInvocationResolver.BuildHelpFallbackInvocations(invocation))
@@ -83,20 +95,24 @@ internal static class HookProcessRetrySupport
                     continue;
                 }
 
-                TryDeleteCaptureFile(capturePath);
-                processResult = await invokeAsync(fallbackInvocation, effectiveEnvironment, cancellationToken);
-                if (File.Exists(capturePath) || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(processResult))
+                retryResult = await InvokeAttemptAsync(
+                    fallbackInvocation,
+                    effectiveEnvironment,
+                    capturePublisher,
+                    invokeAsync,
+                    cancellationToken);
+                if (retryResult.HasCapture || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(retryResult.ProcessResult))
                 {
-                    return processResult;
+                    return retryResult;
                 }
             }
         }
 
-        if (File.Exists(capturePath)
-            || !DotnetRuntimeCompatibilitySupport.LooksLikeMissingSharedRuntime(processResult)
+        if (retryResult.HasCapture
+            || !DotnetRuntimeCompatibilitySupport.LooksLikeMissingSharedRuntime(retryResult.ProcessResult)
             || effectiveEnvironment.ContainsKey(DotnetRuntimeCompatibilitySupport.DotnetRollForwardEnvironmentVariableName))
         {
-            return processResult;
+            return retryResult;
         }
 
         effectiveEnvironment = new Dictionary<string, string>(effectiveEnvironment, StringComparer.OrdinalIgnoreCase)
@@ -104,11 +120,15 @@ internal static class HookProcessRetrySupport
             [DotnetRuntimeCompatibilitySupport.DotnetRollForwardEnvironmentVariableName] = DotnetRuntimeCompatibilitySupport.DotnetRollForwardMajorValue,
         };
 
-        TryDeleteCaptureFile(capturePath);
-        processResult = await invokeAsync(invocation, effectiveEnvironment, cancellationToken);
-        if (File.Exists(capturePath) || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(processResult))
+        retryResult = await InvokeAttemptAsync(
+            invocation,
+            effectiveEnvironment,
+            capturePublisher,
+            invokeAsync,
+            cancellationToken);
+        if (retryResult.HasCapture || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(retryResult.ProcessResult))
         {
-            return processResult;
+            return retryResult;
         }
 
         foreach (var fallbackInvocation in HookToolProcessInvocationResolver.BuildHelpFallbackInvocations(invocation))
@@ -118,25 +138,45 @@ internal static class HookProcessRetrySupport
                 continue;
             }
 
-            TryDeleteCaptureFile(capturePath);
-            processResult = await invokeAsync(fallbackInvocation, effectiveEnvironment, cancellationToken);
-            if (File.Exists(capturePath) || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(processResult))
+            retryResult = await InvokeAttemptAsync(
+                fallbackInvocation,
+                effectiveEnvironment,
+                capturePublisher,
+                invokeAsync,
+                cancellationToken);
+            if (retryResult.HasCapture || !HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(retryResult.ProcessResult))
             {
-                return processResult;
+                return retryResult;
             }
         }
 
-        return processResult;
+        return retryResult;
     }
 
-    private static bool ShouldRetryWithAlternateHelp(CommandRuntime.ProcessResult processResult, string capturePath)
+    private static async Task<RetryInvocationResult> InvokeAttemptAsync(
+        HookToolProcessInvocation invocation,
+        IReadOnlyDictionary<string, string> environment,
+        RetryCapturePublisher capturePublisher,
+        Func<HookToolProcessInvocation, IReadOnlyDictionary<string, string>, CancellationToken, Task<CommandRuntime.ProcessResult>> invokeAsync,
+        CancellationToken cancellationToken)
     {
-        if (!File.Exists(capturePath))
+        var attemptCapturePath = capturePublisher.CreateAttemptCapturePath();
+        var effectiveEnvironment = new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase)
         {
-            return HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(processResult);
+            [CapturePathEnvironmentVariableName] = attemptCapturePath,
+        };
+        var processResult = await invokeAsync(invocation, effectiveEnvironment, cancellationToken);
+        return new RetryInvocationResult(processResult, attemptCapturePath);
+    }
+
+    private static bool ShouldRetryWithAlternateHelp(RetryInvocationResult retryResult)
+    {
+        if (!retryResult.HasCapture)
+        {
+            return HookRejectedHelpSupport.LooksLikeRejectedHelpInvocation(retryResult.ProcessResult);
         }
 
-        var capture = HookCaptureDeserializer.Deserialize(capturePath);
+        var capture = HookCaptureDeserializer.Deserialize(retryResult.CapturePath);
         if (capture is null || (capture.Status == "ok" && capture.Root is not null))
         {
             return false;
@@ -163,4 +203,55 @@ internal static class HookProcessRetrySupport
         => string.Join(
             '\u001f',
             [invocation.FilePath, invocation.PreferredAssemblyPath ?? string.Empty, .. invocation.ArgumentList]);
+
+    private sealed record RetryInvocationResult(CommandRuntime.ProcessResult ProcessResult, string CapturePath)
+    {
+        public bool HasCapture => File.Exists(CapturePath);
+    }
+
+    private sealed class RetryCapturePublisher(string requestedCapturePath)
+    {
+        private readonly string _requestedCapturePath = requestedCapturePath;
+        private int _attemptNumber;
+
+        public string CreateAttemptCapturePath()
+        {
+            _attemptNumber++;
+            var directory = Path.GetDirectoryName(_requestedCapturePath) ?? string.Empty;
+            var fileName = Path.GetFileNameWithoutExtension(_requestedCapturePath);
+            var extension = Path.GetExtension(_requestedCapturePath);
+            return Path.Combine(directory, $"{fileName}.attempt-{_attemptNumber:D3}{extension}");
+        }
+
+        public CommandRuntime.ProcessResult Publish(RetryInvocationResult retryResult)
+        {
+            TryDeleteCaptureFile(_requestedCapturePath);
+            if (!retryResult.HasCapture)
+            {
+                DeleteAttemptCapture(retryResult);
+                return retryResult.ProcessResult;
+            }
+
+            try
+            {
+                var directory = Path.GetDirectoryName(_requestedCapturePath);
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                File.Copy(retryResult.CapturePath, _requestedCapturePath, overwrite: true);
+            }
+            catch
+            {
+                TryDeleteCaptureFile(_requestedCapturePath);
+            }
+
+            DeleteAttemptCapture(retryResult);
+            return retryResult.ProcessResult;
+        }
+
+        public void DeleteAttemptCapture(RetryInvocationResult retryResult)
+            => TryDeleteCaptureFile(retryResult.CapturePath);
+    }
 }
