@@ -26,17 +26,7 @@
     {
       "name": "--info",
       "description": "Display Retype information [default: False]",
-      "recursive": true,
-      "arguments": [
-        {
-          "name": "INFO",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "recursive": true
     }
   ],
   "commands": [
@@ -137,33 +127,13 @@
         },
         {
           "name": "--pro",
-          "description": "Enable Retype Pro preview [default: False]",
-          "arguments": [
-            {
-              "name": "PRO",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Enable Retype Pro preview [default: False]"
         },
         {
           "name": "--no-open",
           "description": "Prevent default web browser from being opened [default: False]",
           "aliases": [
             "-n"
-          ],
-          "arguments": [
-            {
-              "name": "NO_OPEN",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -171,16 +141,6 @@
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -188,16 +148,6 @@
           "description": "Watch for API changes [default: False]",
           "aliases": [
             "-a"
-          ],
-          "arguments": [
-            {
-              "name": "API",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -237,16 +187,6 @@
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -344,33 +284,13 @@
         },
         {
           "name": "--strict",
-          "description": "[PRO] Return a non-zero exit code if the build had errors or warnings [default: False]",
-          "arguments": [
-            {
-              "name": "STRICT",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "[PRO] Return a non-zero exit code if the build had errors or warnings [default: False]"
         },
         {
           "name": "--watch",
           "description": "Watch for file changes [default: False]",
           "aliases": [
             "-w"
-          ],
-          "arguments": [
-            {
-              "name": "WATCH",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -378,16 +298,6 @@
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -395,16 +305,6 @@
           "description": "Watch for API changes [default: False]",
           "aliases": [
             "-a"
-          ],
-          "arguments": [
-            {
-              "name": "API",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -459,16 +359,6 @@
           "description": "Live reload open browsers when a change in the project output is detected [default: False]",
           "aliases": [
             "-l"
-          ],
-          "arguments": [
-            {
-              "name": "LIVE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -476,16 +366,6 @@
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -507,31 +387,11 @@
       "options": [
         {
           "name": "--list",
-          "description": "List running Retype web servers, including servers that may not be stoppable [default: False]",
-          "arguments": [
-            {
-              "name": "LIST",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "List running Retype web servers, including servers that may not be stoppable [default: False]"
         },
         {
           "name": "--all",
-          "description": "Stop all running Retype web servers [default: False]",
-          "arguments": [
-            {
-              "name": "ALL",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Stop all running Retype web servers [default: False]"
         },
         {
           "name": "--id",
@@ -583,16 +443,6 @@
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -648,16 +498,6 @@
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -683,16 +523,6 @@
           "description": "Watch for API changes [default: False]",
           "aliases": [
             "-a"
-          ],
-          "arguments": [
-            {
-              "name": "API",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -776,16 +606,6 @@
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -807,33 +627,13 @@
       "options": [
         {
           "name": "--dry",
-          "description": "List files and directories that would be deleted [default: False]",
-          "arguments": [
-            {
-              "name": "DRY",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "List files and directories that would be deleted [default: False]"
         },
         {
           "name": "--verbose",
           "description": "Enable verbose logging [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -885,31 +685,11 @@
         },
         {
           "name": "--list",
-          "description": "List the stored keys [default: False]",
-          "arguments": [
-            {
-              "name": "LIST",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "List the stored keys [default: False]"
         },
         {
           "name": "--clear",
-          "description": "Clear the wallet [default: False]",
-          "arguments": [
-            {
-              "name": "CLEAR",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Clear the wallet [default: False]"
         }
       ]
     }

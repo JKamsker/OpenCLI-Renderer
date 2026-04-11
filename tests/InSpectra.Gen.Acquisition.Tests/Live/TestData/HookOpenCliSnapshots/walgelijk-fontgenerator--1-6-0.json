@@ -10,7 +10,7 @@
       "description": "Path to input file or directory",
       "arguments": [
         {
-          "name": null,
+          "name": "INPUT",
           "required": true,
           "type": "String",
           "arity": {
@@ -25,7 +25,7 @@
       "description": "Path to output file. Does nothing if the input is a directory.",
       "arguments": [
         {
-          "name": null,
+          "name": "OUTPUT",
           "required": true,
           "type": "FileInfo",
           "arity": {
@@ -40,7 +40,7 @@
       "description": "Path to text file containing all to-be-encoded characters. ASCII by default.",
       "arguments": [
         {
-          "name": null,
+          "name": "CHARSET",
           "required": true,
           "type": "FileInfo",
           "arity": {
@@ -55,7 +55,7 @@
       "description": "Font size to render the font with. Effectively determines bitmap resolution.",
       "arguments": [
         {
-          "name": null,
+          "name": "FONT_SIZE",
           "required": true,
           "type": "Int32",
           "arity": {
@@ -67,17 +67,7 @@
     },
     {
       "name": "--version",
-      "description": "Show version information",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
-      ]
+      "description": "Show version information"
     },
     {
       "name": "-h",
@@ -87,16 +77,6 @@
         "--help",
         "-?",
         "/?"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ]

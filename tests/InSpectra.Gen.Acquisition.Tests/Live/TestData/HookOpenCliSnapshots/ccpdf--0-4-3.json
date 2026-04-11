@@ -7,17 +7,7 @@
   "options": [
     {
       "name": "--version",
-      "description": "Show version information",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
-      ]
+      "description": "Show version information"
     },
     {
       "name": "-h",
@@ -27,16 +17,6 @@
         "--help",
         "-?",
         "/?"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ],
@@ -50,7 +30,7 @@
           "description": "The file to read",
           "arguments": [
             {
-              "name": null,
+              "name": "FILE",
               "required": true,
               "type": "FileInfo",
               "arity": {
@@ -65,7 +45,7 @@
           "description": "Minimum image width to compress",
           "arguments": [
             {
-              "name": null,
+              "name": "MAXWIDTH",
               "required": true,
               "type": "Int32",
               "arity": {
@@ -80,7 +60,7 @@
           "description": "The compressed file",
           "arguments": [
             {
-              "name": null,
+              "name": "OUTPUTFILE",
               "required": true,
               "type": "FileInfo",
               "arity": {
@@ -92,17 +72,7 @@
         },
         {
           "name": "--noPrompt",
-          "description": "Write file without prompt",
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Write file without prompt"
         }
       ]
     },
@@ -115,7 +85,7 @@
           "description": "The file to read",
           "arguments": [
             {
-              "name": null,
+              "name": "FILE",
               "required": true,
               "type": "FileInfo",
               "arity": {
@@ -130,7 +100,7 @@
           "description": "Minimum image width to compress",
           "arguments": [
             {
-              "name": null,
+              "name": "MAXWIDTH",
               "required": true,
               "type": "Int32",
               "arity": {
@@ -145,7 +115,7 @@
           "description": "The compressed file",
           "arguments": [
             {
-              "name": null,
+              "name": "OUTPUTFILE",
               "required": true,
               "type": "FileInfo",
               "arity": {
@@ -157,17 +127,7 @@
         },
         {
           "name": "--noPrompt",
-          "description": "Write file without prompt",
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Write file without prompt"
         }
       ]
     },
@@ -180,7 +140,7 @@
           "description": "The file to read",
           "arguments": [
             {
-              "name": null,
+              "name": "FILE",
               "required": true,
               "type": "FileInfo",
               "arity": {
@@ -195,7 +155,7 @@
           "description": "Minimum image width to compress",
           "arguments": [
             {
-              "name": null,
+              "name": "MAXWIDTH",
               "required": true,
               "type": "Int32",
               "arity": {
@@ -210,7 +170,7 @@
           "description": "The compressed file",
           "arguments": [
             {
-              "name": null,
+              "name": "OUTPUTFILE",
               "required": true,
               "type": "FileInfo",
               "arity": {
@@ -222,17 +182,7 @@
         },
         {
           "name": "--noPrompt",
-          "description": "Write file without prompt",
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Write file without prompt"
         }
       ]
     }

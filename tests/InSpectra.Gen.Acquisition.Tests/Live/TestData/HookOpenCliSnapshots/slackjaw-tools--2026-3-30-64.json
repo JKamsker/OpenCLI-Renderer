@@ -7,17 +7,7 @@
   "options": [
     {
       "name": "--version",
-      "description": "Show version information",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
-      ]
+      "description": "Show version information"
     },
     {
       "name": "-h",
@@ -27,16 +17,6 @@
         "--help",
         "-?",
         "/?"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ],
@@ -53,7 +33,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "TARGET",
               "required": true,
               "type": "String",
               "arity": {
@@ -77,7 +57,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "TARGET",
               "required": true,
               "type": "String",
               "arity": {
@@ -92,16 +72,6 @@
           "description": "Ignore failing tests and continue with DLL transfer",
           "aliases": [
             "-i"
-          ],
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -109,16 +79,6 @@
           "description": "Skip test execution completely",
           "aliases": [
             "-s"
-          ],
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ]
@@ -135,7 +95,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "TARGET",
               "required": true,
               "type": "String",
               "arity": {
@@ -159,7 +119,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "TARGET",
               "required": true,
               "type": "String",
               "arity": {
@@ -183,7 +143,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "TARGET",
               "required": true,
               "type": "String",
               "arity": {
@@ -201,7 +161,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "WORKING_DIRECTORY",
               "required": true,
               "type": "String",
               "arity": {
@@ -219,7 +179,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "BUILD_VERSION",
               "required": true,
               "type": "String",
               "arity": {

@@ -24,7 +24,7 @@ internal static class HookCapturedNameSupport
             .Where(token => !string.Equals(token, primaryName, StringComparison.Ordinal))
             .ToArray();
 
-    public static string? ResolveOptionArgumentName(HookCapturedOption option)
+    public static string? ResolveOptionArgumentName(HookCapturedOption option, string? resolvedOptionName = null)
     {
         var rawName = option.ArgumentName?.Trim();
         if (OpenCliNameValidationSupport.IsPublishableArgumentName(rawName))
@@ -32,10 +32,19 @@ internal static class HookCapturedNameSupport
             return OptionSignatureSupport.NormalizeArgumentName(rawName!);
         }
 
-        var inferredName = OptionSignatureSupport.InferArgumentNameFromOption(option.Name);
-        if (OpenCliNameValidationSupport.IsPublishableArgumentName(inferredName))
+        // Try the option's raw Name first, then fall back to the resolved primary token
+        // (typically sourced from the first alias when Name is null — which happens under
+        // System.CommandLine 2.0.x where Option.Name is not populated on the captured model).
+        var inferredFromOptionName = OptionSignatureSupport.InferArgumentNameFromOption(option.Name);
+        if (OpenCliNameValidationSupport.IsPublishableArgumentName(inferredFromOptionName))
         {
-            return inferredName;
+            return inferredFromOptionName;
+        }
+
+        var inferredFromResolvedName = OptionSignatureSupport.InferArgumentNameFromOption(resolvedOptionName);
+        if (OpenCliNameValidationSupport.IsPublishableArgumentName(inferredFromResolvedName))
+        {
+            return inferredFromResolvedName;
         }
 
         return null;

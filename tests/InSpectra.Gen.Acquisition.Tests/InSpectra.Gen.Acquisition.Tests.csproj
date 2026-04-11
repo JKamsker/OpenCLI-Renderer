@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <StartupHookTargetFramework>netcoreapp3.1</StartupHookTargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,28 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\InSpectra.Gen.Acquisition\InSpectra.Gen.Acquisition.csproj" />
+  </ItemGroup>
+
+  <!--
+    The hook-based live tests invoke HookInstalledToolAnalysisSupport, which resolves
+    the startup-hook DLL relative to the Acquisition assembly's location (i.e. the test
+    output directory). Make sure both the hook DLL and its Harmony dependency are built
+    and copied into the test output so live tests can attach the hook at runtime.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\InSpectra.Gen.StartupHook\InSpectra.Gen.StartupHook.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\src\InSpectra.Gen.StartupHook\bin\$(Configuration)\$(StartupHookTargetFramework)\InSpectra.Gen.StartupHook.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             Link="hooks\InSpectra.Gen.StartupHook.dll" />
+    <Content Include="..\..\src\InSpectra.Gen.StartupHook\bin\$(Configuration)\$(StartupHookTargetFramework)\0Harmony.dll"
+             CopyToOutputDirectory="PreserveNewest"
+             Link="hooks\0Harmony.dll" />
   </ItemGroup>
 
 </Project>

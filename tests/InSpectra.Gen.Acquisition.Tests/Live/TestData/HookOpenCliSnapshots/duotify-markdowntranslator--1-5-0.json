@@ -10,16 +10,6 @@
       "description": "\u7FFB\u8B6F\u5B8C\u6210\u5F8C\u8986\u5BEB\u539F\u59CB\u6A94\u6848",
       "aliases": [
         "-i"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -30,7 +20,7 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "OUTPUT",
           "required": true,
           "type": "String",
           "arity": {
@@ -45,16 +35,6 @@
       "description": "\u5982\u679C\u6A94\u6848\u5B58\u5728\u5247\u5F37\u5236\u8986\u84CB",
       "aliases": [
         "-f"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -62,16 +42,6 @@
       "description": "\u986F\u793A\u9032\u5EA6",
       "aliases": [
         "-p"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -79,16 +49,6 @@
       "description": "\u4E0D\u986F\u793A\u4EFB\u4F55\u8A0A\u606F",
       "aliases": [
         "-q"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -99,7 +59,7 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "LANG",
           "required": true,
           "type": "String",
           "arity": {
@@ -117,7 +77,7 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "MODE",
           "required": true,
           "type": "String",
           "arity": {
@@ -129,17 +89,7 @@
     },
     {
       "name": "--version",
-      "description": "Show version information",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
-      ]
+      "description": "Show version information"
     },
     {
       "name": "-h",
@@ -149,16 +99,6 @@
         "--help",
         "-?",
         "/?"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ],

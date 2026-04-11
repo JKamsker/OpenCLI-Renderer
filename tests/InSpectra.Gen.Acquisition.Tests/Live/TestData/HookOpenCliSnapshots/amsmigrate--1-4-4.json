@@ -13,22 +13,13 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "LOG_LEVEL",
           "required": true,
           "type": "LogLevel",
           "arity": {
             "minimum": 1,
             "maximum": 1
-          },
-          "allowedValues": [
-            "Trace",
-            "Debug",
-            "Information",
-            "Warning",
-            "Error",
-            "Critical",
-            "None"
-          ]
+          }
         }
       ]
     },
@@ -40,7 +31,7 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "L",
           "required": true,
           "type": "String",
           "arity": {
@@ -58,7 +49,7 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "SUBSCRIPTION",
           "required": true,
           "type": "String",
           "arity": {
@@ -76,7 +67,7 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "RESOURCE_GROUP",
           "required": true,
           "type": "String",
           "arity": {
@@ -94,7 +85,7 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "ACCOUNT_NAME",
           "required": true,
           "type": "String",
           "arity": {
@@ -112,19 +103,12 @@
       ],
       "arguments": [
         {
-          "name": null,
+          "name": "CLOUD_TYPE",
           "type": "CloudType",
           "arity": {
             "minimum": 0,
             "maximum": 1
-          },
-          "allowedValues": [
-            "AWS",
-            "Azure",
-            "Custom",
-            "GCP",
-            "Local"
-          ]
+          }
         }
       ]
     },
@@ -133,31 +117,11 @@
       "description": "Run in daemon mode and do not use ASCII graphics.",
       "aliases": [
         "--daemon-mode"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
       "name": "--version",
-      "description": "Show version information",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
-      ]
+      "description": "Show version information"
     },
     {
       "name": "-h",
@@ -167,16 +131,6 @@
         "--help",
         "-?",
         "/?"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ],
@@ -193,7 +147,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "BATCH_SIZE",
               "required": true,
               "type": "Int32",
               "arity": {
@@ -211,18 +165,13 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "T",
               "required": true,
               "type": "AnalysisType",
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              },
-              "allowedValues": [
-                "Summary",
-                "Detailed",
-                "Report"
-              ]
+              }
             }
           ]
         }
@@ -237,7 +186,7 @@
           "description": "Query entities created after given date.",
           "arguments": [
             {
-              "name": null,
+              "name": "CREATED_AFTER",
               "required": true,
               "type": "DateOnly",
               "arity": {
@@ -252,7 +201,7 @@
           "description": "Query entities created before given date.",
           "arguments": [
             {
-              "name": null,
+              "name": "CREATED_BEFORE",
               "required": true,
               "type": "DateOnly",
               "arity": {
@@ -270,7 +219,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "FILTER",
               "required": true,
               "type": "String",
               "arity": {
@@ -285,49 +234,24 @@
           "description": "Mark completed assets by writing metadata on the container",
           "aliases": [
             "--mark-complete"
-          ],
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
           "name": "--skip-migrated",
-          "description": "Skip assets that have been migrated already.",
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Skip assets that have been migrated already."
         },
         {
           "name": "--packager",
           "description": "The packager to use.",
           "arguments": [
             {
-              "name": null,
+              "name": "PACKAGER",
               "required": true,
               "type": "Packager",
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              },
-              "allowedValues": [
-                "Ffmpeg",
-                "Shaka",
-                "None"
-              ]
+              }
             }
           ]
         },
@@ -336,7 +260,7 @@
           "description": "The working directory to use migration.",
           "arguments": [
             {
-              "name": null,
+              "name": "WORKING_DIR",
               "required": true,
               "type": "String",
               "arity": {
@@ -348,17 +272,7 @@
         },
         {
           "name": "--copy-nonstremable",
-          "description": "Copy non-stremable assets (Assets without .ism file) as is.",
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Copy non-stremable assets (Assets without .ism file) as is."
         },
         {
           "name": "--batch-size",
@@ -368,7 +282,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "BATCH_SIZE",
               "required": true,
               "type": "Int32",
               "arity": {
@@ -386,7 +300,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "STORAGE_PATH",
               "required": true,
               "type": "String",
               "arity": {
@@ -401,16 +315,6 @@
           "description": "Overwrite the files in the destination.",
           "aliases": [
             "--overwrite"
-          ],
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -421,7 +325,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "PATH_TEMPLATE",
               "type": "String",
               "arity": {
                 "minimum": 0,
@@ -438,7 +342,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "ASSET_NAMES",
               "required": true,
               "type": "String[]",
               "arity": {
@@ -459,49 +363,24 @@
           "description": "Mark completed assets by writing metadata on the container",
           "aliases": [
             "--mark-complete"
-          ],
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
           "name": "--skip-migrated",
-          "description": "Skip assets that have been migrated already.",
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Skip assets that have been migrated already."
         },
         {
           "name": "--packager",
           "description": "The packager to use.",
           "arguments": [
             {
-              "name": null,
+              "name": "PACKAGER",
               "required": true,
               "type": "Packager",
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              },
-              "allowedValues": [
-                "Ffmpeg",
-                "Shaka",
-                "None"
-              ]
+              }
             }
           ]
         },
@@ -510,7 +389,7 @@
           "description": "The working directory to use migration.",
           "arguments": [
             {
-              "name": null,
+              "name": "WORKING_DIR",
               "required": true,
               "type": "String",
               "arity": {
@@ -522,17 +401,7 @@
         },
         {
           "name": "--copy-nonstremable",
-          "description": "Copy non-stremable assets (Assets without .ism file) as is.",
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Copy non-stremable assets (Assets without .ism file) as is."
         },
         {
           "name": "--batch-size",
@@ -542,7 +411,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "BATCH_SIZE",
               "required": true,
               "type": "Int32",
               "arity": {
@@ -560,7 +429,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "STORAGE_PATH",
               "required": true,
               "type": "String",
               "arity": {
@@ -575,16 +444,6 @@
           "description": "Overwrite the files in the destination.",
           "aliases": [
             "--overwrite"
-          ],
-          "arguments": [
-            {
-              "name": null,
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -595,7 +454,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "PATH_TEMPLATE",
               "type": "String",
               "arity": {
                 "minimum": 0,
@@ -612,7 +471,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "P",
               "required": true,
               "type": "String",
               "arity": {
@@ -636,7 +495,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "KEY_VAULT_URL",
               "required": true,
               "type": "Uri",
               "arity": {
@@ -654,7 +513,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "SECRET_TEMPLATE",
               "type": "String",
               "arity": {
                 "minimum": 0,
@@ -671,7 +530,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "BATCH_SIZE",
               "required": true,
               "type": "Int32",
               "arity": {
@@ -686,7 +545,7 @@
           "description": "Query entities created after given date.",
           "arguments": [
             {
-              "name": null,
+              "name": "CREATED_AFTER",
               "required": true,
               "type": "DateOnly",
               "arity": {
@@ -701,7 +560,7 @@
           "description": "Query entities created before given date.",
           "arguments": [
             {
-              "name": null,
+              "name": "CREATED_BEFORE",
               "required": true,
               "type": "DateOnly",
               "arity": {
@@ -719,7 +578,7 @@
           ],
           "arguments": [
             {
-              "name": null,
+              "name": "FILTER",
               "required": true,
               "type": "String",
               "arity": {

@@ -10,7 +10,7 @@
       "description": "Windows metadata to include in projection",
       "arguments": [
         {
-          "name": null,
+          "name": "INPUT",
           "type": "ValueTuple\u00602[]",
           "arity": {
             "minimum": 0,
@@ -24,7 +24,7 @@
       "description": "Windows metadata to reference from projection",
       "arguments": [
         {
-          "name": null,
+          "name": "REFERENCE",
           "type": "ValueTuple\u00602[]",
           "arity": {
             "minimum": 0,
@@ -38,7 +38,7 @@
       "description": "Location of generated projection",
       "arguments": [
         {
-          "name": null,
+          "name": "OUTPUT",
           "type": "DirectoryInfo",
           "arity": {
             "minimum": 0,
@@ -52,7 +52,7 @@
       "description": "One or more prefixes to include in projection",
       "arguments": [
         {
-          "name": null,
+          "name": "INCLUDE",
           "type": "String[]",
           "arity": {
             "minimum": 0,
@@ -66,7 +66,7 @@
       "description": "One or more prefixes to exclude from projection",
       "arguments": [
         {
-          "name": null,
+          "name": "EXCLUDE",
           "type": "String[]",
           "arity": {
             "minimum": 0,
@@ -80,7 +80,7 @@
       "description": "Install headers in custom path",
       "arguments": [
         {
-          "name": null,
+          "name": "HEADER_PATH",
           "type": "DirectoryInfo",
           "arity": {
             "minimum": 0,
@@ -94,7 +94,7 @@
       "description": "Nullability information JSON file",
       "arguments": [
         {
-          "name": null,
+          "name": "NULLABILITY_JSON",
           "type": "FileInfo",
           "arity": {
             "minimum": 0,
@@ -105,45 +105,15 @@
     },
     {
       "name": "--component-dlls",
-      "description": "Set this flag when generating projection for user components that will ship with the required .dlls in the Python package",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "description": "Set this flag when generating projection for user components that will ship with the required .dlls in the Python package"
     },
     {
       "name": "--verbose",
-      "description": "Show detailed progress information",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "description": "Show detailed progress information"
     },
     {
       "name": "--version",
-      "description": "Show version information",
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
-      ]
+      "description": "Show version information"
     },
     {
       "name": "-h",
@@ -153,16 +123,6 @@
         "--help",
         "-?",
         "/?"
-      ],
-      "arguments": [
-        {
-          "name": null,
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ]

@@ -19,6 +19,16 @@ internal static class HookOpenCliSnapshotSupport
     {
         var actual = Normalize(openCli);
         var fixturePath = ResolveFixturePath(packageId, version);
+
+        // Operators can opt into regenerating snapshots via INSPECTRA_LIVE_UPDATE_SNAPSHOTS=1
+        // when the upstream pipeline changes (e.g. new builder behaviour or metadata refresh).
+        if (Environment.GetEnvironmentVariable("INSPECTRA_LIVE_UPDATE_SNAPSHOTS") == "1")
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(fixturePath)!);
+            File.WriteAllText(fixturePath, Serialize(actual));
+            return;
+        }
+
         Assert.True(File.Exists(fixturePath), $"Missing OpenCLI fixture for {packageId} {version}: {fixturePath}");
 
         var expected = Normalize(JsonNode.Parse(File.ReadAllText(fixturePath)));

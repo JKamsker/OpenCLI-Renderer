@@ -42,6 +42,25 @@ internal static class OpenCliOptionCollisionMergeSupport
             return true;
         }
 
+        // Two options sharing the same well-known informational primary name (e.g. `--version`
+        // appearing twice: once as System.CommandLine's auto-registered VersionOption and once
+        // as a tool-author's redefined version flag) refer to the same semantic concept. Merge
+        // them by preferring the richer option so the document stays publishable. Only applies
+        // when neither side carries meaningful argument metadata — options that take a value
+        // argument (e.g. `--version <VERSION>` on a package publisher) are genuinely different
+        // and must stay separate (see OpenCliDocumentSanitizerOptionMergeTests).
+        if (OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(leftName)
+            && OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(rightName)
+            && !OpenCliOptionSupport.HasArguments(leftEntry.Option)
+            && !OpenCliOptionSupport.HasArguments(rightOption))
+        {
+            var preferredWellKnown = ChoosePreferredOption(leftEntry.Option, rightOption, leftInformational, rightInformational);
+            var otherWellKnown = ReferenceEquals(preferredWellKnown, leftEntry.Option) ? rightOption : leftEntry.Option;
+            var mergedWellKnown = OpenCliOptionSupport.MergeOptions(preferredWellKnown, otherWellKnown);
+            resolvedEntry = new OpenCliOptionCollisionEntry(mergedWellKnown, OpenCliOptionSupport.GetOptionTokens(mergedWellKnown));
+            return true;
+        }
+
         if (leftInformational
             && rightInformational
             && !OpenCliOptionDescriptionSupport.HaveEquivalentInformationalTokenSets(leftEntry.Tokens, rightTokens))

@@ -160,7 +160,10 @@ internal static class HookOpenCliBuilder
                 var argNode = new JsonObject();
 
                 // Argument name (e.g., "SERVER", "COUNT") — matches help-crawl output.
-                var argName = HookCapturedNameSupport.ResolveOptionArgumentName(opt);
+                // Pass the resolved option name so we can infer "CONFIG_PATH" from "--config-path"
+                // when the captured Option.Name is null (System.CommandLine 2.0.x surfaces the
+                // primary token only as an alias on the walked Option instance).
+                var argName = HookCapturedNameSupport.ResolveOptionArgumentName(opt, optionName);
                 if (!string.IsNullOrWhiteSpace(argName))
                     argNode["name"] = argName;
 

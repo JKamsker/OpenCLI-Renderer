@@ -24,16 +24,6 @@
       "description": "The HTTP request should follow redirects [default: False]",
       "aliases": [
         "-F"
-      ],
-      "arguments": [
-        {
-          "name": "FOLLOW",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -53,17 +43,7 @@
     },
     {
       "name": "--no-verify",
-      "description": "disable ssl cert check [default: False]",
-      "arguments": [
-        {
-          "name": "NO_VERIFY",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "description": "disable ssl cert check [default: False]"
     },
     {
       "name": "--ssl",
@@ -97,47 +77,17 @@
     },
     {
       "name": "--no-proxy",
-      "description": "Disable proxy [default: False]",
-      "arguments": [
-        {
-          "name": "NO_PROXY",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "description": "Disable proxy [default: False]"
     },
     {
       "name": "--decompress",
-      "description": "The HTTP request allows auto-decompress [default: False]",
-      "arguments": [
-        {
-          "name": "DECOMPRESS",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "description": "The HTTP request allows auto-decompress [default: False]"
     },
     {
       "name": "-f",
       "description": "The request is form data, and content type is \u0027application/x-www-form-urlencoded;charset=UTF-8\u0027 [default: False]",
       "aliases": [
         "--form"
-      ],
-      "arguments": [
-        {
-          "name": "F",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -145,16 +95,6 @@
       "description": "The request body is json by default, and content type is \u0027application/json;charset=UTF-8\u0027 [default: False]",
       "aliases": [
         "--json"
-      ],
-      "arguments": [
-        {
-          "name": "J",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -174,17 +114,7 @@
     },
     {
       "name": "--debug",
-      "description": "Enable debug mode, output debug log [default: False]",
-      "arguments": [
-        {
-          "name": "DEBUG",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "description": "Enable debug mode, output debug log [default: False]"
     },
     {
       "name": "--schema",
@@ -254,33 +184,13 @@
     },
     {
       "name": "--no-cache",
-      "description": "Send \u0027Cache-Control: No-Cache\u0027 request header [default: False]",
-      "arguments": [
-        {
-          "name": "NO_CACHE",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
-      ]
+      "description": "Send \u0027Cache-Control: No-Cache\u0027 request header [default: False]"
     },
     {
       "name": "-d",
       "description": "Download file [default: False]",
       "aliases": [
         "--download"
-      ],
-      "arguments": [
-        {
-          "name": "D",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -289,16 +199,6 @@
       "aliases": [
         "--continue",
         "--append"
-      ],
-      "arguments": [
-        {
-          "name": "C",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -345,14 +245,7 @@
           "arity": {
             "minimum": 1,
             "maximum": 1
-          },
-          "allowedValues": [
-            "MD5",
-            "SHA1",
-            "SHA256",
-            "SHA384",
-            "SHA512"
-          ]
+          }
         }
       ]
     },
@@ -382,12 +275,7 @@
           "arity": {
             "minimum": 1,
             "maximum": 1
-          },
-          "allowedValues": [
-            "Flag",
-            "List",
-            "Hierarchical"
-          ]
+          }
         }
       ]
     },
@@ -396,16 +284,6 @@
       "description": "offline mode, would not send the request, just print request info [default: False]",
       "aliases": [
         "--dry-run"
-      ],
-      "arguments": [
-        {
-          "name": "OFFLINE",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -413,16 +291,6 @@
       "description": "quiet mode, output nothing [default: False]",
       "aliases": [
         "-q"
-      ],
-      "arguments": [
-        {
-          "name": "QUIET",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -430,16 +298,6 @@
       "description": "output response headers only [default: False]",
       "aliases": [
         "--headers"
-      ],
-      "arguments": [
-        {
-          "name": "H",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -447,16 +305,6 @@
       "description": "output response headers and response body only [default: False]",
       "aliases": [
         "--body"
-      ],
-      "arguments": [
-        {
-          "name": "B",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -464,16 +312,6 @@
       "description": "output all request/response info, including request/response headers,properties,body [default: False]",
       "aliases": [
         "--verbose"
-      ],
-      "arguments": [
-        {
-          "name": "V",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -505,13 +343,7 @@
           "arity": {
             "minimum": 1,
             "maximum": 1
-          },
-          "allowedValues": [
-            "None",
-            "Format",
-            "Style",
-            "All"
-          ]
+          }
         }
       ]
     },
@@ -587,16 +419,6 @@
       "description": "Stream response body output as it arrives (text responses only) [default: False]",
       "aliases": [
         "-S"
-      ],
-      "arguments": [
-        {
-          "name": "STREAM",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 1
-          }
-        }
       ]
     },
     {
@@ -649,11 +471,7 @@
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              },
-              "allowedValues": [
-                "Http",
-                "Curl"
-              ]
+              }
             }
           ]
         },
@@ -674,33 +492,13 @@
         },
         {
           "name": "--debug",
-          "description": "Enable debug mode, output debug log [default: False]",
-          "arguments": [
-            {
-              "name": "DEBUG",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Enable debug mode, output debug log [default: False]"
         },
         {
           "name": "--offline",
           "description": "offline mode, would not send the request, just print request info [default: False]",
           "aliases": [
             "--dry-run"
-          ],
-          "arguments": [
-            {
-              "name": "OFFLINE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -752,17 +550,7 @@
         },
         {
           "name": "--offline",
-          "description": "Print requests without sending them [default: False]",
-          "arguments": [
-            {
-              "name": "OFFLINE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Print requests without sending them [default: False]"
         }
       ],
       "arguments": [

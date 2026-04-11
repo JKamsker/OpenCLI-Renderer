@@ -112,14 +112,7 @@
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              },
-              "allowedValues": [
-                "OperationId",
-                "MethodAndPath",
-                "Summary",
-                "OperationIdWithDots",
-                "OperationIdSplit"
-              ]
+              }
             }
           ]
         },
@@ -128,16 +121,6 @@
           "description": "Generate all models in a single file [default: False]",
           "aliases": [
             "-s"
-          ],
-          "arguments": [
-            {
-              "name": "SINGLE_FILE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -145,16 +128,6 @@
           "description": "Exclude deprecated operations [default: False]",
           "aliases": [
             "-e"
-          ],
-          "arguments": [
-            {
-              "name": "EXCLUDE_DEPRECATED_OPERATIONS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -174,73 +147,23 @@
         },
         {
           "name": "--ignore-openapi-errors",
-          "description": "Ignore OpenAPI errors [default: True]",
-          "arguments": [
-            {
-              "name": "IGNORE_OPENAPI_ERRORS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Ignore OpenAPI errors [default: True]"
         },
         {
           "name": "--ignore-openapi-warnings",
-          "description": "Ignore OpenAPI warnings [default: True]",
-          "arguments": [
-            {
-              "name": "IGNORE_OPENAPI_WARNINGS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Ignore OpenAPI warnings [default: True]"
         },
         {
           "name": "--validation",
-          "description": "Generate validation methods for models [default: False]",
-          "arguments": [
-            {
-              "name": "VALIDATION",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Generate validation methods for models [default: False]"
         },
         {
           "name": "--compute-discriminators",
-          "description": "Compute discriminators for polymorphic models [default: False]",
-          "arguments": [
-            {
-              "name": "COMPUTE_DISCRIMINATORS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Compute discriminators for polymorphic models [default: False]"
         },
         {
           "name": "--generate-cli",
-          "description": "Generate CLI for the client [default: False]",
-          "arguments": [
-            {
-              "name": "GENERATE_CLI",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Generate CLI for the client [default: False]"
         },
         {
           "name": "--security-scheme",
@@ -388,27 +311,13 @@
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              },
-              "allowedValues": [
-                "External",
-                "SdkRoot"
-              ]
+              }
             }
           ]
         },
         {
           "name": "--generate-models",
-          "description": "Generate model classes, enums, and JSON converters. Set to false when referencing types from an existing namespace via --types-namespace. [default: True]",
-          "arguments": [
-            {
-              "name": "GENERATE_MODELS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Generate model classes, enums, and JSON converters. Set to false when referencing types from an existing namespace via --types-namespace. [default: True]"
         },
         {
           "name": "--language",
@@ -465,16 +374,6 @@
           "description": "Generate a single .http file [default: False]",
           "aliases": [
             "-s"
-          ],
-          "arguments": [
-            {
-              "name": "SINGLE_FILE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -482,45 +381,15 @@
           "description": "Exclude deprecated operations [default: False]",
           "aliases": [
             "-e"
-          ],
-          "arguments": [
-            {
-              "name": "EXCLUDE_DEPRECATED_OPERATIONS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
           "name": "--ignore-openapi-errors",
-          "description": "Ignore OpenAPI errors [default: True]",
-          "arguments": [
-            {
-              "name": "IGNORE_OPENAPI_ERRORS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Ignore OpenAPI errors [default: True]"
         },
         {
           "name": "--ignore-openapi-warnings",
-          "description": "Ignore OpenAPI warnings [default: True]",
-          "arguments": [
-            {
-              "name": "IGNORE_OPENAPI_WARNINGS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Ignore OpenAPI warnings [default: True]"
         }
       ],
       "arguments": [
@@ -562,45 +431,15 @@
           "description": "Exclude deprecated operations [default: False]",
           "aliases": [
             "-e"
-          ],
-          "arguments": [
-            {
-              "name": "EXCLUDE_DEPRECATED_OPERATIONS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
           "name": "--ignore-openapi-errors",
-          "description": "Ignore OpenAPI errors [default: True]",
-          "arguments": [
-            {
-              "name": "IGNORE_OPENAPI_ERRORS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Ignore OpenAPI errors [default: True]"
         },
         {
           "name": "--ignore-openapi-warnings",
-          "description": "Ignore OpenAPI warnings [default: True]",
-          "arguments": [
-            {
-              "name": "IGNORE_OPENAPI_WARNINGS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
-          ]
+          "description": "Ignore OpenAPI warnings [default: True]"
         }
       ],
       "arguments": [
@@ -750,16 +589,6 @@
           "description": "Adds MkDocs to the solution [default: True]",
           "aliases": [
             "-m"
-          ],
-          "arguments": [
-            {
-              "name": "ADD_MKDOCS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         },
         {
@@ -767,16 +596,6 @@
           "description": "Adds integration tests to the solution [default: True]",
           "aliases": [
             "-t"
-          ],
-          "arguments": [
-            {
-              "name": "ADD_TESTS",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
@@ -864,16 +683,6 @@
           "description": "Show full dotnet publish output [default: False]",
           "aliases": [
             "-v"
-          ],
-          "arguments": [
-            {
-              "name": "VERBOSE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 1
-              }
-            }
           ]
         }
       ],
