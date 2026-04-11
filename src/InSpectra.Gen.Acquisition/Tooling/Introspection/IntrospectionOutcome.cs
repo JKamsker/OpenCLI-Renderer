@@ -4,12 +4,6 @@ using InSpectra.Gen.Acquisition.Tooling.Process;
 
 using System.Text.Json.Nodes;
 
-internal sealed record JsonParseResult(
-    bool Success,
-    JsonNode? Document,
-    string? ArtifactText,
-    string? Error);
-
 internal sealed record IntrospectionOutcome(
     string CommandName,
     ProcessResult ProcessResult,
@@ -38,5 +32,3 @@ internal sealed record IntrospectionOutcome(
         return metadata;
     }
 }
-
-

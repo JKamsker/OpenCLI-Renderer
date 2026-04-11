@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Modes.Static.Attributes.SystemCommandLine;
 
-using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.Metadata;
 
 internal abstract class MethodValue;
 

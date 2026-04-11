@@ -60,7 +60,7 @@ public sealed class OpenCliMetadataContractTests
             "demo",
             "1.0.0",
             "System.CommandLine",
-            new Dictionary<string, InSpectra.Gen.Acquisition.Modes.Static.Models.StaticCommandDefinition>(StringComparer.OrdinalIgnoreCase),
+            new Dictionary<string, InSpectra.Gen.Acquisition.Modes.Static.Metadata.StaticCommandDefinition>(StringComparer.OrdinalIgnoreCase),
             new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase));
 
         Assert.Equal(InspectraProductInfo.GeneratorName, document["x-inspectra"]?["generator"]?.GetValue<string>());

@@ -4,7 +4,7 @@ using InSpectra.Gen.Acquisition.Contracts.Documents;
 using InSpectra.Gen.Acquisition.Contracts.Providers;
 using InSpectra.Gen.Acquisition.Tooling.DocumentPipeline.Documents;
 using InSpectra.Gen.Acquisition.Tooling.DocumentPipeline.Structure;
-using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.Metadata;
 
 internal static class StaticAnalysisOpenCliCommandSelectionSupport
 {

@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Modes.Static.Projection;
 
-using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.Metadata;
 
 internal static class StaticAnalysisCommandPublishabilitySupport
 {

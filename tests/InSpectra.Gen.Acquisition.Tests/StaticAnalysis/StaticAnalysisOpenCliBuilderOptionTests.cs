@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests.StaticAnalysis;
 
 using InSpectra.Gen.Acquisition.Contracts.Documents;
-using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.Metadata;
 using InSpectra.Gen.Acquisition.Modes.Static.Projection;
 
 public sealed class StaticAnalysisOpenCliBuilderOptionTests

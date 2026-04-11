@@ -2,7 +2,7 @@ namespace InSpectra.Gen.Acquisition.Modes.Static.Projection;
 
 using InSpectra.Gen.Acquisition.Contracts.Documents;
 
-using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.Metadata;
 
 using System.Text.Json.Nodes;
 

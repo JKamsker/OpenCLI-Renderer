@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Modes.Static.Attributes;
 
 using InSpectra.Gen.Acquisition.Modes.Static.Inspection;
-using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.Metadata;
 
 /// <summary>
 /// Strongly typed contract for a Static-mode attribute reader.

@@ -142,7 +142,7 @@ internal sealed class CoconaModuleBuilder : IDisposable
             [new CAArgument(new ClassSig(_moduleBuilder.CorLibTypes.GetTypeRef("System", "Type")), subcommandType.ToTypeSig())]));
     }
 
-    public IReadOnlyDictionary<string, InSpectra.Gen.Acquisition.Modes.Static.Models.StaticCommandDefinition> ReadCommands()
+    public IReadOnlyDictionary<string, InSpectra.Gen.Acquisition.Modes.Static.Metadata.StaticCommandDefinition> ReadCommands()
     {
         var reader = new CoconaAttributeReader();
         _moduleBuilder.Write(_modulePath);

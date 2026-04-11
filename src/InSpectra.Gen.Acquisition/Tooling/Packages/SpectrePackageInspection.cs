@@ -32,9 +32,3 @@ internal sealed record SpectrePackageInspection(
         [],
         []);
 }
-
-internal sealed record SpectreAssemblyVersionInfo(
-    string Path,
-    string? AssemblyVersion,
-    string? FileVersion,
-    string? InformationalVersion);

@@ -2,7 +2,7 @@ namespace InSpectra.Gen.Acquisition.Modes.Static.Attributes.SystemCommandLine;
 
 using InSpectra.Gen.Acquisition.Modes.Static.Attributes.SystemCommandLine.Constructor;
 using InSpectra.Gen.Acquisition.Modes.Static.Attributes.SystemCommandLine.FactoryMethod;
-using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.Metadata;
 
 using dnlib.DotNet;
 
