@@ -1,7 +1,5 @@
 namespace InSpectra.Gen.Acquisition.Modes.Static.Attributes.Cocona;
 
-using InSpectra.Gen.Acquisition.Modes.Static.Attributes;
-
 using InSpectra.Gen.Acquisition.Modes.Static.Inspection;
 using InSpectra.Gen.Acquisition.Modes.Static.Models;
 

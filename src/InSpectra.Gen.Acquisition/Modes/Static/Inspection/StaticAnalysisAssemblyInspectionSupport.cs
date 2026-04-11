@@ -1,10 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Modes.Static.Inspection;
 
-using InSpectra.Gen.Acquisition.Tooling.FrameworkDetection;
-
 using InSpectra.Gen.Acquisition.Modes.Static.Attributes;
 using InSpectra.Gen.Acquisition.Modes.Static.Models;
-
+using InSpectra.Gen.Acquisition.Tooling.FrameworkDetection;
 
 using dnlib.DotNet;
 
@@ -39,6 +37,15 @@ internal sealed class StaticAnalysisAssemblyInspectionSupport
 
         try
         {
+            // Runtime cast is intentional. The adapter carries the reader as `object`
+            // on purpose so that Tooling/FrameworkDetection has no compile-time
+            // dependency on Modes.Static.Attributes (a Tooling -> Modes dependency is
+            // forbidden by the architecture charter). Promoting IStaticAttributeReader
+            // into Contracts/ would not help either, because its signature references
+            // Static-mode-owned types (StaticCommandDefinition and dnlib-backed
+            // ScannedModule), which would turn the erasure into an even worse
+            // Contracts -> Modes leak. See StaticAnalysisFrameworkAdapter and
+            // IStaticAttributeReader for the full rationale.
             var reader = (IStaticAttributeReader)adapter.Reader;
             var commands = new Dictionary<string, StaticCommandDefinition>(reader.Read(modules), StringComparer.OrdinalIgnoreCase);
             if (commands.Count == 0)

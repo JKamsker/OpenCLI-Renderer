@@ -2,8 +2,8 @@ namespace InSpectra.Gen.Acquisition.Contracts.Providers;
 
 /// <summary>
 /// Public composition seam that lets the app shell run the correct installed-tool
-/// analyzer for a given <see cref="AnalysisMode"/> without reaching into
-/// <c>InSpectra.Gen.Acquisition.Modes.*</c> directly.
+/// analyzer for a given <see cref="AnalysisMode"/> without reaching into any
+/// mode-specific namespace directly.
 /// </summary>
 public interface IAcquisitionAnalysisDispatcher
 {
