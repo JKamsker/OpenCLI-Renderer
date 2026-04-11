@@ -2,12 +2,9 @@ namespace InSpectra.Gen.Acquisition.Tests.Live;
 
 using InSpectra.Gen.Acquisition.Tooling.Json;
 using InSpectra.Gen.Acquisition.Tooling.NuGet;
-using InSpectra.Gen.Acquisition.Tooling.Paths;
 
 using System.Collections.Concurrent;
 using System.Net;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -62,12 +59,12 @@ public sealed class NuGetApiClientLiveTests
     [Trait("Category", "Live")]
     public async Task Live_IndexedPackageRegistrationAndCatalogPayloads_Parse()
     {
-        if (!HookLiveTestSupport.ShouldRun() || !IndexedPackageMetadataAvailable())
+        if (!HookLiveTestSupport.ShouldRun())
         {
             return;
         }
 
-        var metadataEntries = LoadIndexedPackageMetadata().ToArray();
+        var metadataEntries = NuGetApiClientLiveTestSupport.LoadIndexedPackageMetadata();
         _output.WriteLine($"Validating registration/catalog payloads for {metadataEntries.Length} indexed package entries.");
 
         using var httpClient = CreateHttpClient();
@@ -92,7 +89,7 @@ public sealed class NuGetApiClientLiveTests
                 try
                 {
                     var registrationIndex = await client.GetRegistrationIndexAsync(registrationBaseUrl, entry.PackageId, token);
-                    var registrationPageLeaf = await FindLeafAsync(client, registrationIndex, entry.Version, token)
+                    var registrationPageLeaf = await NuGetApiClientLiveTestSupport.FindLeafAsync(client, registrationIndex, entry.Version, token)
                         ?? throw new InvalidOperationException($"Could not find version '{entry.Version}' in registration index.");
 
                     var registrationLeaf = await client.GetRegistrationLeafAsync(entry.RegistrationLeafUrl, token);
@@ -117,19 +114,19 @@ public sealed class NuGetApiClientLiveTests
                 }
             });
 
-        AssertFailures(failures);
+        NuGetApiClientLiveTestSupport.AssertFailures(failures);
     }
 
     [Fact]
     [Trait("Category", "Live")]
     public async Task Live_IndexedPackageSearchAndAutocompletePayloads_Parse()
     {
-        if (!HookLiveTestSupport.ShouldRun() || !IndexedPackageMetadataAvailable())
+        if (!HookLiveTestSupport.ShouldRun())
         {
             return;
         }
 
-        var metadataEntries = LoadIndexedPackageMetadata()
+        var metadataEntries = NuGetApiClientLiveTestSupport.LoadIndexedPackageMetadata()
             .GroupBy(entry => entry.PackageId, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToArray();
@@ -210,7 +207,7 @@ public sealed class NuGetApiClientLiveTests
                 }
             });
 
-        AssertFailures(failures);
+        NuGetApiClientLiveTestSupport.AssertFailures(failures);
     }
 
     private static HttpClient CreateHttpClient()
@@ -221,79 +218,4 @@ public sealed class NuGetApiClientLiveTests
         {
             Timeout = TimeSpan.FromSeconds(60),
         };
-
-    private static bool IndexedPackageMetadataAvailable()
-        => Directory.Exists(Path.Combine(RepositoryPathResolver.ResolveRepositoryRoot(), "index", "packages"));
-
-    private static IEnumerable<IndexedPackageMetadata> LoadIndexedPackageMetadata()
-    {
-        var repositoryRoot = RepositoryPathResolver.ResolveRepositoryRoot();
-        var packageRoot = Path.Combine(repositoryRoot, "index", "packages");
-
-        var metadataFiles = string.Equals(Environment.GetEnvironmentVariable(ScopeEnvVar), "all", StringComparison.OrdinalIgnoreCase)
-            ? Directory.EnumerateFiles(packageRoot, "metadata.json", SearchOption.AllDirectories)
-                .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}latest{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
-            : Directory.EnumerateFiles(packageRoot, "metadata.json", SearchOption.AllDirectories)
-                .Where(path => path.Contains($"{Path.DirectorySeparatorChar}latest{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase));
-
-        foreach (var metadataPath in metadataFiles.OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
-        {
-            var payload = JsonSerializer.Deserialize<IndexedPackageMetadata>(
-                File.ReadAllText(metadataPath),
-                JsonOptions.Default);
-
-            if (payload is null)
-            {
-                throw new InvalidOperationException($"Failed to deserialize indexed metadata '{metadataPath}'.");
-            }
-
-            yield return payload;
-        }
-    }
-
-    private static async Task<RegistrationPageLeaf?> FindLeafAsync(
-        NuGetApiClient client,
-        RegistrationIndex index,
-        string version,
-        CancellationToken cancellationToken)
-    {
-        foreach (var pageReference in index.Items)
-        {
-            var items = pageReference.Items
-                ?? (await client.GetRegistrationPageAsync(pageReference.Id, cancellationToken)).Items;
-
-            var match = items.FirstOrDefault(item =>
-                string.Equals(item.CatalogEntry.Version, version, StringComparison.OrdinalIgnoreCase));
-
-            if (match is not null)
-            {
-                return match;
-            }
-        }
-
-        return null;
-    }
-
-    private static void AssertFailures(ConcurrentQueue<string> failures)
-    {
-        if (failures.IsEmpty)
-        {
-            return;
-        }
-
-        var sample = failures.Take(20).ToArray();
-        var message = string.Join(Environment.NewLine, sample);
-        if (failures.Count > sample.Length)
-        {
-            message += Environment.NewLine + $"... plus {failures.Count - sample.Length} more failures.";
-        }
-
-        Assert.Fail(message);
-    }
-
-    private sealed record IndexedPackageMetadata(
-        [property: JsonPropertyName("packageId")] string PackageId,
-        [property: JsonPropertyName("version")] string Version,
-        [property: JsonPropertyName("registrationLeafUrl")] string RegistrationLeafUrl,
-        [property: JsonPropertyName("catalogEntryUrl")] string CatalogEntryUrl);
 }
