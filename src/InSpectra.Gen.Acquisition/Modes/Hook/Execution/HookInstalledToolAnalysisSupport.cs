@@ -119,7 +119,7 @@ internal sealed class HookInstalledToolAnalysisSupport
             hookEnvironment[PreferredFrameworkDirectoryEnvironmentVariableName] = preferredFrameworkDirectory;
         }
 
-        var processResult = await HookProcessRetrySupport.InvokeWithHelpFallbackAsync(
+        var retryResult = await HookProcessRetrySupport.InvokeWithHelpFallbackAsync(
             invocation,
             hookEnvironment,
             capturePath,
@@ -130,12 +130,14 @@ internal sealed class HookInstalledToolAnalysisSupport
                 request.CommandTimeoutSeconds,
                 token),
             cancellationToken);
+        var processResult = retryResult.ProcessResult;
+        var resolvedCapturePath = retryResult.CapturePath;
         hookStopwatch.Stop();
 
         request.Result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(hookStopwatch.Elapsed.TotalMilliseconds);
 
         // Read and validate the capture file.
-        if (!File.Exists(capturePath))
+        if (string.IsNullOrWhiteSpace(resolvedCapturePath) || !File.Exists(resolvedCapturePath))
         {
             if (TryApplyMissingSharedRuntimeFailure(request.Result, request.CommandName, processResult))
             {
@@ -150,7 +152,7 @@ internal sealed class HookInstalledToolAnalysisSupport
             return;
         }
 
-        var capture = HookCaptureDeserializer.Deserialize(capturePath);
+        var capture = HookCaptureDeserializer.Deserialize(resolvedCapturePath);
         if (capture is null)
         {
             NonSpectreResultSupport.ApplyRetryableFailure(

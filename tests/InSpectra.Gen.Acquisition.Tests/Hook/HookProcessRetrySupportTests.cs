@@ -62,7 +62,7 @@ public sealed class HookProcessRetrySupportTests
 
         try
         {
-            var processResult = await HookProcessRetrySupport.InvokeWithHelpFallbackAsync(
+            var retryResult = await HookProcessRetrySupport.InvokeWithHelpFallbackAsync(
                 invocation,
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
@@ -122,7 +122,8 @@ public sealed class HookProcessRetrySupportTests
                 },
                 CancellationToken.None);
 
-            Assert.Equal("ok", processResult.Status);
+            Assert.Equal("ok", retryResult.ProcessResult.Status);
+            Assert.Equal(capturePath, retryResult.CapturePath);
             Assert.Equal(2, capturePaths.Count);
             Assert.NotEqual(capturePaths[0], capturePaths[1]);
             Assert.True(File.Exists(capturePath));
@@ -136,5 +137,54 @@ public sealed class HookProcessRetrySupportTests
         {
             lockedCapture?.Dispose();
         }
+    }
+
+    [Fact]
+    public async Task InvokeWithHelpFallbackAsync_Preserves_Attempt_Capture_When_Final_Publication_Fails()
+    {
+        using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
+        var capturePath = Path.Combine(tempDirectory.Path, "capture.json");
+        Directory.CreateDirectory(capturePath);
+        var invocation = new HookToolProcessInvocation("demo", ["--help"], PreferredAssemblyPath: null);
+        string? attemptCapturePath = null;
+
+        var retryResult = await HookProcessRetrySupport.InvokeWithHelpFallbackAsync(
+            invocation,
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+            capturePath,
+            (_, environment, _) =>
+            {
+                attemptCapturePath = environment["INSPECTRA_CAPTURE_PATH"];
+                File.WriteAllText(
+                    attemptCapturePath,
+                    JsonSerializer.Serialize(new HookCaptureResult
+                    {
+                        CaptureVersion = 1,
+                        Status = "ok",
+                        Root = new HookCapturedCommand
+                        {
+                            Name = "demo",
+                        },
+                    }));
+                return Task.FromResult(new CommandRuntime.ProcessResult(
+                    Status: "ok",
+                    TimedOut: false,
+                    ExitCode: 0,
+                    DurationMs: 1,
+                    Stdout: string.Empty,
+                    Stderr: string.Empty));
+            },
+            CancellationToken.None);
+
+        Assert.Equal("ok", retryResult.ProcessResult.Status);
+        Assert.NotNull(attemptCapturePath);
+        Assert.Equal(attemptCapturePath, retryResult.CapturePath);
+        Assert.True(File.Exists(attemptCapturePath));
+        Assert.True(Directory.Exists(capturePath));
+
+        var capture = HookCaptureDeserializer.Deserialize(retryResult.CapturePath!);
+        Assert.NotNull(capture);
+        Assert.Equal("ok", capture.Status);
+        Assert.Equal("demo", capture.Root?.Name);
     }
 }

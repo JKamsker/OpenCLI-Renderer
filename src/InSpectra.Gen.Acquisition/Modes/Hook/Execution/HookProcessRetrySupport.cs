@@ -7,7 +7,7 @@ internal static class HookProcessRetrySupport
 {
     private const string CapturePathEnvironmentVariableName = "INSPECTRA_CAPTURE_PATH";
 
-    public static async Task<CommandRuntime.ProcessResult> InvokeWithHelpFallbackAsync(
+    public static async Task<PublishedRetryResult> InvokeWithHelpFallbackAsync(
         HookToolProcessInvocation invocation,
         IReadOnlyDictionary<string, string> environment,
         string capturePath,
@@ -209,6 +209,8 @@ internal static class HookProcessRetrySupport
         public bool HasCapture => File.Exists(CapturePath);
     }
 
+    internal sealed record PublishedRetryResult(CommandRuntime.ProcessResult ProcessResult, string? CapturePath);
+
     private sealed class RetryCapturePublisher(string requestedCapturePath)
     {
         private readonly string _requestedCapturePath = requestedCapturePath;
@@ -223,13 +225,13 @@ internal static class HookProcessRetrySupport
             return Path.Combine(directory, $"{fileName}.attempt-{_attemptNumber:D3}{extension}");
         }
 
-        public CommandRuntime.ProcessResult Publish(RetryInvocationResult retryResult)
+        public PublishedRetryResult Publish(RetryInvocationResult retryResult)
         {
             TryDeleteCaptureFile(_requestedCapturePath);
             if (!retryResult.HasCapture)
             {
                 DeleteAttemptCapture(retryResult);
-                return retryResult.ProcessResult;
+                return new PublishedRetryResult(retryResult.ProcessResult, CapturePath: null);
             }
 
             try
@@ -245,10 +247,13 @@ internal static class HookProcessRetrySupport
             catch
             {
                 TryDeleteCaptureFile(_requestedCapturePath);
+                return new PublishedRetryResult(
+                    retryResult.ProcessResult,
+                    File.Exists(retryResult.CapturePath) ? retryResult.CapturePath : null);
             }
 
             DeleteAttemptCapture(retryResult);
-            return retryResult.ProcessResult;
+            return new PublishedRetryResult(retryResult.ProcessResult, _requestedCapturePath);
         }
 
         public void DeleteAttemptCapture(RetryInvocationResult retryResult)

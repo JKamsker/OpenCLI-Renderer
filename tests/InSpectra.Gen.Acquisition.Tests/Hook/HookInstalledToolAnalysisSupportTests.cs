@@ -127,6 +127,53 @@ public sealed class HookInstalledToolAnalysisSupportTests
     }
 
     [Fact]
+    public async Task AnalyzeInstalledAsync_Uses_Preserved_Attempt_Capture_When_Final_Publication_Fails()
+    {
+        using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
+        var hookDllPath = HookInstalledToolAnalysisTestSupport.CreateHookPlaceholder(tempDirectory.Path);
+        var installedTool = HookInstalledToolAnalysisTestSupport.CreateInstalledTool(tempDirectory);
+        string? requestedCapturePath = null;
+        var runtime = new HookInstalledToolAnalysisTestSupport.FakeHookCommandRuntime(invocation =>
+        {
+            var attemptCapturePath = invocation.Environment["INSPECTRA_CAPTURE_PATH"];
+            requestedCapturePath = BuildRequestedCapturePath(attemptCapturePath);
+            Directory.CreateDirectory(requestedCapturePath);
+
+            File.WriteAllText(attemptCapturePath, JsonSerializer.Serialize(new HookCaptureResult
+            {
+                CaptureVersion = 1,
+                Status = "ok",
+                CliFramework = "System.CommandLine",
+                Root = HookInstalledToolAnalysisTestSupport.CreateValidRootCommand(),
+            }));
+
+            return new CommandRuntime.ProcessResult(
+                Status: "ok",
+                TimedOut: false,
+                ExitCode: 0,
+                DurationMs: 15,
+                Stdout: string.Empty,
+                Stderr: string.Empty);
+        });
+        var support = new HookInstalledToolAnalysisSupport(runtime, () => hookDllPath);
+        var result = HookInstalledToolAnalysisTestSupport.CreateInitialResult();
+
+        await support.AnalyzeInstalledAsync(
+            new InstalledToolAnalysisRequest(result, "1.2.3", "demo", tempDirectory.Path, installedTool, tempDirectory.Path, 30),
+            CancellationToken.None);
+
+        Assert.Equal("success", result["disposition"]?.GetValue<string>());
+        Assert.Equal("complete", result["phase"]?.GetValue<string>());
+        Assert.Equal("startup-hook", result["classification"]?.GetValue<string>());
+        Assert.NotNull(requestedCapturePath);
+        Assert.True(Directory.Exists(requestedCapturePath));
+
+        var openCli = JsonNode.Parse(File.ReadAllText(Path.Combine(tempDirectory.Path, "opencli.json")))!.AsObject();
+        Assert.Equal("demo", openCli["info"]?["title"]?.GetValue<string>());
+        Assert.Equal("startup-hook", openCli["x-inspectra"]?["artifactSource"]?.GetValue<string>());
+    }
+
+    [Fact]
     public async Task AnalyzeInstalledAsync_Uses_A_Fresh_Capture_Path_Per_Run()
     {
         using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
@@ -198,4 +245,14 @@ public sealed class HookInstalledToolAnalysisSupportTests
         Assert.Equal("success", result["disposition"]?.GetValue<string>());
     }
 
+    private static string BuildRequestedCapturePath(string attemptCapturePath)
+    {
+        var extension = Path.GetExtension(attemptCapturePath);
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(attemptCapturePath);
+        var attemptSuffix = ".attempt-001";
+        Assert.EndsWith(attemptSuffix, fileNameWithoutExtension, StringComparison.Ordinal);
+        return Path.Combine(
+            Path.GetDirectoryName(attemptCapturePath)!,
+            fileNameWithoutExtension[..^attemptSuffix.Length] + extension);
+    }
 }
