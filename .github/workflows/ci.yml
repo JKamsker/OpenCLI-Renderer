@@ -6,6 +6,8 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'  # nightly at 03:00 UTC
 
 permissions:
   contents: write
@@ -145,6 +147,53 @@ jobs:
         with:
           name: nupkg
           path: src/InSpectra.Gen/bin/Release/*.nupkg
+
+  live-tests:
+    # Runs the ~35 end-to-end regression tests against real NuGet packages.
+    # Gated behind INSPECTRA_GEN_LIVE_TESTS=1 so normal PRs stay fast.
+    # This job installs real CLI tools from NuGet and validates the
+    # acquisition pipeline produces stable OpenCLI output.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    needs: build-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore InSpectra.Gen.sln
+
+      - name: Build
+        run: dotnet build InSpectra.Gen.sln --configuration Release --no-restore
+
+      - name: Run live regression tests
+        env:
+          INSPECTRA_GEN_LIVE_TESTS: "1"
+        run: |
+          dotnet test InSpectra.Gen.sln \
+            --configuration Release \
+            --no-build \
+            --filter "Category=Live" \
+            --logger "console;verbosity=detailed" \
+            --logger "trx;LogFileName=live-tests.trx"
+
+      - name: Upload live test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-test-logs
+          path: |
+            **/TestResults/**
 
   package-pages-preview:
     needs: build-test

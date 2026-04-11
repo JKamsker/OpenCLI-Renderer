@@ -10,16 +10,6 @@
       "description": "Show help and usage information",
       "aliases": [
         "-h"
-      ],
-      "arguments": [
-        {
-          "name": "HELP",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     },
     {
@@ -27,16 +17,6 @@
       "description": "Show version information",
       "aliases": [
         "-v"
-      ],
-      "arguments": [
-        {
-          "name": "VERSION",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ],
@@ -50,16 +30,6 @@
           "description": "Show help and usage information",
           "aliases": [
             "-h"
-          ],
-          "arguments": [
-            {
-              "name": "HELP",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 0
-              }
-            }
           ]
         },
         {
@@ -85,16 +55,6 @@
           "description": "Overwrites a signature if it exists.",
           "aliases": [
             "-f"
-          ],
-          "arguments": [
-            {
-              "name": "FORCE",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 0
-              }
-            }
           ]
         },
         {
@@ -318,16 +278,6 @@
           "description": "Use a Managed Identity to access Azure Key Vault.",
           "aliases": [
             "-kvm"
-          ],
-          "arguments": [
-            {
-              "name": "AZURE_KEY_VAULT_MANAGED_IDENTITY",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 0
-              }
-            }
           ]
         }
       ],
@@ -353,16 +303,6 @@
           "description": "Show help and usage information",
           "aliases": [
             "-h"
-          ],
-          "arguments": [
-            {
-              "name": "HELP",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 0
-              }
-            }
           ]
         }
       ],

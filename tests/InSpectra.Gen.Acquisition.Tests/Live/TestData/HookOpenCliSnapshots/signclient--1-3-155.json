@@ -10,16 +10,6 @@
       "description": "Show help and usage information",
       "aliases": [
         "-h"
-      ],
-      "arguments": [
-        {
-          "name": "HELP",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     },
     {
@@ -27,16 +17,6 @@
       "description": "Show version information",
       "aliases": [
         "-v"
-      ],
-      "arguments": [
-        {
-          "name": "VERSION",
-          "type": "Boolean",
-          "arity": {
-            "minimum": 0,
-            "maximum": 0
-          }
-        }
       ]
     }
   ],
@@ -50,16 +30,6 @@
           "description": "Show help and usage information",
           "aliases": [
             "-h"
-          ],
-          "arguments": [
-            {
-              "name": "HELP",
-              "type": "Boolean",
-              "arity": {
-                "minimum": 0,
-                "maximum": 0
-              }
-            }
           ]
         },
         {

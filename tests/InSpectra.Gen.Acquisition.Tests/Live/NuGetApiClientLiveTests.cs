@@ -62,7 +62,7 @@ public sealed class NuGetApiClientLiveTests
     [Trait("Category", "Live")]
     public async Task Live_IndexedPackageRegistrationAndCatalogPayloads_Parse()
     {
-        if (!HookLiveTestSupport.ShouldRun())
+        if (!HookLiveTestSupport.ShouldRun() || !IndexedPackageMetadataAvailable())
         {
             return;
         }
@@ -124,7 +124,7 @@ public sealed class NuGetApiClientLiveTests
     [Trait("Category", "Live")]
     public async Task Live_IndexedPackageSearchAndAutocompletePayloads_Parse()
     {
-        if (!HookLiveTestSupport.ShouldRun())
+        if (!HookLiveTestSupport.ShouldRun() || !IndexedPackageMetadataAvailable())
         {
             return;
         }
@@ -221,6 +221,9 @@ public sealed class NuGetApiClientLiveTests
         {
             Timeout = TimeSpan.FromSeconds(60),
         };
+
+    private static bool IndexedPackageMetadataAvailable()
+        => Directory.Exists(Path.Combine(RepositoryPathResolver.ResolveRepositoryRoot(), "index", "packages"));
 
     private static IEnumerable<IndexedPackageMetadata> LoadIndexedPackageMetadata()
     {
