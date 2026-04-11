@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests.SystemCommandLine;
 
-using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes.SystemCommandLine.FactoryMethod;
+using InSpectra.Gen.Acquisition.Modes.Static.Attributes.SystemCommandLine.FactoryMethod;
 
 public sealed class SystemCommandLineFactoryMethodReaderSupportTests
 {

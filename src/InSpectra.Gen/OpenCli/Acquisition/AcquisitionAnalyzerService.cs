@@ -1,12 +1,12 @@
 using System.Text.Json.Nodes;
-using InSpectra.Gen.Acquisition.Analysis.CliFx.Execution;
-using InSpectra.Gen.Acquisition.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Modes.CliFx.Execution;
+using InSpectra.Gen.Acquisition.Modes.Hook;
 using InSpectra.Gen.Acquisition.Analysis.Results;
-using InSpectra.Gen.Acquisition.Help.Crawling;
+using InSpectra.Gen.Acquisition.Modes.Help.Crawling;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 using InSpectra.Gen.Acquisition.Infrastructure;
-using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
-using InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Static.Inspection;
+using InSpectra.Gen.Acquisition.Modes.Static.OpenCli;
 using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime.Acquisition;
 

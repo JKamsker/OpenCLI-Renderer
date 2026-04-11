@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests.TestSupport;
 
-using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes.Cocona;
-using InSpectra.Gen.Acquisition.StaticAnalysis.Inspection;
+using InSpectra.Gen.Acquisition.Modes.Static.Attributes.Cocona;
+using InSpectra.Gen.Acquisition.Modes.Static.Inspection;
 
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
@@ -142,7 +142,7 @@ internal sealed class CoconaModuleBuilder : IDisposable
             [new CAArgument(new ClassSig(_moduleBuilder.CorLibTypes.GetTypeRef("System", "Type")), subcommandType.ToTypeSig())]));
     }
 
-    public IReadOnlyDictionary<string, InSpectra.Gen.Acquisition.StaticAnalysis.Models.StaticCommandDefinition> ReadCommands()
+    public IReadOnlyDictionary<string, InSpectra.Gen.Acquisition.Modes.Static.Models.StaticCommandDefinition> ReadCommands()
     {
         var reader = new CoconaAttributeReader();
         _moduleBuilder.Write(_modulePath);

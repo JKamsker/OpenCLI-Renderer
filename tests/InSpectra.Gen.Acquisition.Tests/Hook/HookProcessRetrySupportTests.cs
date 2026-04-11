@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests.Hook;
 
-using InSpectra.Gen.Acquisition.Analysis.Hook;
+using InSpectra.Gen.Acquisition.Modes.Hook;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 using InSpectra.Gen.Acquisition.Tests.TestSupport;
 

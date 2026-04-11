@@ -1,7 +1,7 @@
 namespace InSpectra.Gen.Acquisition.Tests.Help;
 
-using InSpectra.Gen.Acquisition.Help.Crawling;
-using InSpectra.Gen.Acquisition.Help.Parsing;
+using InSpectra.Gen.Acquisition.Modes.Help.Crawling;
+using InSpectra.Gen.Acquisition.Modes.Help.Parsing;
 
 using System.Text.Json.Nodes;
 

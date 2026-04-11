@@ -1,8 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Tests.StaticAnalysis;
 
-using InSpectra.Gen.Acquisition.Help.Documents;
-using InSpectra.Gen.Acquisition.StaticAnalysis.Models;
-using InSpectra.Gen.Acquisition.StaticAnalysis.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Help.Documents;
+using InSpectra.Gen.Acquisition.Modes.Static.Models;
+using InSpectra.Gen.Acquisition.Modes.Static.OpenCli;
 
 public sealed class StaticAnalysisOpenCliBuilderOptionTests
 {

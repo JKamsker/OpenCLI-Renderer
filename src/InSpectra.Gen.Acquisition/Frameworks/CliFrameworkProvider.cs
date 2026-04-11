@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Frameworks;
 
-using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
+using InSpectra.Gen.Acquisition.Modes.Static.Attributes;
 
 
 internal sealed record CliFrameworkProvider(

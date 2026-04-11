@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests.TextParsing;
 
-using InSpectra.Gen.Acquisition.Help.Parsing;
+using InSpectra.Gen.Acquisition.Modes.Help.Parsing;
 
 public sealed class TextParserStructuredHelpTests
 {

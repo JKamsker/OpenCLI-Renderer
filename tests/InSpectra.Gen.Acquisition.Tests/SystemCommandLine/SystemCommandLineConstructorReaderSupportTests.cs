@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Tests.SystemCommandLine;
 
-using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes.SystemCommandLine.Constructor;
+using InSpectra.Gen.Acquisition.Modes.Static.Attributes.SystemCommandLine.Constructor;
 
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;

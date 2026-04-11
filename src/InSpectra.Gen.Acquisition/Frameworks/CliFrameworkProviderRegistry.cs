@@ -1,8 +1,8 @@
 namespace InSpectra.Gen.Acquisition.Frameworks;
 
-using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes;
-using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes.Cocona;
-using InSpectra.Gen.Acquisition.StaticAnalysis.Attributes.SystemCommandLine;
+using InSpectra.Gen.Acquisition.Modes.Static.Attributes;
+using InSpectra.Gen.Acquisition.Modes.Static.Attributes.Cocona;
+using InSpectra.Gen.Acquisition.Modes.Static.Attributes.SystemCommandLine;
 
 using InSpectra.Gen.Acquisition.NuGet;
 
