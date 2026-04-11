@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Acquisition.Modes.CliFx.OpenCli;
+namespace InSpectra.Gen.Acquisition.Modes.CliFx.Projection;
 
 using System.Text;
 using System.Text.Json.Nodes;

@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Modes.Help.Documents;
 
-using InSpectra.Gen.Acquisition.Modes.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Help.Projection;
 
 internal static class EmbeddedCommandDocumentExpansionSupport
 {

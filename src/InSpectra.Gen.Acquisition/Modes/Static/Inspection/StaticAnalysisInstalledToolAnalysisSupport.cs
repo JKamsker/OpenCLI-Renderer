@@ -11,7 +11,7 @@ using InSpectra.Gen.Acquisition.Modes.Help.Crawling;
 
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Gen.Acquisition.Modes.Static.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Static.Projection;
 
 using InSpectra.Gen.Acquisition.Analysis;
 using System.Diagnostics;

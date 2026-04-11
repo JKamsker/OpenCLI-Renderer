@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Acquisition.Modes.Help.OpenCli;
+namespace InSpectra.Gen.Acquisition.Modes.Help.Projection;
 
 
 internal sealed record CommandNode(

@@ -10,7 +10,7 @@ using InSpectra.Gen.Acquisition.Modes.CliFx.Crawling;
 
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 
-using InSpectra.Gen.Acquisition.Modes.CliFx.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.CliFx.Projection;
 
 using InSpectra.Gen.Acquisition.Modes.CliFx.Metadata;
 

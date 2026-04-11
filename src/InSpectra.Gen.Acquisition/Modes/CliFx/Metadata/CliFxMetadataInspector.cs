@@ -1,6 +1,6 @@
 namespace InSpectra.Gen.Acquisition.Modes.CliFx.Metadata;
 
-using InSpectra.Gen.Acquisition.Modes.CliFx.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.CliFx.Projection;
 
 using System.Reflection;
 

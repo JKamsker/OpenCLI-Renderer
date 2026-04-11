@@ -3,7 +3,7 @@ namespace InSpectra.Gen.Acquisition.Modes.Help.Inference.Usage;
 using InSpectra.Gen.Acquisition.Modes.Help.Documents;
 using InSpectra.Gen.Acquisition.Modes.Help.Inference.Usage.Arguments;
 using InSpectra.Gen.Acquisition.Modes.Help.Inference.Usage.Prototypes;
-using InSpectra.Gen.Acquisition.Modes.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Help.Projection;
 using InSpectra.Gen.Acquisition.Modes.Help.Signatures;
 
 using System.Text.RegularExpressions;

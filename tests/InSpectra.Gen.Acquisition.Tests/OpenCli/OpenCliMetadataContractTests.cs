@@ -1,9 +1,9 @@
 namespace InSpectra.Gen.Acquisition.Tests.OpenCli;
 
 using InSpectra.Gen.Acquisition.Modes.CliFx.Metadata;
-using InSpectra.Gen.Acquisition.Modes.CliFx.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.CliFx.Projection;
 using InSpectra.Gen.Acquisition.Modes.Help.Documents;
-using InSpectra.Gen.Acquisition.Modes.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Help.Projection;
 using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.Tests.StaticAnalysis;
 using System.Text.Json.Nodes;
@@ -55,7 +55,7 @@ public sealed class OpenCliMetadataContractTests
     [Fact]
     public void Static_analysis_builder_uses_the_current_generator_name()
     {
-        var builder = new InSpectra.Gen.Acquisition.Modes.Static.OpenCli.StaticAnalysisOpenCliBuilder();
+        var builder = new InSpectra.Gen.Acquisition.Modes.Static.Projection.StaticAnalysisOpenCliBuilder();
         var document = builder.Build(
             "demo",
             "1.0.0",

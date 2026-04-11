@@ -1,13 +1,13 @@
 using InSpectra.Gen.Acquisition.Modes.CliFx.Execution;
 using InSpectra.Gen.Acquisition.Modes.CliFx.Metadata;
-using InSpectra.Gen.Acquisition.Modes.CliFx.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.CliFx.Projection;
 using InSpectra.Gen.Acquisition.Modes.Hook;
 using InSpectra.Gen.Acquisition.Analysis.Tools;
 using InSpectra.Gen.Acquisition.Modes.Help.Crawling;
-using InSpectra.Gen.Acquisition.Modes.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Help.Projection;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 using InSpectra.Gen.Acquisition.Modes.Static.Inspection;
-using InSpectra.Gen.Acquisition.Modes.Static.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Static.Projection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace InSpectra.Gen.Acquisition.Composition;

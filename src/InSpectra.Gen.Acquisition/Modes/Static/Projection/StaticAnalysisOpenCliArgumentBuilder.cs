@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Acquisition.Modes.Static.OpenCli;
+namespace InSpectra.Gen.Acquisition.Modes.Static.Projection;
 
 using InSpectra.Gen.Acquisition.Modes.Help.Documents;
 

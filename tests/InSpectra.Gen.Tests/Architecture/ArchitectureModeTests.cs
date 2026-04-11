@@ -68,7 +68,7 @@ public sealed class ArchitectureModeTests
                   + string.Join(Environment.NewLine, violations));
     }
 
-    [Fact(Skip = "Unskip after Step 5 — requires renaming mode-specific OpenCli folders to Projection.")]
+    [Fact]
     public void Mode_specific_OpenCli_folders_are_renamed_to_Projection()
     {
         Assert.True(Directory.Exists(ModesRoot), $"Expected Modes root at '{ModesRoot}' to exist.");

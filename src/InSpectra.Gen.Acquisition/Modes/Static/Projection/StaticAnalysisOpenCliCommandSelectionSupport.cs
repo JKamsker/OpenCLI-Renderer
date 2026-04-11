@@ -1,8 +1,8 @@
-namespace InSpectra.Gen.Acquisition.Modes.Static.OpenCli;
+namespace InSpectra.Gen.Acquisition.Modes.Static.Projection;
 
 using InSpectra.Gen.Acquisition.Modes.Help.Documents;
 using InSpectra.Gen.Acquisition.Modes.Help.Inference.Usage.Commands;
-using InSpectra.Gen.Acquisition.Modes.Help.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Help.Projection;
 using InSpectra.Gen.Acquisition.OpenCli.Documents;
 using InSpectra.Gen.Acquisition.OpenCli.Structure;
 using InSpectra.Gen.Acquisition.Modes.Static.Models;

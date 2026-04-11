@@ -6,7 +6,7 @@ using InSpectra.Gen.Acquisition.Modes.Help.Crawling;
 using InSpectra.Gen.Acquisition.Infrastructure.Commands;
 using InSpectra.Gen.Acquisition.Infrastructure;
 using InSpectra.Gen.Acquisition.Modes.Static.Inspection;
-using InSpectra.Gen.Acquisition.Modes.Static.OpenCli;
+using InSpectra.Gen.Acquisition.Modes.Static.Projection;
 using InSpectra.Gen.Acquisition.Runtime;
 using InSpectra.Gen.Runtime.Acquisition;
 
