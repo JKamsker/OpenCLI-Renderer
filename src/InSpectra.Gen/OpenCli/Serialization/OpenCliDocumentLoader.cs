@@ -15,13 +15,23 @@ public sealed class OpenCliDocumentLoader(OpenCliSchemaProvider schemaProvider)
     public async Task<OpenCliDocument> LoadFromFileAsync(string path, CancellationToken cancellationToken)
     {
         var resolvedPath = Path.GetFullPath(path);
-        if (!File.Exists(resolvedPath))
+        try
+        {
+            var json = await File.ReadAllTextAsync(resolvedPath, cancellationToken);
+            return LoadFromJson(json, resolvedPath);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested && !File.Exists(resolvedPath))
         {
             throw new CliUsageException($"OpenCLI file `{resolvedPath}` does not exist.");
         }
-
-        var json = await File.ReadAllTextAsync(resolvedPath, cancellationToken);
-        return LoadFromJson(json, resolvedPath);
+        catch (Exception exception) when (exception is FileNotFoundException or DirectoryNotFoundException)
+        {
+            throw new CliUsageException($"OpenCLI file `{resolvedPath}` does not exist.");
+        }
+        catch (UnauthorizedAccessException) when (!File.Exists(resolvedPath))
+        {
+            throw new CliUsageException($"OpenCLI file `{resolvedPath}` does not exist.");
+        }
     }
 
     public OpenCliDocument LoadFromJson(string json, string sourceLabel)

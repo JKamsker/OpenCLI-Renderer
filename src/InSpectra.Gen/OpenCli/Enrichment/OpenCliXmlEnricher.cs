@@ -9,13 +9,23 @@ public sealed class OpenCliXmlEnricher
     public async Task<XmlEnrichmentResult> EnrichFromFileAsync(OpenCliDocument document, string path, CancellationToken cancellationToken)
     {
         var resolvedPath = Path.GetFullPath(path);
-        if (!File.Exists(resolvedPath))
+        try
+        {
+            var xml = await File.ReadAllTextAsync(resolvedPath, cancellationToken);
+            return EnrichFromXml(document, xml, resolvedPath);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested && !File.Exists(resolvedPath))
         {
             throw new CliUsageException($"XML enrichment file `{resolvedPath}` does not exist.");
         }
-
-        var xml = await File.ReadAllTextAsync(resolvedPath, cancellationToken);
-        return EnrichFromXml(document, xml, resolvedPath);
+        catch (Exception exception) when (exception is FileNotFoundException or DirectoryNotFoundException)
+        {
+            throw new CliUsageException($"XML enrichment file `{resolvedPath}` does not exist.");
+        }
+        catch (UnauthorizedAccessException) when (!File.Exists(resolvedPath))
+        {
+            throw new CliUsageException($"XML enrichment file `{resolvedPath}` does not exist.");
+        }
     }
 
     public XmlEnrichmentResult EnrichFromXml(OpenCliDocument document, string xml, string sourceLabel)

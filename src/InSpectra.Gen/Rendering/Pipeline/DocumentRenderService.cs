@@ -57,7 +57,7 @@ public sealed class DocumentRenderService(
         };
     }
 
-    private static async Task<string?> LoadXmlDocumentAsync(string? path, CancellationToken cancellationToken)
+    internal static async Task<string?> LoadXmlDocumentAsync(string? path, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -65,11 +65,21 @@ public sealed class DocumentRenderService(
         }
 
         var resolvedPath = Path.GetFullPath(path);
-        if (!File.Exists(resolvedPath))
+        try
+        {
+            return await File.ReadAllTextAsync(resolvedPath, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested && !File.Exists(resolvedPath))
         {
             throw new CliUsageException($"XML enrichment file `{resolvedPath}` does not exist.");
         }
-
-        return await File.ReadAllTextAsync(resolvedPath, cancellationToken);
+        catch (Exception exception) when (exception is FileNotFoundException or DirectoryNotFoundException)
+        {
+            throw new CliUsageException($"XML enrichment file `{resolvedPath}` does not exist.");
+        }
+        catch (UnauthorizedAccessException) when (!File.Exists(resolvedPath))
+        {
+            throw new CliUsageException($"XML enrichment file `{resolvedPath}` does not exist.");
+        }
     }
 }
