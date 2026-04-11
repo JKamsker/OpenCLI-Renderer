@@ -1,6 +1,6 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using InSpectra.Gen.Output.Json;
 using InSpectra.Gen.Rendering.Contracts;
 using InSpectra.Gen.Rendering.Pipeline;
 
@@ -8,6 +8,12 @@ namespace InSpectra.Gen.Rendering.Html.Bundle;
 
 internal static class HtmlBundleAssetComposer
 {
+    private static readonly JsonSerializerOptions CompactSerializerOptions = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = false,
+    };
+
     private const string SelfExtractingHead =
         """<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>InSpectraUI</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></head><body><div id="root"></div>""";
     private const string SelfExtractingThemeScript =
@@ -166,7 +172,7 @@ internal static class HtmlBundleAssetComposer
 
     private static string ComposeSelfExtractingHtml(string css, string js, string bootstrap)
     {
-        var pack = JsonSerializer.Serialize(new { c = css, j = js, b = bootstrap }, JsonOutput.CompactSerializerOptions);
+        var pack = JsonSerializer.Serialize(new { c = css, j = js, b = bootstrap }, CompactSerializerOptions);
         var compressedBlob = HtmlBundleCompression.GzipBase64(pack);
         return SelfExtractingHead
             + SelfExtractingThemeScript

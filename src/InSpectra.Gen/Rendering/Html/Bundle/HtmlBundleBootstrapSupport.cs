@@ -1,5 +1,5 @@
 using System.Text.Json;
-using InSpectra.Gen.Output.Json;
+using System.Text.Json.Serialization;
 using InSpectra.Gen.Rendering.Contracts;
 using InSpectra.Gen.Rendering.Pipeline;
 using InSpectra.Gen.Rendering.Pipeline.Model;
@@ -8,6 +8,12 @@ namespace InSpectra.Gen.Rendering.Html.Bundle;
 
 internal static class HtmlBundleBootstrapSupport
 {
+    private static readonly JsonSerializerOptions CompactSerializerOptions = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = false,
+    };
+
     public static string BuildRawBootstrapJson(
         AcquiredRenderDocument prepared,
         bool includeHidden,
@@ -48,7 +54,7 @@ internal static class HtmlBundleBootstrapSupport
             },
         };
 
-        return JsonSerializer.Serialize(payload, JsonOutput.CompactSerializerOptions);
+        return JsonSerializer.Serialize(payload, CompactSerializerOptions);
     }
 
     public static string EscapeForJsStringLiteral(string value)

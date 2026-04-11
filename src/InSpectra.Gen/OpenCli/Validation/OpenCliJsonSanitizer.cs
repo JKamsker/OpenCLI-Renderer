@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using InSpectra.Gen.Output.Json;
+using System.Text.Json.Serialization;
 
 namespace InSpectra.Gen.OpenCli.Validation;
 
@@ -15,6 +15,12 @@ namespace InSpectra.Gen.OpenCli.Validation;
 /// </summary>
 public static class OpenCliJsonSanitizer
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = true,
+    };
+
     public static string Sanitize(string raw)
     {
         var sb = new StringBuilder(raw.Length);
@@ -58,6 +64,6 @@ public static class OpenCliJsonSanitizer
         }
 
         using var document = JsonDocument.Parse(sb.ToString());
-        return JsonSerializer.Serialize(document, JsonOutput.SerializerOptions);
+        return JsonSerializer.Serialize(document, SerializerOptions);
     }
 }

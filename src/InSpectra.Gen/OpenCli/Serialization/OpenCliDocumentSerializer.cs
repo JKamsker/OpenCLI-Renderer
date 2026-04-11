@@ -1,5 +1,5 @@
 using System.Text.Json;
-using InSpectra.Gen.Output.Json;
+using System.Text.Json.Serialization;
 
 namespace InSpectra.Gen.OpenCli.Serialization;
 
@@ -7,7 +7,7 @@ public sealed class OpenCliDocumentSerializer
 {
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
     {
-        DefaultIgnoreCondition = JsonOutput.SerializerOptions.DefaultIgnoreCondition,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         WriteIndented = true,
     };
 
