@@ -9,8 +9,8 @@ same action inputs, plus a small wrapper-specific set for setup and artifact upl
 | Input | Default | Description |
 |---|---|---|
 | `mode` | `exec` | `exec` (generate `opencli.json` from a live CLI, then render it), `file` (render from saved `opencli.json`), `dotnet` (generate from a .NET project), or `package` (analyze a published .NET tool package) |
-| `format` | `html` | `html` (interactive SPA), `markdown` (tree layout), `markdown-monolith` (single file), or `markdown-hybrid` (README + per-group files) |
-| `split-depth` | | Depth for `markdown-hybrid` output. Depth `1` emits one file per top-level group; depth `2` also emits second-level group files. Ignored for other formats |
+| `format` | `html` | `html` (interactive SPA), `markdown` (tree layout), `markdown-monolith` (single file), or `markdown-hybrid` (README + group files as needed; leaf-only CLIs may emit README only) |
+| `split-depth` | | Depth for `markdown-hybrid` output. Depth `1` emits one file per top-level group when groups exist; depth `2` also emits second-level group files. Leaf-only CLIs may legitimately emit README only. Ignored for other formats |
 | `output-dir` | `inspectra-output` | Directory where the rendered output is written |
 | `label` | | Custom label shown in the viewer header (e.g. `v1.2.3`) |
 | `title` | | Override the CLI title shown in the viewer header and overview |
@@ -52,10 +52,9 @@ same action inputs, plus a small wrapper-specific set for setup and artifact upl
 ### Auto-installed `InSpectra.Cli` package
 
 In `dotnet` mode the action automatically adds an `<PackageReference>` for the
-package that provides `cli opencli` / `cli xmldoc`. The csproj is restored to
-its original state by the underlying CI checkout being throwaway, so this
-mutation never reaches your repo. This auto-add only runs when `opencli-mode`
-is `native` (or left empty so the CLI default remains native).
+package that provides `cli opencli` / `cli xmldoc`. This auto-add only runs
+when `opencli-mode` is `native` (or left empty so the CLI default remains
+native).
 
 | Input | Default | Description |
 |---|---|---|
@@ -66,13 +65,18 @@ is `native` (or left empty so the CLI default remains native).
 If the package is already referenced by the `.csproj`, the auto-add is a
 no-op (your existing pin is preserved).
 
-## Argument overrides (exec / dotnet)
+The action does not revert that project-file edit during the job, so the
+checked-out workspace remains modified for later steps. Scope commit / diff
+steps to the docs output (for example with `add-paths`) or set
+`skip-inspectra-cli: 'true'` if your project already manages the dependency.
+
+## Argument overrides (`exec` / `dotnet` / `package`)
 
 | Input | Default | Description |
 |---|---|---|
-| `opencli-args` | `cli opencli` | Override the OpenCLI export arguments. Useful if your CLI uses a different command (e.g. `export spec`) |
-| `xmldoc-args` | `cli xmldoc` | Override the XML documentation export arguments used when the action enriches generated `opencli.json` |
-| `timeout` | `30` (`exec`) / `120` (`dotnet`) | Per-invocation timeout in seconds |
+| `opencli-args` | `cli opencli` | Override the OpenCLI export arguments for generate-based modes (`exec`, `dotnet`, `package`). Useful if your CLI uses a different command (e.g. `export spec`) |
+| `xmldoc-args` | `cli xmldoc` | Override the XML documentation export arguments for generate-based modes (`exec`, `dotnet`, `package`) when the action enriches generated `opencli.json` |
+| `timeout` | `30` (`exec`) / `120` (`dotnet`, `package`) | Timeout in seconds for each generate-mode export command |
 
 ## Analysis options (`exec` / `dotnet` / `package`)
 
@@ -105,8 +109,8 @@ These inputs only affect `format: html`.
 
 | Input | Default | Description |
 |---|---|---|
-| `single-file` | `false` | Emit a single self-contained HTML file |
-| `compression-level` | `2` | HTML bundle compression level: `0` none, `1` compressed JSON, `2` self-extracting bundle |
+| `single-file` | `false` | Force a single self-contained HTML file. HTML is also self-contained by default at `compression-level: 2` |
+| `compression-level` | `2` | HTML bundle compression level: `0` none, `1` compressed JSON, `2` self-extracting single-file bundle |
 | `theme` | | Initial theme mode (`light` or `dark`) |
 | `color-theme` | | Color theme preset (`cyan`, `indigo`, `emerald`, `amber`, `rose`, `blue`) |
 | `accent` | | Custom accent color for light mode (hex) |
@@ -117,6 +121,9 @@ Other HTML renderer flags such as `--show-home`, `--enable-url`,
 `--enable-nuget-browser`, `--enable-package-upload`, `--no-composer`,
 `--no-dark`, and `--no-light` are still supported by the CLI, but they are
 passed through the action via `extra-args` rather than dedicated inputs.
+
+With the default `compression-level: 2`, HTML output is self-contained even if
+`single-file` is left at its default `false`.
 
 ## Outputs
 

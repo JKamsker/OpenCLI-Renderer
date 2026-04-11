@@ -64,6 +64,9 @@ That's the entire setup. The action takes care of:
 You don't need a separate `actions/setup-dotnet` step, you don't need
 `dotnet tool install`, and you don't need to add any `PackageReference`
 to your project by hand.
+The action does not revert an auto-added `InSpectra.Cli` reference during the
+job, so later commit or diff steps should scope themselves to the docs output
+or use `skip-inspectra-cli: 'true'` when you already manage that dependency.
 
 ## When to use which mode
 
@@ -92,7 +95,8 @@ Your CLI must support the OpenCLI specification.
   the repo.
 
 If your CLI uses custom export arguments (not `cli opencli`), pass them via
-`opencli-args`. Same for `xmldoc-args`.
+`opencli-args`. `xmldoc-args` and `timeout` apply to the same generate-based
+flows (`exec`, `dotnet`, and `package`).
 
 ## See also
 

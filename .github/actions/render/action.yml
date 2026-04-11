@@ -21,14 +21,15 @@ inputs:
         html               - interactive SPA bundle
         markdown            - tree layout (one file per command)
         markdown-monolith   - single Markdown file
-        markdown-hybrid     - README.md + one file per command group (see split-depth)
+        markdown-hybrid     - README.md + group files as needed (leaf-only CLIs may emit README.md only; see split-depth)
     required: false
     default: 'html'
 
   split-depth:
     description: >
-      Depth for markdown-hybrid output (default 1). Depth 1 emits one file per top-level group;
-      depth 2 also emits a file per second-level group; and so on. Ignored for other formats.
+      Depth for markdown-hybrid output (default 1). Depth 1 emits one file per top-level group when groups exist;
+      depth 2 also emits a file per second-level group; and so on. Leaf-only CLIs may legitimately emit README.md only.
+      Ignored for other formats.
     required: false
 
   # ── exec mode ──────────────────────────────────────────────────────
@@ -54,15 +55,15 @@ inputs:
     required: false
 
   opencli-args:
-    description: 'Override the OpenCLI export arguments (exec mode, default: cli opencli)'
+    description: 'Override the OpenCLI export arguments for generate-based modes (exec, dotnet, package; default: cli opencli)'
     required: false
 
   xmldoc-args:
-    description: 'Override the xmldoc export arguments (exec mode, default: cli xmldoc)'
+    description: 'Override the xmldoc export arguments for generate-based modes (exec, dotnet, package; default: cli xmldoc)'
     required: false
 
   timeout:
-    description: 'Timeout in seconds for each export command (exec mode)'
+    description: 'Timeout in seconds for each generate-mode export command (exec, dotnet, package)'
     required: false
 
   # ── file mode ──────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ inputs:
     required: false
 
   single-file:
-    description: 'Emit a single self-contained HTML file (works from file://)'
+    description: 'Force a single self-contained HTML file (works from file://). HTML is also self-contained by default at compression-level 2.'
     required: false
     default: 'false'
 
@@ -141,7 +142,7 @@ inputs:
       Compression level for HTML output.
         0  - none (raw JSON, largest)
         1  - compress embedded JSON
-        2  - self-extracting bundle (smallest, default)
+        2  - self-extracting single-file bundle (smallest, default)
     required: false
     default: '2'
 
@@ -644,13 +645,10 @@ runs:
             test -f "$OUTPUT_DIR/README.md"
             ;;
           markdown-hybrid)
+            test -d "$OUTPUT_DIR"
             test -f "$OUTPUT_DIR/README.md"
-            # Hybrid always emits the README plus at least one group file.
-            group_count=$(find "$OUTPUT_DIR" -mindepth 2 -name 'index.md' | wc -l)
-            if [ "$group_count" -eq 0 ]; then
-              echo "::error::markdown-hybrid output is missing per-group index.md files"
-              exit 1
-            fi
+            # Hybrid may legitimately emit only README.md for leaf-only CLIs.
+            # Grouped CLIs will add per-group Markdown files under the output directory.
             ;;
         esac
         echo "InSpectra output verified ($FORMAT) at $OUTPUT_DIR"

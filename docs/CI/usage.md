@@ -47,6 +47,9 @@ steps:
   so the action doesn't rebuild for each `dotnet run` invocation.
 - If your project already references a specific `InSpectra.Cli` version, the
   action skips the auto-add. To opt out entirely, set `skip-inspectra-cli: 'true'`.
+- The auto-added `InSpectra.Cli` reference stays in the checked-out workspace
+  for the rest of the job, so keep later commit or diff steps scoped to the
+  docs output unless you want that project-file change included.
 
 ## From a published .NET tool (`exec` mode)
 
@@ -89,7 +92,8 @@ steps:
 
 Set `format` to `markdown` (tree layout, one file per command),
 `markdown-monolith` (single file), or `markdown-hybrid`
-(`README.md` plus per-group files). `split-depth` only applies to
+(`README.md` plus group files when groups exist; leaf-only CLIs may emit
+`README.md` only). `split-depth` only applies to
 `markdown-hybrid`. All three work with any mode.
 
 ```yaml

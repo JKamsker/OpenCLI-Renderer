@@ -28,7 +28,7 @@
 
 ## Features
 
-- **Markdown output** — GitHub-friendly single file, tree layout (one file per command), or hybrid layout (README + one file per command group)
+- **Markdown output** — GitHub-friendly single file, tree layout (one file per command), or hybrid layout (README + group files when groups exist; leaf-only CLIs may emit README only)
 - **Interactive HTML viewer** — relocatable SPA bundle with sidebar navigation, search, dark/light theme, and deep-link hash routing
 - **Command composer** — interactively build CLI invocations from documented options and arguments
 - **Command palette** — fuzzy search across all commands (Ctrl+K)
@@ -174,6 +174,9 @@ steps:
 
 `actions/setup-dotnet` and `dotnet tool install` are no longer needed in the
 caller workflow — the action handles both, generates `opencli.json`, then renders it.
+The action does not revert an auto-added `InSpectra.Cli` reference during the
+job, so later commit or diff steps should scope themselves to the docs output
+or set `skip-inspectra-cli: 'true'` if the project already manages that dependency.
 
 ### File mode (from saved spec)
 
@@ -205,7 +208,7 @@ steps:
 - uses: JKamsker/InSpectra@v1
   with:
     cli-name: mycli
-    format: markdown-hybrid     # README.md + per-group files
+    format: markdown-hybrid     # README.md + group files when groups exist
     split-depth: '2'
 ```
 
@@ -214,8 +217,8 @@ steps:
 | Input | Default | Description |
 | --- | --- | --- |
 | `mode` | `exec` | `exec`, `file`, `dotnet`, or `package` |
-| `format` | `html` | `html`, `markdown` (tree), `markdown-monolith` (single file), or `markdown-hybrid` (README + per-group files) |
-| `split-depth` | | Depth for `markdown-hybrid` output. Ignored for other formats. |
+| `format` | `html` | `html`, `markdown` (tree), `markdown-monolith` (single file), or `markdown-hybrid` (README + group files as needed; leaf-only CLIs may emit README only) |
+| `split-depth` | | Depth for `markdown-hybrid` output. Group files are emitted only when groups exist; leaf-only CLIs may emit README only. Ignored for other formats. |
 | `cli-name` | | CLI executable name or path (exec mode) |
 | `dotnet-tool` | | NuGet package to `dotnet tool install -g` (exec mode) |
 | `dotnet-tool-version` | | Version constraint for the dotnet tool |
@@ -233,8 +236,8 @@ steps:
 | `label` | | Custom label shown in the viewer header (e.g. `v1.2.3`) |
 | `title` | | Override the CLI title shown in the viewer header and overview |
 | `command-prefix` | | Override the CLI command prefix used in generated examples and the composer |
-| `single-file` | `false` | Emit a single self-contained HTML file |
-| `compression-level` | `2` | HTML bundle compression level (`0`, `1`, or `2`) |
+| `single-file` | `false` | Force a single self-contained HTML file. HTML is also self-contained by default at `compression-level: 2` |
+| `compression-level` | `2` | HTML bundle compression level (`0`, `1`, or `2`); `2` is the default self-extracting single-file bundle |
 | `theme` | | Initial HTML theme (`light` or `dark`) |
 | `color-theme` | | HTML accent preset (`cyan`, `indigo`, `emerald`, `amber`, `rose`, `blue`) |
 | `accent` | | Custom HTML accent color for light mode |
@@ -247,12 +250,15 @@ steps:
 | `skip-inspectra-cli` | `false` | Skip the automatic InSpectra.Cli PackageReference (e.g. when the project already manages it) |
 | `dotnet-version` | `10.0.x` | .NET SDK version(s) for InSpectra. In dotnet mode the action also auto-detects the project's `TargetFramework` and installs that SDK; already-installed versions are skipped |
 | `dotnet-quality` | stable | .NET SDK quality channel (`preview` for pre-release) |
-| `opencli-args` | | Override the OpenCLI export arguments used during `generate` |
-| `xmldoc-args` | | Override the xmldoc export arguments used during `generate` |
-| `timeout` | | Timeout in seconds for each acquisition command (exec / dotnet mode) |
+| `opencli-args` | | Override the OpenCLI export arguments used during `generate` (`exec` / `dotnet` / `package`) |
+| `xmldoc-args` | | Override the xmldoc export arguments used during `generate` (`exec` / `dotnet` / `package`) |
+| `timeout` | | Timeout in seconds for each generate-mode export command (`30` default for `exec`; `120` for `dotnet` and `package`) |
 | `opencli-mode` | | `native`, `auto`, `help`, `clifx`, `static`, or `hook` |
 | `command` | | Override the generated root command name |
 | `cli-framework` | | Hint or override the detected CLI framework for non-native analysis |
+
+With the default `compression-level: 2`, HTML output is self-contained even if
+`single-file` is left at its default `false`.
 
 ### Action output
 
@@ -392,7 +398,7 @@ Markdown rendering supports:
 - `--out <FILE>` for single-file output
 - `--out-dir <DIR>` with `--layout tree` or `--layout hybrid`
 - `--layout single|tree|hybrid`
-- `--split-depth <N>` with `--layout hybrid` (defaults to `1`) — controls the depth at which per-group Markdown files are emitted. Depth `1` produces `README.md` plus one file per top-level group; depth `2` also emits a file per second-level group; and so on.
+- `--split-depth <N>` with `--layout hybrid` (defaults to `1`) — controls the depth at which per-group Markdown files are emitted. Depth `1` produces `README.md` plus one file per top-level group when groups exist; depth `2` also emits a file per second-level group; leaf-only CLIs may legitimately emit `README.md` only.
 
 ### Render HTML
 

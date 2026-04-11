@@ -120,8 +120,9 @@ jobs:
 - **Path filter** scopes the trigger to changes that could actually affect
   the CLI surface, so unrelated commits don't churn PRs.
 - **`add-paths: docs/cli`** keeps any incidental files out of the commit
-  (the auto-installed `InSpectra.Cli` package mutates your `.csproj` at
-  runtime — `add-paths` prevents that mutation from leaking into the PR).
+  (the auto-installed `InSpectra.Cli` package leaves your checked-out
+  `.csproj` modified for the rest of the job, and `add-paths` prevents that
+  runtime workspace change from leaking into the PR).
 - **`delete-branch: true`** cleans up the working branch on merge.
 
 ## Drift check on pull requests
