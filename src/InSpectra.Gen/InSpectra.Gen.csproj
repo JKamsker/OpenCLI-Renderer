@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Schema\OpenCli.draft.json" />
+    <EmbeddedResource Include="OpenCli\Schema\OpenCli.draft.json" />
   </ItemGroup>
 
   <ItemGroup>

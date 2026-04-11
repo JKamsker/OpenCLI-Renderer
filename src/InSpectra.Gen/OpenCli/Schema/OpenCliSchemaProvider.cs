@@ -11,7 +11,7 @@ public sealed class OpenCliSchemaProvider
 
     private static JsonSchema LoadSchema()
     {
-        const string resourceName = "InSpectra.Gen.Schema.OpenCli.draft.json";
+        const string resourceName = "InSpectra.Gen.OpenCli.Schema.OpenCli.draft.json";
 
         using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException($"Embedded resource `{resourceName}` was not found.");
