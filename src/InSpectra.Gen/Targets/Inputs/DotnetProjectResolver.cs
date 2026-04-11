@@ -1,6 +1,6 @@
 using InSpectra.Gen.Core;
 
-namespace InSpectra.Gen.Targets;
+namespace InSpectra.Gen.Targets.Inputs;
 
 /// <summary>
 /// Resolves the &lt;PROJECT&gt; argument for `generate dotnet` commands to an

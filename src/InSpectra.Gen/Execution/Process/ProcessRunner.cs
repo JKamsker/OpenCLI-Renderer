@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using InSpectra.Gen.Core;
 
-namespace InSpectra.Gen.Execution;
+namespace InSpectra.Gen.Execution.Process;
 
 public sealed class ProcessRunner : IProcessRunner
 {
@@ -44,7 +44,7 @@ public sealed class ProcessRunner : IProcessRunner
             }
         }
 
-        using var process = new Process { StartInfo = startInfo };
+        using var process = new System.Diagnostics.Process { StartInfo = startInfo };
         try
         {
             process.Start();
@@ -96,7 +96,7 @@ public sealed class ProcessRunner : IProcessRunner
         }
     }
 
-    private static void TryTerminate(Process process)
+    private static void TryTerminate(System.Diagnostics.Process process)
     {
         try
         {

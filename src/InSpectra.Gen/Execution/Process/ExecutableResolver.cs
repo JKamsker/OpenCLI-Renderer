@@ -1,6 +1,6 @@
 using InSpectra.Gen.Core;
 
-namespace InSpectra.Gen.Execution;
+namespace InSpectra.Gen.Execution.Process;
 
 public sealed class ExecutableResolver
 {

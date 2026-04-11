@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Targets;
+namespace InSpectra.Gen.Targets.Sources;
 
 internal sealed record MaterializedCliTarget(
     string DisplayName,

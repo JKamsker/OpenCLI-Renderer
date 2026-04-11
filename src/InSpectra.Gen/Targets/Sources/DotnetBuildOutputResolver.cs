@@ -1,7 +1,7 @@
 using InSpectra.Gen.Core;
 using InSpectra.Gen.UseCases.Generate.Requests;
 
-namespace InSpectra.Gen.Targets;
+namespace InSpectra.Gen.Targets.Sources;
 
 internal sealed record DotnetBuildOutput(
     string TargetPath,

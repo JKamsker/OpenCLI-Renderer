@@ -1,5 +1,5 @@
 using InSpectra.Gen.Core;
-using InSpectra.Gen.Execution;
+using InSpectra.Gen.Execution.Process;
 using InSpectra.Gen.UseCases.Generate;
 using InSpectra.Gen.UseCases.Generate.Requests;
 using InSpectra.Gen.Tests.TestSupport;

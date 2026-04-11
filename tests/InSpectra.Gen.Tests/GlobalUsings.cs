@@ -1,4 +1,5 @@
-global using InSpectra.Gen.Execution;
+global using InSpectra.Gen.Execution.Process;
+global using InSpectra.Gen.Execution.Workspace;
 global using InSpectra.Gen.OpenCli.Enrichment;
 global using InSpectra.Gen.OpenCli.Model;
 global using InSpectra.Gen.OpenCli.Schema;
@@ -9,5 +10,6 @@ global using InSpectra.Gen.Rendering.Html;
 global using InSpectra.Gen.Rendering.Html.Bundle;
 global using InSpectra.Gen.Rendering.Markdown;
 global using InSpectra.Gen.Rendering.Pipeline;
-global using InSpectra.Gen.Targets;
+global using InSpectra.Gen.Targets.Inputs;
+global using InSpectra.Gen.Targets.Sources;
 global using InSpectra.Gen.UseCases.Generate;

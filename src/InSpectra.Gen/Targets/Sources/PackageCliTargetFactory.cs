@@ -1,6 +1,6 @@
 using InSpectra.Gen.Acquisition.Contracts.Providers;
 
-namespace InSpectra.Gen.Targets;
+namespace InSpectra.Gen.Targets.Sources;
 
 internal sealed class PackageCliTargetFactory(IPackageCliToolInstaller installer)
 {

@@ -1,6 +1,6 @@
 using InSpectra.Gen.Acquisition.Contracts.Providers;
 using InSpectra.Gen.Tests.TestSupport;
-using InSpectra.Gen.Targets;
+using InSpectra.Gen.Targets.Sources;
 
 namespace InSpectra.Gen.Tests.Targets;
 

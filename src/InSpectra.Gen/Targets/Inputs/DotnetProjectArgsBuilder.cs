@@ -1,6 +1,6 @@
 using InSpectra.Gen.UseCases.Generate.Requests;
 
-namespace InSpectra.Gen.Targets;
+namespace InSpectra.Gen.Targets.Inputs;
 
 /// <summary>
 /// Builds the argument array passed to <c>dotnet</c> for the

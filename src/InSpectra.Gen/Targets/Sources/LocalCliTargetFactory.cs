@@ -3,7 +3,7 @@ using System.Reflection;
 using InSpectra.Gen.Core;
 using InSpectra.Gen.Acquisition.Contracts.Providers;
 
-namespace InSpectra.Gen.Targets;
+namespace InSpectra.Gen.Targets.Sources;
 
 public sealed class LocalCliTargetFactory(ILocalCliFrameworkDetector frameworkDetector)
 {

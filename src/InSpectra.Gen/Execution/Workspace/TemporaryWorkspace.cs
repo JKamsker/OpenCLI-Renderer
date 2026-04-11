@@ -1,4 +1,4 @@
-namespace InSpectra.Gen.Execution;
+namespace InSpectra.Gen.Execution.Workspace;
 
 using System.Diagnostics;
 
