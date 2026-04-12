@@ -61,9 +61,11 @@ public sealed class MarkdownRenderService(
                 $"Dry run: render `{prepared.Source.OpenCliOrigin}` as hybrid Markdown in `{outputDirectory}` ({planned.Count} files planned).");
         }
 
-        OutputPathHelper.PrepareDirectory(outputDirectory, options.Overwrite);
-
-        var writtenFiles = await WriteRenderedFilesAsync(outputDirectory, files, cancellationToken);
+        var writtenFiles = await OutputPathHelper.PublishDirectoryAsync(
+            outputDirectory,
+            options.Overwrite,
+            (stagingDirectory, token) => WriteRenderedFilesAsync(stagingDirectory, outputDirectory, files, token),
+            cancellationToken);
         var summary = options.Quiet ? null : $"Wrote {writtenFiles.Count} hybrid Markdown files to `{outputDirectory}`.";
         return CreateResult(prepared, document, options, writtenFiles, summary);
     }
@@ -98,14 +100,7 @@ public sealed class MarkdownRenderService(
             return CreateResult(prepared, document, options, [], summary: null, stdoutDocument: content);
         }
 
-        OutputPathHelper.EnsureFileWritable(options.OutputFile, options.Overwrite);
-        var directory = Path.GetDirectoryName(options.OutputFile);
-        if (!string.IsNullOrWhiteSpace(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        await File.WriteAllTextAsync(options.OutputFile, content, cancellationToken);
+        await OutputPathHelper.PublishFileAsync(options.OutputFile, content, options.Overwrite, cancellationToken);
 
         var written = new RenderedFile(Path.GetFileName(options.OutputFile), options.OutputFile, content);
         var summary = options.Quiet ? null : $"Wrote Markdown to `{options.OutputFile}`.";
@@ -137,14 +132,17 @@ public sealed class MarkdownRenderService(
                 $"Dry run: render `{prepared.Source.OpenCliOrigin}` as a Markdown tree in `{outputDirectory}` ({planned.Count} files planned).");
         }
 
-        OutputPathHelper.PrepareDirectory(outputDirectory, options.Overwrite);
-
-        var writtenFiles = await WriteRenderedFilesAsync(outputDirectory, files, cancellationToken);
+        var writtenFiles = await OutputPathHelper.PublishDirectoryAsync(
+            outputDirectory,
+            options.Overwrite,
+            (stagingDirectory, token) => WriteRenderedFilesAsync(stagingDirectory, outputDirectory, files, token),
+            cancellationToken);
         var summary = options.Quiet ? null : $"Wrote {writtenFiles.Count} Markdown files to `{outputDirectory}`.";
         return CreateResult(prepared, document, options, writtenFiles, summary);
     }
 
     private static async Task<List<RenderedFile>> WriteRenderedFilesAsync(
+        string stagingDirectory,
         string outputDirectory,
         IReadOnlyList<RelativeRenderedFile> files,
         CancellationToken cancellationToken)
@@ -154,15 +152,15 @@ public sealed class MarkdownRenderService(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var fullPath = Path.Combine(outputDirectory, file.RelativePath);
-            var directory = Path.GetDirectoryName(fullPath);
+            var stagingPath = Path.Combine(stagingDirectory, file.RelativePath);
+            var directory = Path.GetDirectoryName(stagingPath);
             if (!string.IsNullOrWhiteSpace(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            await File.WriteAllTextAsync(fullPath, file.Content, cancellationToken);
-            writtenFiles.Add(new RenderedFile(file.RelativePath, fullPath, file.Content));
+            await File.WriteAllTextAsync(stagingPath, file.Content, cancellationToken);
+            writtenFiles.Add(new RenderedFile(file.RelativePath, Path.Combine(outputDirectory, file.RelativePath), file.Content));
         }
 
         return writtenFiles;

@@ -44,6 +44,47 @@ public sealed class OutputPathHelperTests
     }
 
     [Fact]
+    public async Task PublishFileAsync_Preserves_Existing_Output_When_Cancelled()
+    {
+        using var temp = new TempDirectory();
+        var outputPath = Path.Combine(temp.Path, "opencli.json");
+        await File.WriteAllTextAsync(outputPath, "existing");
+        using var cancellationSource = new CancellationTokenSource();
+        await cancellationSource.CancelAsync();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            OutputPathHelper.PublishFileAsync(outputPath, "replacement", overwrite: true, cancellationSource.Token));
+
+        Assert.Equal("existing", await File.ReadAllTextAsync(outputPath));
+    }
+
+    [Fact]
+    public async Task PublishDirectoryAsync_Keeps_Existing_Output_When_Writer_Fails()
+    {
+        using var temp = new TempDirectory();
+        var outputDirectory = Path.Combine(temp.Path, "out");
+        Directory.CreateDirectory(outputDirectory);
+        await File.WriteAllTextAsync(Path.Combine(outputDirectory, "keep.txt"), "existing");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            OutputPathHelper.PublishDirectoryAsync<bool>(
+                outputDirectory,
+                overwrite: true,
+                async (stagingDirectory, cancellationToken) =>
+                {
+                    await File.WriteAllTextAsync(Path.Combine(stagingDirectory, "new.txt"), "new", cancellationToken);
+                    throw new InvalidOperationException("boom");
+#pragma warning disable CS0162
+                    return true;
+#pragma warning restore CS0162
+                },
+                CancellationToken.None));
+
+        Assert.Equal("existing", await File.ReadAllTextAsync(Path.Combine(outputDirectory, "keep.txt")));
+        Assert.False(File.Exists(Path.Combine(outputDirectory, "new.txt")));
+    }
+
+    [Fact]
     public void EnsureFileWritable_Rejects_Existing_Directory_Path()
     {
         using var temp = new TempDirectory();

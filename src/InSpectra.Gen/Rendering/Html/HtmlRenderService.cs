@@ -62,38 +62,42 @@ public sealed class HtmlRenderService(
                 $"Dry run: render `{prepared.Source.OpenCliOrigin}` as an HTML app bundle in `{outputDirectory}` ({plannedFiles.Count} files planned).");
         }
 
-        OutputPathHelper.PrepareDirectory(outputDirectory, options.Overwrite);
+        var writtenFiles = await OutputPathHelper.PublishDirectoryAsync(
+            outputDirectory,
+            options.Overwrite,
+            async (stagingDirectory, token) =>
+            {
+                if (options.SingleFile)
+                {
+                    return await RenderSingleFileAsync(
+                        prepared,
+                        options,
+                        features,
+                        label,
+                        title,
+                        commandPrefix,
+                        themeOptions,
+                        bundleRoot,
+                        stagingDirectory,
+                        outputDirectory,
+                        token);
+                }
 
-        List<RenderedFile> writtenFiles;
-        if (options.SingleFile)
-        {
-            writtenFiles = await RenderSingleFileAsync(
-                prepared,
-                options,
-                features,
-                label,
-                title,
-                commandPrefix,
-                themeOptions,
-                bundleRoot,
-                outputDirectory,
-                cancellationToken);
-        }
-        else
-        {
-            writtenFiles = await RenderBundleAsync(
-                prepared,
-                options,
-                features,
-                label,
-                title,
-                commandPrefix,
-                themeOptions,
-                bundleFiles,
-                referencedAssets,
-                outputDirectory,
-                cancellationToken);
-        }
+                return await RenderBundleAsync(
+                    prepared,
+                    options,
+                    features,
+                    label,
+                    title,
+                    commandPrefix,
+                    themeOptions,
+                    bundleFiles,
+                    referencedAssets,
+                    stagingDirectory,
+                    outputDirectory,
+                    token);
+            },
+            cancellationToken);
 
         var summary = options.Quiet
             ? null
@@ -161,6 +165,7 @@ public sealed class HtmlRenderService(
         string? commandPrefix,
         HtmlThemeOptions? themeOptions,
         string bundleRoot,
+        string stagingOutputDirectory,
         string outputDirectory,
         CancellationToken cancellationToken)
     {
@@ -195,9 +200,9 @@ public sealed class HtmlRenderService(
             html = await HtmlBundleAssetComposer.InlineAssetsAsync(indexHtml, bundleRoot, cancellationToken);
         }
 
-        var indexDestination = Path.Combine(outputDirectory, "index.html");
+        var indexDestination = Path.Combine(stagingOutputDirectory, "index.html");
         await File.WriteAllTextAsync(indexDestination, html, cancellationToken);
-        return [new RenderedFile("index.html", indexDestination, html)];
+        return [new RenderedFile("index.html", Path.Combine(outputDirectory, "index.html"), html)];
     }
 
     private async Task<List<RenderedFile>> RenderBundleAsync(
@@ -210,6 +215,7 @@ public sealed class HtmlRenderService(
         HtmlThemeOptions? themeOptions,
         IReadOnlyList<BundleFile> bundleFiles,
         ISet<string> referencedAssets,
+        string stagingOutputDirectory,
         string outputDirectory,
         CancellationToken cancellationToken)
     {
@@ -236,13 +242,13 @@ public sealed class HtmlRenderService(
             if (string.Equals(file.RelativePath, "static.html", StringComparison.OrdinalIgnoreCase))
             {
                 var html = await BuildIndexHtmlAsync(file.SourcePath, bootstrapJson, options.CompressLevel, cancellationToken);
-                var indexDestination = Path.Combine(outputDirectory, "index.html");
+                var indexDestination = Path.Combine(stagingOutputDirectory, "index.html");
                 await File.WriteAllTextAsync(indexDestination, html, cancellationToken);
-                writtenFiles.Add(new RenderedFile("index.html", indexDestination, html));
+                writtenFiles.Add(new RenderedFile("index.html", Path.Combine(outputDirectory, "index.html"), html));
                 continue;
             }
 
-            var destinationPath = Path.Combine(outputDirectory, file.RelativePath);
+            var destinationPath = Path.Combine(stagingOutputDirectory, file.RelativePath);
             var destinationDirectory = Path.GetDirectoryName(destinationPath);
             if (!string.IsNullOrWhiteSpace(destinationDirectory))
             {
@@ -250,7 +256,7 @@ public sealed class HtmlRenderService(
             }
 
             await CopyFileAsync(file.SourcePath, destinationPath, cancellationToken);
-            writtenFiles.Add(new RenderedFile(file.RelativePath, destinationPath, null));
+            writtenFiles.Add(new RenderedFile(file.RelativePath, Path.Combine(outputDirectory, file.RelativePath), null));
         }
 
         return writtenFiles;
