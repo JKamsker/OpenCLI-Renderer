@@ -1,4 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
+using InSpectra.Gen.Rendering.Contracts;
+using InSpectra.Gen.Rendering.Html;
+using InSpectra.Gen.Rendering.Html.Bundle;
+using InSpectra.Gen.Rendering.Markdown;
+using InSpectra.Gen.Rendering.Pipeline;
 
 namespace InSpectra.Gen.Rendering.Composition;
 

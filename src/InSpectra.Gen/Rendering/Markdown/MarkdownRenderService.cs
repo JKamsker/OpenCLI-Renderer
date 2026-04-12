@@ -1,6 +1,7 @@
-using InSpectra.Gen.Rendering.Pipeline.Model;
 using InSpectra.Gen.Core;
 using InSpectra.Gen.Rendering.Contracts;
+using InSpectra.Gen.Rendering.Pipeline;
+using InSpectra.Gen.Rendering.Pipeline.Model;
 
 namespace InSpectra.Gen.Rendering.Markdown;
 
