@@ -8,7 +8,7 @@ This folder replaces the old monolithic
 - Working branch: `feat/merge-tool`
 - Current follow-up docs live on the branch tip; verify `HEAD` before
   resuming work.
-- Latest fully validated pushed tip: `6c52c76`
+- Latest fully validated pushed tip: `567e144`
 - Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, and
   the queue-driven thin-shell phase `g40`, the installed-tool
   process-safety phase `g41`, the packaged-tool verification phase `g42`, and
@@ -18,29 +18,30 @@ This folder replaces the old monolithic
   phase `g48`, the backend failure-diagnostics phase `g49`, the hosted
   OpenCli test-support follow-up phase `g50`, and the installed-tool
   multi-TFM determinism phase `g51`, and the viewer-bundle
-  rebuild-failure phase `g52` are now pushed and hosted validated.
-- The pushed tip `6c52c76` is hosted validated:
+  rebuild-failure phase `g52`, and the install-host / failure-detail
+  phase `g53` are now pushed and hosted validated.
+- The pushed tip `567e144` is hosted validated:
   - `61` frontend unit tests
   - `12` Playwright E2E tests
-  - green `pull_request` run `24306402929`
+  - green `pull_request` run `24306957046`
   - local validation on the same tip:
-    engine build green, focused rendering/policy slice `25 / 25`, and full
-    app-shell rerun `174 / 174`, including `17` architecture policy tests
+    focused tooling slice `4 / 4`, full engine rerun `202 / 202`, and repo
+    policy `2 / 2`
 - The latest green `workflow_dispatch` validation is still on pushed tip
   `a3390bb`:
   - green `workflow_dispatch` run `24296167355`, including `live-tests`
-- Outer iteration 14 wave 1 shipped `g52` on `6c52c76`; the next required
+- Outer iteration 15 wave 1 shipped `g53` on `567e144`; the next required
   step is a fresh dotnet/backend investigation swarm from the current tree.
 - The original zero-BLOCKER/HIGH/MEDIUM stop condition was not reached.
-  `g52` closed the viewer-bundle stale-fallback HIGH and aligned viewer build
-  timeout/output preservation with `ProcessRunner`, but the hosted
-  action/version determinism HIGH plus the remaining backend MEDIUM clusters
-  still remain, so the next fresh swarm should stay focused on the dotnet
-  projects.
+  `g53` closed the install-time dotnet-host alignment HIGH plus the remaining
+  installed-tool failure-detail loss in the command-install path, but the
+  hosted action/version determinism HIGH plus the remaining backend MEDIUM
+  clusters still remain, so the next fresh swarm should stay focused on the
+  dotnet projects.
 - Active todo-next queue:
   - no non-completed queued items remain
-  - latest hosted-validated phase: `g52` (`6c52c76`) with green
-    `pull_request` run `24306402929`
+  - latest hosted-validated phase: `g53` (`567e144`) with green
+    `pull_request` run `24306957046`
   - next work item is a fresh dotnet/backend investigation swarm from the
     current tree
   - `TN-2026-04-12-04` completed on `g44` (`99a2c5a`) with green
@@ -58,7 +59,7 @@ This folder replaces the old monolithic
 ## Current Handoff State
 
 - Source of truth for current open work:
-  [Logbook](Logbook.md#current-open-items-after-g52-hosted-validation-2026-04-12)
+  [Logbook](Logbook.md#current-open-items-after-g53-hosted-validation-2026-04-12)
 - Source of truth for how to resume the loop:
   [Runbook](Runbook.md)
 - Source of truth for mandatory queued work before the next swarm:

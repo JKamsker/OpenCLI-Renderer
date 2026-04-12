@@ -1,7 +1,7 @@
 # Follow-up Logbook
 
-> **Status (2026-04-12): 52 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g52`
-> HOSTED VALIDATED ON `6c52c76` AND A FRESH DOTNET/BACKEND SWARM NOW
+> **Status (2026-04-12): 53 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g53`
+> HOSTED VALIDATED ON `567e144` AND A FRESH DOTNET/BACKEND SWARM NOW
 > REQUIRED.**
 > Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
 > queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
@@ -11,22 +11,23 @@
 > phase `g47`, the hosted test-support follow-up phase `g48`, the backend
 > failure-diagnostics phase `g49`, the hosted OpenCli test-support
 > follow-up phase `g50`, the installed-tool multi-TFM determinism phase
-> `g51`, and the viewer-bundle rebuild-failure phase `g52` are now pushed,
-> and `6c52c76` is the current hosted-validated code tip.
+> `g51`, the viewer-bundle rebuild-failure phase `g52`, and the install-host /
+> failure-detail phase `g53` are now pushed, and `567e144` is the current
+> hosted-validated code tip.
 > The original zero-BLOCKER/HIGH/MEDIUM stop condition is still **not** met:
-> `g49` / `g50` / `g51` / `g52` closed the ProcessRunner diagnostics HIGH,
-> the native-attempt detail loss, the installed-tool determinism MEDIUM, and
-> the viewer-bundle stale-fallback HIGH on the latest hosted-validated tip,
+> `g49` / `g50` / `g51` / `g52` / `g53` closed the ProcessRunner diagnostics
+> HIGH, the native-attempt detail loss, the installed-tool determinism MEDIUM,
+> the viewer-bundle stale-fallback HIGH, and the install-time dotnet-host
+> mismatch plus install failure-detail loss on the latest hosted-validated tip,
 > but the hosted action/version determinism HIGH plus the remaining backend
 > MEDIUM clusters remain. The next required step is a fresh dotnet/backend
 > swarm from the current tree, and the user-directed focus remains on the
 > dotnet projects.
 >
-> Current validated pushed tip: `6c52c76` with **61 frontend unit tests**,
-> **12 Playwright E2E tests**, green `pull_request` run `24306402929`, and
-> local validation on the same tip of **1 engine build**, a focused rendering
-> / policy slice of **25 tests**, and a full app-shell rerun of
-> **174 tests**, including **17 architecture policy tests**.
+> Current validated pushed tip: `567e144` with **61 frontend unit tests**,
+> **12 Playwright E2E tests**, green `pull_request` run `24306957046`, and
+> local validation on the same tip of a focused tooling slice of **4 tests**,
+> a full engine rerun of **202 tests**, and repo policy **2 / 2**.
 >
 > The latest green `workflow_dispatch` run is still `24296167355` on pushed tip
 > `a3390bb`, including `live-tests`.
@@ -50,8 +51,8 @@
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
 - No non-completed queued items remain.
-- Latest hosted-validated phase: `g52` (`6c52c76`) with green
-  `pull_request` run `24306402929`.
+- Latest hosted-validated phase: `g53` (`567e144`) with green
+  `pull_request` run `24306957046`.
 - No queue item blocks the loop; the next work item is a fresh dotnet/backend
   investigation swarm from the current tree under the user’s dotnet-project
   directive.
@@ -64,6 +65,88 @@
   [Close the installed-tool process-safety cluster](TodoNext/2026-04-12-installed-tool-process-safety.md)
 - `TN-2026-04-12-01` completed locally in `g40` (`8b3c0bc`):
   [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
+## Current Open Items After `g53` Hosted Validation (2026-04-12)
+
+This section supersedes the older post-`g52` hosted-validation snapshot below
+for current execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `567e144`
+- green `pull_request` run `24306957046`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Outer iteration 15 wave summary and shipped phases:**
+
+- the fresh post-`ad79165` dotnet/backend swarm ran two research waves and
+  then stopped because wave 2 mostly repeated wave 1
+- repeated leading clusters were:
+  install-time dotnet-host alignment plus installed-tool failure-detail loss,
+  static-analysis degradation handling, and architecture scanner /
+  boundary-enforcement gaps
+- secondary surviving MEDIUMs from the same swarm were:
+  the public provider seam still leaking engine-internal orchestration APIs,
+  the hook runtimeconfig-synthesis fallback silently bypassing the
+  deterministic dotnet-runner path, and the carried output-helper ownership
+  leak around `UseCases.Generate` / `Rendering.Pipeline`
+- `g53` (`567e144`) closed the contained tooling/runtime slice by:
+  aligning both install flows to `DotnetHostPathResolutionSupport`, preserving
+  both normalized stdout and stderr in the retryable installed-tool install
+  failure message, and adding focused engine regressions for resolved-host
+  launch plus mixed-stream failure preservation
+- local `g53` validation passed:
+  - `dotnet test tests/InSpectra.Gen.Engine.Tests/InSpectra.Gen.Engine.Tests.csproj --filter "FullyQualifiedName~CommandInstallationSupportTests|FullyQualifiedName~PackageCliToolInstallerTests|FullyQualifiedName~RepositoryCodeFilePolicyTests"` ✅ (`4 / 4`)
+  - `dotnet test tests/InSpectra.Gen.Engine.Tests/InSpectra.Gen.Engine.Tests.csproj --no-restore` ✅ (`202 / 202`)
+  - `dotnet test tests/InSpectra.Gen.Tests/InSpectra.Gen.Tests.csproj --no-restore --filter "FullyQualifiedName~RepositoryCodeFilePolicyTests"` ✅ (`2 / 2`)
+- hosted rerun `24306957046` completed green across `build-test`,
+  `windows-backend-tests`, and `package-pages-preview`
+- no new smell category was discovered in outer iteration 15 wave 1
+
+**Still-open ranked clusters after `g53`:**
+
+- **HIGH: hosted action/version determinism still depends on ambient PATH and
+  floating workflow wiring.**
+  `.github/actions/render/action.yml` still lets ambient `inspectra` override
+  `inspectra-version`, and the reusable workflow/action revision surface still
+  drifts from the current tree.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals
+  and overstates degraded help coverage.**
+  `StaticInstalledToolAnalysisSupport.cs` still bypasses the output-limit /
+  guardrail terminal checks that the help and CliFx analyzers honor, and
+  `StaticAnalysisCoverageClassifier.cs` still labels partial or budget-clipped
+  metadata-plus-help crawls as full coverage.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine dependency suites still rely on plain `using` detection,
+  and the `Rendering.Markdown` / `Rendering.Html` separation is still
+  chartered but not executable.
+- **MEDIUM: the public provider seam still leaks engine-internal
+  orchestration and targeting APIs.**
+  `Contracts/Providers/*` still exports types the thin shell no longer uses,
+  and `ArchitectureEnginePublicSurfaceTests` currently blesses the whole
+  namespace wholesale.
+- **MEDIUM: hook-installed-tool runtimeconfig synthesis still hides setup
+  failures behind the generic fallback path.**
+  `HookToolProcessInvocationResolver.cs` still writes a synthetic
+  runtimeconfig synchronously under `catch { return false; }`, so failures in
+  that setup path quietly drop back to the generic help invocation.
+- **LOW: backend rendering/output ownership drift remains aggregated.**
+  `OpenCliArtifactWriter.cs` still reaches into
+  `Rendering.Pipeline.OutputPathHelper`, and the carried backend diagnostics
+  nits around best-effort timeout snapshots and multiline human detail blocks
+  remain open.
+- **LOW: frontend static-route polish and frontend practical file-size drift
+  remain aggregated but non-blocking.**
+  The previously logged static-route polish items and frontend practical
+  file-size LOWs remain open and unchanged by `g53`.
+
+**Next-step focus:**
+
+- start a fresh dotnet/backend investigation swarm from the current tree
+- keep the user-directed focus on the dotnet projects
+- if the next fresh swarm converges the same way again, the best-contained
+  remaining backend slice is the static-analysis degradation cluster before
+  the broader architecture-enforcement or provider-surface work
 
 ## Current Open Items After `g52` Hosted Validation (2026-04-12)
 
