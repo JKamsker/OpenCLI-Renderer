@@ -229,6 +229,54 @@ public sealed class OpenCliDocumentSanitizerOptionCollisionTests
             option => string.Equals(option["description"]?.GetValue<string>(), "Display version information.", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void Sanitize_Merges_Well_Known_Informational_Duplicate_When_One_Token_Set_Is_Subset()
+    {
+        // Hook synthetic injection produces --version (no alias).
+        // Framework built-in produces --version with -v alias.
+        // Both are informational. Token sets: {--version} ⊂ {--version, -v}.
+        // Should merge into the richer entry.
+        var document = CreateDocument(
+            new JsonObject
+            {
+                ["name"] = "--version",
+                ["description"] = "Display version information.",
+            },
+            new JsonObject
+            {
+                ["name"] = "--version",
+                ["description"] = "Display version information.",
+                ["aliases"] = new JsonArray("-v"),
+            });
+
+        OpenCliDocumentSanitizer.Sanitize(document);
+
+        var version = Assert.Single(document["options"]!.AsArray());
+        Assert.Equal("--version", version!["name"]?.GetValue<string>());
+        Assert.Contains(version["aliases"]!.AsArray(), a => a?.GetValue<string>() == "-v");
+    }
+
+    [Fact]
+    public void Sanitize_Merges_Identical_Well_Known_Informational_Duplicates_Without_Aliases()
+    {
+        // Both from the same framework — identical --help entries, no aliases.
+        var document = CreateDocument(
+            new JsonObject
+            {
+                ["name"] = "--help",
+                ["description"] = "Display this help screen.",
+            },
+            new JsonObject
+            {
+                ["name"] = "--help",
+                ["description"] = "Display this help screen.",
+            });
+
+        OpenCliDocumentSanitizer.Sanitize(document);
+
+        Assert.Single(document["options"]!.AsArray());
+    }
+
     private static JsonObject CreateDocument(params JsonObject[] options)
         => OpenCliDocumentSanitizerOptionMergeTests.CreateDocument(options);
 }

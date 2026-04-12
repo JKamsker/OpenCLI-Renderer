@@ -46,7 +46,17 @@ internal static class OpenCliOptionCollisionMergeSupport
             && rightInformational
             && !OpenCliOptionDescriptionSupport.HaveEquivalentInformationalTokenSets(leftEntry.Tokens, rightTokens))
         {
-            return false;
+            // Well-known informational names (--help, --version) can safely merge when one
+            // token set is a subset of the other. This handles the common case where a hook's
+            // synthetic injection produces --version (no alias) alongside the framework's own
+            // --version with a -v alias — they are the same semantic option.
+            // Genuinely different conventions (e.g., --help/-h vs --help/?) have disjoint
+            // alias sets and remain separate.
+            if (!OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(leftName)
+                || (!leftEntry.Tokens.IsSubsetOf(rightTokens) && !rightTokens.IsSubsetOf(leftEntry.Tokens)))
+            {
+                return false;
+            }
         }
 
         if (leftInformational ^ rightInformational)
