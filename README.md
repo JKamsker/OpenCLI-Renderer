@@ -453,23 +453,23 @@ HTML uses bundle-directory output only:
 
 When rendering HTML bundles, the following flags control which UI features are available to the end user. These flags only apply to `render file html`.
 
-By default, statically generated pages are locked down: only the inline command viewer and composer are active. Features like the home screen, NuGet browser, file upload, URL loading, and theme switching must be explicitly opted in. This "secure by default" approach ensures generated documentation pages expose exactly the features you choose.
+By default, statically generated pages embed the inline command viewer and composer on the default `#/` overview route. The Home toolbar button, browse/import/package routes, and URL-driven loading must be explicitly enabled, while theme switching remains available unless you disable it with the theme flags. This keeps generated documentation pages self-contained by default while still letting you opt into the extra static entry points you want to expose.
 
 | Flag | Default | Description |
 | --- | --- | --- |
-| `--show-home` | off | Show the Home button in the toolbar. Required for `--enable-nuget-browser` and `--enable-package-upload`. |
+| `--show-home` | off | Show the Home button in the generated static viewer toolbar. Required for `--enable-nuget-browser` and `--enable-package-upload`. |
 | `--no-composer` | off | Hide the Composer panel and its toolbar toggle. |
 | `--no-dark` | off | Disable the dark theme and force light mode. Cannot be combined with `--no-light`. |
 | `--no-light` | off | Disable the light theme and force dark mode. Cannot be combined with `--no-dark`. |
-| `--enable-url` | off | Allow loading OpenCLI specs from URL query parameters (`?opencli=`, `?xmldoc=`, `?dir=`). |
-| `--enable-nuget-browser` | off | Enable the NuGet package browser on the home screen. Requires `--show-home`. |
-| `--enable-package-upload` | off | Enable the file upload drop zone on the home screen. Requires `--show-home`. |
+| `--enable-url` | off | Allow `?opencli=` or `?dir=` to load alternate inputs, with optional `?xmldoc=` enrichment. When enabled, query parameters override the embedded static bootstrap input. |
+| `--enable-nuget-browser` | off | Enable the `#/browse` package browser route, package deep links such as `#/pkg/<id>`, and the Browse toolbar button in generated static HTML. Requires `--show-home`. |
+| `--enable-package-upload` | off | Enable the `#/import` route and import controls in generated static HTML. Requires `--show-home`. |
 
 **Validation rules:**
 
 - `--no-dark` and `--no-light` cannot both be set (at least one theme must be available).
-- `--enable-nuget-browser` requires `--show-home` (the browser is accessed from the home screen).
-- `--enable-package-upload` requires `--show-home` (the upload drop zone is on the home screen).
+- `--enable-nuget-browser` requires `--show-home` so the generated static toolbar can expose the browse entry point.
+- `--enable-package-upload` requires `--show-home` so the generated static toolbar can expose the import entry point.
 
 **Examples:**
 
@@ -517,8 +517,8 @@ The HTML renderer copies `src/InSpectra.UI/dist/**` and patches `index.html` wit
 The bundled viewer supports three boot paths:
 
 1. **Inline bootstrap** (default for generated pages): The full OpenCLI document is embedded in the HTML as a JSON payload. The page is self-contained and works offline.
-2. **URL-driven loading**: Query parameters `?opencli=<url>`, `?xmldoc=<url>`, or `?dir=<url>` point the viewer at remote files. Only active when `--enable-url` is set (or in development mode).
-3. **Manual import**: Users drop or pick `opencli.json` and optional `xmldoc.xml` from disk. Only shown when `--enable-package-upload` is set (or in development mode).
+2. **URL-driven loading**: Query parameters `?opencli=<url>` or `?dir=<url>` point the viewer at remote files, and optional `?xmldoc=<url>` adds XML enrichment to that source. `?xmldoc=<url>` alone does not activate URL loading. Only active when `--enable-url` is set (or in development mode), and when active they override the embedded static input.
+3. **Manual import**: Users open `#/import` to drop or pick `opencli.json` and optional `xmldoc.xml` from disk. The route and toolbar entry are only shown when `--show-home --enable-package-upload` is set (or in development mode).
 
 ### Viewer Features
 
@@ -526,7 +526,7 @@ The bundled viewer supports three boot paths:
 - **Command palette** (Ctrl+K) for quick fuzzy search across all commands
 - **Composer panel** for interactively building CLI invocations from documented options and arguments (toggleable, hideable via `--no-composer`)
 - **Dark/light theme** with toggle button and localStorage persistence (lockable to one theme via `--no-dark` or `--no-light`)
-- **NuGet browser** for searching and exploring indexed .NET CLI tool packages (opt-in via `--enable-nuget-browser`)
+- **NuGet browser** for searching and exploring indexed .NET CLI tool packages (opt-in via `--show-home --enable-nuget-browser`)
 - **Overview panel** showing root-level arguments, options, and command summary
 - **Recursive option inheritance** display
 - **Metadata sections** (when `--include-metadata` is set)
@@ -539,6 +539,8 @@ The bundled viewer supports three boot paths:
 - optional `<dir>/xmldoc.xml`
 
 Missing inferred `xmldoc.xml` is non-fatal.
+
+`?opencli=<url>` loads that OpenCLI JSON directly. Add `?xmldoc=<url>` alongside it when you want XML enrichment from a separate file.
 
 ## Architecture
 

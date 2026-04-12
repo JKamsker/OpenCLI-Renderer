@@ -18,6 +18,8 @@ import { BrowseOrder, FULL_INDEX_HYDRATION_DELAY_MS, sortPackages, splitFramewor
 interface NugetBrowserProps {
   packageId?: string;
   version?: string;
+  inspectError?: string | null;
+  onBackToBrowse: () => void;
   onLoadPackage: (
     opencliUrl: string,
     xmldocUrl: string | undefined,
@@ -25,11 +27,11 @@ interface NugetBrowserProps {
     packageId: string,
     version: string | undefined,
     command: string | undefined,
-  ) => void;
+  ) => Promise<void>;
   onBack: () => void;
 }
 
-export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: NugetBrowserProps) {
+export function NugetBrowser({ packageId, version, inspectError, onBackToBrowse, onLoadPackage, onBack }: NugetBrowserProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [index, setIndex] = useState<DiscoverySummaryIndex | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,7 +171,7 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
               <div className="eyebrow">NuGet Browser</div>
               <h1>Package not found</h1>
               <p className="ds-inline-alert" role="alert">{packageError}</p>
-              <button type="button" className="secondary-button" onClick={() => history.back()} style={{ marginTop: "1rem" }}>
+              <button type="button" className="secondary-button" onClick={onBackToBrowse} style={{ marginTop: "1rem" }}>
                 Back to browser
               </button>
             </section>
@@ -201,6 +203,8 @@ export function NugetBrowser({ packageId, version, onLoadPackage, onBack }: Nuge
           pkg={packageDetail}
           summary={packageSummary}
           selectedVersion={version}
+          loadError={inspectError}
+          onBack={onBackToBrowse}
           onLoadPackage={onLoadPackage}
         />
         {browsePalette}

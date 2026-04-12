@@ -11,7 +11,7 @@ public abstract class HtmlCommandSettingsBase : CommonCommandSettings
     [Spectre.Console.Cli.CommandOption("--out-dir <DIR>")]
     public string? OutputDirectory { get; init; }
 
-    [Description("Show the viewer home screen button in the generated HTML app.")]
+    [Description("Show the Home button in the generated static HTML toolbar.")]
     [Spectre.Console.Cli.CommandOption("--show-home")]
     public bool ShowHome { get; init; }
 
@@ -27,15 +27,15 @@ public abstract class HtmlCommandSettingsBase : CommonCommandSettings
     [Spectre.Console.Cli.CommandOption("--no-light")]
     public bool NoLight { get; init; }
 
-    [Description("Allow the viewer to load OpenCLI inputs from URL query parameters.")]
+    [Description("Allow ?opencli= or ?dir= to load alternate inputs in generated static HTML, with optional ?xmldoc= enrichment. When enabled, query parameters override the embedded input.")]
     [Spectre.Console.Cli.CommandOption("--enable-url")]
     public bool EnableUrl { get; init; }
 
-    [Description("Enable the NuGet package browser on the viewer home screen.")]
+    [Description("Enable the #/browse package browser route, package deep links such as #/pkg/<id>, and the Browse toolbar button in generated static HTML. Requires --show-home.")]
     [Spectre.Console.Cli.CommandOption("--enable-nuget-browser")]
     public bool EnableNugetBrowser { get; init; }
 
-    [Description("Enable local package upload on the viewer home screen.")]
+    [Description("Enable the #/import route and import controls in generated static HTML. Requires --show-home.")]
     [Spectre.Console.Cli.CommandOption("--enable-package-upload")]
     public bool EnablePackageUpload { get; init; }
 

@@ -1345,7 +1345,7 @@
                   "required": false,
                   "aliases": [],
                   "arguments": [],
-                  "description": "Enable the NuGet package browser on the viewer home screen.",
+                  "description": "Enable the #/browse package browser route, package deep links such as #/pkg/<id>, and the Browse toolbar button in generated static HTML. Requires --show-home.",
                   "recursive": false,
                   "hidden": false,
                   "metadata": []
@@ -1355,7 +1355,7 @@
                   "required": false,
                   "aliases": [],
                   "arguments": [],
-                  "description": "Enable local package upload on the viewer home screen.",
+                  "description": "Enable the #/import route and import controls in generated static HTML. Requires --show-home.",
                   "recursive": false,
                   "hidden": false,
                   "metadata": []
@@ -1365,7 +1365,7 @@
                   "required": false,
                   "aliases": [],
                   "arguments": [],
-                  "description": "Allow the viewer to load OpenCLI inputs from  URL query parameters.",
+                  "description": "Allow ?opencli= or ?dir= to load alternate inputs in generated static HTML, with optional ?xmldoc= enrichment. When enabled, query parameters override the embedded input.",
                   "recursive": false,
                   "hidden": false,
                   "metadata": []
@@ -1558,7 +1558,7 @@
                   "required": false,
                   "aliases": [],
                   "arguments": [],
-                  "description": "Show the viewer home screen button in the  generated HTML app.",
+                  "description": "Show the Home button in the generated static HTML toolbar.",
                   "recursive": false,
                   "hidden": false,
                   "metadata": []

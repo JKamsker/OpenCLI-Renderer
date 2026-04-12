@@ -1,25 +1,23 @@
 # Follow-up Logbook
 
-> **Status (2026-04-12): 45 PHASES PUSHED WITH GREEN HOSTED CI, WITH OUTER
-> ITERATION 11 FRESH-SWARM WAVE 1 CONVERGED ON `8d83ebc` AND LOCAL PHASE
-> `g46` NOW IN PROGRESS.**
+> **Status (2026-04-12): 46 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g46`
+> HOSTED VALIDATED ON `f5da215` AND A FRESH POST-`g46` SWARM NEXT.**
 > Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
 > queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
 > `g41`, the packaged-tool verification phase `g42`, the hosted follow-up
-> fix `g43`, the Playwright hosted-CI phase `g44`, and the docs/UI
-> truthfulness phase `g45` are now pushed, and `8d83ebc` is the current
-> hosted-validated code tip.
+> fix `g43`, the Playwright hosted-CI phase `g44`, the docs/UI truthfulness
+> phase `g45`, and the frontend file-limit phase `g46` are now pushed, and
+> `f5da215` is the current hosted-validated code tip.
 > The original zero-BLOCKER/HIGH/MEDIUM stop condition is still **not** met:
-> `g45` closed the stale `AboutPage` / `CIGuidePage` truthfulness HIGH, but
-> the fresh post-`8d83ebc` wave-1 ranking converged on the surviving static
-> HTML contract HIGH, the frontend code-size-policy HIGH, and the same
-> established MEDIUM clusters. Local phase `g46` now closes the narrower
-> frontend code-size slice and is ready to commit/push.
+> `g46` closed the frontend code-size-policy HIGH on the latest
+> hosted-validated tip, but the static HTML contract HIGH and the established
+> MEDIUM clusters remain in the carry-forward ranking from the last converged
+> swarm. A fresh post-`g46` investigation wave is the next required step.
 >
-> Current validated pushed tip: `8d83ebc` with **30 frontend unit tests**,
+> Current validated pushed tip: `f5da215` with **30 frontend unit tests**,
 > **12 Playwright E2E tests**, **354 backend unit tests / 0 failed / 0
 > skipped**, **17 architecture policy tests**, and green `pull_request` run
-> `24301601858`.
+> `24302199808`.
 >
 > The latest green `workflow_dispatch` run is still `24296167355` on pushed tip
 > `a3390bb`, including `live-tests`.
@@ -43,11 +41,10 @@
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
 - No non-completed queued items remain.
-- Latest hosted-validated phase: `g45` (`8d83ebc`) with green
-  `pull_request` run `24301601858`.
-- Current local implementation pick: `g46` for frontend code-size
-  enforcement plus the `CIGuidePage` / `NugetBrowser` hard-cap splits
-  (locally complete; hosted validation pending).
+- Latest hosted-validated phase: `g46` (`f5da215`) with green
+  `pull_request` run `24302199808`.
+- No current local implementation pick remains; the next work item starts
+  with a fresh post-`g46` investigation swarm from the hosted-green tip.
 - `TN-2026-04-12-04` completed on `g44` (`99a2c5a`):
   [TN-2026-04-12-04](TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md)
   (green `pull_request` run `24301203450`)
@@ -57,6 +54,69 @@
   [Close the installed-tool process-safety cluster](TodoNext/2026-04-12-installed-tool-process-safety.md)
 - `TN-2026-04-12-01` completed locally in `g40` (`8b3c0bc`):
   [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
+## Current Open Items After `g46` Hosted Validation (2026-04-12)
+
+This section supersedes the older post-`g45` wave-1 snapshot below for
+current execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `f5da215`
+- green `pull_request` run `24302199808`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Work closed on `g46`:**
+
+- `g46` (`f5da215`) extended `RepositoryCodeFilePolicyTests` so the repo hard
+  `500`-line limit now covers tracked and working-tree `*.cs`, `*.ts`, and
+  `*.tsx` files while preserving the practical `300`-line gate for C# only
+- the policy enumerator now unions `git ls-files` with current tree
+  enumeration, ignores build/output folders, and falls back cleanly when
+  `git` is unavailable so new local splits are still enforced before commit
+- `CIGuidePage.tsx` was split into focused CI-guide shell, data, section, and
+  code modules; the page-local copy button was removed in favor of the shared
+  `CopyButton`; `NugetBrowser.tsx` was split so both surviving owner files are
+  back under the repo hard cap
+- hosted rerun `24302199808` completed green with `30` frontend unit tests,
+  `12` Playwright E2E tests, `354 / 0 / 0` backend unit tests, and `17`
+  architecture policy tests
+
+**Still-open ranked clusters pending the fresh post-`f5da215` swarm:**
+
+- **HIGH: generated static HTML still overstates several public viewer
+  features.**
+  The public contract still advertises `--show-home`,
+  `--enable-package-upload`, `--enable-nuget-browser`, and `--enable-url`,
+  but the shipped `static.html` entry still routes through `StaticViewerApp`,
+  which does not wire the real browser/import flows and still prefers the
+  injected bootstrap over query-param loading.
+- **MEDIUM: process and viewer failure diagnostics still discard useful
+  stdout/timeout evidence.**
+  `ProcessRunner.cs` and
+  `Rendering/Html/Bundle/ViewerBundleProcessSupport.cs` still collapse many
+  non-zero or timed-out failures to exit codes or short timeout messages even
+  when stdout contains the actionable error text.
+- **MEDIUM: installed-tool selection and action versioning remain
+  nondeterministic.**
+  Installed-tool analysis still picks the first matching
+  `DotnetToolSettings.xml`, and the composite action still lets ambient
+  `inspectra` on `PATH` override `inspectra-version`.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals.**
+  `StaticAnalysisInstalledToolAnalysisSupport.cs` still bypasses the
+  output-limit / guardrail terminal checks that the help and CliFx analyzers
+  already honor.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine scanners still rely on plain `using` detection in multiple
+  suites, and the `Rendering.Markdown` / `Rendering.Html` separation is still
+  chartered but not executable.
+- **LOW: frontend practical-limit drift remains aggregated but non-blocking.**
+  Current carried-forward examples include
+  `src/InSpectra.UI/src/test/app.test.tsx` (`410` lines),
+  `src/InSpectra.UI/src/components/CliViewer.tsx` (`366` lines), and
+  `src/InSpectra.UI/src/components/ComposerPanel.tsx` (`330` lines). `g46`
+  removed the duplicate local `CopyButton` from `CIGuidePage.tsx`, so that
+  LOW is now closed.
 
 ## Current Open Items After `g45` Fresh-Swarm Wave 1 (2026-04-12)
 

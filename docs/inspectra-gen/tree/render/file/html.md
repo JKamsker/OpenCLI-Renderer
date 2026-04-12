@@ -21,9 +21,9 @@ Render an HTML app bundle from an OpenCLI JSON  file and optional XML enrichment
 | --command-prefix | — | <TEXT> | No | No | Declared | — | Override the CLI command prefix used in  generated examples and the composer. | TEXT · required · arity 1 |
 | --compression-level | — | <LEVEL> | No | No | Declared | — | Compression level: 0 = none, 1 = compress embedded JSON in multi-file bundle mode, 2 = self-extracting single-file bundle (default). | LEVEL · required · arity 1 |
 | --dry-run | — | flag | No | No | Declared | — | Preview the resolved render plan without  writing files. | — |
-| --enable-nuget-browser | — | flag | No | No | Declared | — | Enable the NuGet package browser on the viewer home screen. | — |
-| --enable-package-upload | — | flag | No | No | Declared | — | Enable local package upload on the viewer home screen. | — |
-| --enable-url | — | flag | No | No | Declared | — | Allow the viewer to load OpenCLI inputs from  URL query parameters. | — |
+| --enable-nuget-browser | — | flag | No | No | Declared | — | Enable the `#/browse` package browser route, package deep links such as `#/pkg/<id>`, and the Browse toolbar button in generated static HTML. Requires `--show-home`. | — |
+| --enable-package-upload | — | flag | No | No | Declared | — | Enable the `#/import` route and import controls in generated static HTML. Requires `--show-home`. | — |
+| --enable-url | — | flag | No | No | Declared | — | Allow `?opencli=` or `?dir=` to load alternate inputs in generated static HTML, with optional `?xmldoc=` enrichment. When enabled, query parameters override the embedded input. | — |
 | --include-hidden | — | flag | No | No | Declared | — | Include commands and options marked hidden by  the source CLI. | — |
 | --include-metadata | — | flag | No | No | Declared | — | Include metadata sections in the rendered  Markdown or HTML output. | — |
 | --json | — | flag | No | No | Declared | — | Emit the stable machine-readable JSON envelope instead of human output. | — |
@@ -37,7 +37,7 @@ Render an HTML app bundle from an OpenCLI JSON  file and optional XML enrichment
 | --output | — | <MODE> | No | No | Declared | — | Override the output mode. Supported values are human and json. | MODE · required · arity 1 |
 | --overwrite | — | flag | No | No | Declared | — | Allow existing output files or directories to  be replaced. | — |
 | --quiet | -q | flag | No | No | Declared | — | Suppress non-essential console output. | — |
-| --show-home | — | flag | No | No | Declared | — | Show the viewer home screen button in the  generated HTML app. | — |
+| --show-home | — | flag | No | No | Declared | — | Show the Home button in the generated static HTML toolbar. | — |
 | --single-file | — | flag | No | No | Declared | — | Emit a single self-contained HTML file with  all assets inlined. Works from file:// without a web server. | — |
 | --theme | — | <MODE> | No | No | Declared | — | Set the initial theme mode (light or dark). | MODE · required · arity 1 |
 | --title | — | <TEXT> | No | No | Declared | — | Override the CLI title shown in the viewer  header and overview. | TEXT · required · arity 1 |

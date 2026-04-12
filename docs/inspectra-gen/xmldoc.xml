@@ -112,16 +112,17 @@ examples and the composer.</Description>
 files.</Description>
           </Option>
           <Option Short="" Long="enable-nuget-browser" Value="NULL" Required="false" Kind="flag" ClrType="System.Boolean">
-            <Description>Enable the NuGet package browser on the viewer home 
-screen.</Description>
+            <Description>Enable the #/browse package browser route, package
+deep links such as #/pkg/&lt;id&gt;, and the Browse toolbar button in generated
+static HTML. Requires --show-home.</Description>
           </Option>
           <Option Short="" Long="enable-package-upload" Value="NULL" Required="false" Kind="flag" ClrType="System.Boolean">
-            <Description>Enable local package upload on the viewer home 
-screen.</Description>
+            <Description>Enable the #/import route and import controls in
+generated static HTML. Requires --show-home.</Description>
           </Option>
           <Option Short="" Long="enable-url" Value="NULL" Required="false" Kind="flag" ClrType="System.Boolean">
-            <Description>Allow the viewer to load OpenCLI inputs from URL query 
-parameters.</Description>
+            <Description>Allow ?opencli= or ?dir= to load alternate inputs in
+generated static HTML, with optional ?xmldoc= enrichment. When enabled, query parameters override the embedded input.</Description>
           </Option>
           <Option Short="" Long="include-hidden" Value="NULL" Required="false" Kind="flag" ClrType="System.Boolean">
             <Description>Include commands and options marked hidden by the 
@@ -175,8 +176,8 @@ replaced.</Description>
             <Description>Suppress non-essential console output.</Description>
           </Option>
           <Option Short="" Long="show-home" Value="NULL" Required="false" Kind="flag" ClrType="System.Boolean">
-            <Description>Show the viewer home screen button in the generated 
-HTML app.</Description>
+            <Description>Show the Home button in the generated static HTML
+toolbar.</Description>
           </Option>
           <Option Short="" Long="single-file" Value="NULL" Required="false" Kind="flag" ClrType="System.Boolean">
             <Description>Emit a single self-contained HTML file with all assets 
