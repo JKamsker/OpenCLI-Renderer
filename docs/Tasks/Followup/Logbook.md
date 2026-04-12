@@ -1,23 +1,24 @@
 # Follow-up Logbook
 
-> **Status (2026-04-12): 46 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g46`
-> HOSTED VALIDATED ON `f5da215` AND A FRESH POST-`g46` SWARM NEXT.**
+> **Status (2026-04-12): 48 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g47` /
+> `g48` HOSTED VALIDATED ON `e3990ea` AND A FRESH POST-`g48` SWARM NEXT.**
 > Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
 > queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
 > `g41`, the packaged-tool verification phase `g42`, the hosted follow-up
 > fix `g43`, the Playwright hosted-CI phase `g44`, the docs/UI truthfulness
-> phase `g45`, and the frontend file-limit phase `g46` are now pushed, and
-> `f5da215` is the current hosted-validated code tip.
+> phase `g45`, the frontend file-limit phase `g46`, the static-package-route
+> phase `g47`, and the hosted test-support follow-up phase `g48` are now
+> pushed, and `e3990ea` is the current hosted-validated code tip.
 > The original zero-BLOCKER/HIGH/MEDIUM stop condition is still **not** met:
-> `g46` closed the frontend code-size-policy HIGH on the latest
-> hosted-validated tip, but the static HTML contract HIGH and the established
-> MEDIUM clusters remain in the carry-forward ranking from the last converged
-> swarm. A fresh post-`g46` investigation wave is the next required step.
+> `g47` / `g48` closed the static-HTML contract HIGH on the latest
+> hosted-validated tip, but the established dotnet/backend MEDIUM clusters
+> remain. A fresh post-`g48` investigation wave is the next required step,
+> and the user directed that the next swarm focus on the dotnet projects.
 >
-> Current validated pushed tip: `f5da215` with **30 frontend unit tests**,
+> Current validated pushed tip: `e3990ea` with **61 frontend unit tests**,
 > **12 Playwright E2E tests**, **354 backend unit tests / 0 failed / 0
 > skipped**, **17 architecture policy tests**, and green `pull_request` run
-> `24302199808`.
+> `24303960057`.
 >
 > The latest green `workflow_dispatch` run is still `24296167355` on pushed tip
 > `a3390bb`, including `live-tests`.
@@ -41,10 +42,12 @@
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
 - No non-completed queued items remain.
-- Latest hosted-validated phase: `g46` (`f5da215`) with green
-  `pull_request` run `24302199808`.
+- Latest hosted-validated phases: `g47` / `g48`
+  (`ab7719a`, `e3990ea`) with failed `pull_request` run `24303874752`
+  followed by green `pull_request` run `24303960057`.
 - No current local implementation pick remains; the next work item starts
-  with a fresh post-`g46` investigation swarm from the hosted-green tip.
+  with a fresh post-`g48` investigation swarm from the hosted-green tip,
+  focused on the dotnet projects per the latest user instruction.
 - `TN-2026-04-12-04` completed on `g44` (`99a2c5a`):
   [TN-2026-04-12-04](TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md)
   (green `pull_request` run `24301203450`)
@@ -54,6 +57,89 @@
   [Close the installed-tool process-safety cluster](TodoNext/2026-04-12-installed-tool-process-safety.md)
 - `TN-2026-04-12-01` completed locally in `g40` (`8b3c0bc`):
   [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
+## Current Open Items After `g48` Hosted Validation (2026-04-12)
+
+This section supersedes the older post-`g46` hosted-validation snapshot below
+for current execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `e3990ea`
+- green `pull_request` run `24303960057`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Outer iteration 12 wave summary and shipped phases:**
+
+- fresh post-`f5da215` swarm converged on the static-HTML contract HIGH in the
+  static package-route / browse-detail slice, plus adjacent UI LOWs and test
+  gaps; no new smell family surfaced
+- `g47` (`ab7719a`) closed the real runtime/doc issues:
+  direct package-route latest/version handling, browse-detail inspect version
+  transitions, stale success/failure suppression, browse-detail error
+  surfacing, and the `?xmldoc=` docs/runtime contract drift
+- `g47` also expanded the regression suite around versioned package hashes,
+  latest-vs-versioned route switching, stale document-load exits, missing
+  version errors, browse-detail inspect failure handling, stale browse-detail
+  failures, and gated static routes
+- hosted `pull_request` run `24303874752` failed only because the expanded
+  `StaticViewerApp.test.tsx` reached `557` lines and tripped the repo hard
+  `500`-line policy in `RepositoryCodeFilePolicyTests`
+- `g48` (`e3990ea`) split the static-viewer test helpers into
+  `staticViewerTestSupport.ts`, bringing `StaticViewerApp.test.tsx` back to
+  `401` lines while preserving the new coverage
+- local `g48` reruns passed:
+  - `npm test` in `src/InSpectra.UI` ✅ (`61 / 61`)
+  - `dotnet test tests/InSpectra.Gen.Tests/InSpectra.Gen.Tests.csproj --no-restore --filter "FullyQualifiedName~RepositoryCodeFilePolicyTests"` ✅ (`2 / 2`)
+- hosted rerun `24303960057` completed green with `61` frontend unit tests,
+  `12` Playwright E2E tests, `354 / 0 / 0` backend unit tests, and `17`
+  architecture policy tests
+
+**Still-open ranked clusters pending the fresh post-`e3990ea` swarm:**
+
+- **MEDIUM: process and viewer failure diagnostics still discard useful
+  stdout/timeout evidence.**
+  `ProcessRunner.cs` and
+  `Rendering/Html/Bundle/ViewerBundleProcessSupport.cs` still collapse many
+  non-zero or timed-out failures to exit codes or short timeout messages even
+  when stdout contains the actionable error text.
+- **MEDIUM: installed-tool selection and action versioning remain
+  nondeterministic.**
+  Installed-tool analysis still picks the first matching
+  `DotnetToolSettings.xml`, and the composite action still lets ambient
+  `inspectra` on `PATH` override `inspectra-version`.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals.**
+  `StaticAnalysisInstalledToolAnalysisSupport.cs` still bypasses the
+  output-limit / guardrail terminal checks that the help and CliFx analyzers
+  already honor.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine scanners still rely on plain `using` detection in multiple
+  suites, and the `Rendering.Markdown` / `Rendering.Html` separation is still
+  chartered but not executable.
+- **LOW: frontend static-route polish and maintainability findings remain
+  aggregated but non-blocking.**
+  Current carried-forward LOWs include:
+  - `#/pkg/{id}` and `#/pkg/{id}/{latestVersion}` still reload equivalent
+    content because the resolved latest version is not persisted in
+    `packageContext`
+  - a failed direct package load can still leave a stale alert on `#/` until a
+    later load clears the shared `error` state
+  - standalone `#/about` and `#/guide` still fall through to the generic
+    no-bootstrap error instead of redirecting to a valid static destination
+  - package-route version matching still depends on duplicated normalization
+    logic across `staticViewerSupport.ts` and `staticViewerState.ts`
+  - practical frontend file-size drift remains aggregated in
+    `src/InSpectra.UI/src/test/app.test.tsx` (`410` lines),
+    `src/InSpectra.UI/src/components/CliViewer.tsx` (`366` lines),
+    `src/InSpectra.UI/src/components/ComposerPanel.tsx` (`330` lines), and
+    `src/InSpectra.UI/src/StaticViewerApp.tsx` (`320` lines)
+
+**Next-step focus:**
+
+- the next fresh investigation swarm should focus on the dotnet projects and
+  the surviving backend/tooling MEDIUM clusters, not another frontend pass,
+  unless genuinely new evidence appears
+- no new smell category was discovered in outer iteration 12
 
 ## Current Open Items After `g46` Hosted Validation (2026-04-12)
 

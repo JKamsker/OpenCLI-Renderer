@@ -8,36 +8,38 @@ This folder replaces the old monolithic
 - Working branch: `feat/merge-tool`
 - Current follow-up docs live on the branch tip; verify `HEAD` before
   resuming work.
-- Latest fully validated pushed tip: `f5da215`
+- Latest fully validated pushed tip: `e3990ea`
 - Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, and
   the queue-driven thin-shell phase `g40`, the installed-tool
   process-safety phase `g41`, the packaged-tool verification phase `g42`, and
   the hosted follow-up fix `g43`, the Playwright hosted-CI phase `g44`, the
-  website truthfulness phase `g45`, and the frontend file-limit phase `g46`
-  are now pushed and hosted validated.
-- The pushed tip `f5da215` is hosted validated:
-  - `30` frontend unit tests
+  website truthfulness phase `g45`, the frontend file-limit phase `g46`, the
+  static-package-route phase `g47`, and the hosted test-support follow-up
+  phase `g48` are now pushed and hosted validated.
+- The pushed tip `e3990ea` is hosted validated:
+  - `61` frontend unit tests
   - `12` Playwright E2E tests
   - `354 / 0 / 0` backend unit tests
   - `17` architecture policy tests
-  - green `pull_request` run `24302199808`
+  - green `pull_request` run `24303960057`
 - The latest green `workflow_dispatch` validation is still on pushed tip
   `a3390bb`:
   - green `workflow_dispatch` run `24296167355`, including `live-tests`
-- Outer iteration 11 closed `g46` on `f5da215`; the next required step is a
-  fresh post-`g46` investigation swarm from the current hosted-green tip.
+- Outer iteration 12 closed `g47` / `g48` on `e3990ea`; the next required
+  step is a fresh post-`g48` investigation swarm from the current
+  hosted-green tip.
 - The original zero-BLOCKER/HIGH/MEDIUM stop condition was not reached.
-  `g46` closed the frontend code-size-policy HIGH on the latest
-  hosted-validated tip, but the static-HTML contract HIGH and the established
-  MEDIUM clusters still remain in the carry-forward ranking from the last
-  converged swarm. A fresh post-`g46` swarm must re-rank from the current
-  tree before the next phase is chosen.
+  `g47` / `g48` closed the static-HTML contract HIGH on the latest
+  hosted-validated tip, but the established dotnet/backend MEDIUM clusters
+  still remain. The next fresh swarm should re-rank from the current tree
+  with user-directed focus on the dotnet projects.
 - Active todo-next queue:
   - no non-completed queued items remain
-  - latest hosted-validated phase: `g46` (`f5da215`) with green
-    `pull_request` run `24302199808`
+  - latest hosted-validated phases: `g47` / `g48`
+    (`ab7719a`, `e3990ea`) with failed `pull_request` run `24303874752`
+    followed by green `pull_request` run `24303960057`
   - no current local implementation pick; the next work item starts with a
-    fresh post-`g46` investigation swarm
+    fresh post-`g48` investigation swarm focused on the dotnet projects
   - `TN-2026-04-12-04` completed on `g44` (`99a2c5a`) with green
     `pull_request` run `24301203450`:
     [TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md](TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md)
@@ -53,7 +55,7 @@ This folder replaces the old monolithic
 ## Current Handoff State
 
 - Source of truth for current open work:
-  [Logbook](Logbook.md#current-open-items-after-g46-hosted-validation-2026-04-12)
+  [Logbook](Logbook.md#current-open-items-after-g48-hosted-validation-2026-04-12)
 - Source of truth for how to resume the loop:
   [Runbook](Runbook.md)
 - Source of truth for mandatory queued work before the next swarm:
