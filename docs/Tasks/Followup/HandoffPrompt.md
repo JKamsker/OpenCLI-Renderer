@@ -1,9 +1,3 @@
-# Reusable Handoff Prompt
-
-Use this prompt as-is for the next agent. It is intentionally stateless: the
-prompt delegates all mutable state to the follow-up docs in this folder.
-
-```text
 You are picking up the InSpectra follow-up “infinite loop” task.
 
 Before taking action, read the follow-up docs top to bottom in this order:
@@ -69,4 +63,3 @@ When you finish, provide:
 
 Before editing, verify the current branch, HEAD, and worktree yourself in case
 they moved since the docs were last updated.
-```
