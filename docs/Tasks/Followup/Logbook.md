@@ -1,7 +1,7 @@
 # Follow-up Logbook
 
-> **Status (2026-04-12): 53 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g53`
-> HOSTED VALIDATED ON `567e144` AND A FRESH DOTNET/BACKEND SWARM NOW
+> **Status (2026-04-12): 54 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g54`
+> HOSTED VALIDATED ON `9195242` AND A FRESH DOTNET/BACKEND SWARM NOW
 > REQUIRED.**
 > Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
 > queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
@@ -11,26 +11,29 @@
 > phase `g47`, the hosted test-support follow-up phase `g48`, the backend
 > failure-diagnostics phase `g49`, the hosted OpenCli test-support
 > follow-up phase `g50`, the installed-tool multi-TFM determinism phase
-> `g51`, the viewer-bundle rebuild-failure phase `g52`, and the install-host /
-> failure-detail phase `g53` are now pushed, and `567e144` is the current
-> hosted-validated code tip.
+> `g51`, the viewer-bundle rebuild-failure phase `g52`, the install-host /
+> failure-detail phase `g53`, and the discovery-contract carry-forward
+> phase `g54` are now pushed, and `9195242` is the current hosted-validated
+> code tip.
 > The original zero-BLOCKER/HIGH/MEDIUM stop condition is still **not** met:
-> `g49` / `g50` / `g51` / `g52` / `g53` closed the ProcessRunner diagnostics
-> HIGH, the native-attempt detail loss, the installed-tool determinism MEDIUM,
-> the viewer-bundle stale-fallback HIGH, and the install-time dotnet-host
-> mismatch plus install failure-detail loss on the latest hosted-validated tip,
-> but the hosted action/version determinism HIGH plus the remaining backend
-> MEDIUM clusters remain. The next required step is a fresh dotnet/backend
-> swarm from the current tree, and the user-directed focus remains on the
-> dotnet projects.
+> `g49` / `g50` / `g51` / `g52` / `g53` / `g54` closed the ProcessRunner
+> diagnostics HIGH, the native-attempt detail loss, the installed-tool
+> determinism MEDIUM, the viewer-bundle stale-fallback HIGH, the install-time
+> dotnet-host mismatch plus install failure-detail loss, and the user-directed
+> Cake native-regression plus missing hosted auto-resolver contract coverage on
+> the latest hosted-validated tip, but the hosted action/version determinism
+> HIGH plus the remaining backend MEDIUM clusters remain. The next required
+> step is a fresh dotnet/backend swarm from the current tree, and the
+> user-directed focus remains on the dotnet projects.
 >
-> Current validated pushed tip: `567e144` with **61 frontend unit tests**,
-> **12 Playwright E2E tests**, green `pull_request` run `24306957046`, and
-> local validation on the same tip of a focused tooling slice of **4 tests**,
-> a full engine rerun of **202 tests**, and repo policy **2 / 2**.
+> Current validated pushed tip: `9195242` with **61 frontend unit tests**,
+> **12 Playwright E2E tests**, **43 hosted live tests**, green `pull_request`
+> run `24311087147`, green `workflow_dispatch` run `24311095925`, and local
+> Docker validation on the same tip of a non-live solution subset of
+> **341 tests** plus targeted live reruns of **8 tests**.
 >
-> The latest green `workflow_dispatch` run is still `24296167355` on pushed tip
-> `a3390bb`, including `live-tests`.
+> The latest green `workflow_dispatch` run is `24311095925` on pushed tip
+> `9195242`, including `live-tests`.
 >
 > Use this file for shipped history, test/CI ledger, lessons learned, and the
 > current open-findings list. Use [README](README.md), [Runbook](Runbook.md),
@@ -51,8 +54,9 @@
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
 - No non-completed queued items remain.
-- Latest hosted-validated phase: `g53` (`567e144`) with green
-  `pull_request` run `24306957046`.
+- Latest hosted-validated phase: `g54` (`9195242`) with green
+  `pull_request` run `24311087147` and green `workflow_dispatch` run
+  `24311095925`.
 - No queue item blocks the loop; the next work item is a fresh dotnet/backend
   investigation swarm from the current tree under the user’s dotnet-project
   directive.
@@ -65,6 +69,115 @@
   [Close the installed-tool process-safety cluster](TodoNext/2026-04-12-installed-tool-process-safety.md)
 - `TN-2026-04-12-01` completed locally in `g40` (`8b3c0bc`):
   [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
+## Current Open Items After `g54` Hosted Validation (2026-04-12)
+
+This section supersedes the older post-`g53` hosted-validation snapshot below
+for current execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `9195242`
+- green `pull_request` run `24311087147`
+- green `workflow_dispatch` run `24311095925`
+- hosted `live-tests` now pass `43 / 0 / 0`
+
+**User-directed phase summary and shipped phase:**
+
+- `g54` (`9195242`) carried the fixed-package auto resolver contract from
+  `InSpectra-Discovery` into `tests/InSpectra.Gen.Engine.Tests/Live`, added
+  the missing hosted regression cases to the `Category=Live` lane, and kept
+  the live harness aligned with the real package defaults by sharing the
+  `cli opencli` / `cli xmldoc` native export arguments
+- the same phase also hardened native acquisition so invalid JSON now becomes
+  a classified failed attempt instead of silently aborting the run, with
+  focused unit coverage for the preserved parser detail
+- `g54` removed the unstable Linux `dotnet-mgcb` carry-over case and replaced
+  it with `SaigonMio.Generata 1.1.36`, which preserves the intended
+  hook/static-to-help fallback shape without depending on a UI-oriented package
+- local Docker validation passed:
+  - `dotnet test InSpectra.Gen.sln --filter "Category!=WindowsOnly&Category!=Live"` ✅ (`341 / 341`)
+  - `INSPECTRA_GEN_LIVE_TESTS=1 INSPECTRA_LIVE_UPDATE_SNAPSHOTS=1 dotnet test tests/InSpectra.Gen.Engine.Tests/InSpectra.Gen.Engine.Tests.csproj --filter "FullyQualifiedName~AutoAnalysisServiceLiveTests|FullyQualifiedName~AutoHookFallbackLiveTests"` ✅ (`8 / 8`)
+  - `INSPECTRA_GEN_LIVE_TESTS=1 dotnet test tests/InSpectra.Gen.Engine.Tests/InSpectra.Gen.Engine.Tests.csproj --filter "FullyQualifiedName~AutoAnalysisServiceLiveTests|FullyQualifiedName~AutoHookFallbackLiveTests"` ✅ (`8 / 8`)
+- hosted rerun `24311087147` completed green across `build-test`,
+  `windows-backend-tests`, and `package-pages-preview`
+- hosted rerun `24311095925` completed green across `build-test`,
+  `windows-backend-tests`, and `live-tests` (`43 / 0 / 0`)
+- no new smell category was discovered in this user-directed phase
+
+**Discovery-contract differences assessed in `g54`:**
+
+- **Fixed regression:** `Cake.Tool 6.1.0` remains a `native` case. The old
+  mismatch was helper drift, not a heuristic problem: the live helper had
+  stopped using the real `cli opencli` default arguments, so bare
+  `dotnet-cake` fell into `build.cake` behavior. `g54` fixes that drift by
+  sharing the defaults.
+- **Accepted snapshot divergence:** `csharp-ls 0.22.0` still differs from the
+  historical discovery snapshot, but the current output is more correct
+  because it preserves real option-argument metadata.
+- **Accepted mode rebaselines:** `DotNetAnalyzer 1.5.0` and
+  `SoftwareExtravaganza.Whizbang.CLI 0.54.2-alpha.76` now intentionally accept
+  `help` instead of the older discovery `static` expectation. The current
+  resolver still over-confirms framework hints from secondary assemblies, so a
+  future backend phase may tighten that heuristic, but the current hosted
+  result is now recorded as the accepted contract.
+- **Accepted fallback rebase:** `sqlite-global-tool 1.2.2` no longer requires
+  a hook attempt before `help`; current hook eligibility correctly depends on
+  stronger entry-assembly evidence than the older discovery contract assumed.
+- **Accepted classification rename:** `Meadow.Cli 0.3.225` now records the
+  terminal failure as `invalid-opencli-artifact` instead of the older
+  `invalid-success-artifact`.
+- **Accepted matrix replacement:** `dotnet-mgcb` was removed from the stable
+  Linux contract set per the user instruction and replaced with
+  `SaigonMio.Generata 1.1.36`; the Windows-specific
+  `dotnet-mgcb-editor-windows` and Linux-invalid `METU.CORE` cases were not
+  carried into the current hosted contract.
+
+**Still-open ranked clusters after `g54`:**
+
+- **HIGH: hosted action/version determinism still depends on ambient PATH and
+  floating workflow wiring.**
+  `.github/actions/render/action.yml` still lets ambient `inspectra` override
+  `inspectra-version`, and the reusable workflow/action revision surface still
+  drifts from the current tree.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals
+  and overstates degraded help coverage.**
+  `StaticInstalledToolAnalysisSupport.cs` still bypasses the output-limit /
+  guardrail terminal checks that the help and CliFx analyzers honor, and
+  `StaticAnalysisCoverageClassifier.cs` still labels partial or budget-clipped
+  metadata-plus-help crawls as full coverage.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine dependency suites still rely on plain `using` detection,
+  and the `Rendering.Markdown` / `Rendering.Html` separation is still
+  chartered but not executable.
+- **MEDIUM: the public provider seam still leaks engine-internal
+  orchestration and targeting APIs.**
+  `Contracts/Providers/*` still exports types the thin shell no longer uses,
+  and `ArchitectureEnginePublicSurfaceTests` currently blesses the whole
+  namespace wholesale.
+- **MEDIUM: hook-installed-tool runtimeconfig synthesis still hides setup
+  failures behind the generic fallback path.**
+  `HookToolProcessInvocationResolver.cs` still writes a synthetic
+  runtimeconfig synchronously under `catch { return false; }`, so failures in
+  that setup path quietly drop back to the generic help invocation.
+- **LOW: backend rendering/output ownership drift remains aggregated.**
+  `OpenCliArtifactWriter.cs` still reaches into
+  `Rendering.Pipeline.OutputPathHelper`, and the carried backend diagnostics
+  nits around best-effort timeout snapshots and multiline human detail blocks
+  remain open.
+- **LOW: frontend static-route polish and frontend practical file-size drift
+  remain aggregated but non-blocking.**
+  The previously logged static-route polish items and frontend practical
+  file-size LOWs remain open and unchanged by `g54`.
+
+**Next-step focus:**
+
+- start a fresh dotnet/backend investigation swarm from the current tree
+- keep the user-directed focus on the dotnet projects
+- preserve `g54`'s discovery-contract ledger as an accepted baseline and only
+  re-open those differences if a fresh backend phase produces new evidence
+  that the current outcomes are wrong rather than merely evolved
+  from `InSpectra-Discovery`
 
 ## Current Open Items After `g53` Hosted Validation (2026-04-12)
 

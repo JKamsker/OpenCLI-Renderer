@@ -8,40 +8,45 @@ This folder replaces the old monolithic
 - Working branch: `feat/merge-tool`
 - Current follow-up docs live on the branch tip; verify `HEAD` before
   resuming work.
-- Latest fully validated pushed tip: `567e144`
-- Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, and
-  the queue-driven thin-shell phase `g40`, the installed-tool
-  process-safety phase `g41`, the packaged-tool verification phase `g42`, and
-  the hosted follow-up fix `g43`, the Playwright hosted-CI phase `g44`, the
-  website truthfulness phase `g45`, the frontend file-limit phase `g46`, the
-  static-package-route phase `g47`, the hosted test-support follow-up
-  phase `g48`, the backend failure-diagnostics phase `g49`, the hosted
-  OpenCli test-support follow-up phase `g50`, and the installed-tool
-  multi-TFM determinism phase `g51`, and the viewer-bundle
-  rebuild-failure phase `g52`, and the install-host / failure-detail
-  phase `g53` are now pushed and hosted validated.
-- The pushed tip `567e144` is hosted validated:
+- Latest fully validated pushed tip: `9195242`
+- Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
+  queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
+  `g41`, the packaged-tool verification phase `g42`, the hosted follow-up
+  fix `g43`, the Playwright hosted-CI phase `g44`, the website truthfulness
+  phase `g45`, the frontend file-limit phase `g46`, the static-package-route
+  phase `g47`, the hosted test-support follow-up phase `g48`, the backend
+  failure-diagnostics phase `g49`, the hosted OpenCli test-support follow-up
+  phase `g50`, the installed-tool multi-TFM determinism phase `g51`, the
+  viewer-bundle rebuild-failure phase `g52`, the install-host / failure-detail
+  phase `g53`, and the discovery-contract carry-forward phase `g54` are now
+  pushed and hosted validated.
+- The pushed tip `9195242` is hosted validated:
   - `61` frontend unit tests
   - `12` Playwright E2E tests
-  - green `pull_request` run `24306957046`
-  - local validation on the same tip:
-    focused tooling slice `4 / 4`, full engine rerun `202 / 202`, and repo
-    policy `2 / 2`
-- The latest green `workflow_dispatch` validation is still on pushed tip
-  `a3390bb`:
-  - green `workflow_dispatch` run `24296167355`, including `live-tests`
-- Outer iteration 15 wave 1 shipped `g53` on `567e144`; the next required
-  step is a fresh dotnet/backend investigation swarm from the current tree.
+  - `43` hosted live tests
+  - green `pull_request` run `24311087147`
+  - green `workflow_dispatch` run `24311095925`
+  - local Docker validation on the same tip:
+    non-live solution subset `341 / 341`, targeted live regeneration `8 / 8`,
+    and targeted live rerun `8 / 8`
+- The latest green `workflow_dispatch` validation is on pushed tip `9195242`:
+  - green `workflow_dispatch` run `24311095925`, including `live-tests`
+- `g54` carried the fixed-package auto resolver contract over from
+  `InSpectra-Discovery`, kept `Cake.Tool` on the intended native path by
+  sharing the `cli opencli` defaults, replaced the unstable Linux `mgcb`
+  case with `SaigonMio.Generata`, and rebaselined the accepted discovery
+  divergences that still produce correct current outcomes.
 - The original zero-BLOCKER/HIGH/MEDIUM stop condition was not reached.
-  `g53` closed the install-time dotnet-host alignment HIGH plus the remaining
-  installed-tool failure-detail loss in the command-install path, but the
-  hosted action/version determinism HIGH plus the remaining backend MEDIUM
-  clusters still remain, so the next fresh swarm should stay focused on the
+  `g54` expanded the hosted live regression surface and fixed the discovered
+  Cake native-invocation regression, but the hosted action/version determinism
+  HIGH plus the remaining backend MEDIUM clusters from the post-`g53`
+  ledger still remain, so the next fresh swarm should stay focused on the
   dotnet projects.
 - Active todo-next queue:
   - no non-completed queued items remain
-  - latest hosted-validated phase: `g53` (`567e144`) with green
-    `pull_request` run `24306957046`
+  - latest hosted-validated phase: `g54` (`9195242`) with green
+    `pull_request` run `24311087147` and green `workflow_dispatch` run
+    `24311095925`
   - next work item is a fresh dotnet/backend investigation swarm from the
     current tree
   - `TN-2026-04-12-04` completed on `g44` (`99a2c5a`) with green
@@ -59,7 +64,7 @@ This folder replaces the old monolithic
 ## Current Handoff State
 
 - Source of truth for current open work:
-  [Logbook](Logbook.md#current-open-items-after-g53-hosted-validation-2026-04-12)
+  [Logbook](Logbook.md#current-open-items-after-g54-hosted-validation-2026-04-12)
 - Source of truth for how to resume the loop:
   [Runbook](Runbook.md)
 - Source of truth for mandatory queued work before the next swarm:
