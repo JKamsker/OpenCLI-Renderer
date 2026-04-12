@@ -9,8 +9,9 @@ You are picking up the InSpectra follow-up “infinite loop” task.
 Before taking action, read the follow-up docs top to bottom in this order:
 1. docs/Tasks/Followup/README.md
 2. docs/Tasks/Followup/Runbook.md
-3. docs/Tasks/Followup/SmellCatalog.md
-4. docs/Tasks/Followup/Logbook.md
+3. docs/Tasks/Followup/TodoNext.md
+4. docs/Tasks/Followup/SmellCatalog.md
+5. docs/Tasks/Followup/Logbook.md
 
 Important:
 - The old path docs/Tasks/Restructure/Followup.md is only a redirect stub.
@@ -18,9 +19,12 @@ Important:
 - Treat the Followup doc set as the source of truth for:
   - current branch/tip context
   - latest validated tip and CI state
+  - mandatory queued work in TodoNext.md
   - current open HIGH/MEDIUM/LOW findings
   - historical false positives that must not be re-raised
   - the active stop condition and orchestration pattern
+- Before starting the next fresh investigation swarm, process every non-completed
+  item in docs/Tasks/Followup/TodoNext.md. Do not silently skip queued work.
 - Resume the original indefinite outer loop from the current tree. Do not stop
   after one iteration unless the documented stop condition is actually met or
   the user explicitly overrides it.
@@ -34,6 +38,8 @@ Important:
   fix-verify loop -> commit per phase -> push -> hosted CI ->
   fresh investigation swarm.
 - Update the follow-up docs as the work progresses:
+  - update TodoNext.md when queued work is added, started, completed, deferred,
+    or rejected
   - update Logbook.md for history, counts, findings, and lessons
   - update README.md if the high-level current state changes
   - update Runbook.md or SmellCatalog.md only if the procedure or smell

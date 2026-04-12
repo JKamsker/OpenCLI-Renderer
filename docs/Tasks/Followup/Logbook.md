@@ -30,6 +30,13 @@
 > | `450e808` | g5 | Split the 2 cross-cutting service+DTO pairs where the DTO is used far from its declaration (`ProcessResult`, `StaticAnalysisFrameworkAdapter`). Remaining 22 service+DTO pairs left inline under the tight-coupling exception. |
 > | `59ba4a2` | g6 | Synced `README.md` Project Layout with the 5 source + 2 test projects. |
 
+## Todo Next Snapshot
+
+- Queue source of truth: [Todo Next Queue](TodoNext.md)
+- Current mandatory queued item before the next fresh swarm:
+  - `TN-2026-04-12-01` `Ready`:
+    [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
 ## Retrospective (executed 2026-04-11)
 
 This section is self-contained: a reader should be able to understand

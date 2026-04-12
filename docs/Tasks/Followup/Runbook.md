@@ -52,6 +52,7 @@ Reference docs worth reading:
 - `docs/Tasks/Restructure/Task.md`
 - `docs/Tasks/Restructure/Feedback1.md`
 - `tests/InSpectra.Gen.Tests/Architecture/*.cs`
+- [Todo Next Queue](TodoNext.md)
 - [Smell Catalog](SmellCatalog.md)
 - [Logbook](Logbook.md)
 
@@ -63,6 +64,24 @@ If a genuinely new smell family is discovered, record it in
 [Logbook](Logbook.md) and then promote it into the catalog.
 
 ## Orchestration
+
+### Todo Next Queue
+
+Before starting any new outer iteration, read [Todo Next Queue](TodoNext.md).
+
+This queue is mandatory input, not optional context. Any item marked `Ready`,
+`Carry`, or `In Progress` must be triaged before the next fresh investigation
+swarm starts.
+
+For each queued item, do one of the following:
+
+- start it as the first work item of the iteration and mark it `In Progress`
+- complete it and mark it `Completed`
+- defer it with dated rationale and keep it in the queue
+- reject it with dated rationale and a matching logbook note
+
+Do not silently skip queued work. The normal fresh-swarm loop resumes only
+after every non-completed queue item has been explicitly triaged.
 
 ### Outer Loop
 
@@ -79,19 +98,22 @@ cached conclusion.
 
 Each outer iteration:
 
-1. Investigation swarm:
+1. Todo-next triage:
+   process every mandatory queue item in [Todo Next Queue](TodoNext.md) before
+   the fresh investigation swarm begins.
+2. Investigation swarm:
    spawn 6+ parallel read-only subagents, each focused on a different slice of
    the smell categories. Each subagent should report file path, line number,
    category, severity, and a suggested fix shape.
-2. Aggregate findings:
+3. Aggregate findings:
    deduplicate across subagents and rank by severity.
    - BLOCKER: breaks the charter or an active architecture test
    - HIGH: layering smell, compile-time cycle risk, dead code
    - MEDIUM: naming drift, stale comments, isolated dependency leaks
    - LOW: documentation, TODO, cosmetic, low-risk hygiene debt
-3. Group BLOCKER/HIGH/MEDIUM findings into phases:
+4. Group BLOCKER/HIGH/MEDIUM findings into phases:
    target 3–8 files per phase and do not batch unrelated fixes.
-4. For each phase:
+5. For each phase:
    - Spawn one implementation subagent with a precise brief.
    - Read its report and resolve blockers before verification.
    - Spawn 6 verifier subagents with narrow scopes:
@@ -101,9 +123,9 @@ Each outer iteration:
      verifier until two consecutive passes.
    - Commit with the existing phase message style:
      `refactor(arch): phase gN - <short summary>`
-5. After all phases in the iteration commit:
+6. After all phases in the iteration commit:
    run the full validation swarm across the whole combined diff.
-6. If validation is clean:
+7. If validation is clean:
    start the next outer iteration with a fresh investigation swarm.
 
 ### Stop Conditions
