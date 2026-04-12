@@ -15,6 +15,9 @@ internal static class HookOpenCliSnapshotSupport
         WriteIndented = true,
     };
 
+    internal static string SerializeForComparison(JsonNode? openCli)
+        => Serialize(Normalize(openCli));
+
     public static void AssertMatchesFixture(string packageId, string version, JsonNode? openCli)
     {
         var actual = Normalize(openCli);

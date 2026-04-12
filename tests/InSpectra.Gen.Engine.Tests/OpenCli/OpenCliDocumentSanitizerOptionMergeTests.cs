@@ -130,7 +130,84 @@ public sealed class OpenCliDocumentSanitizerOptionMergeTests
         Assert.Contains("Regex pattern(s) that should match", regex["description"]?.GetValue<string>(), StringComparison.Ordinal);
     }
 
-    private static JsonObject CreateDocument(params JsonObject[] options)
+    [Fact]
+    public void Sanitize_Merges_Informational_Option_With_Synthetic_Self_Argument_Duplicate()
+    {
+        var document = CreateDocument(
+            new JsonObject
+            {
+                ["name"] = "--version",
+                ["arguments"] = new JsonArray
+                {
+                    new JsonObject
+                    {
+                        ["name"] = "VERSION",
+                        ["required"] = false,
+                        ["arity"] = new JsonObject
+                        {
+                            ["minimum"] = 0,
+                            ["maximum"] = 1,
+                        },
+                    },
+                },
+            },
+            new JsonObject
+            {
+                ["name"] = "--version",
+                ["description"] = "Display version information.",
+            });
+
+        OpenCliDocumentSanitizer.Sanitize(document);
+
+        var version = Assert.Single(document["options"]!.AsArray());
+        Assert.Equal("--version", version!["name"]?.GetValue<string>());
+        Assert.Equal("Display version information.", version["description"]?.GetValue<string>());
+        Assert.Null(version["arguments"]);
+    }
+
+    [Fact]
+    public void Sanitize_Trims_Trailing_Noise_From_Single_Informational_Option()
+    {
+        var document = CreateDocument(
+            new JsonObject
+            {
+                ["name"] = "--version",
+                ["description"] = "Display version information.\nvalue pos. 0",
+            });
+
+        OpenCliDocumentSanitizer.Sanitize(document);
+
+        var version = Assert.Single(document["options"]!.AsArray());
+        Assert.Equal("--version", version!["name"]?.GetValue<string>());
+        Assert.Equal("Display version information.", version["description"]?.GetValue<string>());
+    }
+
+    [Fact]
+    public void Sanitize_Prefers_Richer_Compatible_Option_Description_When_Merging()
+    {
+        var document = CreateDocument(
+            new JsonObject
+            {
+                ["name"] = "--config",
+                ["description"] = "JSON file containing XAML Styler settings",
+                ["aliases"] = new JsonArray("-c"),
+            },
+            new JsonObject
+            {
+                ["name"] = "--config",
+                ["description"] = "JSON file containing XAML Styler settings\nconfiguration.",
+                ["aliases"] = new JsonArray("-c"),
+            });
+
+        OpenCliDocumentSanitizer.Sanitize(document);
+
+        var config = Assert.Single(document["options"]!.AsArray());
+        Assert.Equal(
+            "JSON file containing XAML Styler settings\nconfiguration.",
+            config!["description"]?.GetValue<string>());
+    }
+
+    internal static JsonObject CreateDocument(params JsonObject[] options)
         => new()
         {
             ["opencli"] = "0.1-draft",
