@@ -8,25 +8,29 @@ This folder replaces the old monolithic
 - Working branch: `feat/merge-tool`
 - Current follow-up docs live on the branch tip; verify `HEAD` before
   resuming work.
-- Latest fully validated pushed tip: `29a526c`
+- Latest fully validated pushed tip: `6bb272d`
 - Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, and
-  the queue-driven thin-shell phase `g40` plus the installed-tool
-  process-safety phase `g41` are now pushed and hosted validated.
-- The pushed tip `29a526c` is locally and hosted validated:
+  the queue-driven thin-shell phase `g40`, the installed-tool
+  process-safety phase `g41`, the packaged-tool verification phase `g42`, and
+  the hosted follow-up fix `g43` are now pushed and hosted validated.
+- The pushed tip `6bb272d` is hosted validated:
   - `354 / 0 / 0` unit tests
   - `17` architecture policy tests
-  - green `pull_request` run `24300030057`
+  - green `pull_request` run `24300661250`
 - The latest green `workflow_dispatch` validation is still on pushed tip
   `a3390bb`:
   - green `workflow_dispatch` run `24296167355`, including `live-tests`
-- Outer iteration 8 fresh-swarm ranking restarted from `29a526c`, and wave 1
+- Outer iteration 9 fresh-swarm wave 1 restarted from `6bb272d` and
   converged on the remaining pre-existing HIGH/MEDIUM clusters.
 - The original zero-BLOCKER/HIGH/MEDIUM stop condition was not reached.
-  `g41` closed the installed-tool process-safety HIGH, but multiple other
-  ranked HIGH/MEDIUM clusters remain open after post-`29a526c` wave 1, with
-  `TN-2026-04-12-03` now in progress.
+  `g42`/`g43` closed the packaged-tool verification HIGH, but multiple other
+  ranked HIGH/MEDIUM clusters remain open after the fresh post-`6bb272d`
+  wave-1 ranking.
 - Active todo-next queue:
-  - `TN-2026-04-12-03` in progress:
+  - `TN-2026-04-12-04` ready:
+    [TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md](TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md)
+  - `TN-2026-04-12-03` completed on `g42`/`g43`
+    (`6ccb5b7`, `6bb272d`):
     [TodoNext/2026-04-12-packaged-tool-hook-verification.md](TodoNext/2026-04-12-packaged-tool-hook-verification.md)
   - `TN-2026-04-12-02` completed on `g41`
     (`29a526c`):
@@ -37,7 +41,7 @@ This folder replaces the old monolithic
 ## Current Handoff State
 
 - Source of truth for current open work:
-  [Logbook](Logbook.md#current-open-items-after-g41-hosted-validation-2026-04-12)
+  [Logbook](Logbook.md#current-open-items-after-g43-fresh-swarm-wave-1-2026-04-12)
 - Source of truth for how to resume the loop:
   [Runbook](Runbook.md)
 - Source of truth for mandatory queued work before the next swarm:

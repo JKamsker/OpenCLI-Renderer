@@ -1,20 +1,21 @@
 # Follow-up Logbook
 
-> **Status (2026-04-12): 41 PHASES PUSHED WITH GREEN HOSTED CI, WITH
-> `TN-2026-04-12-03` NOW IN PROGRESS FROM THE HOSTED-VALIDATED `29a526c`
-> BASELINE.**
+> **Status (2026-04-12): 43 PHASES PUSHED WITH GREEN HOSTED CI, WITH OUTER
+> ITERATION 9 FRESH-SWARM WAVE 1 CONVERGED AND `TN-2026-04-12-04` QUEUED NEXT
+> FROM `6bb272d`.**
 > Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
-> queue-driven thin-shell phase `g40` and the installed-tool process-safety
-> phase `g41` are now pushed, and `29a526c` is the current hosted-validated
-> code tip.
+> queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
+> `g41`, the packaged-tool verification phase `g42`, and the hosted follow-up
+> fix `g43` are now pushed, and `6bb272d` is the current hosted-validated code
+> tip.
 > The original zero-BLOCKER/HIGH/MEDIUM stop condition is still **not** met:
-> `g41` closed the installed-tool process-safety HIGH, but multiple other
-> ranked HIGH/MEDIUM clusters remain open after post-`29a526c` wave 1, with
-> `TN-2026-04-12-03` now in progress.
+> `g42`/`g43` closed the packaged-tool verification HIGH, but multiple other
+> ranked HIGH/MEDIUM clusters remain open after the fresh post-`6bb272d`
+> wave-1 ranking.
 >
-> Current validated pushed tip: `29a526c` with **354 unit tests / 0 failed / 0
+> Current validated pushed tip: `6bb272d` with **354 unit tests / 0 failed / 0
 > skipped**, **17 architecture policy tests**, and green `pull_request` run
-> `24300030057`.
+> `24300661250`.
 >
 > The latest green `workflow_dispatch` run is still `24296167355` on pushed tip
 > `a3390bb`, including `live-tests`.
@@ -37,15 +38,153 @@
 ## Todo Next Snapshot
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
-- Active queued phase:
-  [TN-2026-04-12-03](TodoNext/2026-04-12-packaged-tool-hook-verification.md)
-  (`In Progress`)
-- No additional queued items remain ahead of the next fresh investigation
-  swarm after `TN-2026-04-12-03`.
+- Next queued phase:
+  [TN-2026-04-12-04](TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md)
+  (`Ready`)
+- `TN-2026-04-12-03` completed on `g42`/`g43` (`6ccb5b7`, `6bb272d`):
+  [Close the packaged-tool hook-verification HIGH](TodoNext/2026-04-12-packaged-tool-hook-verification.md)
 - `TN-2026-04-12-02` completed on `g41` (`29a526c`):
   [Close the installed-tool process-safety cluster](TodoNext/2026-04-12-installed-tool-process-safety.md)
 - `TN-2026-04-12-01` completed locally in `g40` (`8b3c0bc`):
   [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
+## Current Open Items After `g43` Fresh-Swarm Wave 1 (2026-04-12)
+
+This section supersedes the older post-`g43` hosted-validation snapshot below
+for current execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `6bb272d`
+- green `pull_request` run `24300661250`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Wave summary and ranking outcome:**
+
+- wave 1 converged strongly on the already-ranked remaining clusters rather
+  than surfacing a materially new smell family
+- the repeated HIGHs were: hosted Playwright CI coverage, generated static-HTML
+  public-contract drift, and frontend code-size policy enforcement
+- the repeated MEDIUMs were: local Playwright stale-cache / weak-assertion
+  hygiene, process and viewer diagnostics preservation, installed-tool
+  determinism, static-analysis degradation handling, docs/UI drift, and
+  architecture-scanner / boundary-assertion gaps
+- active implementation pick:
+  `TN-2026-04-12-04` targets the Playwright CI gap first because it closes one
+  remaining HIGH together with two adjacent MEDIUMs in a narrow CI/E2E slice
+- no new smell category was discovered in wave 1
+
+**Still-open ranked clusters after wave 1:**
+
+- **HIGH: hosted CI still does not execute the Playwright E2E suite.**
+  `.github/workflows/ci.yml` still runs frontend unit tests plus build, but not
+  `npm run test:e2e`.
+- **HIGH: generated static HTML still overstates several public viewer
+  features.**
+  The generated static viewer still renders `Home` without honoring the
+  `--show-home` contract and still does not implement the advertised static
+  `browse` / `upload` flows.
+- **HIGH: frontend code-size policy is unenforced and already violated.**
+  `RepositoryCodeFilePolicyTests.cs` still ignores `*.ts` / `*.tsx`, while
+  `CIGuidePage.tsx` and `NugetBrowser.tsx` exceed the repo hard cap.
+- **MEDIUM: local Playwright still has stale-cache and weak-assertion risks.**
+  The shared `.rendered` cache can mask current-output regressions, and the
+  theme-toggle E2E still passes when the toggle is absent.
+- **MEDIUM: process and viewer failure diagnostics still discard useful
+  stdout/timeout evidence.**
+  `ProcessRunner.cs` and
+  `Rendering/Html/Bundle/ViewerBundleProcessSupport.cs` still collapse many
+  non-zero or timed-out failures to exit codes or short timeout messages even
+  when stdout contains the actionable error text.
+- **MEDIUM: installed-tool selection and action versioning remain
+  nondeterministic.**
+  Installed-tool analysis still picks the first matching
+  `DotnetToolSettings.xml`, and the composite action still lets ambient
+  `inspectra` on `PATH` override `inspectra-version`.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals.**
+  `StaticAnalysisInstalledToolAnalysisSupport.cs` does not fail on help-crawl
+  output-limit or guardrail failures the way the sibling help/CliFx analyzers
+  do.
+- **MEDIUM: public docs, website copy, and the CI guide still drift from the
+  real product contract.**
+  Current gaps include stale package-mode XML-doc claims and website wording
+  around temporary project mutation, plus broader CI-guide input drift.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine scanners still rely on plain `using` detection in multiple
+  suites, leaving fully qualified or alias-based forbidden edges invisible.
+
+## Current Open Items After `g43` Hosted Validation (2026-04-12)
+
+This section supersedes the older post-`g41` snapshot below for current
+execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `6bb272d`
+- green `pull_request` run `24300661250`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Queue-handling work closed on `g42`/`g43`:**
+
+- `TN-2026-04-12-03` is complete on `g42` (`6ccb5b7`) and `g43` (`6bb272d`)
+- `g42` changed the PR `Validate nupkg` lane to install the just-built package
+  into a temp `--tool-path`, then assert the installed
+  `.store/.../tools/*/any/hooks/` payload layout that the runtime hook
+  resolver depends on
+- the first hosted run (`24300589542`) failed because the temp `NuGet.Config`
+  wrote the local package source as a relative path, which the runner resolved
+  relative to `/tmp`
+- `g43` anchored that package source to an absolute directory, and rerun
+  `24300661250` completed green
+- local validation on the final tree included:
+  - package-layout install simulation with temp `--tool-path` plus temp
+    single-source config ✅
+  - `.github/workflows/ci.yml` YAML parse ✅
+
+**Still-open ranked clusters pending the fresh post-`6bb272d` swarm:**
+
+- **HIGH: hosted CI still does not execute the Playwright E2E suite.**
+  `.github/workflows/ci.yml` still runs frontend unit tests plus build, but not
+  `npm run test:e2e`.
+- **HIGH: generated static HTML still overstates several public viewer
+  features.**
+  The currently shipped static viewer does not honor the documented
+  `--enable-url` behavior and does not implement the advertised
+  `--show-home` / `--enable-nuget-browser` / `--enable-package-upload`
+  contract.
+- **HIGH: frontend code-size policy is unenforced and already violated.**
+  `CIGuidePage.tsx` is `744` lines, the repo-wide policy is not enforced for
+  `.tsx`, and the frontend slice can drift past the documented hard cap without
+  CI catching it.
+- **MEDIUM: process and viewer failure diagnostics still discard useful
+  stdout/timeout evidence.**
+  `ProcessRunner.cs` and
+  `Rendering/Html/Bundle/ViewerBundleProcessSupport.cs` still collapse many
+  non-zero or timed-out failures to exit codes or short timeout messages even
+  when stdout contains the actionable error text.
+- **MEDIUM: installed-tool selection and action versioning remain
+  nondeterministic.**
+  Installed-tool analysis still picks the first matching
+  `DotnetToolSettings.xml`, and the composite action still lets ambient
+  `inspectra` on `PATH` override `inspectra-version`.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals.**
+  `StaticAnalysisInstalledToolAnalysisSupport.cs` does not fail on help-crawl
+  output-limit or guardrail failures the way the sibling help/CliFx analyzers
+  do.
+- **MEDIUM: public docs, website copy, and the CI guide still drift from the
+  real product contract.**
+  Current gaps include outdated CLI commands on `AboutPage`, stale CI-guide
+  input coverage, README/Pages claims that no longer match deployment, and
+  docs that overstate the current HTML feature-flag defaults.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine scanners still rely on plain `using` detection in multiple
+  suites, `StartupHook` packaging-only metadata is not asserted, and some
+  documented boundaries such as `Rendering.Html` vs `Rendering.Markdown` still
+  lack executable coverage.
+- **MEDIUM: the local Playwright suite still has stale-cache and weak-assertion
+  risks even before it is wired into hosted CI.**
+  The shared `.rendered` cache can mask current-output regressions, and the
+  theme-toggle E2E still passes when the toggle is absent.
 
 ## Current Open Items After `g41` Hosted Validation (2026-04-12)
 

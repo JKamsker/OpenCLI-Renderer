@@ -1,15 +1,20 @@
 # Todo Next: Packaged-Tool Hook Verification
 
 - ID: `TN-2026-04-12-03`
-- State: `In Progress`
+- State: `Completed`
 - Added: `2026-04-12`
 - Source: outer iteration 8 post-`g41` fresh-swarm wave 1 on hosted-green tip
   `29a526c`
 - Queue entry: [Todo Next Queue](../TodoNext.md)
-- Pickup rule: this is the active implementation phase selected after the
+- Pickup rule: this was the active implementation phase selected after the
   post-`g41` wave-1 convergence.
 - Exit rule: mark the queue item `Completed`, `Deferred`, or `Rejected` with
   dated rationale and update [Logbook](../Logbook.md) accordingly.
+- Landed on: `g42` (`6ccb5b7`) and `g43` (`6bb272d`)
+- Hosted validation: green `pull_request` run `24300661250`
+- Follow-up hosted fix: `pull_request` run `24300589542` failed because the
+  temp `NuGet.Config` wrote a relative local package source path; `g43`
+  corrected that to an absolute path before the green rerun
 
 ## Why This Phase Goes Next
 
@@ -24,20 +29,23 @@ surfacing a materially new family. This slice is the most contained next HIGH:
 That keeps the write set narrow and closes a runtime-critical blind spot without
 mixing frontend E2E wiring or static-HTML contract work into the same phase.
 
-## Current Local Implementation Progress
+## Outcome
 
-The current local phase work is intentionally using package-layout validation
-rather than a broader runtime smoke:
+This phase intentionally used package-layout validation rather than a broader
+runtime smoke:
 
-- the workflow now installs the just-built `.nupkg` into a temp `--tool-path`
-- a temp `NuGet.Config` clears ambient sources so the install proves the local
-  package rather than a remote feed
-- the CI step now asserts the installed `.store/.../tools/*/any/hooks/`
-  payload layout that the runtime hook resolver depends on
+- `g42` changed CI to install the just-built `.nupkg` into a temp
+  `--tool-path`, then assert the installed
+  `.store/.../tools/*/any/hooks/` payload layout that the runtime hook
+  resolver depends on
+- the first hosted run exposed a follow-up defect: the temp `NuGet.Config`
+  wrote the local package source as a relative path, which the runner resolved
+  relative to `/tmp` instead of the repo checkout
+- `g43` anchored the local package source path to an absolute directory, after
+  which `pull_request` run `24300661250` went green
+- the packaged-tool verification HIGH is now closed on the validated pushed tip
 
-Commit, push, and hosted validation are still pending.
-
-## Confirmed Problem Statement
+## Baseline Problem Statement
 
 On the hosted-validated baseline that selected this phase, the PR CI lane
 verified:
