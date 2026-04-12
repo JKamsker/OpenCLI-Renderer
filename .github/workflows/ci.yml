@@ -76,6 +76,9 @@ jobs:
       - name: Pack tool
         run: dotnet pack src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build -p:Version=0.0.${{ github.run_number }}
 
+      - name: Pack library
+        run: dotnet pack src/InSpectra.Lib/InSpectra.Lib.csproj --configuration Release --no-build -p:Version=0.0.${{ github.run_number }}
+
       - name: Publish tool
         run: dotnet publish src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build -o artifacts/publish
 
@@ -183,11 +186,18 @@ jobs:
             src/InSpectra.Gen/bin/Release/net10.0/
             artifacts/publish/
 
+      - name: Stage nupkg files
+        shell: bash
+        run: |
+          mkdir -p artifacts/nupkg
+          cp src/InSpectra.Gen/bin/Release/*.nupkg artifacts/nupkg/
+          cp src/InSpectra.Lib/bin/Release/*.nupkg artifacts/nupkg/
+
       - name: Upload nupkg
         uses: actions/upload-artifact@v4
         with:
           name: nupkg
-          path: src/InSpectra.Gen/bin/Release/*.nupkg
+          path: artifacts/nupkg/*.nupkg
 
   windows-backend-tests:
     runs-on: windows-latest

@@ -8,6 +8,17 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
     <AssemblyName>InSpectra.Lib</AssemblyName>
     <RootNamespace>InSpectra.Lib</RootNamespace>
+
+    <!-- NuGet package metadata -->
+    <PackageId>InSpectra.Lib</PackageId>
+    <Version>0.0.0</Version>
+    <Description>Core inspection and OpenCLI acquisition library for InSpectra. Analyse .NET CLI tools, extract command structures, and produce OpenCLI documents.</Description>
+    <Authors>Jonas Kamsker</Authors>
+    <PackageProjectUrl>https://github.com/JKamsker/InSpectra</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/JKamsker/InSpectra</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>cli;opencli;inspection;dotnet;nuget</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +31,10 @@
 
   <ItemGroup>
     <EmbeddedResource Include="OpenCli\Schema\OpenCli.draft.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Link="README.md" />
   </ItemGroup>
 
 </Project>
