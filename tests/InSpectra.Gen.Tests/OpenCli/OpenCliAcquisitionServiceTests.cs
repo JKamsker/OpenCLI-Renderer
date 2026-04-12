@@ -1,4 +1,6 @@
 using System.Text.Json.Nodes;
+using InSpectra.Gen.Core;
+using InSpectra.Gen.Engine.Contracts.Providers;
 using InSpectra.Gen.Engine.Execution.Process;
 using InSpectra.Gen.Engine.Targets.Sources;
 using InSpectra.Gen.Engine.UseCases.Generate;
@@ -206,4 +208,95 @@ public sealed class OpenCliAcquisitionServiceTests
         Assert.Equal([Path.GetFullPath(packageInstaller.LastTempRoot)], processRunner.CleanupRoots);
         Assert.Equal(Path.GetFullPath(packageInstaller.LastTempRoot), dispatcher.LastCleanupRoot);
     }
+
+    [Fact]
+    public async Task Auto_mode_final_failure_preserves_native_attempt_detail()
+    {
+        using var temp = new TempDirectory();
+        var sourcePath = Path.Combine(temp.Path, "demo.cmd");
+        await File.WriteAllTextAsync(sourcePath, "@echo off");
+        var service = new OpenCliAcquisitionService(
+            new ExecutableResolver(),
+            new OpenCliNativeAcquisitionSupport(new ThrowingAcquisitionProcessRunner(
+                new CliSourceExecutionException(
+                    "Native analysis failed.",
+                    details:
+                    [
+                        "Arguments: inspect --opencli",
+                        "Standard output:\nusage details",
+                    ]))),
+            new LocalCliTargetFactory(new FakeLocalCliFrameworkDetector()),
+            new PackageCliTargetFactory(new UnusedPackageInstaller()),
+            new DotnetBuildOutputResolver(new FakeProcessRunner()),
+            new EmptyCliFrameworkCatalog(),
+            new AlwaysFailingDispatcher());
+
+        var exception = await Assert.ThrowsAsync<CliSourceExecutionException>(() => service.AcquireFromExecAsync(
+            new ExecAcquisitionRequest(
+                sourcePath,
+                [],
+                temp.Path,
+                new AcquisitionOptions(
+                    OpenCliMode.Auto,
+                    "demo",
+                    null,
+                    [],
+                    false,
+                    [],
+                    30,
+                    new OpenCliArtifactOptions(null, null))),
+            CancellationToken.None));
+
+        Assert.Contains(exception.Details, detail => detail.Contains("native: Native analysis failed.", StringComparison.Ordinal));
+        Assert.Contains(exception.Details, detail => detail.Contains("Arguments: inspect --opencli", StringComparison.Ordinal));
+        Assert.Contains(exception.Details, detail => detail.Contains("help: help mode failed", StringComparison.Ordinal));
+    }
+}
+
+internal sealed class ThrowingAcquisitionProcessRunner(CliException exception) : IProcessRunner
+{
+    public Task<ProcessResult> RunAsync(
+        string executablePath,
+        string workingDirectory,
+        IReadOnlyList<string> arguments,
+        int timeoutSeconds,
+        CancellationToken cancellationToken)
+        => Task.FromException<ProcessResult>(exception);
+
+    public Task<ProcessResult> RunAsync(
+        string executablePath,
+        string workingDirectory,
+        IReadOnlyList<string> arguments,
+        int timeoutSeconds,
+        IReadOnlyDictionary<string, string>? environment,
+        string? cleanupRoot,
+        CancellationToken cancellationToken)
+        => Task.FromException<ProcessResult>(exception);
+}
+
+internal sealed class AlwaysFailingDispatcher : IAcquisitionAnalysisDispatcherInternal
+{
+    public Task<AcquisitionAnalysisOutcome> TryAnalyzeAsync(
+        CliTargetDescriptor target,
+        string mode,
+        string? framework,
+        int timeoutSeconds,
+        CancellationToken cancellationToken)
+        => TryAnalyzeAsync(target, null, mode, framework, timeoutSeconds, cancellationToken);
+
+    public Task<AcquisitionAnalysisOutcome> TryAnalyzeAsync(
+        CliTargetDescriptor target,
+        string? cleanupRoot,
+        string mode,
+        string? framework,
+        int timeoutSeconds,
+        CancellationToken cancellationToken)
+        => Task.FromResult(new AcquisitionAnalysisOutcome(
+            Success: false,
+            Mode: mode,
+            Framework: framework,
+            OpenCliJson: null,
+            CrawlJson: null,
+            FailureClassification: "analysis_failed",
+            FailureMessage: $"{mode} mode failed"));
 }

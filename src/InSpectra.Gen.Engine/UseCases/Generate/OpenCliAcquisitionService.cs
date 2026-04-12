@@ -200,7 +200,6 @@ internal sealed class OpenCliAcquisitionService(
                 OpenCliModePlanner.ToModeValue(options.Mode),
                 options.Mode == OpenCliMode.Hook ? target.HookCliFramework ?? target.CliFramework : target.CliFramework,
                 AnalysisDisposition.Planned)];
-        var failureDetails = new List<string>();
         var targetDescriptor = ToTargetDescriptor(target);
 
         foreach (var plannedAttempt in plannedAttempts)
@@ -216,10 +215,9 @@ internal sealed class OpenCliAcquisitionService(
                 plannedAttempt.Mode,
                 plannedAttempt.Framework,
                 outcome.Success ? AnalysisDisposition.Success : AnalysisDisposition.Failed,
-                outcome.FailureMessage));
+                outcome.FailureMessage ?? outcome.FailureClassification ?? AnalysisDisposition.Failed));
             if (!outcome.Success)
             {
-                failureDetails.Add($"{plannedAttempt.Mode}: {outcome.FailureMessage ?? outcome.FailureClassification ?? AnalysisDisposition.Failed}");
                 continue;
             }
 
@@ -247,8 +245,14 @@ internal sealed class OpenCliAcquisitionService(
 
         throw new CliSourceExecutionException(
             "No OpenCLI acquisition mode succeeded.",
-            details: failureDetails);
+            details: BuildFailureDetails(attempts));
     }
+
+    private static IReadOnlyList<string> BuildFailureDetails(IEnumerable<OpenCliAcquisitionAttempt> attempts)
+        => attempts
+            .Where(attempt => attempt.Outcome == AnalysisDisposition.Failed)
+            .Select(attempt => $"{attempt.Mode}: {attempt.Detail ?? AnalysisDisposition.Failed}")
+            .ToArray();
 
     private static CliTargetDescriptor ToTargetDescriptor(MaterializedCliTarget target)
         => new(

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using InSpectra.Gen.Core;
 using InSpectra.Gen.Engine.Tooling.Process;
 
@@ -42,6 +43,7 @@ internal sealed class ProcessRunner : IProcessRunner
         string? cleanupRoot,
         CancellationToken cancellationToken)
     {
+        var timeout = TimeSpan.FromSeconds(timeoutSeconds);
         var startInfo = new ProcessStartInfo
         {
             FileName = executablePath,
@@ -76,46 +78,195 @@ internal sealed class ProcessRunner : IProcessRunner
         }
 
         process.StandardInput.Close();
-
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(timeoutSeconds));
+        var stopwatch = Stopwatch.StartNew();
+        var stdoutCapture = new StreamCapture(process.StandardOutput);
+        var stderrCapture = new StreamCapture(process.StandardError);
 
         try
         {
-            var stdoutTask = process.StandardOutput.ReadToEndAsync(timeout.Token);
-            var stderrTask = process.StandardError.ReadToEndAsync(timeout.Token);
-
-            await process.WaitForExitAsync(timeout.Token);
-            var stdout = await stdoutTask;
-            var stderr = await stderrTask;
+            await WaitForProcessExitAsync(process, timeout, cancellationToken);
+            var remainingDrainTime = RemainingDuration(timeout, stopwatch.Elapsed);
+            var (stdout, stderr) = await ReadOutputAsync(
+                stdoutCapture,
+                stderrCapture,
+                remainingDrainTime,
+                cancellationToken);
 
             if (process.ExitCode != 0)
             {
-                var details = new List<string> { $"Exit code: {process.ExitCode}" };
-                if (!string.IsNullOrWhiteSpace(stderr))
-                {
-                    details.Add(stderr.Trim());
-                }
-
-                throw new CliSourceExecutionException($"`{executablePath}` exited with code {process.ExitCode}.", details: details);
+                throw new CliSourceExecutionException(
+                    $"`{executablePath}` exited with code {process.ExitCode}.",
+                    details: CreateExitDetails(process.ExitCode, stdout, stderr));
             }
 
             return new ProcessResult(stdout, stderr);
         }
-        catch (OperationCanceledException exception)
+        catch (OperationCanceledException)
         {
-            TryTerminate(process);
-            if (cancellationToken.IsCancellationRequested)
-            {
-                _terminateSandboxProcesses(cleanupRoot);
-                throw;
-            }
-
-            _terminateSandboxProcesses(cleanupRoot);
+            CleanupAfterCancellation(process, cleanupRoot);
+            stdoutCapture.ObserveFaults();
+            stderrCapture.ObserveFaults();
+            throw;
+        }
+        catch (TimeoutException exception)
+        {
+            CleanupAfterCancellation(process, cleanupRoot);
+            var stdout = stdoutCapture.GetLatestText();
+            var stderr = stderrCapture.GetLatestText();
+            stdoutCapture.ObserveFaults();
+            stderrCapture.ObserveFaults();
+            cancellationToken.ThrowIfCancellationRequested();
             throw new CliSourceExecutionException(
                 $"`{executablePath}` did not finish within {timeoutSeconds} seconds.",
-                details: arguments.Count > 0 ? [$"Arguments: {string.Join(' ', arguments)}"] : [],
+                details: CreateTimeoutDetails(arguments, stdout, stderr),
                 innerException: exception);
+        }
+    }
+
+    private void CleanupAfterCancellation(
+        System.Diagnostics.Process process,
+        string? cleanupRoot)
+    {
+        TryTerminate(process);
+        _terminateSandboxProcesses(cleanupRoot);
+    }
+
+    private static async Task WaitForProcessExitAsync(
+        System.Diagnostics.Process process,
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        var processExitTask = process.WaitForExitAsync(cancellationToken);
+        var timeoutTask = Task.Delay(timeout);
+        var completedTask = await Task.WhenAny(processExitTask, timeoutTask);
+        if (completedTask == processExitTask || processExitTask.IsCompleted)
+        {
+            await processExitTask;
+            return;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        throw new TimeoutException();
+    }
+
+    private static TimeSpan RemainingDuration(TimeSpan timeout, TimeSpan elapsed)
+        => timeout > elapsed ? timeout - elapsed : TimeSpan.Zero;
+
+    private static async Task<(string StandardOutput, string StandardError)> ReadOutputAsync(
+        StreamCapture stdoutCapture,
+        StreamCapture stderrCapture,
+        TimeSpan maxWait,
+        CancellationToken cancellationToken)
+    {
+        var stdoutTask = stdoutCapture.GetTextAsync(maxWait, cancellationToken);
+        var stderrTask = stderrCapture.GetTextAsync(maxWait, cancellationToken);
+        await Task.WhenAll(stdoutTask, stderrTask);
+        return (await stdoutTask, await stderrTask);
+    }
+
+    private static IReadOnlyList<string> CreateTimeoutDetails(
+        IReadOnlyList<string> arguments,
+        string stdout,
+        string stderr)
+    {
+        var details = new List<string>();
+        if (arguments.Count > 0)
+        {
+            details.Add($"Arguments: {string.Join(' ', arguments)}");
+        }
+
+        AddOutputDetail(details, "Standard output", stdout);
+        AddOutputDetail(details, "Standard error", stderr);
+        return details;
+    }
+
+    private static IReadOnlyList<string> CreateExitDetails(int exitCode, string stdout, string stderr)
+    {
+        var details = new List<string> { $"Exit code: {exitCode}" };
+        AddOutputDetail(details, "Standard output", stdout);
+        AddOutputDetail(details, "Standard error", stderr);
+        return details;
+    }
+
+    private static void AddOutputDetail(List<string> details, string label, string output)
+    {
+        if (!string.IsNullOrWhiteSpace(output))
+        {
+            details.Add($"{label}:{Environment.NewLine}{output.Trim()}");
+        }
+    }
+
+    private sealed class StreamCapture
+    {
+        private readonly object _sync = new();
+        private readonly StringBuilder _buffer = new();
+
+        public StreamCapture(StreamReader reader)
+        {
+            Completion = CaptureAsync(reader);
+        }
+
+        private Task<string> Completion { get; }
+
+        public async Task<string> GetTextAsync(TimeSpan maxWait, CancellationToken cancellationToken)
+        {
+            if (Completion.IsCompletedSuccessfully)
+            {
+                return Completion.Result;
+            }
+
+            if (maxWait <= TimeSpan.Zero)
+            {
+                return Snapshot();
+            }
+
+            try
+            {
+                return await Completion.WaitAsync(maxWait, cancellationToken);
+            }
+            catch (TimeoutException)
+            {
+                return Snapshot();
+            }
+        }
+
+        public string GetLatestText()
+            => Completion.IsCompletedSuccessfully ? Completion.Result : Snapshot();
+
+        public void ObserveFaults()
+        {
+            _ = Completion.ContinueWith(
+                static task => _ = task.Exception,
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
+
+        private async Task<string> CaptureAsync(StreamReader reader)
+        {
+            var buffer = new char[4096];
+
+            while (true)
+            {
+                var read = await reader.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                if (read == 0)
+                {
+                    return Snapshot();
+                }
+
+                lock (_sync)
+                {
+                    _buffer.Append(buffer, 0, read);
+                }
+            }
+        }
+
+        private string Snapshot()
+        {
+            lock (_sync)
+            {
+                return _buffer.ToString();
+            }
         }
     }
 

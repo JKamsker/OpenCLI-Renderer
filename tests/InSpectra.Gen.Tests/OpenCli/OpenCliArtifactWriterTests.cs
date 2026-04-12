@@ -1,5 +1,6 @@
 using System.Text.Json.Nodes;
 using InSpectra.Gen.Core;
+using InSpectra.Gen.Engine.Contracts;
 using InSpectra.Gen.Engine.Execution.Process;
 using InSpectra.Gen.Engine.UseCases.Generate;
 using InSpectra.Gen.Engine.UseCases.Generate.Requests;
@@ -201,4 +202,70 @@ public sealed class OpenCliArtifactWriterTests
             JsonNode.Parse(result.OpenCliJson)?.ToJsonString(),
             JsonNode.Parse(await File.ReadAllTextAsync(openCliPath))?.ToJsonString());
     }
+
+    [Fact]
+    public async Task Native_try_acquire_preserves_exception_details_in_failed_attempt()
+    {
+        var attempts = new List<OpenCliAcquisitionAttempt>();
+        var support = new OpenCliNativeAcquisitionSupport(new ThrowingProcessRunner(
+            new CliSourceExecutionException(
+                "Native analysis failed.",
+                details:
+                [
+                    "Arguments: inspect --opencli",
+                    "Standard output:\nusage details",
+                    "Standard error:\nexecution failed",
+                ])));
+
+        var result = await support.TryAcquireAsync(
+            new AcquisitionResultContext(
+                "exec",
+                "demo",
+                "C:\\tools\\demo.exe",
+                "demo",
+                null,
+                new OpenCliArtifactOptions(null, null)),
+            new NativeProcessOptions(
+                "C:\\temp\\inspectra-local-target.cmd",
+                [],
+                [],
+                false,
+                [],
+                Environment.CurrentDirectory,
+                null,
+                null,
+                30),
+            attempts,
+            warnings: [],
+            cancellationToken: CancellationToken.None);
+
+        Assert.Null(result);
+        var attempt = Assert.Single(attempts);
+        Assert.NotNull(attempt.Detail);
+        Assert.Contains("Native analysis failed.", attempt.Detail, StringComparison.Ordinal);
+        Assert.Contains("Arguments: inspect --opencli", attempt.Detail, StringComparison.Ordinal);
+        Assert.Contains("Standard output:", attempt.Detail, StringComparison.Ordinal);
+        Assert.Contains("Standard error:", attempt.Detail, StringComparison.Ordinal);
+    }
+}
+
+internal sealed class ThrowingProcessRunner(CliException exception) : IProcessRunner
+{
+    public Task<ProcessResult> RunAsync(
+        string executablePath,
+        string workingDirectory,
+        IReadOnlyList<string> arguments,
+        int timeoutSeconds,
+        CancellationToken cancellationToken)
+        => Task.FromException<ProcessResult>(exception);
+
+    public Task<ProcessResult> RunAsync(
+        string executablePath,
+        string workingDirectory,
+        IReadOnlyList<string> arguments,
+        int timeoutSeconds,
+        IReadOnlyDictionary<string, string>? environment,
+        string? cleanupRoot,
+        CancellationToken cancellationToken)
+        => Task.FromException<ProcessResult>(exception);
 }

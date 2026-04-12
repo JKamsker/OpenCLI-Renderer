@@ -34,7 +34,11 @@ internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunn
         }
         catch (CliException exception)
         {
-            attempts.Add(new OpenCliAcquisitionAttempt(AnalysisMode.Native, context.CliFramework, AnalysisDisposition.Failed, exception.Message));
+            attempts.Add(new OpenCliAcquisitionAttempt(
+                AnalysisMode.Native,
+                context.CliFramework,
+                AnalysisDisposition.Failed,
+                FormatAttemptDetail(exception)));
             return null;
         }
     }
@@ -77,6 +81,13 @@ internal sealed class OpenCliNativeAcquisitionSupport(IProcessRunner processRunn
             cleanupRoot,
             cancellationToken);
         return xmlResult.StandardOutput;
+    }
+
+    private static string FormatAttemptDetail(CliException exception)
+    {
+        var detailLines = new List<string> { exception.Message };
+        detailLines.AddRange(exception.Details.Where(detail => !string.IsNullOrWhiteSpace(detail)));
+        return string.Join(Environment.NewLine, detailLines);
     }
 
     private async Task<(string OpenCliJson, string? XmlDocument)> RunAsync(
