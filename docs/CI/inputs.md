@@ -49,6 +49,9 @@ same action inputs, plus a small wrapper-specific set for setup and artifact upl
 | `package-id` | _required_ | NuGet package id for the .NET tool package to analyze |
 | `package-version` | _required_ | NuGet package version to install and analyze |
 
+`package` mode enables XML enrichment by default and uses `cli xmldoc` unless
+you override it with `xmldoc-args`.
+
 ### Auto-installed `InSpectra.Cli` package
 
 In `dotnet` mode the action automatically adds an `<PackageReference>` for the
@@ -75,7 +78,7 @@ steps to the docs output (for example with `add-paths`) or set
 | Input | Default | Description |
 |---|---|---|
 | `opencli-args` | `cli opencli` | Override the OpenCLI export arguments for generate-based modes (`exec`, `dotnet`, `package`). Useful if your CLI uses a different command (e.g. `export spec`) |
-| `xmldoc-args` | `cli xmldoc` | Override the XML documentation export arguments for generate-based modes (`exec`, `dotnet`, `package`) when the action enriches generated `opencli.json` |
+| `xmldoc-args` | `cli xmldoc` | Override the XML documentation export arguments for generate-based modes (`exec`, `dotnet`, `package`). `exec` and `dotnet` probe those args before enabling enrichment; `package` mode enables enrichment by default and uses these args directly |
 | `timeout` | `30` (`exec`) / `120` (`dotnet`, `package`) | Timeout in seconds for each generate-mode export command |
 
 ## Analysis options (`exec` / `dotnet` / `package`)

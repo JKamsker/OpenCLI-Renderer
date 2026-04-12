@@ -503,8 +503,10 @@ runs:
             for a in $OPENCLI_ARGS; do generate_args+=(--opencli-arg "$a"); done
           fi
 
+          # Package mode uses the documented default xmldoc command (`cli xmldoc`)
+          # unless the caller overrides it via xmldoc-args.
+          generate_args+=(--with-xmldoc)
           if [ -n "$XMLDOC_ARGS" ]; then
-            generate_args+=(--with-xmldoc)
             for a in $XMLDOC_ARGS; do generate_args+=(--xmldoc-arg "$a"); done
           fi
 

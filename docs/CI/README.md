@@ -58,8 +58,9 @@ That's the entire setup. The action takes care of:
    if you already reference it.
 3. **`InSpectra.Gen` tool** — installed from NuGet, then used to generate an
    enriched `opencli.json` and render it into the format you asked for.
-4. **XML enrichment** — auto-detected when your CLI exposes `cli xmldoc`,
-   so the generated `opencli.json` is already enriched before rendering.
+4. **XML enrichment** — `exec` and `dotnet` auto-detect `cli xmldoc`, while
+   `package` mode enables XML enrichment by default with the same command
+   unless you override it via `xmldoc-args`.
 
 You don't need a separate `actions/setup-dotnet` step, you don't need
 `dotnet tool install`, and you don't need to add any `PackageReference`
@@ -96,7 +97,8 @@ Your CLI must support the OpenCLI specification.
 
 If your CLI uses custom export arguments (not `cli opencli`), pass them via
 `opencli-args`. `xmldoc-args` and `timeout` apply to the same generate-based
-flows (`exec`, `dotnet`, and `package`).
+flows (`exec`, `dotnet`, and `package`); in `package` mode, XML enrichment is
+enabled by default.
 
 ## See also
 

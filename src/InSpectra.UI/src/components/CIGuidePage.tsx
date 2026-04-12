@@ -362,17 +362,17 @@ const inputs: InputDef[] = [
   },
   {
     name: "opencli-args",
-    desc: <>Override the OpenCLI export arguments (exec / dotnet mode).</>,
+    desc: <>Override the OpenCLI export arguments (exec / dotnet / package mode).</>,
     defaultVal: <><code>cli opencli</code></>,
   },
   {
     name: "xmldoc-args",
-    desc: <>Override the xmldoc export arguments (exec / dotnet mode).</>,
+    desc: <>Override the xmldoc export arguments (exec / dotnet / package mode).</>,
     defaultVal: <><code>cli xmldoc</code></>,
   },
   {
     name: "timeout",
-    desc: <>Timeout in seconds for each CLI export command (exec / dotnet mode).</>,
+    desc: <>Timeout in seconds for each CLI export command (exec / dotnet / package mode).</>,
     defaultVal: <>Optional</>,
   },
   {
@@ -621,8 +621,9 @@ export function CIGuidePage({ section }: { section?: string }) {
                 <div className="ci-guide-callout-title">Automatic XML enrichment</div>
                 <p>
                   In <code>exec</code> and <code>dotnet</code> modes, the action automatically probes for{" "}
-                  <code>cli xmldoc</code> support and uses it when available. No flag needed &mdash;
-                  richer descriptions are included transparently.
+                  <code>cli xmldoc</code> support and uses it when available. In <code>package</code>{" "}
+                  mode, XML enrichment is enabled by default with the same command unless you override{" "}
+                  <code>xmldoc-args</code>.
                 </p>
               </div>
             </div>
@@ -765,6 +766,11 @@ export function CIGuidePage({ section }: { section?: string }) {
                 which outputs the OpenCLI JSON spec to stdout. Optionally implement <code>cli xmldoc</code>{" "}
                 for richer descriptions. Adding the <code>InSpectra.Cli</code> NuGet package to your project
                 provides both commands.
+              </p>
+              <p>
+                <strong>For package mode</strong>, the published .NET tool package should expose{" "}
+                <code>cli opencli</code>. If it also exposes <code>cli xmldoc</code>, the action uses that
+                XML export by default unless you override <code>xmldoc-args</code>.
               </p>
               <p>
                 <strong>For file mode</strong>, export your <code>opencli.json</code> once and check it into your
