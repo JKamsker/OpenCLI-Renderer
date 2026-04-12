@@ -7,11 +7,11 @@ namespace InSpectra.Gen.Tests.Architecture;
 ///
 /// Active rule set:
 /// <list type="bullet">
-///   <item><c>InSpectra.Gen</c> may reference <c>InSpectra.Lib</c>,
-///         <c>InSpectra.Gen.StartupHook</c>, and <c>InSpectra.Lib</c>.</item>
-///   <item><c>InSpectra.Lib</c> may reference <c>InSpectra.Lib</c>.</item>
+///   <item><c>InSpectra.Gen</c> may reference <c>InSpectra.Lib</c> and
+///         <c>InSpectra.Gen.StartupHook</c>.</item>
+///   <item><c>InSpectra.Lib</c> may reference <c>InSpectra.Gen.StartupHook</c>
+///         (build-order only, for NuGet DLL embedding).</item>
 ///   <item><c>InSpectra.Gen.StartupHook</c> must have zero project references.</item>
-///   <item><c>InSpectra.Lib</c> must have zero project references.</item>
 /// </list>
 /// </summary>
 public sealed class ArchitectureProjectDependencyTests
@@ -31,10 +31,9 @@ public sealed class ArchitectureProjectDependencyTests
             },
             [ArchitecturePolicyScanner.EngineProjectName] = new HashSet<string>(StringComparer.Ordinal)
             {
-                ArchitecturePolicyScanner.CoreProjectName,
+                ArchitecturePolicyScanner.StartupHookProjectName,
             },
             [ArchitecturePolicyScanner.StartupHookProjectName] = new HashSet<string>(StringComparer.Ordinal),
-            [ArchitecturePolicyScanner.CoreProjectName] = new HashSet<string>(StringComparer.Ordinal),
         };
 
     [Fact]
