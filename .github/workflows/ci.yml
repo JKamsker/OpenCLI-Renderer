@@ -31,6 +31,10 @@ jobs:
         working-directory: src/InSpectra.UI
         run: npm ci
 
+      - name: Install Playwright browser
+        working-directory: src/InSpectra.UI
+        run: npx playwright install --with-deps chromium
+
       - name: Test frontend
         working-directory: src/InSpectra.UI
         run: npm test
@@ -49,6 +53,22 @@ jobs:
 
       - name: Build
         run: dotnet build InSpectra.Gen.sln --configuration Release --no-restore
+
+      - name: Test rendered HTML in Chromium
+        working-directory: src/InSpectra.UI
+        env:
+          INSPECTRA_E2E_DOTNET_CONFIGURATION: Release
+          INSPECTRA_E2E_DOTNET_NO_BUILD: "1"
+        run: npm run test:e2e
+
+      - name: Upload Playwright artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            src/InSpectra.UI/playwright-report/
+            src/InSpectra.UI/test-results/
 
       - name: Test
         run: dotnet test InSpectra.Gen.sln --configuration Release --no-build --filter "Category!=WindowsOnly&Category!=Live"

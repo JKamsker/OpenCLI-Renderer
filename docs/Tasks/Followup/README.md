@@ -27,7 +27,7 @@ This folder replaces the old monolithic
   ranked HIGH/MEDIUM clusters remain open after the fresh post-`6bb272d`
   wave-1 ranking.
 - Active todo-next queue:
-  - `TN-2026-04-12-04` ready:
+  - `TN-2026-04-12-04` in progress from clean tip `f2f07dc`:
     [TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md](TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md)
   - `TN-2026-04-12-03` completed on `g42`/`g43`
     (`6ccb5b7`, `6bb272d`):

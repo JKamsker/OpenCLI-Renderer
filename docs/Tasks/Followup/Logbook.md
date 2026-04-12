@@ -1,8 +1,8 @@
 # Follow-up Logbook
 
 > **Status (2026-04-12): 43 PHASES PUSHED WITH GREEN HOSTED CI, WITH OUTER
-> ITERATION 9 FRESH-SWARM WAVE 1 CONVERGED AND `TN-2026-04-12-04` QUEUED NEXT
-> FROM `6bb272d`.**
+> ITERATION 9 FRESH-SWARM WAVE 1 CONVERGED AND `TN-2026-04-12-04` IN PROGRESS
+> FROM CLEAN TIP `f2f07dc`.**
 > Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
 > queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
 > `g41`, the packaged-tool verification phase `g42`, and the hosted follow-up
@@ -38,9 +38,9 @@
 ## Todo Next Snapshot
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
-- Next queued phase:
+- Active queued phase:
   [TN-2026-04-12-04](TodoNext/2026-04-12-playwright-ci-and-e2e-hygiene.md)
-  (`Ready`)
+  (`In Progress`, resumed from clean `f2f07dc` on `2026-04-12`)
 - `TN-2026-04-12-03` completed on `g42`/`g43` (`6ccb5b7`, `6bb272d`):
   [Close the packaged-tool hook-verification HIGH](TodoNext/2026-04-12-packaged-tool-hook-verification.md)
 - `TN-2026-04-12-02` completed on `g41` (`29a526c`):
@@ -72,6 +72,9 @@ for current execution state.
 - active implementation pick:
   `TN-2026-04-12-04` targets the Playwright CI gap first because it closes one
   remaining HIGH together with two adjacent MEDIUMs in a narrow CI/E2E slice
+- queue state: `TN-2026-04-12-04` is now active from clean branch tip
+  `f2f07dc`; implementation is restricted to the CI/E2E file cluster unless
+  validation forces a minimal adjacent config change
 - no new smell category was discovered in wave 1
 
 **Still-open ranked clusters after wave 1:**

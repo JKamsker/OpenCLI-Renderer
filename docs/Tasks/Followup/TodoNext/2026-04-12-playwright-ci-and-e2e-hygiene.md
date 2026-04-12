@@ -1,7 +1,7 @@
 # Todo Next: Playwright CI And E2E Hygiene
 
 - ID: `TN-2026-04-12-04`
-- State: `Ready`
+- State: `In Progress`
 - Added: `2026-04-12`
 - Source: outer iteration 9 post-`g43` fresh-swarm wave 1 on hosted-green tip
   `6bb272d`
@@ -10,6 +10,8 @@
   the post-`g43` wave-1 convergence.
 - Exit rule: mark the queue item `Completed`, `Deferred`, or `Rejected` with
   dated rationale and update [Logbook](../Logbook.md) accordingly.
+- Active start: resumed from clean `feat/merge-tool` tip `f2f07dc` on
+  `2026-04-12`
 
 ## Why This Phase Goes Next
 
