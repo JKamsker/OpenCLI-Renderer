@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Reflection;
 using InSpectra.Gen.Core;
 using InSpectra.Gen.Acquisition.Contracts.Providers;
+using InSpectra.Gen.Execution.Process;
 
 namespace InSpectra.Gen.Targets.Sources;
 

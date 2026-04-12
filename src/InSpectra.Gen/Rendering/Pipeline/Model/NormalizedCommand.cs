@@ -1,3 +1,5 @@
+using InSpectra.Gen.OpenCli.Model;
+
 namespace InSpectra.Gen.Rendering.Pipeline.Model;
 
 public sealed class NormalizedCommand

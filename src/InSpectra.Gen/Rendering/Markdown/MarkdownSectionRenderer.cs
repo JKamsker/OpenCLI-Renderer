@@ -1,4 +1,6 @@
 using System.Text;
+using InSpectra.Gen.OpenCli.Model;
+using InSpectra.Gen.Rendering.Pipeline;
 using InSpectra.Gen.Rendering.Pipeline.Model;
 
 namespace InSpectra.Gen.Rendering.Markdown;

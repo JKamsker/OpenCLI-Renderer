@@ -1,3 +1,5 @@
+using InSpectra.Gen.OpenCli.Metadata;
+
 namespace InSpectra.Gen.Rendering.Contracts;
 
 public sealed class RenderExecutionResult

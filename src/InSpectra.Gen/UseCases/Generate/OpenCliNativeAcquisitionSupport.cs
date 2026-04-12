@@ -1,5 +1,8 @@
 using InSpectra.Gen.Acquisition.Contracts;
 using InSpectra.Gen.Core;
+using InSpectra.Gen.Execution.Process;
+using InSpectra.Gen.OpenCli.Metadata;
+using InSpectra.Gen.OpenCli.Validation;
 using InSpectra.Gen.UseCases.Generate.Requests;
 
 namespace InSpectra.Gen.UseCases.Generate;

@@ -7,7 +7,9 @@ namespace InSpectra.Gen.Tests.Architecture;
 /// concrete acquisition internals" and "For the initial acquisition-namespace rule,
 /// <c>InSpectra.Gen</c> may reference only <c>InSpectra.Gen.Acquisition.Composition</c>,
 /// <c>InSpectra.Gen.Acquisition.Contracts</c>, and intentionally exposed public service
-/// interfaces" (docs/architecture/ARCHITECTURE.md).
+/// interfaces" (docs/architecture/ARCHITECTURE.md). Internal app-shell global usings
+/// are also forbidden because they hide cross-module imports from the regex-based
+/// architecture scanners that enforce those same layering rules.
 ///
 /// The four <c>Cli*Exception</c> types live in <c>InSpectra.Gen.Core</c> so both the app
 /// shell and Acquisition can reference them without widening the Acquisition surface.
@@ -29,6 +31,16 @@ public sealed class ArchitectureAppShellTests
     /// <summary>Matches <c>using InSpectra.Gen.Acquisition.X.Y;</c> at the top of a file.</summary>
     private static readonly Regex AcquisitionUsingDirective = new(
         @"^\s*using\s+(?<ns>InSpectra\.Gen\.Acquisition(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\s*;",
+        RegexOptions.Multiline | RegexOptions.Compiled);
+
+    /// <summary>
+    /// Matches project-wide internal global usings like
+    /// <c>global using InSpectra.Gen.Rendering.Contracts;</c>. Those make the
+    /// downstream layering tests look only at the consumer file body while the real
+    /// dependency is smuggled in through a project-root import surface.
+    /// </summary>
+    private static readonly Regex InternalGlobalUsingDirective = new(
+        @"^\s*global\s+using\s+(?<ns>InSpectra\.Gen(?:\.[A-Za-z_][A-Za-z0-9_]*)*)\s*;",
         RegexOptions.Multiline | RegexOptions.Compiled);
 
     [Fact]
@@ -68,6 +80,42 @@ public sealed class ArchitectureAppShellTests
             violations.Count == 0
                 ? null
                 : "App shell must not reach into deep Acquisition internals, but found:"
+                  + Environment.NewLine
+                  + string.Join(Environment.NewLine, violations));
+    }
+
+    [Fact]
+    public void App_shell_does_not_hide_internal_dependencies_behind_global_usings()
+    {
+        var projects = ArchitecturePolicyScanner.EnumerateBackendProjects();
+        Assert.NotEmpty(projects);
+
+        var appShell = projects.SingleOrDefault(p => p.Name == ArchitecturePolicyScanner.AppShellProjectName);
+        Assert.NotNull(appShell);
+
+        var violations = new List<string>();
+        var filesScanned = 0;
+
+        foreach (var filePath in ArchitecturePolicyScanner.EnumerateProjectCodeFiles(appShell!))
+        {
+            filesScanned++;
+            var text = File.ReadAllText(filePath);
+            foreach (Match match in InternalGlobalUsingDirective.Matches(text))
+            {
+                violations.Add(
+                    $"- {ArchitecturePolicyScanner.GetRelativeRepoPath(filePath)} declares global using '{match.Groups["ns"].Value}'");
+            }
+        }
+
+        Assert.True(
+            filesScanned > 0,
+            $"Expected app shell project '{appShell!.Name}' at '{appShell.Directory}' to contain at least one tracked .cs file but found none.");
+
+        Assert.True(
+            violations.Count == 0,
+            violations.Count == 0
+                ? null
+                : "App shell must not hide internal dependencies behind project-wide global usings, but found:"
                   + Environment.NewLine
                   + string.Join(Environment.NewLine, violations));
     }

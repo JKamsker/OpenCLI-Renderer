@@ -4,6 +4,7 @@ using Json.Schema;
 using InSpectra.Gen.Core;
 using InSpectra.Gen.OpenCli.Model;
 using InSpectra.Gen.OpenCli.Schema;
+using InSpectra.Gen.OpenCli.Validation;
 
 namespace InSpectra.Gen.OpenCli.Serialization;
 

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using InSpectra.Gen.Core;
 using Microsoft.Extensions.Options;
 
@@ -50,18 +49,39 @@ public class ViewerBundleLocator(IOptions<ViewerBundleLocatorOptions> options)
             throw new CliUsageException($"InSpectra.UI package metadata is missing in `{frontendRoot}`. {FrontendBuildHint}");
         }
 
-        var npmExecutable = ResolveNpmExecutable(frontendRoot);
+        var npmExecutable = ViewerBundleProcessSupport.ResolveNpmExecutable(
+            frontendRoot,
+            options.Value.NpmExecutablePath,
+            FrontendBuildHint);
         switch (GetNodeModulesState(frontendRoot))
         {
             case NodeModulesState.Missing:
-                await RunProcessAsync(npmExecutable, frontendRoot, repositoryDist, ["ci"], cancellationToken);
+                await ViewerBundleProcessSupport.RunProcessAsync(
+                    npmExecutable,
+                    frontendRoot,
+                    repositoryDist,
+                    ["ci"],
+                    options.Value.NpmTimeoutSeconds,
+                    cancellationToken);
                 break;
             case NodeModulesState.Incomplete:
-                await RunProcessAsync(npmExecutable, frontendRoot, repositoryDist, ["install"], cancellationToken);
+                await ViewerBundleProcessSupport.RunProcessAsync(
+                    npmExecutable,
+                    frontendRoot,
+                    repositoryDist,
+                    ["install"],
+                    options.Value.NpmTimeoutSeconds,
+                    cancellationToken);
                 break;
         }
 
-        await RunProcessAsync(npmExecutable, frontendRoot, repositoryDist, ["run", "build"], cancellationToken);
+        await ViewerBundleProcessSupport.RunProcessAsync(
+            npmExecutable,
+            frontendRoot,
+            repositoryDist,
+            ["run", "build"],
+            options.Value.NpmTimeoutSeconds,
+            cancellationToken);
     }
 
     private static string? FindRepositoryRoot()
@@ -80,57 +100,8 @@ public class ViewerBundleLocator(IOptions<ViewerBundleLocatorOptions> options)
     }
 
     private static IEnumerable<string> CandidateDirectories() => [AppContext.BaseDirectory, Directory.GetCurrentDirectory()];
-    private static bool HasBundle(string path) => File.Exists(Path.Combine(path, "static.html"));
-
-    private string ResolveNpmExecutable(string frontendRoot)
-    {
-        var configuredExecutable = options.Value.NpmExecutablePath;
-        if (!string.IsNullOrWhiteSpace(configuredExecutable))
-        {
-            return Path.IsPathRooted(configuredExecutable) || ContainsDirectorySeparator(configuredExecutable)
-                ? Path.GetFullPath(configuredExecutable, frontendRoot)
-                : configuredExecutable;
-        }
-
-        foreach (var directory in EnumerateSearchDirectories(frontendRoot))
-        {
-            var match = ResolveFromDirectory(directory, "npm");
-            if (match is not null) return match;
-        }
-        throw new CliUsageException($"InSpectra.UI dist was not found and `npm` is not available on PATH. {FrontendBuildHint}");
-    }
-
-    private static IEnumerable<string> EnumerateSearchDirectories(string workingDirectory)
-    {
-        yield return workingDirectory;
-        foreach (var pathEntry in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
-                     .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            yield return pathEntry;
-    }
-
-    private static string? ResolveFromDirectory(string directory, string executableName)
-    {
-        if (!Directory.Exists(directory)) return null;
-        var exactPath = Path.Combine(directory, executableName);
-        if (Path.HasExtension(executableName)) return File.Exists(exactPath) ? exactPath : null;
-
-        if (OperatingSystem.IsWindows())
-        {
-            foreach (var extension in (Environment.GetEnvironmentVariable("PATHEXT") ?? ".EXE;.CMD;.BAT;.COM")
-                         .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            {
-                if (File.Exists(exactPath + extension.ToLowerInvariant())) return exactPath + extension.ToLowerInvariant();
-                if (File.Exists(exactPath + extension.ToUpperInvariant())) return exactPath + extension.ToUpperInvariant();
-            }
-        }
-
-        return File.Exists(exactPath) ? exactPath : null;
-    }
-
-    private static bool ContainsDirectorySeparator(string value)
-    {
-        return value.Contains(Path.DirectorySeparatorChar) || value.Contains(Path.AltDirectorySeparatorChar);
-    }
+    private static bool HasBundle(string path) => HasBundleFile(path, "index.html") && HasBundleFile(path, "static.html");
+    private static bool HasBundleFile(string path, string fileName) => File.Exists(Path.Combine(path, fileName));
 
     private static NodeModulesState GetNodeModulesState(string frontendRoot)
     {
@@ -240,86 +211,6 @@ public class ViewerBundleLocator(IOptions<ViewerBundleLocatorOptions> options)
         => GetLatestWriteTimeUtc(repositoryDist) > GetLatestWriteTimeUtc(packagedPath)
             ? repositoryDist
             : packagedPath;
-
-    private async Task RunProcessAsync(
-        string executablePath,
-        string workingDirectory,
-        string repositoryDist,
-        IReadOnlyList<string> arguments,
-        CancellationToken cancellationToken)
-    {
-        using var process = new Process { StartInfo = CreateStartInfo(executablePath, workingDirectory) };
-        foreach (var argument in arguments)
-            process.StartInfo.ArgumentList.Add(argument);
-
-        try
-        {
-            process.Start();
-        }
-        catch (Exception exception)
-        {
-            throw CreateBuildFailure(workingDirectory, repositoryDist, $"Failed to start `{executablePath}`.", [exception.Message]);
-        }
-
-        process.StandardInput.Close();
-        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        timeout.CancelAfter(TimeSpan.FromSeconds(options.Value.NpmTimeoutSeconds));
-
-        try
-        {
-            var stdoutTask = process.StandardOutput.ReadToEndAsync(timeout.Token);
-            var stderrTask = process.StandardError.ReadToEndAsync(timeout.Token);
-
-            await process.WaitForExitAsync(timeout.Token);
-            _ = await stdoutTask;
-            var stderr = await stderrTask;
-
-            if (process.ExitCode != 0)
-            {
-                var details = new List<string> { $"Exit code: {process.ExitCode}" };
-                if (!string.IsNullOrWhiteSpace(stderr)) details.Add(stderr.Trim());
-                throw CreateBuildFailure(workingDirectory, repositoryDist, $"`{executablePath}` exited with code {process.ExitCode}.", details);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            TryTerminate(process);
-            if (cancellationToken.IsCancellationRequested) throw;
-            throw CreateBuildFailure(
-                workingDirectory,
-                repositoryDist,
-                $"`{executablePath}` did not finish within {options.Value.NpmTimeoutSeconds} seconds.",
-                arguments.Count > 0 ? [$"Arguments: {string.Join(' ', arguments)}"] : []);
-        }
-    }
-
-    private static ProcessStartInfo CreateStartInfo(string executablePath, string workingDirectory) => new()
-    {
-        FileName = executablePath,
-        WorkingDirectory = workingDirectory,
-        UseShellExecute = false,
-        RedirectStandardOutput = true,
-        RedirectStandardError = true,
-        RedirectStandardInput = true,
-    };
-
-    private static CliUsageException CreateBuildFailure(
-        string frontendRoot,
-        string repositoryDist,
-        string message,
-        IReadOnlyList<string>? details = null)
-        => new(
-            $"Failed to build InSpectra.UI in `{frontendRoot}`.",
-            [message, .. details ?? [], $"Expected bundle path: `{repositoryDist}`."]);
-
-    private static void TryTerminate(Process process)
-    {
-        try
-        {
-            if (!process.HasExited) process.Kill(entireProcessTree: true);
-        }
-        catch { }
-    }
 
     private enum NodeModulesState
     {

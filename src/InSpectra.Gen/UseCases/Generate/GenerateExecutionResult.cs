@@ -1,5 +1,6 @@
-using InSpectra.Gen.UseCases.Generate.Requests;
+using InSpectra.Gen.OpenCli.Metadata;
 using InSpectra.Gen.Rendering.Contracts;
+using InSpectra.Gen.UseCases.Generate.Requests;
 
 namespace InSpectra.Gen.UseCases.Generate;
 

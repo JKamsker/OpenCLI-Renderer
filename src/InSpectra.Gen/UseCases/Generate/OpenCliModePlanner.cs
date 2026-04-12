@@ -1,5 +1,6 @@
 using InSpectra.Gen.Acquisition.Contracts;
 using InSpectra.Gen.Acquisition.Contracts.Providers;
+using InSpectra.Gen.OpenCli.Metadata;
 using InSpectra.Gen.UseCases.Generate.Requests;
 
 namespace InSpectra.Gen.UseCases.Generate;

@@ -1,3 +1,4 @@
+using InSpectra.Gen.OpenCli.Model;
 using InSpectra.Gen.Rendering.Pipeline.Model;
 using InSpectra.Gen.Rendering.Contracts;
 

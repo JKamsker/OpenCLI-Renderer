@@ -1,4 +1,6 @@
 using InSpectra.Gen.Core;
+using InSpectra.Gen.OpenCli.Enrichment;
+using InSpectra.Gen.OpenCli.Serialization;
 using InSpectra.Gen.Rendering.Contracts;
 using InSpectra.Gen.Rendering.Pipeline;
 using InSpectra.Gen.UseCases.Generate.Requests;

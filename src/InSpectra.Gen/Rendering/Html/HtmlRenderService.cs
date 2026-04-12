@@ -55,7 +55,6 @@ public sealed class HtmlRenderService(
         if (options.DryRun)
         {
             var plannedFiles = CreatePlannedFiles(bundleFiles, referencedAssets, outputDirectory, options.SingleFile);
-
             return CreateResult(
                 prepared,
                 normalized,
@@ -100,7 +99,6 @@ public sealed class HtmlRenderService(
                     token);
             },
             cancellationToken);
-
         var summary = options.Quiet
             ? null
             : $"Wrote HTML app bundle ({writtenFiles.Count} files) to `{outputDirectory}`.";
@@ -256,7 +254,6 @@ public sealed class HtmlRenderService(
             {
                 Directory.CreateDirectory(destinationDirectory);
             }
-
             await CopyFileAsync(file.SourcePath, destinationPath, cancellationToken);
             writtenFiles.Add(new RenderedFile(file.RelativePath, Path.Combine(outputDirectory, file.RelativePath), null));
         }
