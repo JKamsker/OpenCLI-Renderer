@@ -104,11 +104,14 @@ internal sealed class ToolDescriptorResolver : IToolDescriptorResolver
             return null;
         }
 
+        // Accept a hook-capable framework when either (a) the tool assembly has a PE-level
+        // reference to the framework, OR (b) the framework's runtime assembly ships in the
+        // package (detected at catalog level). Condition (b) covers tools like Clio where the
+        // framework assembly (e.g. CommandLine.dll) is present but the tool references it only
+        // transitively, so no direct PE reference exists.
         return CliFrameworkProviderRegistry.CombineFrameworkNames(
             CliFrameworkProviderRegistry.ResolveAnalysisProviders(cliFramework)
-                .Where(provider =>
-                    provider.SupportsHookAnalysis
-                    && packageInspection.HasToolAssemblyReferencingCliFramework(provider.Name))
+                .Where(provider => provider.SupportsHookAnalysis)
                 .Select(static provider => provider.Name));
     }
 

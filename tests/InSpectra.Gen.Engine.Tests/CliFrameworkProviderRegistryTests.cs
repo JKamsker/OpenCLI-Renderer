@@ -59,6 +59,7 @@ public sealed class CliFrameworkProviderRegistryTests
     [Theory]
     [InlineData("System.CommandLine", true)]
     [InlineData("CommandLineParser", true)]
+    [InlineData("FluentCommandLineParser", true)]
     [InlineData("System.CommandLine + CommandLineParser", true)]
     [InlineData("CliFx", false)]
     [InlineData(null, false)]
@@ -116,5 +117,55 @@ public sealed class CliFrameworkProviderRegistryTests
         bool expected)
     {
         Assert.Equal(expected, CliFrameworkProviderRegistry.ShouldReplace(existingCliFramework, candidateCliFramework));
+    }
+
+    [Fact]
+    public void Detect_RecognizesFluentCommandLineParserFromDependency()
+    {
+        var catalogLeaf = new CatalogLeaf(
+            "https://nuget.test/catalog/sample.tool.1.0.0.json",
+            Title: null,
+            Description: null,
+            ProjectUrl: null,
+            Repository: null,
+            PackageEntries: null,
+            [new CatalogDependencyGroup([new CatalogDependency("FluentCommandLineParser")])],
+            PackageTypes: null);
+
+        var detected = CliFrameworkProviderRegistry.Detect(catalogLeaf);
+
+        Assert.Equal("FluentCommandLineParser", detected);
+    }
+
+    [Fact]
+    public void Detect_RecognizesFluentCommandLineParserFromAssemblyName()
+    {
+        var catalogLeaf = new CatalogLeaf(
+            "https://nuget.test/catalog/sample.tool.1.0.0.json",
+            Title: null,
+            Description: null,
+            ProjectUrl: null,
+            Repository: null,
+            [new CatalogPackageEntry("tools/net6.0/any/FluentCommandLineParser.dll", "FluentCommandLineParser.dll")],
+            DependencyGroups: null,
+            PackageTypes: null);
+
+        var detected = CliFrameworkProviderRegistry.Detect(catalogLeaf);
+
+        Assert.Equal("FluentCommandLineParser", detected);
+    }
+
+    [Fact]
+    public void ResolveHookAnalysisFramework_Returns_FluentCommandLineParser_For_Matching_Label()
+    {
+        var framework = CliFrameworkProviderRegistry.ResolveHookAnalysisFramework("FluentCommandLineParser");
+
+        Assert.Equal("FluentCommandLineParser", framework);
+    }
+
+    [Fact]
+    public void HasStaticAnalysisSupport_ReturnsFalse_ForFluentCommandLineParser()
+    {
+        Assert.False(CliFrameworkProviderRegistry.HasStaticAnalysisSupport("FluentCommandLineParser"));
     }
 }

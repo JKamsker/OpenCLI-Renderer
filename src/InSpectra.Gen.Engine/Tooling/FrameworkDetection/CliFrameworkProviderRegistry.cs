@@ -217,6 +217,7 @@ internal static class CliFrameworkProviderRegistry
             CreateCatalogOnlyProvider("Oakton", ["Oakton"], ["Oakton.dll"]),
             CreateCatalogOnlyProvider("ManyConsole", ["ManyConsole"], ["ManyConsole.dll"]),
             CreateCatalogOnlyProvider("Mono.Options / NDesk.Options", ["Mono.Options", "NDesk.Options"], ["Mono.Options.dll", "NDesk.Options.dll"], "Mono.Options", "NDesk.Options"),
+            CreateHookOnlyProvider("FluentCommandLineParser", ["FluentCommandLineParser"], ["FluentCommandLineParser.dll"]),
         ];
     }
 
@@ -260,5 +261,24 @@ internal static class CliFrameworkProviderRegistry
                 .ToArray(),
             SupportsCliFxAnalysis: false,
             SupportsHookAnalysis: false,
+            StaticAnalysisAdapter: null);
+
+    private static CliFrameworkProvider CreateHookOnlyProvider(
+        string name,
+        IReadOnlyList<string> dependencyIds,
+        IReadOnlyList<string> packageAssemblyNames,
+        params string[] labelAliases)
+        => new(
+            Name: name,
+            LabelAliases: labelAliases,
+            DependencyIds: dependencyIds,
+            PackageAssemblyNames: packageAssemblyNames,
+            RuntimeAssemblyNames: packageAssemblyNames
+                .Select(static assemblyName => Path.GetFileNameWithoutExtension(assemblyName))
+                .Where(static assemblyName => !string.IsNullOrWhiteSpace(assemblyName))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
+            SupportsCliFxAnalysis: false,
+            SupportsHookAnalysis: true,
             StaticAnalysisAdapter: null);
 }

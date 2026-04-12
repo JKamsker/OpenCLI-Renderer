@@ -1,5 +1,6 @@
 using InSpectra.Gen.StartupHook.CommandLineParser;
 using InSpectra.Gen.StartupHook.CommandLineUtils;
+using InSpectra.Gen.StartupHook.FluentCommandLineParser;
 using InSpectra.Gen.StartupHook.SystemCommandLine;
 using System.Reflection;
 
@@ -11,6 +12,7 @@ internal static class HookCliFrameworkSupport
     public const string McMasterExtensionsCommandLineUtils = "McMaster.Extensions.CommandLineUtils";
     public const string MicrosoftExtensionsCommandLineUtils = "Microsoft.Extensions.CommandLineUtils";
     public const string CommandLineParser = "CommandLineParser";
+    public const string FluentCommandLineParser = "FluentCommandLineParser";
 
     public static string NormalizeExpectedFramework(string? cliFramework)
         => cliFramework switch
@@ -18,6 +20,7 @@ internal static class HookCliFrameworkSupport
             McMasterExtensionsCommandLineUtils => McMasterExtensionsCommandLineUtils,
             MicrosoftExtensionsCommandLineUtils => MicrosoftExtensionsCommandLineUtils,
             CommandLineParser => CommandLineParser,
+            FluentCommandLineParser => FluentCommandLineParser,
             _ => SystemCommandLine,
         };
 
@@ -25,6 +28,7 @@ internal static class HookCliFrameworkSupport
         => cliFramework switch
         {
             CommandLineParser => "CommandLine",
+            FluentCommandLineParser => "FluentCommandLineParser",
             _ => cliFramework,
         };
 
@@ -44,6 +48,9 @@ internal static class HookCliFrameworkSupport
                 return;
             case CommandLineParser:
                 CommandLineParserPatchInstaller.Install(assembly, capturePath);
+                return;
+            case FluentCommandLineParser:
+                FluentCommandLineParserPatchInstaller.Install(assembly, capturePath);
                 return;
             default:
                 HarmonyPatchInstaller.Install(assembly, capturePath);

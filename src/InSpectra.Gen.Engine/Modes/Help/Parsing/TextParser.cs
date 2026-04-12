@@ -41,6 +41,7 @@ internal sealed class TextParser
         string? currentSection = null;
         string? commandHeader = null;
         var sawInventoryHeader = false;
+        var previousLineWasDecorativeBanner = false;
 
         foreach (var rawLine in lines)
         {
@@ -110,8 +111,25 @@ internal sealed class TextParser
 
             if (currentSection is null)
             {
-                if (!TextNoiseClassifier.ShouldIgnorePreambleLine(line))
+                var trimmedLine = line.Trim();
+                var isDecorativeBanner = !string.IsNullOrWhiteSpace(trimmedLine)
+                    && TextNoiseClassifier.LooksLikeDecorativeBannerLine(trimmedLine);
+
+                if (TextNoiseClassifier.ShouldIgnorePreambleLine(line))
                 {
+                    // Track decorative banner lines so the next non-blank line (a section
+                    // header like "Main" sandwiched between dashed separators) is also skipped.
+                    previousLineWasDecorativeBanner = isDecorativeBanner;
+                }
+                else if (previousLineWasDecorativeBanner && !string.IsNullOrWhiteSpace(trimmedLine))
+                {
+                    // Skip bare words that immediately follow a decorative banner line —
+                    // they are section headers (e.g. "Main", "Source", "Validation"), not commands.
+                    previousLineWasDecorativeBanner = false;
+                }
+                else
+                {
+                    previousLineWasDecorativeBanner = false;
                     preamble.Add(line);
                 }
             }

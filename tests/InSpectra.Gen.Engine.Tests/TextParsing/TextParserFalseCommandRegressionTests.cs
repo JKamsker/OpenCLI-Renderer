@@ -180,12 +180,11 @@ public sealed class TextParserFalseCommandRegressionTests
               Cancel renewal specified by the --friendlyname or --id arguments.
             """);
 
-        // The dashed separator "-----" followed by "Main" on its own line gets inferred as a
-        // command via the preamble inventory path. This is a false positive — "Main" is a section
-        // header, not a subcommand. The parser should ideally recognize dashed-separator-bracketed
-        // labels as section headers rather than commands.
-        Assert.True(document.Commands.Count <= 1,
-            $"Expected <=1 commands (known false positive: 'Main'), got {document.Commands.Count}: [{string.Join(", ", document.Commands.Select(c => c.Key))}]");
+        // "Main" appears between dashed separators and is a section header, not a command.
+        // The parser now recognizes bare words preceded by decorative banner lines as section
+        // headers and skips them.
+        Assert.True(document.Commands.Count == 0,
+            $"Expected 0 commands (section headers between dashed separators should not be inferred as commands), got {document.Commands.Count}: [{string.Join(", ", document.Commands.Select(c => c.Key))}]");
         Assert.True(document.Options.Count > 0, "Should parse options from the flat list");
     }
 

@@ -150,7 +150,7 @@ internal static partial class TextNoiseClassifier
     private static bool LooksLikeRejectedHelpInvocation(string? line)
         => RejectedHelpClassifier.LooksLikeRejectedHelpInvocation(line);
 
-    private static bool LooksLikeDecorativeBannerLine(string line)
+    internal static bool LooksLikeDecorativeBannerLine(string line)
         => line.Length > 0
             && line.Any(ch => !char.IsWhiteSpace(ch))
             && !line.Any(char.IsLetterOrDigit);
