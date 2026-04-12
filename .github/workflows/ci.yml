@@ -130,9 +130,30 @@ jobs:
           set -euo pipefail
           nupkg=$(find src/InSpectra.Gen/bin/Release -name '*.nupkg' | head -1)
           test -n "$nupkg"
+          version="0.0.${{ github.run_number }}"
+          tool_dir="$(mktemp -d)"
+          package_source_dir="$(dirname "$nupkg")"
+          nuget_config="$(mktemp)"
           echo "Found package: $nupkg"
-          dotnet tool install --global --add-source "$(dirname "$nupkg")" InSpectra.Gen --version "0.0.${{ github.run_number }}"
-          inspectra --version
+          cat > "$nuget_config" <<EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="local-build" value="$package_source_dir" />
+            </packageSources>
+          </configuration>
+          EOF
+          dotnet tool install --tool-path "$tool_dir" --configfile "$nuget_config" InSpectra.Gen --version "$version"
+          "$tool_dir/inspectra" --version
+          install_store_root="$tool_dir/.store/inspectra.gen/$version"
+          hook_dll_path="$(find "$install_store_root" -path '*/tools/*/any/hooks/InSpectra.Gen.StartupHook.dll' | head -1)"
+          test -n "$hook_dll_path"
+          installed_tool_dir="$(dirname "$(dirname "$hook_dll_path")")"
+          test -n "$installed_tool_dir"
+          test -f "$installed_tool_dir/inspectra.dll"
+          test -f "$installed_tool_dir/hooks/InSpectra.Gen.StartupHook.dll"
+          test -f "$installed_tool_dir/hooks/0Harmony.dll"
 
       - name: Upload build
         uses: actions/upload-artifact@v4

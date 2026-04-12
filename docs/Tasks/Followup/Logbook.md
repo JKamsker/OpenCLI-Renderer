@@ -1,24 +1,23 @@
 # Follow-up Logbook
 
-> **Status (2026-04-12): 39 PHASES PUSHED WITH GREEN HOSTED CI, PLUS LOCAL
-> PHASE `g40` (`8b3c0bc`) COMMITTED AND LOCALLY VALIDATED.**
-> Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, and
-> the queue-driven thin-shell phase `g40` is now committed locally.
+> **Status (2026-04-12): 41 PHASES PUSHED WITH GREEN HOSTED CI, WITH
+> `TN-2026-04-12-03` NOW IN PROGRESS FROM THE HOSTED-VALIDATED `29a526c`
+> BASELINE.**
+> Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
+> queue-driven thin-shell phase `g40` and the installed-tool process-safety
+> phase `g41` are now pushed, and `29a526c` is the current hosted-validated
+> code tip.
 > The original zero-BLOCKER/HIGH/MEDIUM stop condition is still **not** met:
-> the final fresh swarm left one HIGH and several MEDIUM findings open, and
-> the outer loop stopped only because the user explicitly ended it after
-> iteration 7.
+> `g41` closed the installed-tool process-safety HIGH, but multiple other
+> ranked HIGH/MEDIUM clusters remain open after post-`29a526c` wave 1, with
+> `TN-2026-04-12-03` now in progress.
 >
-> Current validated pushed tip: `a3390bb` with **319 unit tests / 0 failed / 0
-> skipped**, **15 architecture policy tests**, targeted live NuGet API slice
-> **3 / 0 / 0** (`NuGetApiClientLiveTests`), green `pull_request` run
-> `24296163756`, and green `workflow_dispatch` run `24296167355` including
-> `live-tests`.
+> Current validated pushed tip: `29a526c` with **354 unit tests / 0 failed / 0
+> skipped**, **17 architecture policy tests**, and green `pull_request` run
+> `24300030057`.
 >
-> The current local committed tip `8b3c0bc` (`g40`) passes **325 unit tests /
-> 0 failed / 0 skipped**, **17 architecture policy tests**, and a targeted
-> engine architecture slice of **3 / 0 / 0**. This tip has not been pushed or
-> hosted validated yet.
+> The latest green `workflow_dispatch` run is still `24296167355` on pushed tip
+> `a3390bb`, including `live-tests`.
 >
 > Use this file for shipped history, test/CI ledger, lessons learned, and the
 > current open-findings list. Use [README](README.md), [Runbook](Runbook.md),
@@ -38,9 +37,208 @@
 ## Todo Next Snapshot
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
-- Current mandatory queued item before the next fresh swarm: none
+- Active queued phase:
+  [TN-2026-04-12-03](TodoNext/2026-04-12-packaged-tool-hook-verification.md)
+  (`In Progress`)
+- No additional queued items remain ahead of the next fresh investigation
+  swarm after `TN-2026-04-12-03`.
+- `TN-2026-04-12-02` completed on `g41` (`29a526c`):
+  [Close the installed-tool process-safety cluster](TodoNext/2026-04-12-installed-tool-process-safety.md)
 - `TN-2026-04-12-01` completed locally in `g40` (`8b3c0bc`):
   [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
+## Current Open Items After `g41` Hosted Validation (2026-04-12)
+
+This section supersedes the older post-`a08c0f2` ranking snapshot below for
+current execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `29a526c`
+- `dotnet test InSpectra.Gen.sln --no-restore` ✅ (`354 / 0 / 0`)
+- architecture filter ✅ (`17 / 0 / 0`)
+- green `pull_request` run `24300030057`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Queue-handling work closed on `g41`:**
+
+- `TN-2026-04-12-02` is complete on `g41` (`29a526c`)
+- installed-tool help/CliFx/hook crawls now keep the real caller working
+  directory while using engine-owned cleanup roots only
+- package acquisition, native opencli generation, and xmldoc extraction now
+  propagate the same engine-owned cleanup root through the runner seams
+- timeout cleanup now always escalates to sandbox cleanup, dotnet-hosted
+  processes can be matched back to sandboxed entry commands, hook retry replay
+  is environment-aware across compatibility changes, and compatibility retries
+  no longer stop on stale pre-existing env values
+- CliFx child-command discovery now normalizes root-qualified command names
+  before enqueueing follow-up help captures
+
+**Fresh post-`g41` investigation wave 1 summary:**
+
+- wave 1 converged strongly on the already-ranked remaining clusters rather
+  than surfacing a materially new smell family
+- the repeated HIGHs were: hosted Playwright CI coverage, generated static-HTML
+  public-contract drift, packaged-tool/StartupHook verification, and frontend
+  code-size policy enforcement
+- the repeated MEDIUMs were: diagnostics preservation, installed-tool
+  determinism, static-analysis degradation handling, CI/docs/Pages drift, and
+  architecture-scanner / boundary-assertion gaps
+- active implementation phase:
+  `TN-2026-04-12-03` targets the packaged-tool hook-verification HIGH first
+  because it is the most contained runtime-critical blind spot in the
+  converged wave
+- local implementation progress:
+  current uncommitted work now installs the just-built `.nupkg` into a temp
+  tool path via a temp single-source `NuGet.Config`, then asserts the
+  installed `.store/.../tools/*/any/hooks/` payload layout that the runtime
+  hook path depends on
+
+**Still-open ranked clusters on the latest validated pushed tip `29a526c`:**
+
+- **HIGH: hosted CI still does not execute the Playwright E2E suite.**
+  `.github/workflows/ci.yml` still runs frontend unit tests plus build, but not
+  `npm run test:e2e`.
+- **HIGH: generated static HTML still overstates several public viewer
+  features.**
+  The currently shipped static viewer does not honor the documented
+  `--enable-url` behavior and does not implement the advertised
+  `--show-home` / `--enable-nuget-browser` / `--enable-package-upload`
+  contract.
+- **HIGH: the packed tool still lacks an end-to-end verification path for its
+  required StartupHook payload.**
+  CI verifies publish layout and installs the `.nupkg`, but it still only runs
+  `inspectra --version`, so a broken packed `hooks/` layout can ship green.
+  `TN-2026-04-12-03` is now addressing this locally by asserting the installed
+  tool-store payload layout before the phase commit.
+- **HIGH: frontend code-size policy is unenforced and already violated.**
+  `CIGuidePage.tsx` is `744` lines, the repo-wide policy is not enforced for
+  `.tsx`, and the frontend slice can drift past the documented hard cap without
+  CI catching it.
+- **MEDIUM: process and viewer failure diagnostics still discard useful
+  stdout/timeout evidence.**
+  `ProcessRunner.cs` and
+  `Rendering/Html/Bundle/ViewerBundleProcessSupport.cs` still collapse many
+  non-zero or timed-out failures to exit codes or short timeout messages even
+  when stdout contains the actionable error text.
+- **MEDIUM: installed-tool selection and action versioning remain
+  nondeterministic.**
+  Installed-tool analysis still picks the first matching
+  `DotnetToolSettings.xml`, and the composite action still lets ambient
+  `inspectra` on `PATH` override `inspectra-version`.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals.**
+  `StaticAnalysisInstalledToolAnalysisSupport.cs` does not fail on help-crawl
+  output-limit or guardrail failures the way the sibling help/CliFx analyzers
+  do.
+- **MEDIUM: public docs, website copy, and the CI guide still drift from the
+  real product contract.**
+  Current gaps include outdated CLI commands on `AboutPage`, stale CI-guide
+  input coverage, README/Pages claims that no longer match deployment, and
+  docs that overstate the current HTML feature-flag defaults.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine scanners still rely on plain `using` detection in multiple
+  suites, `StartupHook` packaging-only metadata is not asserted, and some
+  documented boundaries such as `Rendering.Html` vs `Rendering.Markdown` still
+  lack executable coverage.
+- **MEDIUM: the local Playwright suite still has stale-cache and weak-assertion
+  risks even before it is wired into hosted CI.**
+  The shared `.rendered` cache can mask current-output regressions, and the
+  theme-toggle E2E still passes when the toggle is absent.
+
+## Current Open Items After `a08c0f2` Fresh-Swarm Ranking (2026-04-12)
+
+This section supersedes the older thin-shell queue-handling snapshot below now
+that `g40` is pushed, `a08c0f2` is hosted validated, and the next outer
+iteration has completed three fresh investigation waves plus direct local
+triage.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `a08c0f2`
+- `dotnet test InSpectra.Gen.sln` ✅ (`325 / 0 / 0`)
+- architecture filter ✅ (`17 / 0 / 0`)
+- targeted engine architecture slice ✅ (`3 / 0 / 0`)
+- green `pull_request` run `24297978111`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Wave summary and ranking outcome:**
+
+- wave 1 surfaced the still-open Playwright hosted-CI HIGH, the oversized
+  `CIGuidePage.tsx` HIGH, viewer stdout-diagnostics loss, docs/UI drift, and
+  tooling / architecture enforcement gaps
+- wave 2 added the installed-tool process-safety HIGH, strengthened the
+  installed-tool determinism issue, and expanded the public-doc truthfulness
+  gap
+- wave 3 mostly confirmed the existing clusters while sharpening two more
+  public-contract HIGHs around generated static HTML feature flags and one HIGH
+  around missing StartupHook package verification
+- active implementation pick:
+  `TN-2026-04-12-02` targets the installed-tool process-safety cluster first
+  because it closes a runtime HIGH with a contained write set
+
+**Open HIGH findings after ranking:**
+
+- **HIGH: installed-tool help/hook crawls still scope process cleanup to the
+  caller working directory instead of engine-managed sandbox state.**
+  The help/crawling and hook paths still feed the caller workspace into
+  `CommandProcessSupport.TerminateSandboxProcesses(...)` through the
+  `sandboxRoot` channel, so cancellation cleanup can escape the intended
+  sandbox boundary.
+- **HIGH: hosted CI still does not execute the Playwright E2E suite.**
+  `.github/workflows/ci.yml` still runs frontend unit tests plus build, but not
+  `npm run test:e2e`.
+- **HIGH: generated static HTML still overstates several public viewer
+  features.**
+  The currently shipped static viewer does not honor the documented
+  `--enable-url` behavior and does not implement the advertised
+  `--show-home` / `--enable-nuget-browser` / `--enable-package-upload`
+  contract.
+- **HIGH: the packed tool still lacks an end-to-end verification path for its
+  required StartupHook payload.**
+  CI verifies publish layout and installs the `.nupkg`, but it still only runs
+  `inspectra --version`, so a broken packed `hooks/` layout can ship green.
+- **HIGH: frontend code-size policy is unenforced and already violated.**
+  `CIGuidePage.tsx` is `744` lines, the repo-wide policy is not enforced for
+  `.tsx`, and the frontend slice can drift past the documented hard cap without
+  CI catching it.
+
+**Open MEDIUM findings after ranking:**
+
+- **MEDIUM: process and viewer failure diagnostics still discard useful
+  stdout/timeout evidence.**
+  `ProcessRunner.cs` and
+  `Rendering/Html/Bundle/ViewerBundleProcessSupport.cs` still collapse many
+  non-zero or timed-out failures to exit codes or short timeout messages even
+  when stdout contains the actionable error text.
+- **MEDIUM: installed-tool selection and action versioning remain
+  nondeterministic.**
+  Installed-tool analysis still picks the first matching
+  `DotnetToolSettings.xml`, and the composite action still lets ambient
+  `inspectra` on `PATH` override `inspectra-version`.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals.**
+  `StaticAnalysisInstalledToolAnalysisSupport.cs` does not fail on help-crawl
+  output-limit or guardrail failures the way the sibling help/CliFx analyzers
+  do.
+- **MEDIUM: public docs, website copy, and the CI guide still drift from the
+  real product contract.**
+  Current gaps include outdated CLI commands on `AboutPage`, stale CI-guide
+  input coverage, README/Pages claims that no longer match deployment, and
+  docs that overstate the current HTML feature-flag defaults.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine scanners still rely on plain `using` detection in multiple
+  suites, `StartupHook` packaging-only metadata is not asserted, and some
+  documented boundaries such as `Rendering.Html` vs `Rendering.Markdown` still
+  lack executable coverage.
+- **MEDIUM: the local Playwright suite still has stale-cache and weak-assertion
+  risks even before it is wired into hosted CI.**
+  The shared `.rendered` cache can mask current-output regressions, and the
+  theme-toggle E2E still passes when the toggle is absent.
+
+**Open LOW findings after ranking:**
+
+- no new LOW findings were surfaced by the fresh swarms
+- the prior LOW-only ledger below still remains in force and should continue to
+  be aggregated rather than re-raised as blocking work
 
 ## Current Open Items After Thin-Shell Queue Handling (2026-04-12)
 

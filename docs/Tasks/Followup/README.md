@@ -8,36 +8,36 @@ This folder replaces the old monolithic
 - Working branch: `feat/merge-tool`
 - Current follow-up docs live on the branch tip; verify `HEAD` before
   resuming work.
-- Latest fully validated pushed tip: `a3390bb`
-- Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`.
-- The pushed tip `a3390bb` is locally and hosted validated:
-  - `319 / 0 / 0` unit tests
-  - `15` architecture policy tests
-  - targeted live NuGet API slice `3 / 0 / 0`
-  - green `pull_request` run `24296163756`
-  - green `workflow_dispatch` run `24296167355`, including `live-tests`
-- The current local committed tip `8b3c0bc` (`g40`) was validated on
-  `2026-04-12` and currently passes:
-  - `325 / 0 / 0` unit tests
+- Latest fully validated pushed tip: `29a526c`
+- Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, and
+  the queue-driven thin-shell phase `g40` plus the installed-tool
+  process-safety phase `g41` are now pushed and hosted validated.
+- The pushed tip `29a526c` is locally and hosted validated:
+  - `354 / 0 / 0` unit tests
   - `17` architecture policy tests
-  - targeted engine architecture slice `3 / 0 / 0`
-  - this tip is committed locally and not yet pushed / hosted validated
+  - green `pull_request` run `24300030057`
+- The latest green `workflow_dispatch` validation is still on pushed tip
+  `a3390bb`:
+  - green `workflow_dispatch` run `24296167355`, including `live-tests`
+- Outer iteration 8 fresh-swarm ranking restarted from `29a526c`, and wave 1
+  converged on the remaining pre-existing HIGH/MEDIUM clusters.
 - The original zero-BLOCKER/HIGH/MEDIUM stop condition was not reached.
-  The final fresh swarm still left one HIGH and several MEDIUM findings open,
-  and the outer loop stopped only because the user explicitly ended it after
-  iteration 7.
+  `g41` closed the installed-tool process-safety HIGH, but multiple other
+  ranked HIGH/MEDIUM clusters remain open after post-`29a526c` wave 1, with
+  `TN-2026-04-12-03` now in progress.
 - Active todo-next queue:
-  - none
-  - `TN-2026-04-12-01` completed locally on `g40`
-    (`8b3c0bc`); see
-    [TodoNext/2026-04-12-thin-shell-architecture.md](TodoNext/2026-04-12-thin-shell-architecture.md)
-    and
-    [Logbook](Logbook.md#current-open-items-after-thin-shell-queue-handling-2026-04-12)
+  - `TN-2026-04-12-03` in progress:
+    [TodoNext/2026-04-12-packaged-tool-hook-verification.md](TodoNext/2026-04-12-packaged-tool-hook-verification.md)
+  - `TN-2026-04-12-02` completed on `g41`
+    (`29a526c`):
+    [TodoNext/2026-04-12-installed-tool-process-safety.md](TodoNext/2026-04-12-installed-tool-process-safety.md)
+  - `TN-2026-04-12-01` completed on `g40`
+    (`8b3c0bc`)
 
 ## Current Handoff State
 
 - Source of truth for current open work:
-  [Logbook](Logbook.md#current-open-items-after-thin-shell-queue-handling-2026-04-12)
+  [Logbook](Logbook.md#current-open-items-after-g41-hosted-validation-2026-04-12)
 - Source of truth for how to resume the loop:
   [Runbook](Runbook.md)
 - Source of truth for mandatory queued work before the next swarm:
