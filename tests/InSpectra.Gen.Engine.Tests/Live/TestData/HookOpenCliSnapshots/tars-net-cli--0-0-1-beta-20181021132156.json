@@ -10,11 +10,31 @@
       "description": "Show help and usage information",
       "aliases": [
         "-h"
+      ],
+      "arguments": [
+        {
+          "name": "HELP",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     },
     {
       "name": "--version",
-      "description": "Show version information"
+      "description": "Show version information",
+      "arguments": [
+        {
+          "name": "VERSION",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
+      ]
     }
   ],
   "commands": [
@@ -27,6 +47,16 @@
           "description": "Show help and usage information",
           "aliases": [
             "-h"
+          ],
+          "arguments": [
+            {
+              "name": "HELP",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 0
+              }
+            }
           ]
         }
       ],

@@ -10,6 +10,16 @@
       "description": "Show relative paths in the results",
       "aliases": [
         "-r"
+      ],
+      "arguments": [
+        {
+          "name": "RELATIVE",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     },
     {
@@ -17,6 +27,16 @@
       "description": "Format the results as JSON",
       "aliases": [
         "-j"
+      ],
+      "arguments": [
+        {
+          "name": "JSON",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     },
     {
@@ -24,6 +44,16 @@
       "description": "Show version information",
       "aliases": [
         "-v"
+      ],
+      "arguments": [
+        {
+          "name": "VERSION",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     },
     {
@@ -31,6 +61,16 @@
       "description": "Show help and usage information",
       "aliases": [
         "-h"
+      ],
+      "arguments": [
+        {
+          "name": "HELP",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     }
   ],

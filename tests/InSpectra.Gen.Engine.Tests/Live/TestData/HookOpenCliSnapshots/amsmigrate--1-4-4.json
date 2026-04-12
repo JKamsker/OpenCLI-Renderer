@@ -19,7 +19,16 @@
           "arity": {
             "minimum": 1,
             "maximum": 1
-          }
+          },
+          "allowedValues": [
+            "Trace",
+            "Debug",
+            "Information",
+            "Warning",
+            "Error",
+            "Critical",
+            "None"
+          ]
         }
       ]
     },
@@ -108,7 +117,14 @@
           "arity": {
             "minimum": 0,
             "maximum": 1
-          }
+          },
+          "allowedValues": [
+            "AWS",
+            "Azure",
+            "Custom",
+            "GCP",
+            "Local"
+          ]
         }
       ]
     },
@@ -117,11 +133,31 @@
       "description": "Run in daemon mode and do not use ASCII graphics.",
       "aliases": [
         "--daemon-mode"
+      ],
+      "arguments": [
+        {
+          "name": "D",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
       ]
     },
     {
       "name": "--version",
-      "description": "Show version information"
+      "description": "Show version information",
+      "arguments": [
+        {
+          "name": "VERSION",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
+      ]
     },
     {
       "name": "-h",
@@ -131,6 +167,16 @@
         "--help",
         "-?",
         "/?"
+      ],
+      "arguments": [
+        {
+          "name": "H",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     }
   ],
@@ -171,7 +217,12 @@
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              }
+              },
+              "allowedValues": [
+                "Summary",
+                "Detailed",
+                "Report"
+              ]
             }
           ]
         }
@@ -234,11 +285,31 @@
           "description": "Mark completed assets by writing metadata on the container",
           "aliases": [
             "--mark-complete"
+          ],
+          "arguments": [
+            {
+              "name": "M",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           ]
         },
         {
           "name": "--skip-migrated",
-          "description": "Skip assets that have been migrated already."
+          "description": "Skip assets that have been migrated already.",
+          "arguments": [
+            {
+              "name": "SKIP_MIGRATED",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          ]
         },
         {
           "name": "--packager",
@@ -251,7 +322,12 @@
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              }
+              },
+              "allowedValues": [
+                "Ffmpeg",
+                "Shaka",
+                "None"
+              ]
             }
           ]
         },
@@ -272,7 +348,17 @@
         },
         {
           "name": "--copy-nonstremable",
-          "description": "Copy non-stremable assets (Assets without .ism file) as is."
+          "description": "Copy non-stremable assets (Assets without .ism file) as is.",
+          "arguments": [
+            {
+              "name": "COPY_NONSTREMABLE",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          ]
         },
         {
           "name": "--batch-size",
@@ -315,6 +401,16 @@
           "description": "Overwrite the files in the destination.",
           "aliases": [
             "--overwrite"
+          ],
+          "arguments": [
+            {
+              "name": "Y",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           ]
         },
         {
@@ -363,11 +459,31 @@
           "description": "Mark completed assets by writing metadata on the container",
           "aliases": [
             "--mark-complete"
+          ],
+          "arguments": [
+            {
+              "name": "M",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           ]
         },
         {
           "name": "--skip-migrated",
-          "description": "Skip assets that have been migrated already."
+          "description": "Skip assets that have been migrated already.",
+          "arguments": [
+            {
+              "name": "SKIP_MIGRATED",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          ]
         },
         {
           "name": "--packager",
@@ -380,7 +496,12 @@
               "arity": {
                 "minimum": 1,
                 "maximum": 1
-              }
+              },
+              "allowedValues": [
+                "Ffmpeg",
+                "Shaka",
+                "None"
+              ]
             }
           ]
         },
@@ -401,7 +522,17 @@
         },
         {
           "name": "--copy-nonstremable",
-          "description": "Copy non-stremable assets (Assets without .ism file) as is."
+          "description": "Copy non-stremable assets (Assets without .ism file) as is.",
+          "arguments": [
+            {
+              "name": "COPY_NONSTREMABLE",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          ]
         },
         {
           "name": "--batch-size",
@@ -444,6 +575,16 @@
           "description": "Overwrite the files in the destination.",
           "aliases": [
             "--overwrite"
+          ],
+          "arguments": [
+            {
+              "name": "Y",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           ]
         },
         {

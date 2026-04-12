@@ -67,7 +67,17 @@
     },
     {
       "name": "--version",
-      "description": "Show version information"
+      "description": "Show version information",
+      "arguments": [
+        {
+          "name": "VERSION",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
+      ]
     },
     {
       "name": "-h",
@@ -77,6 +87,16 @@
         "--help",
         "-?",
         "/?"
+      ],
+      "arguments": [
+        {
+          "name": "H",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     }
   ]

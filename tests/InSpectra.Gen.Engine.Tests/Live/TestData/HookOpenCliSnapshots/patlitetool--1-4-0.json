@@ -127,6 +127,16 @@
           "description": "Blink [default: False]",
           "aliases": [
             "-b"
+          ],
+          "arguments": [
+            {
+              "name": "BLINK",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           ]
         },
         {

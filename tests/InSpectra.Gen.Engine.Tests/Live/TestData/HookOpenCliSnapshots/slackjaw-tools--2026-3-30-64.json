@@ -7,7 +7,17 @@
   "options": [
     {
       "name": "--version",
-      "description": "Show version information"
+      "description": "Show version information",
+      "arguments": [
+        {
+          "name": "VERSION",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
+      ]
     },
     {
       "name": "-h",
@@ -17,6 +27,16 @@
         "--help",
         "-?",
         "/?"
+      ],
+      "arguments": [
+        {
+          "name": "H",
+          "type": "Boolean",
+          "arity": {
+            "minimum": 0,
+            "maximum": 0
+          }
+        }
       ]
     }
   ],
@@ -72,6 +92,16 @@
           "description": "Ignore failing tests and continue with DLL transfer",
           "aliases": [
             "-i"
+          ],
+          "arguments": [
+            {
+              "name": "IGNORE_FAILING_TESTS",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           ]
         },
         {
@@ -79,6 +109,16 @@
           "description": "Skip test execution completely",
           "aliases": [
             "-s"
+          ],
+          "arguments": [
+            {
+              "name": "SKIP_TESTS",
+              "type": "Boolean",
+              "arity": {
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
           ]
         }
       ]

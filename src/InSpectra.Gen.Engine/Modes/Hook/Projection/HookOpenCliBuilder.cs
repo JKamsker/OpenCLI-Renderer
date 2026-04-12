@@ -154,8 +154,7 @@ internal static class HookOpenCliBuilder
 
             // Arguments sub-node for the option's value.
             if (opt.ValueType is not null
-                && opt.ValueType is not "Void"
-                && opt.ValueType is not "Boolean")
+                && opt.ValueType is not "Void")
             {
                 var argNode = new JsonObject();
 
@@ -184,7 +183,7 @@ internal static class HookOpenCliBuilder
                 {
                     var valuesArray = new JsonArray();
                     foreach (var v in opt.AllowedValues) valuesArray.Add(v);
-                    argNode["acceptedValues"] = valuesArray;
+                    argNode["allowedValues"] = valuesArray;
                 }
 
                 node["arguments"] = new JsonArray { argNode };
@@ -235,7 +234,7 @@ internal static class HookOpenCliBuilder
             {
                 var valuesArray = new JsonArray();
                 foreach (var v in arg.AllowedValues) valuesArray.Add(v);
-                node["acceptedValues"] = valuesArray;
+                node["allowedValues"] = valuesArray;
             }
 
             array.Add(node);

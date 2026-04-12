@@ -92,7 +92,7 @@ public sealed class HookOpenCliBuilderTests
     }
 
     [Fact]
-    public void Build_Does_Not_Emit_Arguments_For_Boolean_Flags()
+    public void Build_Emits_Arguments_For_Boolean_Flags_With_Type_And_Arity()
     {
         var capture = CreateCapture(
             "demo",
@@ -107,11 +107,15 @@ public sealed class HookOpenCliBuilderTests
         var document = HookOpenCliBuilder.Build("demo", "1.0.0", capture);
 
         var option = Assert.Single(document["options"]!.AsArray());
-        Assert.Null(option!["arguments"]);
+        var argument = Assert.Single(option!["arguments"]!.AsArray());
+        Assert.Equal("Boolean", argument!["type"]?.GetValue<string>());
+        Assert.Equal(0, argument["arity"]?["minimum"]?.GetValue<int>());
+        Assert.Equal(0, argument["arity"]?["maximum"]?.GetValue<int>());
+        Assert.False(argument["required"]?.GetValue<bool>());
     }
 
     [Fact]
-    public void Build_Uses_AcceptedValues_For_Captured_Choices()
+    public void Build_Uses_AllowedValues_For_Captured_Choices()
     {
         var capture = CreateCapture(
             "demo",
@@ -135,12 +139,10 @@ public sealed class HookOpenCliBuilderTests
 
         var option = Assert.Single(document["options"]!.AsArray());
         var optionArgument = Assert.Single(option!["arguments"]!.AsArray());
-        Assert.Equal(["fast", "safe"], optionArgument!["acceptedValues"]!.AsArray().Select(value => value!.GetValue<string>()).ToArray());
-        Assert.Null(optionArgument["allowedValues"]);
+        Assert.Equal(["fast", "safe"], optionArgument!["allowedValues"]!.AsArray().Select(value => value!.GetValue<string>()).ToArray());
 
         var argument = Assert.Single(document["arguments"]!.AsArray());
-        Assert.Equal(["one", "two"], argument!["acceptedValues"]!.AsArray().Select(value => value!.GetValue<string>()).ToArray());
-        Assert.Null(argument["allowedValues"]);
+        Assert.Equal(["one", "two"], argument!["allowedValues"]!.AsArray().Select(value => value!.GetValue<string>()).ToArray());
     }
 
     private static HookCaptureResult CreateCapture(string rootName, params HookCapturedOption[] options)
