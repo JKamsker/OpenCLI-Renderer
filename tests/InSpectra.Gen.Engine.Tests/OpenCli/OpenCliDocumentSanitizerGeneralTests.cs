@@ -1,6 +1,7 @@
 namespace InSpectra.Gen.Engine.Tests.OpenCli;
 
 using InSpectra.Gen.Engine.Tooling.DocumentPipeline.Documents;
+using InSpectra.Gen.Engine.Tooling.DocumentPipeline.Options;
 
 using System.Text.Json.Nodes;
 
@@ -97,6 +98,92 @@ public sealed class OpenCliDocumentSanitizerGeneralTests
         Assert.False(serve.ContainsKey("arguments"));
         Assert.False(serve.ContainsKey("options"));
         Assert.False(serve.ContainsKey("examples"));
+    }
+
+    [Fact]
+    public void Sanitize_Preserves_Required_True_On_Options()
+    {
+        var document = new JsonObject
+        {
+            ["opencli"] = "0.1-draft",
+            ["info"] = new JsonObject
+            {
+                ["title"] = "demo",
+                ["version"] = "1.0.0",
+            },
+            ["commands"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["name"] = "generate",
+                    ["options"] = new JsonArray
+                    {
+                        new JsonObject
+                        {
+                            ["name"] = "--output",
+                            ["required"] = true,
+                            ["description"] = "Output file path",
+                        },
+                        new JsonObject
+                        {
+                            ["name"] = "--verbose",
+                            ["required"] = false,
+                            ["description"] = "Enable verbose output",
+                        },
+                    },
+                },
+            },
+        };
+
+        OpenCliDocumentSanitizer.Sanitize(document);
+
+        var options = document["commands"]![0]!["options"]!.AsArray();
+        var output = options.First(o => o!["name"]?.GetValue<string>() == "--output")!.AsObject();
+        var verbose = options.First(o => o!["name"]?.GetValue<string>() == "--verbose")!.AsObject();
+
+        // required: true should be preserved — it carries semantic meaning
+        Assert.True(output.ContainsKey("required"));
+        Assert.True(output["required"]!.GetValue<bool>());
+
+        // required: false should still be stripped — it's the default
+        Assert.False(verbose.ContainsKey("required"));
+    }
+
+    [Fact]
+    public void Sanitize_Preserves_Gnu_Style_Value_Hint_Aliases()
+    {
+        var document = new JsonObject
+        {
+            ["opencli"] = "0.1-draft",
+            ["info"] = new JsonObject
+            {
+                ["title"] = "demo",
+                ["version"] = "1.0.0",
+            },
+            ["options"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["name"] = "--output",
+                    ["aliases"] = new JsonArray("-o", "--output=<FILENAME>"),
+                    ["description"] = "Output file path",
+                },
+            },
+        };
+
+        OpenCliDocumentSanitizer.Sanitize(document);
+
+        var option = Assert.Single(document["options"]!.AsArray());
+        Assert.Equal("--output", option!["name"]?.GetValue<string>());
+        // The =<FILENAME> suffix should be stripped during normalization,
+        // leaving --output as the normalized alias (which deduplicates with the
+        // primary name). The -o alias must survive.
+        var aliases = option["aliases"]?.AsArray()
+            .Select(a => a?.GetValue<string>())
+            .ToArray() ?? [];
+        Assert.Contains("-o", aliases);
+        // The raw --output=<FILENAME> should NOT survive as-is (angle brackets are non-publishable)
+        Assert.DoesNotContain("--output=<FILENAME>", aliases);
     }
 
     [Fact]

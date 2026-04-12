@@ -96,7 +96,9 @@ internal static partial class OpenCliDocumentSanitizer
             foreach (var property in obj.ToArray())
             {
                 if (string.Equals(arrayContext, "options", StringComparison.Ordinal)
-                    && string.Equals(property.Key, "required", StringComparison.Ordinal))
+                    && string.Equals(property.Key, "required", StringComparison.Ordinal)
+                    && property.Value is JsonValue requiredValue
+                    && (!requiredValue.TryGetValue<bool>(out var isRequired) || !isRequired))
                 {
                     obj.Remove(property.Key);
                     continue;
