@@ -1,28 +1,34 @@
 # Follow-up: hunt and fix similar code smells
 
-> **Status (2026-04-11): 24 CODE/TEST PHASES SHIPPED, LEDGER REFRESHED TO
-> THE POST-`g24` TREE, FINAL STOP-CONDITION SWARM + CI STILL PENDING.**
-> Six outer iterations have now run and shipped code/test phases `g1`–`g24`
+> **Status (2026-04-11): 39 CODE/TEST PHASES SHIPPED, LEDGER REFRESHED TO
+> THE POST-`g39` TREE, HOSTED CI REVALIDATION PENDING ON THE PUSHED TIP.**
+> Seven outer iterations have now run and shipped code/test phases `g1`–`g39`
 > on `feat/merge-tool`. The earlier post-`g10` ledger refresh (`g11`) and
 > ownership follow-ups (`g12`–`g13`) were already on the branch when this run
 > resumed; the resumed loop first added `g14`–`g20` (async file-loading
 > hardening, dead-helper pruning, async artifact emission, viewer-bundle
-> mixed-state fixes, and non-vacuous indexed NuGet live fixtures), then a
-> fresh post-ledger swarm found four more accepted stop-condition issues and
-> shipped `g21`–`g24`: removed the remaining dead acquisition API tail,
-> isolated hook retry capture files so stale captures cannot short-circuit
-> retries, hardened architecture/CI coverage for backend project maps and
-> Windows-only tests, and realigned the reusable-workflow/action contract plus
-> CI docs.
+> mixed-state fixes, and non-vacuous indexed NuGet live fixtures), then
+> iteration 6 added `g21`–`g24` (dead acquisition-tail deletion, hook retry
+> capture isolation, backend architecture/CI coverage hardening, and CI
+> contract realignment), and the final user-directed outer iteration added
+> `g25`–`g39` (retry-capture preservation, CI/docs contract cleanup, more
+> cross-file DTO/helper extraction, app-shell import localization and
+> global-using hardening, transactional generate/render publication, and
+> bundle publication validation).
 >
 > This refresh updates the retrospective, phase table, test counts, and
-> open-item list to match the current post-`g24` tree before the final
-> stop-condition swarm and CI pass.
+> open-item list to match the current post-`g39` tree after that final outer
+> iteration. The original stop condition is **not** yet met: the fresh
+> post-`g38` investigation swarm still found one HIGH and several MEDIUM
+> findings, two of which were fixed in `g39`, while the remaining valid
+> findings are aggregated below. The loop ends here only because the user
+> explicitly directed the outer loop to stop after this iteration.
 >
-> The stop condition is therefore now: one more fresh investigation swarm
-> on the post-ledger tree must find **zero BLOCKER + zero HIGH + zero
-> MEDIUM**, and the final pushed tip must have green `pull_request` +
-> `workflow_dispatch` CI (including `live-tests`).
+> Current local validation after `g39`: **319 unit tests / 0 failed / 0
+> skipped**, **15 architecture policy tests**, plus the targeted live NuGet
+> API slice **3 / 0 / 0** (`NuGetApiClientLiveTests`). Hosted `pull_request`
+> and `workflow_dispatch` reruns on the pushed `g39` tip are still required
+> before the original stop condition could ever be claimed.
 >
 > Previously shipped phases `g1`–`g6`:
 >
@@ -34,13 +40,6 @@
 > | `fde9490` | g4 | Split 5 Service+DTO pair files the `*Models.cs` grep missed (HookToolProcessInvocationResolver, ToolDescriptorResolver, DotnetRuntimeCompatibilitySupport, DotnetToolSettingsReader, OpenCliCommandTreeBuilder). 15 files touched. |
 > | `450e808` | g5 | Split the 2 cross-cutting service+DTO pairs where the DTO is used far from its declaration (`ProcessResult`, `StaticAnalysisFrameworkAdapter`). Remaining 22 service+DTO pairs left inline under the tight-coupling exception. |
 > | `59ba4a2` | g6 | Synced `README.md` Project Layout with the 5 source + 2 test projects. |
->
-> Current local validation after `g24`: **309 unit tests / 0 failed / 0
-> skipped**, **14 architecture policy tests**, plus the targeted live NuGet
-> API slice **3 / 0 / 0** (`NuGetApiClientLiveTests`). The latest fully green
-> published full-live runs in this ledger still remain iteration 3's
-> `pull_request` `24290363150` and `workflow_dispatch` `24290372107`; final
-> post-`g24` CI revalidation is still pending on the pushed tip.
 >
 > The rest of this document is preserved as the original mission brief in
 > case another iteration is warranted later.
@@ -447,7 +446,7 @@ When you declare done:
    so this doc can be updated.
 
 The target end state is: **zero BLOCKER/HIGH/MEDIUM smells detectable by a
-fresh investigation swarm**, plus **14 architecture policy tests**, **309
+fresh investigation swarm**, plus **15 architecture policy tests**, **319
 unit tests**, and the hosted **35 live tests** green in CI on the final
 pushed tip.
 
@@ -951,6 +950,114 @@ evidence):**
   failures to `null`, and `HtmlRenderService` still does unnecessary bundle
   enumeration before the `--single-file --dry-run` fast path. Both remain LOW.
 
+#### Iteration 7
+
+Started from the refreshed post-`g24` tree. This final user-directed outer
+iteration ran repeated fresh investigations plus per-phase verifier swarms and
+shipped `g25`–`g39`.
+
+**Accepted HIGH/MEDIUM findings acted on:**
+
+- **MEDIUM: hook retries could still discard the only surviving capture when
+  final publication failed.** Phase `g25` kept the surviving per-attempt
+  capture path, surfaced it to the caller, and taught installed-tool analysis
+  to deserialize from that effective path instead of assuming the requested
+  capture path existed.
+- **HIGH/MEDIUM: the public CI/action/docs contract still drifted.** Phase
+  `g26` corrected `markdown-hybrid` verification wording, documented
+  compression-level-2 HTML output accurately, and aligned the action/workflow
+  docs with the real runtime surface; phase `g37` later tightened workflow
+  permissions, excluded live tests from the general lane, and aligned package
+  mode xmldoc handling plus the UI guide with the same published contract.
+- **MEDIUM: several Acquisition service files still hid cross-file DTO/helper
+  types inline.** Phases `g27`, `g28`, and `g36` extracted the remaining
+  shared CliFx, archive-inspection, static-analysis, and dotnet-package-layout
+  leaf records/helpers whose consumers had crossed file boundaries and no
+  longer fit the g5 file-private exception.
+- **MEDIUM: app-shell/global-using drift still masked real dependency
+  ownership.** Phases `g29`, `g30`, `g33`, `g34`, and `g38` first localized
+  imports in command, generate, OpenCli, and rendering entry points, then
+  removed `src/InSpectra.Gen/GlobalUsings.cs` entirely and added a guard
+  against internal project-wide `global using InSpectra.Gen.*` directives in
+  the app shell.
+- **HIGH: generate/render publication paths were still not fully
+  transactional.** Phase `g31` staged `generate` output plus requested
+  OpenCLI/crawl artifacts as one transaction; phase `g32` staged HTML and
+  Markdown render outputs before publishing; and verifier-driven phase `g39`
+  closed the remaining existing-empty-directory hole so directory publication
+  stays transactional even when the destination already exists but is empty.
+- **HIGH: HTML bundle publication still only proved bundle presence, not
+  bundle completeness.** Phase `g39` now rejects incomplete viewer bundles
+  when `static.html` references missing assets, preventing broken `index.html`
+  publication.
+- **MEDIUM: rendering still depended on `Execution.Process` for viewer bundle
+  builds.** Phase `g35` localized npm/process launch support under rendering
+  ownership and removed that layer leak.
+
+**Fresh swarm findings explicitly rejected (do not re-raise without stronger
+evidence):**
+
+- **The mixed-state viewer fallback after repo build failure remains the
+  intentional `g17`/`g18` behavior.** The accepted defect was packaged-bundle
+  reachability and stale-bundle precedence in specific mixed states; "fallback
+  must always fail or warn instead" was not accepted as a new current-tree
+  HIGH in this iteration.
+- **The previously documented false positives remain rejected** and should not
+  be resurfaced without new proof: `OpenCliNormalizer` placement,
+  `OpenCliXmlEnricher` nested classes, the old `ArchitectureModeTests`
+  vacuous-green claim, and the pre-existing StartupHook publication issue.
+
+**Fresh post-`g38` swarm findings still open after `g39`:**
+
+- **HIGH: CI still does not execute the Playwright E2E suite.**
+  `.github/workflows/ci.yml` does not run `npm run test:e2e` even though the
+  repo ships UI E2E coverage under `src/InSpectra.UI/e2e/`.
+- **MEDIUM: viewer-build failures surface stderr only.**
+  `ViewerBundleProcessSupport.RunProcessAsync()` drops stdout on failure,
+  making frontend build diagnostics incomplete.
+- **MEDIUM: installed-dotnet-tool command resolution is nondeterministic for
+  multi-TFM tools.** `InstalledDotnetToolCommandSupport.TryResolve()` returns
+  the first matching `DotnetToolSettings.xml` under the install tree, so
+  enumeration order can pick the wrong entry point/runtimeconfig.
+- **MEDIUM: rendering contracts still leak a pipeline concrete.**
+  `IDocumentRenderService` exposes `AcquiredRenderDocument`, which lives under
+  `Rendering.Pipeline`.
+- **MEDIUM: public docs/UI still drift from the shipped action surface.**
+  `README.md` still advertises published example bundles that the Pages jobs do
+  not actually publish, and `src/InSpectra.UI/src/components/CIGuidePage.tsx`
+  still omits multiple action inputs present in
+  `.github/actions/render/action.yml`.
+- **MEDIUM: architecture coverage still has two regex/coverage holes.**
+  `ArchitectureAppShellTests` can still miss fully-qualified, alias, or
+  `global using static` dependency edges, and
+  `ArchitectureGenInternalLayeringTests` still omits `Output`, `Targets`,
+  `Composition`, and `Execution` roots.
+
+**LOW findings aggregated and still open after iteration 7:**
+
+- The pre-existing StartupHook publication LOW, the `CaptureFileWriter`
+  bare-catch diagnostic loss, and the untracked TFM-upgrade TODO remain.
+- `JsonNodeFileLoader.TryLoadJsonObject(...)` still collapses parse/I/O
+  failures to `null`.
+- Residual filename/type drift remains in the four previously documented files
+  plus the `OpenCliDocumentPublishability*Support.cs` partial filenames.
+- Live-test skip catalogs in `ValidatedGenericHelpFrameworkCases.cs` and
+  `CommandLineUtilsHookLiveTests.cs` still use comment-only rationale.
+- Several module-local implementation and output-glue types remain `public`
+  (`OpenCliGenerationService`, `DocumentRenderService`, `ProcessRunner`,
+  `HtmlRenderService`, `ViewerBundleLocator`, `DotnetBuildOutputResolver`,
+  `ExecutableResolver`, `RenderRequestFactory`, `CommandOutputHandler`,
+  `GenerateOutputHandler`, and related JSON envelope types).
+- `README.md` still omits `npm run test:e2e`, the Playwright theme-toggle E2E
+  is still conditionally vacuous, `TemporaryAnalysisWorkspace` still swallows
+  cleanup failures, installed-command resolution still lacks focused tests, and
+  `ArchitectureNamespaceTests` still only validates the first namespace
+  declaration per file.
+- The older LOWs still remain valid: `HtmlRenderService` does unnecessary
+  bundle enumeration before `--single-file --dry-run`, the provider-interface
+  + DTO cluster files remain inline by deliberate choice, and the NuGet DTO
+  clusters remain intentionally unsplit.
+
 ### Phases shipped — full inline summary
 
 | Phase | SHA | Files | Lines | What it actually does |
@@ -979,16 +1086,31 @@ evidence):**
 | **g22** | `f9a182e` | 2 | +221 / −39 | Makes hook retries capture-path-safe. `HookProcessRetrySupport` now gives each attempt its own isolated `INSPECTRA_CAPTURE_PATH`, bases retry decisions on that attempt only, and publishes only the final chosen capture back to the requested path. Adds a regression test covering the stale/locked capture case. |
 | **g23** | `098793d` | 5 | +62 / −15 | Hardens backend policy/CI coverage. `ArchitectureProjectDependencyTests` now requires exact charter coverage for backend `.csproj` files, `ArchitectureForbiddenBucketsTests` asserts it actually scanned at least one top-level directory, the two Windows-specific backend tests are tagged explicitly, and `ci.yml` adds a dedicated `windows-backend-tests` job while filtering that category out of the Ubuntu lane. |
 | **g24** | `4334fcd` | 5 | +76 / −15 | Realigns the public CI contract. The reusable workflow now forwards `title`, `command-prefix`, and caller-controlled `output-dir`, uploads artifacts from that same path, and `README.md` + `docs/CI/*` now document `markdown-hybrid`, `split-depth`, the current HTML input surface, and the corrected quick-start output path. |
+| **g25** | `4629679` | 4 | +123 / −9 | Preserves the surviving retry capture when copying the final attempt capture back to the requested path fails. `HookProcessRetrySupport` now returns both the process result and the effective capture path, and `HookInstalledToolAnalysisSupport` consumes that surfaced path instead of assuming the requested capture exists. Adds focused retry/publication regression coverage. |
+| **g26** | `411aae5` | 7 | +67 / −47 | Fixes the public action/docs drift found by the fresh post-`g24` swarm. `markdown-hybrid` verification now matches the real leaf-only output shape, the HTML docs explain that compression level 2 already yields self-contained output unless `--single-file` is explicitly forced, and the docs now describe the auto-added package reference / argument forwarding behavior accurately. Pure contract/docs cleanup — no runtime change. |
+| **g27** | `a4cfb41` | 8 | +45 / −37 | Extracts the remaining cross-file CliFx and archive-inspection leaf records (`CliFxCommandNode`, `CliFxCaptureSummary`, `PackageArchiveAssemblyInspection`, and verifier-driven `CliFxCrawlResult`) into dedicated sibling files so the owner service files no longer hide externally consumed types inline. |
+| **g28** | `c838a3e` | 4 | +30 / −24 | Extracts `ScannedModule` and `StaticAnalysisAssemblyInspectionResult` into sibling files under `Modes.Static.Inspection`, preserving disposal ownership plus the existing factory/outcome API while removing two more post-g5 cross-file inline type exceptions. |
+| **g29** | `fd3cbfc` | 7 | +17 / −1 | Starts the app-shell import-localization work needed before cutting internal global usings. Narrows the private composition seam by splitting `AddExecutionServices()` out of `AddTargetServices()` and adds the missing explicit imports in the touched command/output/composition files. |
+| **g30** | `eb1dfc4` | 3 | +4 / −1 | Continues the same prep by localizing the remaining `UseCases.Generate` imports in the generate entry points so those files compile without relying on project-wide `GlobalUsings.cs`. |
+| **g31** | `ce6b0e5` | 3 | +261 / −76 | Makes `generate --out` plus requested OpenCLI/crawl artifacts one staged publication transaction. Failures no longer leave partially published mixed output sets on disk because the whole output group now commits or rolls back together. |
+| **g32** | `d979a40` | 4 | +371 / −55 | Moves HTML and Markdown rendering onto staged publication. Renderers now write into staging locations first and only swap into the requested destination after the full render succeeds, so overwrite paths no longer destroy the previous output before a successful render. |
+| **g33** | `b34bbc7` | 4 | +5 | Localizes the OpenCli serialization/enrichment imports that were still being satisfied through app-shell global usings. This is pure ownership cleanup preparing for the final global-using removal. |
+| **g34** | `93c596a` | 5 | +16 / −3 | Localizes the remaining rendering/OpenCli imports in rendering composition and pipeline services that still depended on the app-shell globals. Behavior is unchanged; this finishes the import-prep slice before the hard cut. |
+| **g35** | `cb67921` | 5 | +162 / −145 | Removes the `Rendering -> Execution.Process` leak by moving npm/process launch support under rendering ownership. `ViewerBundleLocator` now resolves npm and runs frontend builds locally without importing the execution module. |
+| **g36** | `5fa6b08` | 4 | +44 / −43 | Extracts the remaining shared acquisition helpers `DotnetToolPackageLayoutBuilder` and `ScannedModuleMetadata` into their own files because both were already consumed across file boundaries and no longer fit the inline-helper exception. |
+| **g37** | `daad781` | 5 | +29 / −12 | Aligns the render workflow contract and CI permissions: the default workflow permissions drop to read-only, write scopes move to the jobs that need them, live tests are excluded from the general build-test lane, package-mode xmldoc handling matches the published action contract, and the UI guide is updated to the same surface. |
+| **g38** | `cdd4398` | 31 | +480 / −343 | Deletes `src/InSpectra.Gen/GlobalUsings.cs`, localizes the remaining app-shell imports explicitly, and adds an architecture guard forbidding internal project-wide `global using InSpectra.Gen.*` directives in the app shell. The verifier loop also forced practical line-limit splits, so `OutputPathHelper` support and the viewer-bundle process support moved into focused companion files without changing behavior. |
+| **g39** | `f0cb1a3` | 5 | +91 / −29 | Closes the final verifier findings from the fresh post-`g38` swarm. Directory publication now uses the same transactional swap path even when the destination already exists but is empty, and HTML rendering now rejects incomplete viewer bundles when `static.html` references missing assets. Adds focused regression coverage for both paths. |
 
 ### Final test counts
 
-| Suite | Baseline (before g1) | After g1+g2 | After g3 | After g4+g6 | After g7+g10 | After g24 |
-|---|---|---|---|---|---|---|
-| `InSpectra.Gen.Acquisition.Tests` (unit) | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 158 / 0 / 0 |
-| `InSpectra.Gen.Tests` (unit) | 123 / 0 / 0 | 123 / 0 / 0 | 127 / 0 / 0 | 127 / 0 / 0 | 129 / 0 / 0 | 151 / 0 / 0 |
-| **Total unit** | **280 / 0 / 0** | **280 / 0 / 0** | **284 / 0 / 0** | **284 / 0 / 0** | **286 / 0 / 0** | **309 / 0 / 0** |
-| Architecture policy tests | 10 | 10 | 14 | 14 | 14 | 14 |
-| Live tests (`workflow_dispatch`, `INSPECTRA_GEN_LIVE_TESTS=1`) | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | **35 / 0 / 0** baseline retained; iteration-4 rerun pending | **35 / 0 / 0 baseline retained**, plus local targeted NuGet API slice **3 / 0 / 0** after `g24` |
+| Suite | Baseline (before g1) | After g1+g2 | After g3 | After g4+g6 | After g7+g10 | After g24 | After g39 |
+|---|---|---|---|---|---|---|---|
+| `InSpectra.Gen.Acquisition.Tests` (unit) | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 157 / 0 / 0 | 158 / 0 / 0 | 160 / 0 / 0 |
+| `InSpectra.Gen.Tests` (unit) | 123 / 0 / 0 | 123 / 0 / 0 | 127 / 0 / 0 | 127 / 0 / 0 | 129 / 0 / 0 | 151 / 0 / 0 | 159 / 0 / 0 |
+| **Total unit** | **280 / 0 / 0** | **280 / 0 / 0** | **284 / 0 / 0** | **284 / 0 / 0** | **286 / 0 / 0** | **309 / 0 / 0** | **319 / 0 / 0** |
+| Architecture policy tests | 10 | 10 | 14 | 14 | 14 | 14 | 15 |
+| Live tests (`workflow_dispatch`, `INSPECTRA_GEN_LIVE_TESTS=1`) | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | 35 / 0 / 0 | **35 / 0 / 0** baseline retained; iteration-4 rerun pending | **35 / 0 / 0 baseline retained**, plus local targeted NuGet API slice **3 / 0 / 0** after `g24` | **35 / 0 / 0 baseline retained**, plus local targeted NuGet API slice **3 / 0 / 0** after `g39` |
 
 ### CI validation
 
@@ -1002,10 +1124,6 @@ evidence):**
   real NuGet.org — the 3 NuGet API tests, 13 System.CommandLine hook
   tests, 11 Microsoft.Extensions.CommandLineUtils hook tests, and 8
   generic help-parser tests all pass).
-- **Iteration-4 / post-`g10` CI status:** not yet rerun at the time of this
-  ledger refresh. The final stop-condition check still requires a green
-  `pull_request` run and a green `workflow_dispatch` run on the final pushed
-  tip after this document update lands.
 - **Local post-`g20` validation before the final push:** `dotnet test
   InSpectra.Gen.sln --no-restore` ✅ (**157 acquisition + 151 gen = 308
   unit tests**, 0 failed) and `INSPECTRA_GEN_LIVE_TESTS=1 dotnet test
@@ -1020,6 +1138,16 @@ evidence):**
   (**3 / 0 / 0**), and both `.github/workflows/ci.yml` plus
   `.github/workflows/inspectra-generate.yml` parse cleanly as YAML. Full
   hosted CI reruns are still pending.
+- **Local post-`g39` validation before the final push:** `dotnet test
+  InSpectra.Gen.sln --no-restore` ✅ (**160 acquisition + 159 gen = 319
+  unit tests**, 0 failed), `dotnet test
+  tests/InSpectra.Gen.Tests/InSpectra.Gen.Tests.csproj --no-restore --filter
+  "FullyQualifiedName~Architecture"` ✅ (**15 / 0 / 0**), `INSPECTRA_GEN_LIVE_TESTS=1
+  dotnet test tests/InSpectra.Gen.Acquisition.Tests/InSpectra.Gen.Acquisition.Tests.csproj
+  --no-restore --filter "FullyQualifiedName~NuGetApiClientLiveTests"` ✅
+  (**3 / 0 / 0**), and the focused `OutputPathHelperTests|HtmlRenderServiceTests`
+  slice for `g39` passed **12 / 0 / 0**. Hosted reruns on the pushed `g39`
+  tip remain the final external verification step.
 
 ### New smell categories / lessons learned
 
@@ -1119,86 +1247,131 @@ evidence):**
    migration desideratum in `Task.md`. **Rule: if a finding depends on the
    older task doc instead of the smell categories and explicit exceptions in
    this file, it needs extra proof before it can block the stop condition.**
+10. **Internal project-wide global usings can make regex architecture tests
+    lie green.** The app shell compiled because `GlobalUsings.cs` quietly
+    satisfied imports that the dependency scanners never saw, so the layering
+    tests looked clean while the compiler still had access to deep internals.
+    The safer pattern is explicit imports in the few files that need them,
+    plus a guard that forbids internal `global using InSpectra.Gen.*`
+    directives from returning.
+11. **Transactional directory publication must use the same swap path even
+    when the destination already exists but is empty.** The original staged
+    publication path only took the full backup/swap route when the destination
+    directory was already populated; the "existing but empty" branch promoted
+    children entry-by-entry and silently lost rollback safety. Empty
+    destinations still need the same atomic swap contract as populated ones.
+12. **Bundle existence is not bundle completeness.** A viewer bundle can have
+    both `index.html` and `static.html` present yet still be broken if
+    `static.html` references missing assets. The validator has to inspect the
+    referenced asset set, not just the top-level file names, before publishing
+    or inlining the bundle.
 
-### Intentionally deferred / low-only open items (still open after iteration 6)
+### Still-open items after iteration 7
 
-The render-path async-I/O findings deferred after iteration 3, the
-iteration-5 live-test-vacuity / viewer-precedence / artifact-emission MEDIUMs,
-and the iteration-6 dead-helper / hook-retry / CI-contract / coverage MEDIUMs
-are now resolved and should **not** be re-raised as current-tree open items.
-What remains open after iteration 6 is either explicitly low-severity or a
-documented intentional exception to the structural rules.
+The original stop condition is **not met** on the current post-`g39` tree.
+The fresh post-`g38` swarm still surfaced valid HIGH/MEDIUM findings, two of
+which were fixed in `g39`; the remainder stay open because the user explicitly
+ended the outer loop after this iteration. The already resolved iteration-3
+sync-I/O findings, the iteration-5 viewer/artifact/live-test MEDIUMs, and the
+iteration-6 dead-helper / hook-retry / CI-contract / coverage MEDIUMs should
+still **not** be re-raised.
+
+**Open HIGH/MEDIUM findings:**
+
+- **HIGH: CI still does not run the Playwright E2E suite.**
+  `.github/workflows/ci.yml` does not execute `npm run test:e2e`, so the UI
+  E2E coverage under `src/InSpectra.UI/e2e/` is not part of hosted CI.
+- **MEDIUM: viewer-build failures lose stdout diagnostics.**
+  `src/InSpectra.Gen/Rendering/Html/Bundle/ViewerBundleProcessSupport.cs`
+  only reports stderr on failure.
+- **MEDIUM: multi-TFM installed-dotnet-tool resolution is nondeterministic.**
+  `src/InSpectra.Gen.Acquisition/Tooling/Process/InstalledDotnetToolCommandSupport.cs`
+  returns the first matching `DotnetToolSettings.xml` under the install tree,
+  so enumeration order can pick the wrong entry point/runtimeconfig.
+- **MEDIUM: rendering contracts still leak a pipeline concrete.**
+  `src/InSpectra.Gen/Rendering/Contracts/IDocumentRenderService.cs` exposes
+  `AcquiredRenderDocument` from `src/InSpectra.Gen/Rendering/Pipeline/`.
+- **MEDIUM: docs/UI still drift from the action and Pages behavior.**
+  `README.md` advertises example bundles that the Pages jobs do not publish,
+  and `src/InSpectra.UI/src/components/CIGuidePage.tsx` still omits multiple
+  inputs present in `.github/actions/render/action.yml`.
+- **MEDIUM: app-shell architecture scanning is still regex-limited.**
+  `tests/InSpectra.Gen.Tests/Architecture/ArchitectureAppShellTests.cs` can
+  still miss fully-qualified, alias, or `global using static` dependency
+  edges.
+- **MEDIUM: internal layering coverage still omits several roots.**
+  `tests/InSpectra.Gen.Tests/Architecture/ArchitectureGenInternalLayeringTests.cs`
+  still does not cover `Output`, `Targets`, `Composition`, or `Execution`.
+
+**Open LOW findings and intentional exceptions:**
 
 - **`StartupHook/SystemCommandLine/HarmonyPatchInstaller.cs:12–13`**
   (and the sibling files
   `CommandLineParser/CommandLineParserPatchInstaller.cs`,
   `CommandLineUtils/CommandLineUtilsPatchInstaller.cs`,
-  `Hooking/AssemblyLoadInterceptor.cs`) — plain `internal static` field
-  writes in `Install()` + reads in Harmony postfixes and
-  `AppDomain.CurrentDomain.ProcessExit` handlers. Pre-existing since
-  `c1e09b4`, not a regression. The commit message of `1789504`
-  *claimed* to convert these but the diff didn't actually do it. Not
-  fixed here because (a) no live test has ever failed on it — the
-  happens-before from event subscription gives practical safety; (b)
-  fixing it cleanly requires either adding a `Volatile` helper or
-  switching to properties, which is a style churn beyond the Followup
-  scope.
-- **`StartupHook/Capture/CaptureFileWriter.cs:103`** — bare
-  `catch { return null; }` in `TryReadStatusCore`. Valid LOW: it hides
-  malformed capture-file state instead of surfacing a structured
-  diagnostic, but it is neither new nor stop-condition-blocking.
-- **`StartupHook/Capture/CaptureFileWriter.cs:12`** — untracked TFM-upgrade
-  TODO about switching to `DefaultIgnoreCondition` once the target framework
-  moves past `netcoreapp3.1`. Valid LOW hygiene debt, not stop-condition work.
+  `Hooking/AssemblyLoadInterceptor.cs`) still use plain `internal static`
+  field publication. Pre-existing since `c1e09b4`; not fixed here because no
+  live failure has reproduced it and the clean fix is style churn outside this
+  follow-up.
+- **`StartupHook/Capture/CaptureFileWriter.cs:103`** still has a bare
+  `catch { return null; }`, and
+  **`StartupHook/Capture/CaptureFileWriter.cs:12`** still carries the
+  untracked TFM-upgrade TODO about `DefaultIgnoreCondition`.
+- **`Acquisition/Tooling/Json/JsonNodeFileLoader.cs:7`** still collapses
+  parse/I/O failures to `null`, hiding the exact load failure reason.
 - **Filename/type drift** remains LOW-only in
   `Modes/CliFx/Execution/CliFxToolRuntime.cs`,
   `Modes/Static/Inspection/StaticAnalysisToolRuntime.cs`,
   `Modes/Static/Inspection/StaticAnalysisInstalledToolAnalysisSupport.cs`,
-  and
-  `tests/InSpectra.Gen.Acquisition.Tests/SystemCommandLine/SystemCommandLineConstructorTestModuleBuilder.cs`.
+  `tests/InSpectra.Gen.Acquisition.Tests/SystemCommandLine/SystemCommandLineConstructorTestModuleBuilder.cs`,
+  and the `OpenCliDocumentPublishability*Support.cs` partial filenames.
 - **Live-test skip catalogs with comment-only rationale** remain LOW-only in
   `ValidatedGenericHelpFrameworkCases.cs` and
-  `CommandLineUtilsHookLiveTests.cs`. The excluded cases are intentional, but
-  future cleanup would be easier if each skip pointed at a concrete tracker.
-- **Module-local implementation types that still remain `public`** — for
+  `CommandLineUtilsHookLiveTests.cs`.
+- **Module-local implementation and output-glue types remain public** — for
   example `UseCases/Generate/OpenCliGenerationService.cs`,
-  `Rendering/Pipeline/DocumentRenderService.cs`, and
-  `Execution/Process/ProcessRunner.cs`. Valid LOW API-surface debt; changing
-  them would be behavior-neutral internally but is still surface churn.
-- **`Acquisition/Tooling/Json/JsonNodeFileLoader.cs:7`** — the remaining live
-  `TryLoadJsonObject(...)` surface still collapses parse/I/O failures to
-  `null`, which can hide the exact reason a document could not be loaded.
-- **`Rendering/Html/HtmlRenderService.cs:42`** — `--single-file --dry-run`
-  still resolves the bundle and enumerates assets before planning the trivial
-  `index.html` output. Valid LOW perf/cleanliness debt, not stop-condition
-  work.
-- **`Contracts/Providers/ICliFrameworkCatalog.cs`,
-  `ILocalCliFrameworkDetector.cs`, `IPackageCliToolInstaller.cs`,
-  `IAcquisitionAnalysisDispatcher.cs`** — each file contains an
-  interface + its result DTO(s). Deliberate choice from step 11
-  (commit `c70195a`, "remove IVT, final app-shell cleanup"). Splitting
-  would blow the 4-file provider surface into 8–10 files for an
-  already-small layer.
-- **`Tooling/NuGet/NuGetApiDtos.cs`** (21 domain DTOs) and
-  **`NuGetApiSpecDtos.cs`** (21 wire-format DTOs) — tight clusters
-  modelling the NuGet V3 API. Renamed off `*Models.cs` in g2 but
-  kept as one file each because every type in a cluster is only used
-  in the context of the other types in the same cluster (they
-  collectively describe one HTTP API surface).
+  `Rendering/Pipeline/DocumentRenderService.cs`,
+  `Execution/Process/ProcessRunner.cs`,
+  `Rendering/Html/HtmlRenderService.cs`,
+  `Rendering/Html/Bundle/ViewerBundleLocator.cs`,
+  `Targets/Sources/DotnetBuildOutputResolver.cs`,
+  `Targets/Inputs/ExecutableResolver.cs`,
+  `Output/RenderRequestFactory.cs`,
+  `Output/CommandOutputHandler.cs`, and
+  `Output/GenerateOutputHandler.cs`.
+- **Documentation/test hygiene LOWs** remain: `README.md` still omits
+  `npm run test:e2e`, the Playwright theme-toggle E2E only asserts when the
+  toggle exists, `TemporaryAnalysisWorkspace` still swallows cleanup failures,
+  installed-command resolution still lacks focused regression tests, and
+  `ArchitectureNamespaceTests` still validates only the first namespace
+  declaration per file.
+- **Render-path LOWs** remain: `HtmlRenderService` still enumerates bundle
+  assets before the `--single-file --dry-run` fast path, and the rendering
+  bundle helpers still use synchronous recursive scans / best-effort cleanup
+  in a few non-blocking paths.
+- **The small provider-interface + DTO cluster files remain intentionally
+  inline** in `ICliFrameworkCatalog.cs`, `ILocalCliFrameworkDetector.cs`,
+  `IPackageCliToolInstaller.cs`, and `IAcquisitionAnalysisDispatcher.cs`.
+  This is the same deliberate g5-style exception documented earlier.
+- **`NuGetApiDtos.cs` and `NuGetApiSpecDtos.cs` remain intentionally
+  unsplit.** They are still tight external-contract DTO clusters, not junk
+  multi-type files.
 
 ### If another iteration is warranted
 
-Assuming the fresh post-ledger swarm and final CI rerun both come back green,
-any further iteration would be **low-only cleanup**, not stop-condition work.
-The most sensible remaining scopes are:
+Because the user stopped the outer loop early, the next sensible iteration is
+still **stop-condition work**, not just low-only cleanup. The highest-value
+next scopes are:
 
-- **Filename/type drift cleanup** for the 4 residual LOW mismatches listed
-  above.
-- **StartupHook publication + diagnostics hardening** if the user wants to
-  spend effort on pre-existing LOWs (`Volatile` publication and the
-  `CaptureFileWriter` silent catch).
-- **`Output` / `Execution` layering enforcement** as a separate, explicit
-  follow-up if someone wants to move those edges from grep-only to
-  test-enforced. That work should start by deciding how to account for
-  `GlobalUsings.cs`, otherwise a naive `using`-directive scanner will keep
-  missing real dependencies.
+- **Wire Playwright E2E into hosted CI** so `npm run test:e2e` becomes part of
+  the branch/PR signal.
+- **Make installed-dotnet-tool resolution deterministic for multi-TFM tools**
+  and add focused regression coverage for the chosen selection rules.
+- **Move `AcquiredRenderDocument` out of the rendering contracts leak** so
+  `IDocumentRenderService` stops exposing a pipeline concrete.
+- **Reconcile docs/UI with actual publishing behavior** by either publishing
+  the advertised example bundles and full input surface or narrowing the docs
+  and UI guide to the truth.
+- **Harden the architecture scanners beyond regex-only `using` detection**, or
+  replace the remaining brittle scans with Roslyn-backed analysis before
+  expanding coverage to `Output`, `Targets`, `Composition`, and `Execution`.
