@@ -1,7 +1,7 @@
 # Follow-up Logbook
 
-> **Status (2026-04-12): 51 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g51`
-> HOSTED VALIDATED ON `2a941b9` AND A FRESH DOTNET/BACKEND SWARM NOW
+> **Status (2026-04-12): 52 PHASES PUSHED WITH GREEN HOSTED CI, WITH `g52`
+> HOSTED VALIDATED ON `6c52c76` AND A FRESH DOTNET/BACKEND SWARM NOW
 > REQUIRED.**
 > Seven outer iterations shipped phases `g1`–`g39` on `feat/merge-tool`, the
 > queue-driven thin-shell phase `g40`, the installed-tool process-safety phase
@@ -10,21 +10,23 @@
 > phase `g45`, the frontend file-limit phase `g46`, the static-package-route
 > phase `g47`, the hosted test-support follow-up phase `g48`, the backend
 > failure-diagnostics phase `g49`, the hosted OpenCli test-support
-> follow-up phase `g50`, and the installed-tool multi-TFM determinism phase
-> `g51` are now pushed, and `2a941b9` is the current hosted-validated code
-> tip.
+> follow-up phase `g50`, the installed-tool multi-TFM determinism phase
+> `g51`, and the viewer-bundle rebuild-failure phase `g52` are now pushed,
+> and `6c52c76` is the current hosted-validated code tip.
 > The original zero-BLOCKER/HIGH/MEDIUM stop condition is still **not** met:
-> `g49` / `g50` / `g51` closed the ProcessRunner diagnostics HIGH, the
-> native-attempt detail loss, and the installed-tool determinism MEDIUM on
-> the latest hosted-validated tip, but the viewer-bundle fallback HIGH plus
-> the remaining backend MEDIUM clusters remain. The next required step is a
-> fresh dotnet/backend swarm from the current tree, and the user-directed
-> focus remains on the dotnet projects.
+> `g49` / `g50` / `g51` / `g52` closed the ProcessRunner diagnostics HIGH,
+> the native-attempt detail loss, the installed-tool determinism MEDIUM, and
+> the viewer-bundle stale-fallback HIGH on the latest hosted-validated tip,
+> but the hosted action/version determinism HIGH plus the remaining backend
+> MEDIUM clusters remain. The next required step is a fresh dotnet/backend
+> swarm from the current tree, and the user-directed focus remains on the
+> dotnet projects.
 >
-> Current validated pushed tip: `2a941b9` with **61 frontend unit tests**,
-> **12 Playwright E2E tests**, green `pull_request` run `24305752872`, and a
-> local full backend rerun on the same tip of **199 engine tests** plus
-> **171 app-shell tests**, including **17 architecture policy tests**.
+> Current validated pushed tip: `6c52c76` with **61 frontend unit tests**,
+> **12 Playwright E2E tests**, green `pull_request` run `24306402929`, and
+> local validation on the same tip of **1 engine build**, a focused rendering
+> / policy slice of **25 tests**, and a full app-shell rerun of
+> **174 tests**, including **17 architecture policy tests**.
 >
 > The latest green `workflow_dispatch` run is still `24296167355` on pushed tip
 > `a3390bb`, including `live-tests`.
@@ -48,10 +50,8 @@
 
 - Queue source of truth: [Todo Next Queue](TodoNext.md)
 - No non-completed queued items remain.
-- Latest hosted-validated phases: `g49` / `g50` / `g51`
-  (`48d66c7`, `f1e23dd`, `2a941b9`) with failed `pull_request` run
-  `24304747281` followed by green `pull_request` runs `24304837684` and
-  `24305752872`.
+- Latest hosted-validated phase: `g52` (`6c52c76`) with green
+  `pull_request` run `24306402929`.
 - No queue item blocks the loop; the next work item is a fresh dotnet/backend
   investigation swarm from the current tree under the user’s dotnet-project
   directive.
@@ -64,6 +64,76 @@
   [Close the installed-tool process-safety cluster](TodoNext/2026-04-12-installed-tool-process-safety.md)
 - `TN-2026-04-12-01` completed locally in `g40` (`8b3c0bc`):
   [Finalize the InSpectra.Gen thin-shell architecture](TodoNext/2026-04-12-thin-shell-architecture.md)
+
+## Current Open Items After `g52` Hosted Validation (2026-04-12)
+
+This section supersedes the older post-`g51` hosted-validation snapshot below
+for current execution state.
+
+**Current validated pushed tip and CI surface:**
+
+- pushed branch tip: `6c52c76`
+- green `pull_request` run `24306402929`
+- latest green `workflow_dispatch` remains `24296167355` on `a3390bb`
+
+**Outer iteration 14 wave 1 summary and shipped phases:**
+
+- the fresh post-`20d5b67` dotnet/backend swarm converged on the already
+  ranked viewer-bundle HIGH plus the remaining backend MEDIUM clusters;
+  wave 2 largely repeated wave 1, so research stopped there and no new smell
+  family was discovered
+- `g52` (`6c52c76`) closed the contained viewer-bundle slice by:
+  removing the stale packaged/repo fallback once staleness triggered a rebuild
+  attempt, aligning `ViewerBundleProcessSupport` with `ProcessRunner`-style
+  exit waiting plus bounded stream capture, splitting the local capture helper
+  into `ViewerBundleStreamCapture.cs` to stay under the repo practical C#
+  line limit, and adding focused regression coverage for timeout/non-zero-exit
+  output capture, the exited-process/open-pipe race, and stale packaged/repo
+  rebuild-failure propagation
+- local `g52` validation passed:
+  - `dotnet build src/InSpectra.Gen.Engine/InSpectra.Gen.Engine.csproj --no-restore` ✅
+  - `dotnet test tests/InSpectra.Gen.Tests/InSpectra.Gen.Tests.csproj --no-restore --filter "FullyQualifiedName~ViewerBundleLocatorRepositoryResolutionTests|FullyQualifiedName~ViewerBundleProcessSupportTests|FullyQualifiedName~ViewerBundleLocatorMixedStateTests|FullyQualifiedName~HtmlRenderServiceTests|FullyQualifiedName~RepositoryCodeFilePolicyTests"` ✅ (`25 / 25`)
+  - `dotnet test tests/InSpectra.Gen.Tests/InSpectra.Gen.Tests.csproj --no-restore` ✅ (`174 / 174`, including `17` architecture tests)
+- hosted rerun `24306402929` completed green across `build-test`,
+  `windows-backend-tests`, and `package-pages-preview`
+- two verifier objections argued to preserve the stale packaged-bundle
+  fallback after a stale-repo rebuild failure. That objection is explicitly
+  rejected: the ranked HIGH being closed was that stale packaged or stale repo
+  bundles masked real rebuild failures once staleness had already been
+  detected. No verifier found a remaining concrete defect in the new timeout /
+  output-preservation logic after the line-limit split and focused tests
+  landed.
+
+**Still-open ranked clusters after `g52`:**
+
+- **HIGH: hosted action/version determinism still depends on ambient PATH and
+  floating workflow wiring.**
+  `.github/actions/render/action.yml` still lets ambient `inspectra` override
+  `inspectra-version`, and the reusable workflow/action revision surface still
+  drifts from the current tree.
+- **MEDIUM: static-analysis mode still drops help-crawl degradation signals.**
+  `StaticInstalledToolAnalysisSupport.cs` still bypasses the output-limit /
+  guardrail terminal checks that the help and CliFx analyzers honor.
+- **MEDIUM: architecture enforcement is still bypassable in several places.**
+  The shell/engine scanners still rely on plain `using` detection in multiple
+  suites, and the `Rendering.Markdown` / `Rendering.Html` separation is still
+  chartered but not executable.
+- **LOW: backend diagnostics preservation still has carried-forward nits.**
+  The timeout path is still best-effort snapshot capture, human output still
+  renders multiline detail blocks awkwardly, and viewer-bundle build/runtime
+  failures still surface as `CliUsageException`.
+- **LOW: frontend static-route polish and frontend practical file-size drift
+  remain aggregated but non-blocking.**
+  The previously logged static-route polish items and frontend practical
+  file-size LOWs remain open and unchanged by `g52`.
+
+**Next-step focus:**
+
+- start a fresh dotnet/backend investigation swarm from the current tree
+- keep the user-directed focus on the dotnet projects
+- re-rank the remaining backend clusters before choosing the next contained
+  phase; keep the carried-forward hosted action/version determinism HIGH in
+  the ledger even while the next swarm stays centered on the dotnet projects
 
 ## Current Open Items After `g51` Hosted Validation (2026-04-12)
 
