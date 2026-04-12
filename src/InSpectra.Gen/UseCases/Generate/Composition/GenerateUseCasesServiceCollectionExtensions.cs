@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using InSpectra.Gen.UseCases.Generate;
 
 namespace InSpectra.Gen.UseCases.Generate.Composition;
 
