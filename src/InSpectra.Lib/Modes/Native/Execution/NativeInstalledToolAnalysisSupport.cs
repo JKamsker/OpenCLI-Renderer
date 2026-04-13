@@ -17,6 +17,11 @@ internal sealed class NativeInstalledToolAnalysisSupport(IProcessRunner processR
 {
     private static readonly string[] OpenCliArguments = ["cli", "opencli"];
 
+    private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
+    {
+        WriteIndented = true,
+    };
+
     internal async Task AnalyzeInstalledAsync(
         InstalledToolAnalysisRequest request,
         CancellationToken cancellationToken)
@@ -61,6 +66,21 @@ internal sealed class NativeInstalledToolAnalysisSupport(IProcessRunner processR
                 classification: "native-invalid-json",
                 $"Native introspection output is not valid OpenCLI JSON: {ex.Message}");
             return;
+        }
+
+        // Hoist __default_command nodes and clean assembly-filename titles.
+        try
+        {
+            var document = JsonNode.Parse(sanitizedJson)?.AsObject();
+            if (document is not null)
+            {
+                OpenCliStructuralSanitizer.Sanitize(document);
+                sanitizedJson = JsonSerializer.Serialize(document, SerializerOptions);
+            }
+        }
+        catch (JsonException)
+        {
+            // Structural sanitization is best-effort; keep the original if it fails.
         }
 
         var openCliPath = Path.Combine(request.OutputDirectory, "opencli.json");
