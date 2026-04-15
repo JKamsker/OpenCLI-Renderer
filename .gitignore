@@ -3,6 +3,13 @@
 **/bin/
 **/obj/
 artifacts/
+!src/InSpectra.Discovery.Tool/App/Artifacts/
+!src/InSpectra.Discovery.Tool/App/Artifacts/**
+!src/InSpectra.Discovery.Tool/OpenCli/Artifacts/
+!src/InSpectra.Discovery.Tool/OpenCli/Artifacts/**
+!src/InSpectra.Discovery.Tool/Promotion/Artifacts/
+!src/InSpectra.Discovery.Tool/Promotion/Artifacts/**
+.claude/worktrees/
 node_modules/
 src/InSpectra.UI/dist/
 src/InSpectra.UI/e2e/.rendered/
