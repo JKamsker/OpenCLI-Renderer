@@ -41,10 +41,12 @@
           PackagePath="\"
           Link="README.md" />
     <Content Include="..\InSpectra.Gen.StartupHook\bin\$(Configuration)\$(StartupHookTargetFramework)\InSpectra.Gen.StartupHook.dll"
+             Pack="false"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest"
              Link="hooks\InSpectra.Gen.StartupHook.dll" />
     <Content Include="..\InSpectra.Gen.StartupHook\bin\$(Configuration)\$(StartupHookTargetFramework)\0Harmony.dll"
+             Pack="false"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest"
              Link="hooks\0Harmony.dll" />
