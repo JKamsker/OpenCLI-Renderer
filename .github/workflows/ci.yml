@@ -79,8 +79,14 @@ jobs:
       - name: Pack library
         run: dotnet pack src/InSpectra.Lib/InSpectra.Lib.csproj --configuration Release --no-build -p:Version=0.0.${{ github.run_number }}
 
+      - name: Pack discovery tool
+        run: dotnet pack src/InSpectra.Discovery.Tool/InSpectra.Discovery.Tool.csproj --configuration Release --no-restore -p:Version=0.0.${{ github.run_number }}
+
       - name: Publish tool
         run: dotnet publish src/InSpectra.Gen/InSpectra.Gen.csproj --configuration Release --no-build -o artifacts/publish
+
+      - name: Publish discovery tool
+        run: dotnet publish src/InSpectra.Discovery.Tool/InSpectra.Discovery.Tool.csproj --configuration Release --no-build -o artifacts/discovery-tool/publish
 
       - name: Verify published bundle
         shell: bash
@@ -92,6 +98,14 @@ jobs:
           test -f artifacts/publish/hooks/0Harmony.dll
           compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.css' > /dev/null
           compgen -G 'artifacts/publish/InSpectra.UI/dist/assets/*.js' > /dev/null
+
+      - name: Verify published discovery bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f artifacts/discovery-tool/publish/InSpectra.Discovery.Tool.dll
+          test -f artifacts/discovery-tool/publish/hooks/InSpectra.Gen.StartupHook.dll
+          test -f artifacts/discovery-tool/publish/hooks/0Harmony.dll
 
       - name: Smoke render HTML bundle
         shell: bash
@@ -184,13 +198,17 @@ jobs:
           name: build
           path: |
             src/InSpectra.Gen/bin/Release/net10.0/
+            src/InSpectra.Discovery.Tool/bin/Release/net10.0/
+            src/InSpectra.Lib/bin/Release/net10.0/
             artifacts/publish/
+            artifacts/discovery-tool/publish/
 
       - name: Stage nupkg files
         shell: bash
         run: |
           mkdir -p artifacts/nupkg
           cp src/InSpectra.Gen/bin/Release/*.nupkg artifacts/nupkg/
+          cp src/InSpectra.Discovery.Tool/bin/Release/*.nupkg artifacts/nupkg/
           cp src/InSpectra.Lib/bin/Release/*.nupkg artifacts/nupkg/
 
       - name: Upload nupkg
