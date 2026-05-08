@@ -3,8 +3,8 @@ namespace InSpectra.Lib.Contracts.Crawling;
 internal static class HelpCrawlGuardrailSupport
 {
     public const int MaxCommandDepth = 8;
-    public const int MaxCapturedCommands = 64;
-    public const int MaxChildCommandsPerDocument = 48;
+    public const int MaxCapturedCommands = 128;
+    public const int MaxChildCommandsPerDocument = 96;
     public const int MaxTimedOutHelpInvocationsPerCommand = 3;
     public const int MaxPayloadCharacters = 262_144;
     public const int MaxPayloadLines = 4_000;
