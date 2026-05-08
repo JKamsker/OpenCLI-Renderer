@@ -80,6 +80,37 @@ public sealed class CliFxHelpCrawlerTests
     }
 
     [Fact]
+    public async Task CrawlAsync_Allows_Large_Root_Command_Lists_Within_Budget()
+    {
+        var commandRows = Enumerable.Range(1, 64)
+            .Select(index => $"  cmd{index:D2}         Command {index}.")
+            .ToArray();
+        var runtime = new RootFanoutCommandRuntime(
+            """
+            demo
+
+            USAGE
+              demo [command]
+
+            COMMANDS
+            """ + Environment.NewLine + string.Join(Environment.NewLine, commandRows));
+        var crawler = new CliFxHelpCrawler(runtime);
+
+        var result = await crawler.CrawlAsync(
+            "demo",
+            workingDirectory: Environment.CurrentDirectory,
+            environment: new Dictionary<string, string>(),
+            timeoutSeconds: 30,
+            sandboxCleanupRoot: null,
+            cancellationToken: CancellationToken.None);
+
+        Assert.Null(result.GuardrailFailureMessage);
+        Assert.Equal(65, result.Documents.Count);
+        Assert.Contains(string.Empty, result.Documents.Keys);
+        Assert.Contains("cmd64", result.Documents.Keys);
+    }
+
+    [Fact]
     public async Task CrawlAsync_Normalizes_Root_Qualified_Command_Entries()
     {
         var runtime = new RootQualifiedCommandRuntime();
@@ -184,6 +215,30 @@ public sealed class CliFxHelpCrawlerTests
                 ExitCode: 0,
                 DurationMs: 1,
                 Stdout: helpText,
+                Stderr: string.Empty));
+        }
+    }
+
+    private sealed class RootFanoutCommandRuntime(string rootHelpText) : CommandRuntime
+    {
+        public override Task<ProcessResult> InvokeProcessCaptureAsync(
+            string filePath,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            IReadOnlyDictionary<string, string> environment,
+            int timeoutSeconds,
+            string? sandboxRoot,
+            CancellationToken cancellationToken)
+        {
+            var isRootHelp = argumentList.Count == 1 && string.Equals(argumentList[0], "--help", StringComparison.Ordinal);
+            return Task.FromResult(new ProcessResult(
+                Status: "ok",
+                TimedOut: false,
+                ExitCode: 0,
+                DurationMs: 1,
+                Stdout: isRootHelp
+                    ? rootHelpText
+                    : HelpResult().Stdout,
                 Stderr: string.Empty));
         }
     }
