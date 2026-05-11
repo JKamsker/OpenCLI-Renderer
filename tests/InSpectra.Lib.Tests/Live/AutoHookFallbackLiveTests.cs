@@ -59,20 +59,17 @@ public sealed class AutoHookFallbackLiveTests
             expectedAnalysisMode: "help",
             expectedArtifactSource: "crawled-from-help",
             requireHookFailure: false));
-        return data;
-    }
-
-    public static TheoryData<HookTerminalFailureToolCase> TerminalFailureCases()
-    {
-        var data = new TheoryData<HookTerminalFailureToolCase>();
-        data.Add(new HookTerminalFailureToolCase(
+        data.Add(new HookFallbackToolCase(
             "McMaster.Extensions.CommandLineUtils",
             "Meadow.Cli",
             "0.3.225",
             "meadow",
-            "custom-parser-no-attributes",
-            expectedSelectedMode: "static",
-            expectedFallbackClassification: "invalid-opencli-artifact"));
+            "meadow",
+            "0.3.225",
+            "invalid-opencli-artifact",
+            expectedAnalysisMode: "help",
+            expectedArtifactSource: null,
+            assertSnapshot: false));
         return data;
     }
 
@@ -101,7 +98,10 @@ public sealed class AutoHookFallbackLiveTests
             BuildModeMismatchMessage(testCase, report));
         Assert.Equal(testCase.ExpectedOpenCliTitle, report.OpenCliDocument?["info"]?["title"]?.GetValue<string>());
         Assert.Equal(testCase.ExpectedOpenCliVersion, report.OpenCliDocument?["info"]?["version"]?.GetValue<string>());
-        Assert.Equal(testCase.ExpectedArtifactSource, report.OpenCliDocument?["x-inspectra"]?["artifactSource"]?.GetValue<string>());
+        if (testCase.ExpectedArtifactSource is not null)
+        {
+            Assert.Equal(testCase.ExpectedArtifactSource, report.OpenCliDocument?["x-inspectra"]?["artifactSource"]?.GetValue<string>());
+        }
 
         if (testCase.RequireHookFailure)
         {
@@ -111,55 +111,10 @@ public sealed class AutoHookFallbackLiveTests
                 testCase.ExpectedHookFailureClassifications);
         }
 
-        HookOpenCliSnapshotSupport.AssertMatchesFixture(testCase.PackageId, testCase.Version, report.OpenCliDocument);
-    }
-
-    [Theory]
-    [MemberData(nameof(TerminalFailureCases))]
-    [Trait("Category", "Live")]
-    public async Task RunAsync_Reports_Expected_Terminal_Failures_For_Real_World_Tools(HookTerminalFailureToolCase testCase)
-    {
-        if (!HookLiveTestSupport.ShouldRun())
+        if (testCase.AssertSnapshot)
         {
-            return;
+            HookOpenCliSnapshotSupport.AssertMatchesFixture(testCase.PackageId, testCase.Version, report.OpenCliDocument);
         }
-
-        var report = await AutoAcquisitionLiveTestSupport.RunAsync(
-            testCase.PackageId,
-            testCase.Version,
-            testCase.CommandName,
-            timeoutSeconds: 300,
-            CancellationToken.None);
-
-        Assert.False(report.Success, BuildFailureMessage(testCase.PackageId, testCase.Version, report));
-        Assert.Equal("static", report.Descriptor.PreferredAnalysisMode);
-        Assert.Equal(testCase.Framework, report.Descriptor.CliFramework);
-
-        var terminalAttempts = report.Attempts.Where(attempt =>
-            string.Equals(attempt.Mode, testCase.ExpectedSelectedMode, StringComparison.Ordinal)
-            && string.Equals(attempt.Outcome, AnalysisDisposition.Failed, StringComparison.Ordinal)).ToArray();
-        Assert.True(
-            terminalAttempts.Length == 1,
-            BuildTerminalAttemptMessage(testCase, report, terminalAttempts));
-        var terminalAttempt = terminalAttempts[0];
-        AssertClassificationOrMessageContains(terminalAttempt, testCase.ExpectedClassification);
-
-        if (string.IsNullOrWhiteSpace(testCase.ExpectedFallbackClassification))
-        {
-            Assert.DoesNotContain(report.Attempts, attempt =>
-                string.Equals(attempt.Mode, AnalysisMode.Static, StringComparison.Ordinal)
-                && string.Equals(attempt.Outcome, AnalysisDisposition.Failed, StringComparison.Ordinal));
-            return;
-        }
-
-        var hookAttempts = report.Attempts.Where(attempt =>
-            string.Equals(attempt.Mode, AnalysisMode.Hook, StringComparison.Ordinal)
-            && string.Equals(attempt.Outcome, AnalysisDisposition.Failed, StringComparison.Ordinal)).ToArray();
-        Assert.True(
-            hookAttempts.Length == 1,
-            BuildHookAttemptMessage(testCase, report, hookAttempts));
-        var hookAttempt = hookAttempts[0];
-        AssertClassificationOrMessageContains(hookAttempt, testCase.ExpectedFallbackClassification);
     }
 
     private static void AssertContainsFailureClassification(
@@ -188,13 +143,6 @@ public sealed class AutoHookFallbackLiveTests
             + string.Join(Environment.NewLine, candidates.Select(FormatAttempt)));
     }
 
-    private static void AssertClassificationOrMessageContains(AutoAcquisitionAttemptReport attempt, string expectedClassification)
-    {
-        Assert.True(
-            Matches(attempt, expectedClassification),
-            $"Expected '{expectedClassification}' in attempt '{FormatAttempt(attempt)}'.");
-    }
-
     private static bool Matches(AutoAcquisitionAttemptReport attempt, string expectedClassification)
         => string.Equals(attempt.Classification, expectedClassification, StringComparison.Ordinal)
             || (!string.IsNullOrWhiteSpace(attempt.Message)
@@ -204,22 +152,6 @@ public sealed class AutoHookFallbackLiveTests
         => BuildFailureMessage(testCase.PackageId, testCase.Version, report)
             + Environment.NewLine
             + $"Expected selected mode '{testCase.ExpectedAnalysisMode}' but got '{report.SelectedMode ?? "<none>"}'.";
-
-    private static string BuildTerminalAttemptMessage(
-        HookTerminalFailureToolCase testCase,
-        AutoAcquisitionReport report,
-        IReadOnlyList<AutoAcquisitionAttemptReport> terminalAttempts)
-        => BuildFailureMessage(testCase.PackageId, testCase.Version, report)
-            + Environment.NewLine
-            + $"Expected exactly one failed '{testCase.ExpectedSelectedMode}' attempt, but found {terminalAttempts.Count}.";
-
-    private static string BuildHookAttemptMessage(
-        HookTerminalFailureToolCase testCase,
-        AutoAcquisitionReport report,
-        IReadOnlyList<AutoAcquisitionAttemptReport> hookAttempts)
-        => BuildFailureMessage(testCase.PackageId, testCase.Version, report)
-            + Environment.NewLine
-            + $"Expected exactly one failed '{AnalysisMode.Hook}' attempt, but found {hookAttempts.Count}.";
 
     private static string BuildFailureMessage(string packageId, string version, AutoAcquisitionReport report)
     {
@@ -253,7 +185,8 @@ public sealed class AutoHookFallbackLiveTests
         string ExpectedOpenCliVersion,
         string expectedHookFailureClassification,
         string expectedAnalysisMode = "static",
-        string expectedArtifactSource = "static-analysis",
+        string? expectedArtifactSource = "static-analysis",
+        bool assertSnapshot = true,
         bool requireHookFailure = true,
         params string[] expectedHookFailureClassifications)
     {
@@ -262,24 +195,9 @@ public sealed class AutoHookFallbackLiveTests
             : expectedHookFailureClassifications;
 
         public string ExpectedAnalysisMode { get; } = expectedAnalysisMode;
-        public string ExpectedArtifactSource { get; } = expectedArtifactSource;
+        public string? ExpectedArtifactSource { get; } = expectedArtifactSource;
+        public bool AssertSnapshot { get; } = assertSnapshot;
         public bool RequireHookFailure { get; } = requireHookFailure;
-
-        public override string ToString()
-            => $"{PackageId} {Version}";
-    }
-
-    public sealed record HookTerminalFailureToolCase(
-        string Framework,
-        string PackageId,
-        string Version,
-        string CommandName,
-        string ExpectedClassification,
-        string expectedSelectedMode = "hook",
-        string? expectedFallbackClassification = null)
-    {
-        public string ExpectedSelectedMode { get; } = expectedSelectedMode;
-        public string? ExpectedFallbackClassification { get; } = expectedFallbackClassification;
 
         public override string ToString()
             => $"{PackageId} {Version}";

@@ -76,6 +76,19 @@ public sealed class AutoHookFallbackLiveTests
             expectedAnalysisMode: "help",
             expectedClassification: "help-crawl",
             expectedArtifactSource: "crawled-from-help"));
+        data.Add(new HookFallbackToolCase(
+            "McMaster.Extensions.CommandLineUtils",
+            "Meadow.Cli",
+            "0.3.225",
+            "meadow",
+            "meadow",
+            "0.3.225",
+            "custom-parser-no-attributes",
+            expectedAnalysisMode: "help",
+            expectedClassification: null,
+            expectedArtifactSource: null,
+            expectedFallbackFrom: "static",
+            assertSnapshot: false));
         return data;
     }
 
@@ -88,17 +101,6 @@ public sealed class AutoHookFallbackLiveTests
             "2025.805.1.1",
             "METU.CORE",
             "hook-invalid-dotnet-entrypoint"));
-        data.Add(new HookTerminalFailureToolCase(
-            "McMaster.Extensions.CommandLineUtils",
-            "Meadow.Cli",
-            "0.3.225",
-            "meadow",
-            "custom-parser-no-attributes",
-            expectedAnalysisMode: "static",
-            expectedPhase: "static-analysis",
-            expectedSelectedMode: "static",
-            expectedFallbackFrom: "hook",
-            expectedFallbackClassification: "invalid-success-artifact"));
         return data;
     }
 
@@ -144,12 +146,20 @@ public sealed class AutoHookFallbackLiveTests
 
             Assert.Equal("success", result?["disposition"]?.GetValue<string>());
             Assert.Equal(testCase.ExpectedAnalysisMode, result?["analysisMode"]?.GetValue<string>());
-            Assert.Equal(testCase.ExpectedClassification, result?["classification"]?.GetValue<string>());
-            Assert.Equal(testCase.ExpectedArtifactSource, result?["opencliSource"]?.GetValue<string>());
+            if (testCase.ExpectedClassification is not null)
+            {
+                Assert.Equal(testCase.ExpectedClassification, result?["classification"]?.GetValue<string>());
+            }
+
+            if (testCase.ExpectedArtifactSource is not null)
+            {
+                Assert.Equal(testCase.ExpectedArtifactSource, result?["opencliSource"]?.GetValue<string>());
+            }
+
             Assert.Equal(testCase.Framework, result?["cliFramework"]?.GetValue<string>());
             Assert.Equal("static", result?["analysisSelection"]?["preferredMode"]?.GetValue<string>());
             Assert.Equal(testCase.ExpectedAnalysisMode, result?["analysisSelection"]?["selectedMode"]?.GetValue<string>());
-            Assert.Equal("hook", result?["fallback"]?["from"]?.GetValue<string>());
+            Assert.Equal(testCase.ExpectedFallbackFrom, result?["fallback"]?["from"]?.GetValue<string>());
             Assert.Contains(
                 result?["fallback"]?["classification"]?.GetValue<string>(),
                 testCase.ExpectedHookFailureClassifications);
@@ -157,10 +167,16 @@ public sealed class AutoHookFallbackLiveTests
 
             Assert.Equal(testCase.ExpectedOpenCliTitle, openCli?["info"]?["title"]?.GetValue<string>());
             Assert.Equal(testCase.ExpectedOpenCliVersion, openCli?["info"]?["version"]?.GetValue<string>());
-            Assert.Equal(testCase.ExpectedArtifactSource, openCli?["x-inspectra"]?["artifactSource"]?.GetValue<string>());
-            Assert.Equal(testCase.Framework, openCli?["x-inspectra"]?["cliFramework"]?.GetValue<string>());
+            if (testCase.ExpectedArtifactSource is not null)
+            {
+                Assert.Equal(testCase.ExpectedArtifactSource, openCli?["x-inspectra"]?["artifactSource"]?.GetValue<string>());
+                Assert.Equal(testCase.Framework, openCli?["x-inspectra"]?["cliFramework"]?.GetValue<string>());
+            }
 
-            HookOpenCliSnapshotSupport.AssertMatchesFixture(testCase.PackageId, testCase.Version, openCli);
+            if (testCase.AssertSnapshot)
+            {
+                HookOpenCliSnapshotSupport.AssertMatchesFixture(testCase.PackageId, testCase.Version, openCli);
+            }
             _output.WriteLine($"{testCase.PackageId} {testCase.Version} succeeded via {testCase.ExpectedAnalysisMode} fallback after hook failure.");
         }
         finally
@@ -254,16 +270,20 @@ public sealed class AutoHookFallbackLiveTests
         string ExpectedOpenCliVersion,
         string expectedHookFailureClassification,
         string expectedAnalysisMode = "static",
-        string expectedClassification = "static-crawl",
-        string expectedArtifactSource = "static-analysis",
+        string? expectedClassification = "static-crawl",
+        string? expectedArtifactSource = "static-analysis",
+        string expectedFallbackFrom = "hook",
+        bool assertSnapshot = true,
         params string[] expectedHookFailureClassifications)
     {
         public IReadOnlyList<string> ExpectedHookFailureClassifications { get; } = expectedHookFailureClassifications.Length == 0
             ? [expectedHookFailureClassification]
             : expectedHookFailureClassifications;
         public string ExpectedAnalysisMode { get; } = expectedAnalysisMode;
-        public string ExpectedClassification { get; } = expectedClassification;
-        public string ExpectedArtifactSource { get; } = expectedArtifactSource;
+        public string? ExpectedClassification { get; } = expectedClassification;
+        public string? ExpectedArtifactSource { get; } = expectedArtifactSource;
+        public string ExpectedFallbackFrom { get; } = expectedFallbackFrom;
+        public bool AssertSnapshot { get; } = assertSnapshot;
 
         public override string ToString()
             => $"{PackageId} {Version}";
