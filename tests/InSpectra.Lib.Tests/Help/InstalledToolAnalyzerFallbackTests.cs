@@ -60,6 +60,7 @@ public sealed class InstalledToolAnalyzerFallbackTests
         var document = LoadOpenCli(tempDirectory.Path);
         Assert.Equal("metadata-only", document["x-inspectra"]?["artifactSource"]?.GetValue<string>());
         Assert.Contains("more than", document["x-inspectra"]?["fallbackReason"]?.GetValue<string>());
+        Assert.True(new FileInfo(Path.Combine(tempDirectory.Path, "crawl.json")).Length < 1_048_576);
     }
 
     [Fact]
@@ -77,6 +78,7 @@ public sealed class InstalledToolAnalyzerFallbackTests
         var document = LoadOpenCli(tempDirectory.Path);
         Assert.True(document["x-inspectra"]?["crawlTruncated"]?.GetValue<bool>());
         Assert.Contains("more than", document["x-inspectra"]?["truncationReason"]?.GetValue<string>());
+        Assert.True(new FileInfo(Path.Combine(tempDirectory.Path, "crawl.json")).Length < 1_048_576);
     }
 
     private static InstalledToolAnalysisRequest CreateRequest(JsonObject result, string outputDirectory)
@@ -184,7 +186,7 @@ public sealed class InstalledToolAnalyzerFallbackTests
                 TimedOut: false,
                 ExitCode: 1,
                 DurationMs: 1,
-                Stdout: string.Empty,
+                Stdout: new string('x', 2_000_000),
                 Stderr: string.Empty,
                 OutputLimitExceeded: true));
     }
@@ -207,7 +209,7 @@ public sealed class InstalledToolAnalyzerFallbackTests
                     TimedOut: false,
                     ExitCode: 1,
                     DurationMs: 1,
-                    Stdout: string.Empty,
+                    Stdout: new string('x', 2_000_000),
                     Stderr: string.Empty,
                     OutputLimitExceeded: true));
             }

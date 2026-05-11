@@ -17,6 +17,9 @@ using System.Text.Json.Nodes;
 
 internal sealed class InstalledToolAnalyzer
 {
+    private const int MaxCrawlArtifactStringLength = 2_048;
+    private const string OmittedOutputLimitText = "[omitted: process output exceeded capture limit]";
+
     private readonly CommandRuntime _runtime;
     private readonly OpenCliBuilder _openCliBuilder;
 
@@ -255,11 +258,65 @@ internal sealed class InstalledToolAnalyzer
         var commands = new JsonArray();
         foreach (var capture in captures.Values)
         {
-            commands.Add(capture.DeepClone());
+            commands.Add(BoundCrawlArtifactCapture(capture));
         }
 
         RepositoryPathResolver.WriteJsonFile(
             Path.Combine(outputDirectory, "crawl.json"),
             new JsonObject { ["commands"] = commands });
     }
+
+    private static JsonObject BoundCrawlArtifactCapture(JsonObject capture)
+    {
+        var bounded = (JsonObject)capture.DeepClone();
+        if (bounded["result"] is JsonObject result
+            && result["outputLimitExceeded"]?.GetValue<bool>() == true)
+        {
+            result["stdout"] = OmittedOutputLimitText;
+            result["stderr"] = OmittedOutputLimitText;
+        }
+
+        BoundLongStrings(bounded);
+        return bounded;
+    }
+
+    private static void BoundLongStrings(JsonNode? node)
+    {
+        switch (node)
+        {
+            case JsonObject obj:
+                foreach (var key in obj.Select(property => property.Key).ToArray())
+                {
+                    if (obj[key] is JsonValue value && value.TryGetValue<string>(out var text))
+                    {
+                        obj[key] = BoundString(text);
+                    }
+                    else
+                    {
+                        BoundLongStrings(obj[key]);
+                    }
+                }
+
+                break;
+            case JsonArray array:
+                for (var index = 0; index < array.Count; index++)
+                {
+                    if (array[index] is JsonValue value && value.TryGetValue<string>(out var text))
+                    {
+                        array[index] = BoundString(text);
+                    }
+                    else
+                    {
+                        BoundLongStrings(array[index]);
+                    }
+                }
+
+                break;
+        }
+    }
+
+    private static string BoundString(string text)
+        => text.Length <= MaxCrawlArtifactStringLength
+            ? text
+            : string.Concat(text.AsSpan(0, MaxCrawlArtifactStringLength), "\n[truncated]");
 }
