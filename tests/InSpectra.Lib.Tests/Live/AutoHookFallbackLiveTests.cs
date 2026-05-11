@@ -59,17 +59,21 @@ public sealed class AutoHookFallbackLiveTests
             expectedAnalysisMode: "help",
             expectedArtifactSource: "crawled-from-help",
             requireHookFailure: false));
-        data.Add(new HookFallbackToolCase(
+        return data;
+    }
+
+    public static TheoryData<HookTerminalFailureToolCase> TerminalFailureCases()
+    {
+        var data = new TheoryData<HookTerminalFailureToolCase>();
+        data.Add(new HookTerminalFailureToolCase(
             "McMaster.Extensions.CommandLineUtils",
             "Meadow.Cli",
             "0.3.225",
             "meadow",
-            "meadow",
-            "0.3.225",
+            "help",
+            "help-crawl-empty",
             "invalid-opencli-artifact",
-            expectedAnalysisMode: "help",
-            expectedArtifactSource: null,
-            assertSnapshot: false));
+            "custom-parser-no-attributes"));
         return data;
     }
 
@@ -115,6 +119,31 @@ public sealed class AutoHookFallbackLiveTests
         {
             HookOpenCliSnapshotSupport.AssertMatchesFixture(testCase.PackageId, testCase.Version, report.OpenCliDocument);
         }
+    }
+
+    [Theory]
+    [MemberData(nameof(TerminalFailureCases))]
+    [Trait("Category", "Live")]
+    public async Task RunAsync_Reports_Honest_Terminal_Failures_When_No_Mode_Can_Produce_OpenCli(HookTerminalFailureToolCase testCase)
+    {
+        if (!HookLiveTestSupport.ShouldRun())
+        {
+            return;
+        }
+
+        var report = await AutoAcquisitionLiveTestSupport.RunAsync(
+            testCase.PackageId,
+            testCase.Version,
+            testCase.CommandName,
+            timeoutSeconds: 300,
+            CancellationToken.None);
+
+        Assert.False(report.Success, $"Expected terminal failure for {testCase.PackageId} {testCase.Version}.");
+        Assert.Equal("static", report.Descriptor.PreferredAnalysisMode);
+        Assert.Equal(testCase.Framework, report.Descriptor.CliFramework);
+        AssertContainsFailureClassification(report.Attempts, testCase.ExpectedFinalMode, [testCase.ExpectedFinalClassification]);
+        AssertContainsFailureClassification(report.Attempts, AnalysisMode.Hook, [testCase.ExpectedHookFailureClassification]);
+        AssertContainsFailureClassification(report.Attempts, AnalysisMode.Static, [testCase.ExpectedStaticFailureClassification]);
     }
 
     private static void AssertContainsFailureClassification(
@@ -199,6 +228,20 @@ public sealed class AutoHookFallbackLiveTests
         public bool AssertSnapshot { get; } = assertSnapshot;
         public bool RequireHookFailure { get; } = requireHookFailure;
 
+        public override string ToString()
+            => $"{PackageId} {Version}";
+    }
+
+    public sealed record HookTerminalFailureToolCase(
+        string Framework,
+        string PackageId,
+        string Version,
+        string CommandName,
+        string ExpectedFinalMode,
+        string ExpectedFinalClassification,
+        string ExpectedHookFailureClassification,
+        string ExpectedStaticFailureClassification)
+    {
         public override string ToString()
             => $"{PackageId} {Version}";
     }

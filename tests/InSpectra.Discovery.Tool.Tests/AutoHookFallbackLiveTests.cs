@@ -76,19 +76,6 @@ public sealed class AutoHookFallbackLiveTests
             expectedAnalysisMode: "help",
             expectedClassification: "help-crawl",
             expectedArtifactSource: "crawled-from-help"));
-        data.Add(new HookFallbackToolCase(
-            "McMaster.Extensions.CommandLineUtils",
-            "Meadow.Cli",
-            "0.3.225",
-            "meadow",
-            "meadow",
-            "0.3.225",
-            "custom-parser-no-attributes",
-            expectedAnalysisMode: "help",
-            expectedClassification: null,
-            expectedArtifactSource: null,
-            expectedFallbackFrom: "static",
-            assertSnapshot: false));
         return data;
     }
 
@@ -101,6 +88,18 @@ public sealed class AutoHookFallbackLiveTests
             "2025.805.1.1",
             "METU.CORE",
             "hook-invalid-dotnet-entrypoint"));
+        data.Add(new HookTerminalFailureToolCase(
+            "McMaster.Extensions.CommandLineUtils",
+            "Meadow.Cli",
+            "0.3.225",
+            "meadow",
+            "help-crawl-empty",
+            expectedAnalysisMode: "help",
+            expectedPhase: "analysis",
+            expectedSelectedMode: "help",
+            expectedFallbackFrom: "static",
+            expectedFallbackClassification: "custom-parser-no-attributes",
+            assertSnapshot: false));
         return data;
     }
 
@@ -246,7 +245,11 @@ public sealed class AutoHookFallbackLiveTests
                 Assert.Equal(testCase.ExpectedFallbackClassification, result?["fallback"]?["classification"]?.GetValue<string>());
             }
 
-            HookResultSnapshotSupport.AssertMatchesFixture(testCase.PackageId, testCase.Version, result);
+            if (testCase.AssertSnapshot)
+            {
+                HookResultSnapshotSupport.AssertMatchesFixture(testCase.PackageId, testCase.Version, result);
+            }
+
             _output.WriteLine($"{testCase.PackageId} {testCase.Version} correctly reports terminal hook failure {testCase.ExpectedClassification}.");
         }
         finally
@@ -299,13 +302,15 @@ public sealed class AutoHookFallbackLiveTests
         string expectedPhase = "hook-setup",
         string expectedSelectedMode = "hook",
         string? expectedFallbackFrom = null,
-        string? expectedFallbackClassification = null)
+        string? expectedFallbackClassification = null,
+        bool assertSnapshot = true)
     {
         public string ExpectedAnalysisMode { get; } = expectedAnalysisMode;
         public string ExpectedPhase { get; } = expectedPhase;
         public string ExpectedSelectedMode { get; } = expectedSelectedMode;
         public string? ExpectedFallbackFrom { get; } = expectedFallbackFrom;
         public string? ExpectedFallbackClassification { get; } = expectedFallbackClassification;
+        public bool AssertSnapshot { get; } = assertSnapshot;
 
         public override string ToString()
             => $"{PackageId} {Version}";
