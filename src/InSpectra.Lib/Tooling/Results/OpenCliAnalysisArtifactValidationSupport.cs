@@ -13,8 +13,23 @@ internal static class OpenCliAnalysisArtifactValidationSupport
         JsonObject openCliDocument,
         string successClassification,
         string artifactSource)
+        => TryWriteValidatedArtifact(
+            result,
+            outputDirectory,
+            openCliDocument,
+            successClassification,
+            artifactSource,
+            out _);
+
+    public static bool TryWriteValidatedArtifact(
+        JsonObject result,
+        string outputDirectory,
+        JsonObject openCliDocument,
+        string successClassification,
+        string artifactSource,
+        out string? validationError)
     {
-        if (!OpenCliDocumentValidator.TryValidateDocument(openCliDocument, out var validationError))
+        if (!OpenCliDocumentValidator.TryValidateDocument(openCliDocument, out validationError))
         {
             NonSpectreResultSupport.ApplyTerminalFailure(
                 result,

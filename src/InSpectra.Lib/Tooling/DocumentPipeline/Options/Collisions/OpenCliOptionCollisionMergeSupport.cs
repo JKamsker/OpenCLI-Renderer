@@ -59,15 +59,6 @@ internal static class OpenCliOptionCollisionMergeSupport
             }
         }
 
-        if (leftInformational ^ rightInformational)
-        {
-            if (OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(leftName)
-                || OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(rightName))
-            {
-                return false;
-            }
-        }
-
         if (OpenCliOptionAlternativeValueCollisionSupport.TryResolve(
                 leftEntry.Option,
                 rightOption,
@@ -87,6 +78,12 @@ internal static class OpenCliOptionCollisionMergeSupport
                 out resolvedEntry))
         {
             return true;
+        }
+
+        if (OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(leftName)
+            && (HasRequiredArguments(leftEntry.Option) || HasRequiredArguments(rightOption)))
+        {
+            return false;
         }
 
         if (!OpenCliOptionDescriptionSupport.AreCompatibleDescriptions(
@@ -134,12 +131,13 @@ internal static class OpenCliOptionCollisionMergeSupport
             return false;
         }
 
-        if (OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(leftName))
+        if (!HaveCompatibleArgumentShapes(leftOption, rightOption))
         {
             return false;
         }
 
-        if (!HaveCompatibleArgumentShapes(leftOption, rightOption))
+        if (OpenCliOptionInformationalCollisionSupport.IsWellKnownInformationalName(leftName)
+            && (HasRequiredArguments(leftOption) || HasRequiredArguments(rightOption)))
         {
             return false;
         }
@@ -160,6 +158,12 @@ internal static class OpenCliOptionCollisionMergeSupport
 
     private static int GetArgumentCount(JsonObject option)
         => option["arguments"] is JsonArray arguments ? arguments.Count : 0;
+
+    private static bool HasRequiredArguments(JsonObject option)
+        => option["arguments"] is JsonArray arguments
+            && arguments
+                .OfType<JsonObject>()
+                .Any(argument => argument["required"]?.GetValue<bool>() == true);
 
     private static int ScoreOption(JsonObject option)
     {

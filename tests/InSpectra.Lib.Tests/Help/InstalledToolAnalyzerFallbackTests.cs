@@ -45,6 +45,40 @@ public sealed class InstalledToolAnalyzerFallbackTests
         Assert.Contains("child budget", document["x-inspectra"]?["truncationReason"]?.GetValue<string>());
     }
 
+    [Fact]
+    public async Task AnalyzeInstalledAsync_Publishes_MetadataOnly_When_Output_Is_Too_Large_Before_Parseable_Help()
+    {
+        using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
+        var result = CreateResult();
+        var analyzer = new InstalledToolAnalyzer(new OutputLimitHelpCommandRuntime(), new OpenCliBuilder());
+
+        await analyzer.AnalyzeInstalledAsync(CreateRequest(result, tempDirectory.Path), CancellationToken.None);
+
+        Assert.Equal("success", result[ResultKey.Disposition]?.GetValue<string>());
+        Assert.Equal("metadata-only", result[ResultKey.Classification]?.GetValue<string>());
+
+        var document = LoadOpenCli(tempDirectory.Path);
+        Assert.Equal("metadata-only", document["x-inspectra"]?["artifactSource"]?.GetValue<string>());
+        Assert.Contains("more than", document["x-inspectra"]?["fallbackReason"]?.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task AnalyzeInstalledAsync_Publishes_Partial_When_Child_Output_Is_Too_Large()
+    {
+        using var tempDirectory = new RepositoryRegressionTestSupport.TemporaryDirectory();
+        var result = CreateResult();
+        var analyzer = new InstalledToolAnalyzer(new ChildOutputLimitHelpCommandRuntime(), new OpenCliBuilder());
+
+        await analyzer.AnalyzeInstalledAsync(CreateRequest(result, tempDirectory.Path), CancellationToken.None);
+
+        Assert.Equal("success", result[ResultKey.Disposition]?.GetValue<string>());
+        Assert.Equal("help-crawl-partial", result[ResultKey.Classification]?.GetValue<string>());
+
+        var document = LoadOpenCli(tempDirectory.Path);
+        Assert.True(document["x-inspectra"]?["crawlTruncated"]?.GetValue<bool>());
+        Assert.Contains("more than", document["x-inspectra"]?["truncationReason"]?.GetValue<string>());
+    }
+
     private static InstalledToolAnalysisRequest CreateRequest(JsonObject result, string outputDirectory)
         => new(
             result,
@@ -124,6 +158,73 @@ public sealed class InstalledToolAnalyzerFallbackTests
 
                 COMMANDS
                 """ + Environment.NewLine + string.Join(Environment.NewLine, commandRows);
+
+            return Task.FromResult(new ProcessResult(
+                Status: "ok",
+                TimedOut: false,
+                ExitCode: 0,
+                DurationMs: 1,
+                Stdout: help,
+                Stderr: string.Empty));
+        }
+    }
+
+    private sealed class OutputLimitHelpCommandRuntime : CommandRuntime
+    {
+        public override Task<ProcessResult> InvokeProcessCaptureAsync(
+            string filePath,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            IReadOnlyDictionary<string, string> environment,
+            int timeoutSeconds,
+            string? sandboxRoot,
+            CancellationToken cancellationToken)
+            => Task.FromResult(new ProcessResult(
+                Status: "failed",
+                TimedOut: false,
+                ExitCode: 1,
+                DurationMs: 1,
+                Stdout: string.Empty,
+                Stderr: string.Empty,
+                OutputLimitExceeded: true));
+    }
+
+    private sealed class ChildOutputLimitHelpCommandRuntime : CommandRuntime
+    {
+        public override Task<ProcessResult> InvokeProcessCaptureAsync(
+            string filePath,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            IReadOnlyDictionary<string, string> environment,
+            int timeoutSeconds,
+            string? sandboxRoot,
+            CancellationToken cancellationToken)
+        {
+            if (argumentList.Contains("new"))
+            {
+                return Task.FromResult(new ProcessResult(
+                    Status: "failed",
+                    TimedOut: false,
+                    ExitCode: 1,
+                    DurationMs: 1,
+                    Stdout: string.Empty,
+                    Stderr: string.Empty,
+                    OutputLimitExceeded: true));
+            }
+
+            const string help =
+                """
+                demo
+
+                USAGE
+                  demo [command] [options]
+
+                OPTIONS
+                  --verbose  Verbose output.
+
+                COMMANDS
+                  new        Create a new item.
+                """;
 
             return Task.FromResult(new ProcessResult(
                 Status: "ok",

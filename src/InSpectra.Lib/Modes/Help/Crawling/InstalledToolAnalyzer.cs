@@ -85,15 +85,9 @@ internal sealed class InstalledToolAnalyzer
             .ToArray();
 
         request.Result["timings"]!.AsObject()["crawlMs"] = (int)Math.Round(crawlStopwatch.Elapsed.TotalMilliseconds);
-        if (outputLimitExceededCommands.Length > 0)
-        {
-            NonSpectreResultSupport.ApplyTerminalFailure(
-                request.Result,
-                phase: "crawl",
-                classification: "help-crawl-output-too-large",
-                $"{ProcessOutputCaptureSupport.BuildOutputLimitExceededMessage()} Affected commands: {string.Join(", ", outputLimitExceededCommands)}.");
-            return;
-        }
+        var outputLimitExceededMessage = outputLimitExceededCommands.Length == 0
+            ? null
+            : $"{ProcessOutputCaptureSupport.BuildOutputLimitExceededMessage()} Affected commands: {string.Join(", ", outputLimitExceededCommands)}.";
 
         if (crawl.Documents.Count == 0)
         {
@@ -139,17 +133,9 @@ internal sealed class InstalledToolAnalyzer
                 WriteCrawlArtifact(request.OutputDirectory, crawl.Captures);
             }
 
-            var metadataOnlyDocument = BuildMetadataOnlyDocument(
-                request.CommandName,
-                request.Version,
-                request.Result,
-                "No help documents could be captured from the installed tool.");
-            OpenCliAnalysisArtifactValidationSupport.TryWriteValidatedArtifact(
-                request.Result,
-                request.OutputDirectory,
-                metadataOnlyDocument,
-                successClassification: "metadata-only",
-                artifactSource: "metadata-only");
+            WriteMetadataOnlyArtifact(
+                request,
+                outputLimitExceededMessage ?? "No help documents could be captured from the installed tool.");
             return;
         }
 
@@ -159,9 +145,12 @@ internal sealed class InstalledToolAnalyzer
         }
 
         var openCliDocument = _openCliBuilder.Build(request.CommandName, request.Version, crawl.Documents);
-        if (guardrailFailureMessages.Length > 0)
+        var truncationReasons = outputLimitExceededMessage is null
+            ? guardrailFailureMessages
+            : guardrailFailureMessages.Append(outputLimitExceededMessage).Distinct(StringComparer.Ordinal).ToArray();
+        if (truncationReasons.Length > 0)
         {
-            ApplyCrawlTruncationMetadata(openCliDocument, guardrailFailureMessages);
+            ApplyCrawlTruncationMetadata(openCliDocument, truncationReasons);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Result["cliFramework"]?.GetValue<string>()))
@@ -174,12 +163,39 @@ internal sealed class InstalledToolAnalyzer
             request.Result["nugetTitle"]?.GetValue<string>(),
             request.Result["nugetDescription"]?.GetValue<string>());
 
-        OpenCliAnalysisArtifactValidationSupport.TryWriteValidatedArtifact(
+        if (OpenCliAnalysisArtifactValidationSupport.TryWriteValidatedArtifact(
             request.Result,
             request.OutputDirectory,
             openCliDocument,
-            successClassification: guardrailFailureMessages.Length > 0 ? "help-crawl-partial" : "help-crawl",
-            artifactSource: "crawled-from-help");
+            successClassification: truncationReasons.Length > 0 ? "help-crawl-partial" : "help-crawl",
+            artifactSource: "crawled-from-help",
+            out var validationError))
+        {
+            return;
+        }
+
+        if (string.Equals(
+                validationError,
+                "OpenCLI artifact does not expose any commands, options, or arguments.",
+                StringComparison.Ordinal))
+        {
+            WriteMetadataOnlyArtifact(request, validationError ?? "Crawled help did not expose a publishable command surface.");
+        }
+    }
+
+    private static void WriteMetadataOnlyArtifact(InstalledToolAnalysisRequest request, string reason)
+    {
+        var metadataOnlyDocument = BuildMetadataOnlyDocument(
+            request.CommandName,
+            request.Version,
+            request.Result,
+            reason);
+        OpenCliAnalysisArtifactValidationSupport.TryWriteValidatedArtifact(
+            request.Result,
+            request.OutputDirectory,
+            metadataOnlyDocument,
+            successClassification: "metadata-only",
+            artifactSource: "metadata-only");
     }
 
     private static JsonObject BuildMetadataOnlyDocument(

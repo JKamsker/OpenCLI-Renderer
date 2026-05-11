@@ -611,7 +611,7 @@ public sealed class OpenCliDocumentSanitizerTests
     }
 
     [Fact]
-    public void Sanitize_Does_Not_Hide_WellKnown_Informational_Primary_Name_Collisions()
+    public void Sanitize_Merges_WellKnown_Duplicate_Primary_Name_Collisions()
     {
         var document = new JsonObject
         {
@@ -639,15 +639,14 @@ public sealed class OpenCliDocumentSanitizerTests
 
         OpenCliDocumentSanitizer.Sanitize(document);
 
-        var options = document["options"]!.AsArray();
-        Assert.Equal(2, options.Count);
-        Assert.All(
-            options.OfType<JsonObject>(),
-            option => Assert.Equal("--version", option["name"]?.GetValue<string>()));
+        var version = Assert.Single(document["options"]!.AsArray())!.AsObject();
+        Assert.Equal("--version", version["name"]?.GetValue<string>());
+        Assert.Equal("Will cause the application to mark all project files with this version number", version["description"]?.GetValue<string>());
+        Assert.Equal("-v", Assert.Single(version["aliases"]!.AsArray())!.GetValue<string>());
     }
 
     [Fact]
-    public void Sanitize_Does_Not_Merge_Custom_Version_Self_Argument_With_BuiltIn_Version_Row()
+    public void Sanitize_Merges_Custom_Version_Self_Argument_With_BuiltIn_Version_Row()
     {
         var document = new JsonObject
         {
@@ -688,13 +687,9 @@ public sealed class OpenCliDocumentSanitizerTests
 
         OpenCliDocumentSanitizer.Sanitize(document);
 
-        var options = document["options"]!.AsArray();
-        Assert.Equal(2, options.Count);
-        Assert.Contains(
-            options.OfType<JsonObject>(),
-            option => option["arguments"] is JsonArray);
-        Assert.Contains(
-            options.OfType<JsonObject>(),
-            option => string.Equals(option["description"]?.GetValue<string>(), "Display version information.", StringComparison.Ordinal));
+        var version = Assert.Single(document["options"]!.AsArray())!.AsObject();
+        Assert.Equal("--version", version["name"]?.GetValue<string>());
+        Assert.Equal("Will cause the application to mark all project files with this version number", version["description"]?.GetValue<string>());
+        Assert.Equal("VERSION", version["arguments"]![0]!["name"]?.GetValue<string>());
     }
 }
